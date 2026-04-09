@@ -47,3 +47,21 @@ Follow the **Phase: SPEC** from the **Working Protocol**, with these mandatory a
 ## Phase: END (Hardened)
 
 Follow the **Phase: END** from the **Working Protocol** with absolute rigor. **DO NOT** commit or push without explicit **Developer authorization**. Ensure `git status` reveals 100% intentionality.
+
+---
+
+> [!TIP]
+> **Multi-Agent Optimization (Claude Code only)**
+>
+> This cycle supports optimized execution via two specialized agents:
+>
+> | Phase        | Role         | Why                                                          |
+> | :----------- | :----------- | :----------------------------------------------------------- |
+> | SPEC + PLAN  | **Planning** | Deep context load, domain modeling, contract design          |
+> | CODE + TEST  | **Fast**     | Operational execution — no strategic overhead, clean context |
+> | Review + END | **Planning** | Narrative Gate validation, checklist review, Dev report      |
+>
+> When PLAN is approved, Planning spawns Fast via the Agent tool with the approved SPEC and minimal context (engineering standards, code style, idiom patterns). Fast returns a structured report. Planning reviews before END.
+>
+> If the Agent tool is unavailable, the cycle runs as single-agent — role annotations in the workflow serve as mindset cues.
+> Read `.ai/instructions/core/agent-roles.md` for the full handoff protocol.

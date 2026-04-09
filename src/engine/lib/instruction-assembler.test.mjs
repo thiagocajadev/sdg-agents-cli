@@ -196,5 +196,61 @@ describe('InstructionAssembler', () => {
       assert.ok(result.includes('idioms/typescript/patterns.md'));
       assert.ok(result.includes('idioms/python/patterns.md'));
     });
+
+    it('should include Agent Roles block when ide is claude', () => {
+      const selections = {
+        flavor: 'lite',
+        idioms: ['go'],
+        versions: {},
+        designPreset: null,
+        ide: 'claude',
+      };
+      const result = buildMasterInstructions(selections);
+      assert.ok(result.includes('## Agent Roles'));
+      assert.ok(result.includes('agent-roles.md'));
+      assert.ok(result.includes('Planning'));
+      assert.ok(result.includes('Fast'));
+    });
+
+    it('should include Agent Roles block when ide is all', () => {
+      const selections = {
+        flavor: 'lite',
+        idioms: ['go'],
+        versions: {},
+        designPreset: null,
+        ide: 'all',
+      };
+      const result = buildMasterInstructions(selections);
+      assert.ok(result.includes('## Agent Roles'));
+      assert.ok(result.includes('agent-roles.md'));
+    });
+
+    it('should not include Agent Roles block for non-Claude IDEs', () => {
+      const ides = ['cursor', 'windsurf', 'vscode', 'roocode', 'none'];
+      for (const ide of ides) {
+        const selections = {
+          flavor: 'lite',
+          idioms: ['go'],
+          versions: {},
+          designPreset: null,
+          ide,
+        };
+        const result = buildMasterInstructions(selections);
+        assert.ok(
+          !result.includes('## Agent Roles'),
+          `Expected no Agent Roles block for ide: ${ide}`
+        );
+        assert.ok(
+          !result.includes('agent-roles.md'),
+          `Expected no agent-roles.md ref for ide: ${ide}`
+        );
+      }
+    });
+
+    it('should not include Agent Roles block when ide is undefined', () => {
+      const selections = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
+      const result = buildMasterInstructions(selections);
+      assert.ok(!result.includes('## Agent Roles'));
+    });
   });
 });

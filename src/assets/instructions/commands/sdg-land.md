@@ -122,3 +122,18 @@ Present a summary of what was produced:
 Then stop completely. Do not begin any `feat:` — do not write any code. Wait for explicit developer approval.
 
 **Hard Rule:** The Land Cycle ends here. The developer decides what comes next.
+
+---
+
+> [!TIP]
+> **Multi-Agent Optimization (Claude Code only)**
+>
+> The Land Cycle is entirely strategic — all phases run under the **Planning** role. There is no CODE phase, so Fast is never invoked.
+>
+> | Phase                                    | Role         | Why                                            |
+> | :--------------------------------------- | :----------- | :--------------------------------------------- |
+> | VISION + SURVEY + SCOPE + BACKLOG + STOP | **Planning** | Pure analysis and decomposition — no execution |
+>
+> The output of this cycle (context.md + tasks.md) becomes the handoff document that Planning will use in future `feat:` cycles to brief Fast agents with precise, grounded context.
+>
+> Read `.ai/instructions/core/agent-roles.md` for the full protocol.

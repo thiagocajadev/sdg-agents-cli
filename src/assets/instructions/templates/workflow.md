@@ -24,6 +24,8 @@ On every request, classify intent before acting:
 
 ## Phase: SPEC (The Contract)
 
+> **Role: Planning**
+
 > <rule name="PhaseSPEC">
 > [!IMPORTANT]
 > Structure the intent before any implementation. **Stop and wait for approval.**
@@ -43,6 +45,8 @@ On every request, classify intent before acting:
   > </rule>
 
 ## Phase: PLAN (The Strategy)
+
+> **Role: Planning**
 
 > <rule name="PhasePLAN">
 > [!NOTE]
@@ -65,6 +69,8 @@ On every request, classify intent before acting:
   > </rule>
 
 ## Phase: CODE (The Execution)
+
+> **Role: Fast**
 
 > <rule name="PhaseCODE">
 > [!IMPORTANT]
@@ -111,6 +117,8 @@ On every request, classify intent before acting:
 
 ## Phase: TEST (The Verification)
 
+> **Role: Fast**
+
 > <rule name="PhaseTEST">
 > [!IMPORTANT]
 > Verify against the Verification Checklist.
@@ -124,6 +132,8 @@ On every request, classify intent before acting:
   > </rule>
 
 ## Phase: END (The Delivery)
+
+> **Role: Planning**
 
 > <rule name="PhaseEND">
 > [!NOTE]

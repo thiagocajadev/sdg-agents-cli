@@ -43,3 +43,21 @@ Follow the **Phase: PLAN** from the **Working Protocol**, with this mandatory ad
 ## Phase: END (Hardened)
 
 Follow the **Phase: END** from the **Working Protocol**. Forensics must be clean: no leftover console logs, no debugging artifacts. **ASK** before any git action.
+
+---
+
+> [!TIP]
+> **Multi-Agent Optimization (Claude Code only)**
+>
+> Fix cycles benefit from role separation — the root cause reasoning stays isolated from the code execution:
+>
+> | Phase        | Role         | Why                                                                     |
+> | :----------- | :----------- | :---------------------------------------------------------------------- |
+> | SPEC + PLAN  | **Planning** | RCA, reproduction case, minimal surface definition                      |
+> | CODE + TEST  | **Fast**     | Targeted fix + regression test — no RCA context bleeding into execution |
+> | Review + END | **Planning** | Verifies fix addresses root cause, no regressions, forensics clean      |
+>
+> When PLAN is approved, Planning spawns Fast with the approved RCA, fix contract, and the regression test scenario. Fast executes and returns pass/fail per checklist item. Planning verifies before END.
+>
+> If the Agent tool is unavailable, the cycle runs as single-agent — role annotations in the workflow serve as mindset cues.
+> Read `.ai/instructions/core/agent-roles.md` for the full handoff protocol.

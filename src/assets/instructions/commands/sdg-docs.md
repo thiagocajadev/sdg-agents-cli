@@ -52,3 +52,18 @@ Follow the **Phase: SPEC** from the **Working Protocol**, using these templates 
 ## Phase: END (Hardened)
 
 Follow the **Phase: END** from the **Working Protocol**. Documentation must be accurate and mirror the code state perfectly. Sync the backlog and **WAIT** for authorization before `commit`/`push`.
+
+---
+
+> [!TIP]
+> **Multi-Agent Optimization (Claude Code only)**
+>
+> The Docs Cycle is entirely analytical — there is no CODE phase, so Fast is never invoked. All phases run under the **Planning** role.
+>
+> | Phase      | Role         | Why                                                       |
+> | :--------- | :----------- | :-------------------------------------------------------- |
+> | SPEC + END | **Planning** | Document classification, structure review, accuracy check |
+>
+> Planning's strength here is accuracy and coherence: cross-referencing code state, CHANGELOG history, and ADR decisions before committing any documentation artifact.
+>
+> Read `.ai/instructions/core/agent-roles.md` for the full protocol.

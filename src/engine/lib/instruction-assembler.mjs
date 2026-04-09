@@ -42,9 +42,30 @@ function buildMasterInstructions(selections) {
   const firstSession = buildFirstSessionNote();
   const instructionLinks = buildInstructionLinks(selections);
 
-  const fullInstructionContent = `${manifesto}\n\n${firstSession}\n\n${workflow}\n\n${instructionLinks}`;
+  const isMultiAgent = selections.ide === 'claude' || selections.ide === 'all';
+  const agentRolesBlock = isMultiAgent ? buildAgentRolesBlock() : '';
+  const agentRolesSeparator = isMultiAgent ? '\n\n' : '';
+
+  const fullInstructionContent = `${manifesto}\n\n${firstSession}\n\n${workflow}${agentRolesSeparator}${agentRolesBlock}\n\n${instructionLinks}`;
 
   return fullInstructionContent;
+
+  function buildAgentRolesBlock() {
+    const agentRolesString = dedent`
+      ## Agent Roles
+
+      > [!NOTE]
+      > Multi-agent execution is active. Read \`.ai/instructions/core/agent-roles.md\` for the full protocol.
+
+      | Role         | Phases                  | Model                      |
+      | :----------- | :---------------------- | :------------------------- |
+      | **Planning** | SPEC, PLAN, Review, END | claude-sonnet-4-6 thinking |
+      | **Fast**     | CODE, TEST              | claude-sonnet-4-6          |
+
+      **Handoff:** Planning spawns Fast via the Agent tool when PLAN is approved. Fast returns a structured report. Planning reviews before END.`;
+
+    return agentRolesString;
+  }
 
   function buildStaffManifesto() {
     const manifestoString = dedent`
@@ -119,10 +140,12 @@ function buildMasterInstructions(selections) {
   }
 
   function buildInstructionLinks(currentSelections) {
+    const isMultiAgentLinks = currentSelections.ide === 'claude' || currentSelections.ide === 'all';
+
     const blocks = [
       buildContextRoutingHeader(),
       buildProjectContextRouting(),
-      buildCoreGovernanceRouting(),
+      buildCoreGovernanceRouting(isMultiAgentLinks),
       buildArchitecturalContextRouting(currentSelections.flavor),
       buildTechnicalExecutionRouting(currentSelections.idioms),
       buildUIUXDesignRouting(currentSelections),
@@ -156,7 +179,11 @@ function buildMasterInstructions(selections) {
       return headerString;
     }
 
-    function buildCoreGovernanceRouting() {
+    function buildCoreGovernanceRouting(includeAgentRoles) {
+      const agentRolesRef = includeAgentRoles
+        ? `\n  <file_ref path=".ai/instructions/core/agent-roles.md" purpose="Multi-Agent Roles & Handoff Protocol" />`
+        : '';
+
       const governanceString = dedent`
         <context_routing category="I. Universal Governance (The Core)">
           <file_ref path=".ai/instructions/core/staff-dna.md" purpose="Staff DNA / Core Principles" />
@@ -167,7 +194,7 @@ function buildMasterInstructions(selections) {
           <file_ref path=".ai/instructions/core/code-style.md" purpose="Code Style & Scannability" />
           <file_ref path=".ai/instructions/core/writing-soul.md" purpose="Writing Soul (Docs & UI Humanization)" />
           <file_ref path=".ai/instructions/core/testing-principles.md" purpose="Testing Principles" />
-          <file_ref path=".ai/instructions/core/observability.md" purpose="Observability" />
+          <file_ref path=".ai/instructions/core/observability.md" purpose="Observability" />${agentRolesRef}
         </context_routing>`;
 
       return governanceString;

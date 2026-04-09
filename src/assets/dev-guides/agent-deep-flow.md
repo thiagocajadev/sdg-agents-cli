@@ -81,6 +81,8 @@ graph TD
 
 ### 1. Phase: SPEC
 
+> **Role: Planning** _(Claude Code — multi-agent mode)_
+
 The agent defines **what** to build before thinking about **how**.
 
 - **Intent Identification**: Classification as `feat:`, `fix:`, or `docs:`.
@@ -89,6 +91,8 @@ The agent defines **what** to build before thinking about **how**.
 - **Approval Gate**: Execution **must stop** here for **Developer verification**.
 
 ### 2. Phase: PLAN
+
+> **Role: Planning** _(Claude Code — multi-agent mode)_
 
 The agent sequences the spec into atomic, estimable tasks.
 
@@ -99,6 +103,8 @@ The agent sequences the spec into atomic, estimable tasks.
 
 ### 3. Phase: CODE
 
+> **Role: Fast** _(Claude Code — multi-agent mode)_
+
 High-density execution following strict architectural standards.
 
 - **Narrative Gate**: Self-check for **Stepdown Rule**, **SLA**, and **Lexical Scoping**.
@@ -108,6 +114,8 @@ High-density execution following strict architectural standards.
 
 ### 4. Phase: TEST
 
+> **Role: Fast** _(Claude Code — multi-agent mode)_
+
 Verification against the original Spec's checklist.
 
 - **Regression Proof**: For bugs, the agent must prove the fix works without breaking existing logic.
@@ -115,6 +123,8 @@ Verification against the original Spec's checklist.
 - **Lint Fix**: Automated resolution of style violations before reporting success.
 
 ### 5. Phase: END
+
+> **Role: Planning** _(Claude Code — multi-agent mode)_
 
 Closing the loop and ensuring project observability.
 
