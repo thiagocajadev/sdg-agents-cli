@@ -1,6 +1,6 @@
 {
   "name": "sdg-agents",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Agnostic Markdown specs for AI development. Transform your repository into a highly-disciplined environment for AI Agents.",
   "type": "module",
   "main": "./src/engine/bin/index.mjs",
