@@ -114,10 +114,6 @@ function printDryRunPreview(selections, targetDir) {
   console.log('  Run without --dry-run to apply.\n');
 }
 
-/**
- * Renders the build summary box and asks for confirmation.
- * Returns true if the user confirms, false otherwise.
- */
 async function printBuildSummary(selections) {
   const { flavor, idioms, versions, designPreset, mode, track } = selections;
 
@@ -151,9 +147,6 @@ async function printBuildSummary(selections) {
   return safeConfirm({ message: '  Proceed?', default: true });
 }
 
-/**
- * Renders the CLI header with version info.
- */
 function printHeader(version) {
   console.log(`\n  Spec-Driven Guide — Agents v${version}`);
   console.log('  ' + '─'.repeat(50));
@@ -161,16 +154,10 @@ function printHeader(version) {
   console.log('  Press Ctrl+C to exit.\n');
 }
 
-/**
- * Renders the CLI footer with GitHub link.
- */
 function printFooter() {
   console.log('\n  See you.\n');
 }
 
-/**
- * Renders the CLI help text.
- */
 function printHelp(version) {
   console.log(`
   sdg-agents v${version}
@@ -208,7 +195,7 @@ function printHelp(version) {
 `);
 }
 
-export const BundleUI = {
+const BundleUI = {
   printWelcome,
   printStep,
   printAborted,
@@ -225,3 +212,5 @@ export const BundleUI = {
   printFooter,
   printHelp,
 };
+
+export { BundleUI };

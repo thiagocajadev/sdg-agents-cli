@@ -2,9 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-/**
- * Returns names of subdirectories in a given directory.
- */
 function getDirectories(source) {
   if (!fs.existsSync(source)) return [];
   return fs
@@ -13,9 +10,6 @@ function getDirectories(source) {
     .map((dirent) => dirent.name);
 }
 
-/**
- * Recursively copies a file or directory.
- */
 function copyRecursiveSync(src, dest) {
   if (!fs.existsSync(src)) return;
   const stats = fs.statSync(src);
@@ -29,10 +23,6 @@ function copyRecursiveSync(src, dest) {
   }
 }
 
-/**
- * Filters markdown/XML content by version tags.
- * Example: <block version=">=1.0"> ... </block>
- */
 function filterContentByVersion(content, targetVersion) {
   if (!targetVersion) return content;
 
@@ -45,21 +35,15 @@ function filterContentByVersion(content, targetVersion) {
     if (evaluateVersionCondition(condition, targetNum)) {
       return match;
     }
-    return ''; // Remove the entire block
+    return '';
   });
 }
 
-/**
- * Extracts a numeric version from a string (e.g. "v1.2.3" -> 1.2).
- */
 function parseVersionNumber(v) {
   const match = String(v).match(/(\d+(\.\d+)?)/);
   return match ? parseFloat(match[1]) : null;
 }
 
-/**
- * Evaluates a version comparison condition.
- */
 function evaluateVersionCondition(condition, targetNum) {
   const match = condition.match(/([<>=]+)?\s*(\d+(\.\d+)?)/);
   if (!match) return true;
@@ -85,17 +69,10 @@ function evaluateVersionCondition(condition, targetNum) {
   }
 }
 
-/**
- * Returns __dirname equivalent for ESM modules.
- */
 function getDirname(importMetaUrl) {
   return path.dirname(fileURLToPath(importMetaUrl));
 }
 
-/**
- * Runs a function if the current module is the direct entry point.
- * Replaces the repeated isDirectRun pattern across bin/ files.
- */
 function runIfDirect(importMetaUrl, fn) {
   if (fileURLToPath(importMetaUrl) === path.resolve(process.argv[1])) {
     fn().catch((error) => {
@@ -109,7 +86,7 @@ function runIfDirect(importMetaUrl, fn) {
   }
 }
 
-export const FsUtils = {
+const FsUtils = {
   getDirectories,
   copyRecursiveSync,
   filterContentByVersion,
@@ -118,3 +95,5 @@ export const FsUtils = {
   getDirname,
   runIfDirect,
 };
+
+export { FsUtils };

@@ -8,10 +8,6 @@ const { getDirname } = FsUtils;
 const __dirname = getDirname(import.meta.url);
 const INSTRUCTIONS_DIR = path.join(__dirname, '..', '..', 'assets', 'instructions');
 
-/**
- * Returns the SHA-256 hex digest of a file's contents.
- * Returns null if the file does not exist.
- */
 function hashFile(filePath) {
   if (!fs.existsSync(filePath)) return null;
   const content = fs.readFileSync(filePath);
@@ -22,13 +18,11 @@ function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR) {
   const { flavor, idioms } = selections;
   const hashes = {};
 
-  // 1. Core Principles
   const coreDir = path.join(instructionsDir, 'core');
   if (fs.existsSync(coreDir)) {
     scanDir(coreDir, 'core', hashes);
   }
 
-  // 2. Flavor (Architecture)
   if (flavor) {
     const flavorDir = path.join(instructionsDir, 'flavors', flavor);
     if (fs.existsSync(flavorDir)) {
@@ -36,7 +30,6 @@ function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR) {
     }
   }
 
-  // 3. Idioms (Languages/Frameworks)
   if (idioms && Array.isArray(idioms)) {
     for (const idiom of idioms) {
       const idiomDir = path.join(instructionsDir, 'idioms', idiom);
@@ -46,25 +39,21 @@ function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR) {
     }
   }
 
-  // 4. Templates
   const templatesDir = path.join(instructionsDir, 'templates');
   if (fs.existsSync(templatesDir)) {
     scanDir(templatesDir, 'templates', hashes);
   }
 
-  // 5. Competencies (backend/frontend execution systems)
   const competenciesDir = path.join(instructionsDir, 'competencies');
   if (fs.existsSync(competenciesDir)) {
     scanDir(competenciesDir, 'competencies', hashes);
   }
 
-  // 6. Workflows (.ai/workflows/)
   const workflowsDir = path.join(instructionsDir, 'workflows');
   if (fs.existsSync(workflowsDir)) {
     scanDir(workflowsDir, 'workflows', hashes);
   }
 
-  // 7. Commands (.ai/commands/)
   const commandsDir = path.join(instructionsDir, 'commands');
   if (fs.existsSync(commandsDir)) {
     scanDir(commandsDir, 'commands', hashes);
@@ -128,10 +117,12 @@ function loadManifest(projectRoot) {
   }
 }
 
-export const ManifestUtils = {
+const ManifestUtils = {
   hashFile,
   computeHashes,
   compareHashes,
   daysAgo,
   loadManifest,
 };
+
+export { ManifestUtils };

@@ -138,21 +138,24 @@ async function handleInitSubcommand(args) {
 
   const { SDG } = await import('./build-bundle.mjs');
   const isNonInteractive = args.mode || args.flavor || args.idioms.length > 0;
+
+  const selectionPayload = isNonInteractive
+    ? {
+        mode: args.mode || 'agents',
+        flavor: args.flavor,
+        idioms: args.idioms || [],
+        agents: args.agents || [],
+        ide: args.ide || 'none',
+        track: args.track,
+        scope: args.scope || 'fullstack',
+        versions: {},
+      }
+    : null;
+
   await SDG.run(args.targetDir, {
     dryRun: args.dryRun,
     noDevGuides: args.noDevGuides,
-    selections: isNonInteractive
-      ? {
-          mode: args.mode || 'agents',
-          flavor: args.flavor,
-          idioms: args.idioms || [],
-          agents: args.agents || [],
-          ide: args.ide || 'none',
-          track: args.track,
-          scope: args.scope || 'fullstack',
-          versions: {},
-        }
-      : null,
+    selections: selectionPayload,
   });
 }
 

@@ -15,9 +15,6 @@ const { safeSelect, safeConfirm } = PromptUtils;
 const __dirname = getDirname(import.meta.url);
 const SOURCE_INSTRUCTIONS = path.join(__dirname, '..', '..', 'assets', 'instructions');
 
-/**
- * Orchestrator: Full Wizard for Gathering User Selections
- */
 async function gatherUserSelections(targetDir = process.cwd()) {
   const availableFlavors = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'flavors'));
   const availableIdioms = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'idioms'));
@@ -36,7 +33,6 @@ async function gatherUserSelections(targetDir = process.cwd()) {
   let scope = 'fullstack';
   let step = 0;
 
-  // Final step for Agents is 8, for Prompts it's a shorter flow.
   const finalStep = () => (selections.mode === 'prompts' ? 2 : 8);
 
   while (step < finalStep()) {
@@ -58,25 +54,29 @@ async function gatherUserSelections(targetDir = process.cwd()) {
     }
 
     step = stepResult.value.nextStep;
-    scope = stepResult.value.scope ?? scope;
-    if (stepResult.value.mode) selections.mode = stepResult.value.mode;
-    if (stepResult.value.flavor) selections.flavor = stepResult.value.flavor;
-    if (stepResult.value.track) selections.track = stepResult.value.track;
-    if (stepResult.value.versions) {
-      Object.assign(selections.versions, stepResult.value.versions);
-      selections.idioms = Array.from(new Set(selections.idioms));
-    }
-    if (stepResult.value.designPreset) selections.designPreset = stepResult.value.designPreset;
-    if (stepResult.value.idiom) selections.idioms.push(stepResult.value.idiom);
-    if (stepResult.value.ide) selections.ide = stepResult.value.ide;
-    if (stepResult.value.undoLastIdiom) selections.idioms.pop();
-    if (stepResult.value.resetIdioms) selections.idioms = [];
+    scope = applyStepResult(selections, scope, stepResult.value);
   }
 
-  return success(selections);
-}
+  const wizardResult = success(selections);
+  return wizardResult;
 
-// --- Private: Wizard Step Dispatcher ---
+  function applyStepResult(currentSelections, currentScope, stepValue) {
+    const nextScope = stepValue.scope ?? currentScope;
+    if (stepValue.mode) currentSelections.mode = stepValue.mode;
+    if (stepValue.flavor) currentSelections.flavor = stepValue.flavor;
+    if (stepValue.track) currentSelections.track = stepValue.track;
+    if (stepValue.versions) {
+      Object.assign(currentSelections.versions, stepValue.versions);
+      currentSelections.idioms = Array.from(new Set(currentSelections.idioms));
+    }
+    if (stepValue.designPreset) currentSelections.designPreset = stepValue.designPreset;
+    if (stepValue.idiom) currentSelections.idioms.push(stepValue.idiom);
+    if (stepValue.ide) currentSelections.ide = stepValue.ide;
+    if (stepValue.undoLastIdiom) currentSelections.idioms.pop();
+    if (stepValue.resetIdioms) currentSelections.idioms = [];
+    return nextScope;
+  }
+}
 
 async function executeWizardStep(step, context) {
   const { mode } = context.selections;
@@ -98,8 +98,10 @@ async function executeWizardStep(step, context) {
       return promptDesignPreset(context);
     case 7:
       return promptIdeSelection();
-    default:
-      return success({ nextStep: 8 });
+    default: {
+      const defaultResult = success({ nextStep: 8 });
+      return defaultResult;
+    }
   }
 }
 
@@ -118,12 +120,18 @@ async function promptInitialChoice() {
       { name: '3. Back', value: 'back' },
     ],
   });
-  if (result === 'back') return fail('', 'USER_BACK');
-  return success({ nextStep: 1, mode: result });
+
+  if (result === 'back') {
+    const backResult = fail('', 'USER_BACK');
+    return backResult;
+  }
+
+  const initialChoiceResult = success({ nextStep: 1, mode: result });
+  return initialChoiceResult;
 }
 
 function handleQuickSetup() {
-  return success({
+  const quickSetupResult = success({
     mode: 'quick',
     flavor: 'lite',
     idioms: ['javascript', 'typescript'],
@@ -135,21 +143,22 @@ function handleQuickSetup() {
       typescript: 'latest',
     },
   });
+  return quickSetupResult;
 }
 
 async function promptTrackSelection(context) {
   const { availableTracks } = context;
 
-  const sortedTrackChoices = availableTracks
-    .sort()
-    .map((t) => {
-      let label = displayName(t);
-      if (t === '00-lite-mode') label = '1. Lite Mode (Simple & Agile)';
-      else if (t === '01-new-evolution') label = '2. New Evolution (Greenfield)';
-      else if (t === '02-legacy-modernization') label = '3. Legacy Modernization (Brownfield)';
-      return { name: label, value: t };
-    })
-    .sort((a, b) => a.value.localeCompare(b.value));
+  const sortedTrackChoices = [...availableTracks]
+    .sort((trackA, trackB) => trackA.localeCompare(trackB))
+    .map((trackId) => {
+      let label = displayName(trackId);
+      if (trackId === '00-lite-mode') label = '1. Lite Mode (Simple & Agile)';
+      else if (trackId === '01-new-evolution') label = '2. New Evolution (Greenfield)';
+      else if (trackId === '02-legacy-modernization')
+        label = '3. Legacy Modernization (Brownfield)';
+      return { name: label, value: trackId };
+    });
 
   const trackChoices = [
     ...sortedTrackChoices,
@@ -161,7 +170,10 @@ async function promptTrackSelection(context) {
     choices: [...trackChoices, { name: '5. Back', value: 'back' }],
   });
 
-  if (track === 'back') return success({ nextStep: 0 });
+  if (track === 'back') {
+    const backResult = success({ nextStep: 0 });
+    return backResult;
+  }
 
   const projectPromptsDir = path.join(context.targetDir, '.ai', 'prompts');
   if (fs.existsSync(projectPromptsDir)) {
@@ -169,10 +181,15 @@ async function promptTrackSelection(context) {
       message: `The directory ".ai/prompts" already exists. Overwrite?`,
       default: false,
     });
-    if (!proceed) return success({ nextStep: 1 });
+    if (!proceed) {
+      const cancelResult = success({ nextStep: 1 });
+      return cancelResult;
+    }
   }
 
-  return success({ nextStep: 2, track }); // For Prompts, 2 is the final step
+  // 2 is the final step for Prompts mode
+  const trackResult = success({ nextStep: 2, track });
+  return trackResult;
 }
 
 async function promptProjectScope() {
@@ -186,9 +203,13 @@ async function promptProjectScope() {
     ],
   });
 
-  if (scope === 'back') return success({ nextStep: 0 });
+  if (scope === 'back') {
+    const backResult = success({ nextStep: 0 });
+    return backResult;
+  }
 
-  return success({ nextStep: 2, scope });
+  const scopeResult = success({ nextStep: 2, scope });
+  return scopeResult;
 }
 
 async function promptArchitectureFlavor(context) {
@@ -200,14 +221,40 @@ async function promptArchitectureFlavor(context) {
     choices: [...flavorChoices, { name: 'Back', value: 'back' }],
   });
 
-  if (flavor === 'back') return success({ nextStep: 1 });
+  if (flavor === 'back') {
+    const backResult = success({ nextStep: 1 });
+    return backResult;
+  }
 
-  return success({ nextStep: 3, flavor });
+  const flavorResult = success({ nextStep: 3, flavor });
+  return flavorResult;
+
+  function buildFlavorChoices(flavors) {
+    return flavors
+      .sort()
+      .map((flavorId) => {
+        let label = displayName(flavorId);
+        if (flavorId === 'lite') label = `0. ${label} (Simple & Agile)`;
+        else if (flavorId === 'vertical-slice') label = `1. ${label} (Recommended)`;
+        else if (flavorId === 'mvc') label = `2. ${label} (Standard Layers)`;
+        else if (flavorId === 'legacy') label = `3. ${label} (Event-Driven / SSR)`;
+        else label = `Sub. ${label}`;
+        return { name: label, value: flavorId };
+      })
+      .sort((flavorA, flavorB) => {
+        const order = { lite: 0, 'vertical-slice': 1, mvc: 2, legacy: 3 };
+        return (order[flavorA.value] ?? 99) - (order[flavorB.value] ?? 99);
+      });
+  }
 }
 
 async function promptBackendIdiom(context) {
   const { scope, availableIdioms } = context;
-  if (scope === 'frontend') return success({ nextStep: 4 });
+
+  if (scope === 'frontend') {
+    const skipResult = success({ nextStep: 4 });
+    return skipResult;
+  }
 
   const backendIdioms = availableIdioms.filter((id) => STACK_DISPLAY_NAMES[id]?.isBackend);
   const result = await safeSelect({
@@ -218,14 +265,22 @@ async function promptBackendIdiom(context) {
     ],
   });
 
-  if (result === 'back') return success({ nextStep: 0 });
+  if (result === 'back') {
+    const backResult = success({ nextStep: 0 });
+    return backResult;
+  }
 
-  return success({ nextStep: 4, idiom: result });
+  const backendIdiomResult = success({ nextStep: 4, idiom: result });
+  return backendIdiomResult;
 }
 
 async function promptFrontendIdiom(context) {
   const { scope, availableIdioms } = context;
-  if (scope === 'backend') return success({ nextStep: 5 });
+
+  if (scope === 'backend') {
+    const skipResult = success({ nextStep: 5 });
+    return skipResult;
+  }
 
   const frontendIdioms = availableIdioms.filter((id) => STACK_DISPLAY_NAMES[id]?.isFrontend);
   const result = await safeSelect({
@@ -237,10 +292,12 @@ async function promptFrontendIdiom(context) {
   });
 
   if (result === 'back') {
-    return success({ nextStep: 2, undoLastIdiom: scope === 'fullstack' });
+    const backResult = success({ nextStep: 2, undoLastIdiom: scope === 'fullstack' });
+    return backResult;
   }
 
-  return success({ nextStep: 5, idiom: result });
+  const frontendIdiomResult = success({ nextStep: 5, idiom: result });
+  return frontendIdiomResult;
 }
 
 async function promptVersionSelections(context) {
@@ -263,18 +320,25 @@ async function promptVersionSelections(context) {
       ],
     });
 
-    if (result === 'back') return success({ nextStep: 2, resetIdioms: true });
+    if (result === 'back') {
+      const backResult = success({ nextStep: 2, resetIdioms: true });
+      return backResult;
+    }
     versions[idiom] = result;
   }
 
-  return success({ nextStep: 6, versions });
+  const versionsResult = success({ nextStep: 6, versions });
+  return versionsResult;
 }
 
 async function promptDesignPreset(context) {
   const { selections } = context;
 
   const hasFrontend = selections.idioms.some((id) => STACK_DISPLAY_NAMES[id]?.isFrontend);
-  if (!hasFrontend) return success({ nextStep: 7 });
+  if (!hasFrontend) {
+    const skipResult = success({ nextStep: 7 });
+    return skipResult;
+  }
 
   const result = await safeSelect({
     message: 'Which initial Design Preset / Skill?',
@@ -291,10 +355,18 @@ async function promptDesignPreset(context) {
     ],
   });
 
-  if (result === 'back') return success({ nextStep: 4 });
-  if (result === 'other') return success({ nextStep: 7 });
+  if (result === 'back') {
+    const backResult = success({ nextStep: 4 });
+    return backResult;
+  }
 
-  return success({ nextStep: 7, designPreset: result });
+  if (result === 'other') {
+    const noPresetResult = success({ nextStep: 7 });
+    return noPresetResult;
+  }
+
+  const presetResult = success({ nextStep: 7, designPreset: result });
+  return presetResult;
 }
 
 async function promptIdeSelection() {
@@ -312,35 +384,15 @@ async function promptIdeSelection() {
     ],
   });
 
-  if (result === 'back') return success({ nextStep: 6 });
+  if (result === 'back') {
+    const backResult = success({ nextStep: 6 });
+    return backResult;
+  }
 
-  return success({ nextStep: 8, ide: result });
+  const ideResult = success({ nextStep: 8, ide: result });
+  return ideResult;
 }
 
-function buildFlavorChoices(availableFlavors) {
-  return availableFlavors
-    .sort()
-    .map((f) => {
-      let label = displayName(f);
-      if (f === 'lite') label = `0. ${label} (Simple & Agile)`;
-      else if (f === 'vertical-slice') label = `1. ${label} (Recommended)`;
-      else if (f === 'mvc') label = `2. ${label} (Standard Layers)`;
-      else if (f === 'legacy') label = `3. ${label} (Event-Driven / SSR)`;
-      else label = `Sub. ${label}`;
-      return { name: label, value: f };
-    })
-    .sort((a, b) => {
-      const order = { lite: 0, 'vertical-slice': 1, mvc: 2, legacy: 3 };
-      return (order[a.value] ?? 99) - (order[b.value] ?? 99);
-    });
-}
-
-// --- Non-Interactive Helpers ---
-
-/**
- * Validates that flavor and idioms exist on disk.
- * Used by non-interactive CLI mode to catch typos early.
- */
 function validateSelections(selections) {
   if (selections.mode === 'quick') {
     selections.flavor = selections.flavor || 'lite';
@@ -350,47 +402,54 @@ function validateSelections(selections) {
     selections.track = selections.track || '00-lite-mode';
     selections.designPreset = selections.designPreset || 'glass';
     selections.ide = selections.ide || 'none';
-    return success(selections);
+    const quickValidResult = success(selections);
+    return quickValidResult;
   }
 
   if (selections.mode === 'prompts') {
-    if (!selections.track) return fail('--track is required for prompts mode.', 'MISSING_TRACK');
-    return success(selections);
+    if (!selections.track) {
+      const missingTrackResult = fail('--track is required for prompts mode.', 'MISSING_TRACK');
+      return missingTrackResult;
+    }
+    const promptsValidResult = success(selections);
+    return promptsValidResult;
   }
 
   const availableFlavors = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'flavors'));
   const availableIdioms = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'idioms'));
 
   if (!selections.flavor) {
-    return fail('--flavor is required.', 'MISSING_FLAVOR');
+    const missingFlavorResult = fail('--flavor is required.', 'MISSING_FLAVOR');
+    return missingFlavorResult;
   }
 
   if (!availableFlavors.includes(selections.flavor)) {
-    return fail(
+    const invalidFlavorResult = fail(
       `Unknown flavor: "${selections.flavor}". Available: ${availableFlavors.join(', ')}`,
       'INVALID_FLAVOR'
     );
+    return invalidFlavorResult;
   }
 
   if (!selections.idioms || selections.idioms.length === 0) {
-    return fail('At least one --idiom is required.', 'MISSING_IDIOM');
+    const missingIdiomResult = fail('At least one --idiom is required.', 'MISSING_IDIOM');
+    return missingIdiomResult;
   }
 
   for (const idiom of selections.idioms) {
     if (!availableIdioms.includes(idiom)) {
-      return fail(
+      const invalidIdiomResult = fail(
         `Unknown idiom: "${idiom}". Available: ${availableIdioms.join(', ')}`,
         'INVALID_IDIOM'
       );
+      return invalidIdiomResult;
     }
   }
 
-  return success(selections);
+  const validResult = success(selections);
+  return validResult;
 }
 
-/**
- * Auto-selects the latest (first) version for each idiom when not specified.
- */
 function autoSelectVersions(selections) {
   if (!selections.versions) selections.versions = {};
 
@@ -404,8 +463,10 @@ function autoSelectVersions(selections) {
   }
 }
 
-export const WizardUtils = {
+const WizardUtils = {
   gatherUserSelections,
   validateSelections,
   autoSelectVersions,
 };
+
+export { WizardUtils };

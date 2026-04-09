@@ -1,13 +1,3 @@
-/**
- * CLI Parser — Sanitizes raw process.argv into a structured command object.
- * Responsibility: Argument parsing and basic validation only. No I/O.
- */
-
-/**
- * Parses raw CLI arguments into a structured command object.
- * @param {string[]} argv - process.argv.slice(2)
- * @returns {Object} Structured arguments
- */
 function parseCliArgs(argv) {
   const subcommand = argv[0] && !argv[0].startsWith('-') ? argv[0] : null;
 
@@ -60,11 +50,6 @@ function getArgValues(argv, flag) {
   return values;
 }
 
-/**
- * Validates requirements for the 'init' command in non-interactive mode.
- * @param {Object} args - Parsed arguments
- * @returns {string|null} Error message or null if valid
- */
 function validateInit(args) {
   const isNonInteractive = args.mode || args.flavor || args.idioms.length > 0;
   if (!isNonInteractive) return null;
@@ -87,7 +72,9 @@ function validateInit(args) {
   return null;
 }
 
-export const CliParser = {
+const CliParser = {
   parseCliArgs,
   validateInit,
 };
+
+export { CliParser };

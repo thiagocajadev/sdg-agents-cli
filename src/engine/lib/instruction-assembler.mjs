@@ -19,11 +19,6 @@ const { getDirname } = FsUtils;
 const __dirname = getDirname(import.meta.url);
 const SOURCE_INSTRUCTIONS = path.join(__dirname, '..', '..', 'assets', 'instructions');
 
-/**
- * --- Module Level Pure Logic (SLA & Testability) ---
- * Decouples stack detection from Markdown formatting.
- */
-
 function computeStackMetrics(idioms) {
   const hasBackend = idioms.some((idiomId) => STACK_DISPLAY_NAMES[idiomId]?.isBackend);
   const hasFrontend = idioms.some((idiomId) => STACK_DISPLAY_NAMES[idiomId]?.isFrontend);
@@ -50,8 +45,6 @@ function buildMasterInstructions(selections) {
   const fullInstructionContent = `${manifesto}\n\n${firstSession}\n\n${workflow}\n\n${instructionLinks}`;
 
   return fullInstructionContent;
-
-  // --- Scoped Internal Helpers (The Stepdown Rule & Lexical Scoping) ---
 
   function buildStaffManifesto() {
     const manifestoString = dedent`
@@ -140,8 +133,6 @@ function buildMasterInstructions(selections) {
 
     return finalContextRouting;
 
-    // --- Inner Routing Builders ---
-
     function buildProjectContextRouting() {
       const routingString = dedent`
         <context_routing category="0. Project Context">
@@ -192,7 +183,7 @@ function buildMasterInstructions(selections) {
     }
 
     function buildTechnicalExecutionRouting(idioms) {
-      const { hasBackend, hasFrontend } = computeStackMetrics(idioms); // Decision Layer
+      const { hasBackend, hasFrontend } = computeStackMetrics(idioms);
 
       const idiomRefs = idioms.map((idiomId) => {
         const label = STACK_DISPLAY_NAMES[idiomId]?.name ?? idiomId;
@@ -217,21 +208,21 @@ function buildMasterInstructions(selections) {
           ]
         : [];
 
-      const allRefs = [...idiomRefs, ...backendRefs, ...frontendRefs].join('\n'); // Implementation Layer
+      const allRefs = [...idiomRefs, ...backendRefs, ...frontendRefs].join('\n');
 
       const technicalRoutingBlock = [
         `<context_routing category="III. Technical Execution">`,
         allRefs,
         `</context_routing>`,
-      ].join('\n'); // Explaining Return
+      ].join('\n');
 
       return technicalRoutingBlock;
     }
 
     function buildUIUXDesignRouting(selectionsObj) {
-      const { idioms } = selectionsObj; // Shallow Boundaries
-      const designPreset = selectionsObj.designPreset ?? 'UNIVERSAL'; // Defensive Dominance
-      const { hasFrontend } = computeStackMetrics(idioms); // Reuse Decision Logic
+      const { idioms } = selectionsObj;
+      const designPreset = selectionsObj.designPreset ?? 'UNIVERSAL';
+      const { hasFrontend } = computeStackMetrics(idioms);
 
       if (!hasFrontend) return null;
 
@@ -292,8 +283,6 @@ function writeBacklogFiles(targetDir, selections) {
 
   writeContextFile(backlogDir, targetDir, selections);
   writeTasksFile(backlogDir);
-
-  // --- Scoped helpers ---
 
   function writeContextFile(backlogDirPath, projectDir, currentSelections) {
     const contextPath = path.join(backlogDirPath, 'context.md');
@@ -474,11 +463,8 @@ function writeGitignore(targetDir) {
     ? fs.readFileSync(gitignorePath, 'utf8')
     : '';
 
-  const missingEntries = REQUIRED_ENTRIES.filter((entry) => {
-    const lines = existingContent.split('\n').map((line) => line.trim());
-    const isAlreadyPresent = lines.includes(entry);
-    return !isAlreadyPresent;
-  });
+  const existingLines = existingContent.split('\n').map((line) => line.trim());
+  const missingEntries = REQUIRED_ENTRIES.filter((entry) => !existingLines.includes(entry));
 
   if (missingEntries.length === 0) return;
 

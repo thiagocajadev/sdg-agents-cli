@@ -1,5 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { FsUtils } from './fs-utils.mjs';
 
 const {
@@ -8,6 +11,7 @@ const {
   filterContentByVersion,
   getDirname,
   getDirectories,
+  copyRecursiveSync,
 } = FsUtils;
 
 describe('FsUtils', () => {
@@ -194,6 +198,58 @@ describe('FsUtils', () => {
 
       assert.ok(Array.isArray(result));
       assert.ok(result.every((directoryName) => typeof directoryName === 'string'));
+    });
+  });
+
+  describe('copyRecursiveSync()', () => {
+    it('should copy a single file to a destination', () => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
+      try {
+        const srcFile = path.join(tmpDir, 'source.txt');
+        const destFile = path.join(tmpDir, 'dest.txt');
+        fs.writeFileSync(srcFile, 'hello');
+
+        copyRecursiveSync(srcFile, destFile);
+
+        assert.ok(fs.existsSync(destFile));
+        assert.equal(fs.readFileSync(destFile, 'utf8'), 'hello');
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should copy a directory tree recursively', () => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
+      try {
+        const srcDir = path.join(tmpDir, 'src');
+        const subDir = path.join(srcDir, 'sub');
+        fs.mkdirSync(subDir, { recursive: true });
+        fs.writeFileSync(path.join(srcDir, 'root.txt'), 'root');
+        fs.writeFileSync(path.join(subDir, 'nested.txt'), 'nested');
+
+        const destDir = path.join(tmpDir, 'dest');
+        copyRecursiveSync(srcDir, destDir);
+
+        assert.ok(fs.existsSync(path.join(destDir, 'root.txt')));
+        assert.ok(fs.existsSync(path.join(destDir, 'sub', 'nested.txt')));
+        assert.equal(fs.readFileSync(path.join(destDir, 'root.txt'), 'utf8'), 'root');
+        assert.equal(fs.readFileSync(path.join(destDir, 'sub', 'nested.txt'), 'utf8'), 'nested');
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should do nothing when the source path does not exist', () => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
+      try {
+        const destFile = path.join(tmpDir, 'dest.txt');
+
+        copyRecursiveSync('/non-existent-path-sdg-test/file.txt', destFile);
+
+        assert.ok(!fs.existsSync(destFile));
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
     });
   });
 });

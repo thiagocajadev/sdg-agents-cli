@@ -10,27 +10,27 @@ function isExitError(err) {
 async function safeSelect(options) {
   try {
     return await select(options);
-  } catch (err) {
-    if (isExitError(err)) return 'back';
-    throw err;
+  } catch (error) {
+    if (isExitError(error)) return 'back';
+    throw error;
   }
 }
 
 async function safeCheckbox(options) {
   try {
     return await checkbox(options);
-  } catch (err) {
-    if (isExitError(err)) return ['back'];
-    throw err;
+  } catch (error) {
+    if (isExitError(error)) return ['back'];
+    throw error;
   }
 }
 
 async function safeConfirm(options) {
   try {
     return await confirm(options);
-  } catch (err) {
-    if (isExitError(err)) return false;
-    throw err;
+  } catch (error) {
+    if (isExitError(error)) return false;
+    throw error;
   }
 }
 
@@ -38,9 +38,6 @@ const PROJECT_ROOT = process.cwd();
 const AI_DIR = path.join(PROJECT_ROOT, '.ai');
 const PROMPT_FILE = path.join(AI_DIR, 'last-prompt.md');
 
-/**
- * Detects if currently running inside the sdg-agents core repository (Maintainer Mode).
- */
 function isMaintainerMode() {
   const pkgPath = path.join(PROJECT_ROOT, 'package.json');
   if (!fs.existsSync(pkgPath)) return false;
@@ -127,7 +124,7 @@ async function printPromptUI(content, title = 'AI Prompt Generated') {
   console.log('  ' + '─'.repeat(60) + '\n');
 }
 
-export const PromptUtils = {
+const PromptUtils = {
   isMaintainerMode,
   savePromptToFile,
   copyToClipboard,
@@ -136,3 +133,5 @@ export const PromptUtils = {
   safeCheckbox,
   safeConfirm,
 };
+
+export { PromptUtils };

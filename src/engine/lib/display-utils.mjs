@@ -13,6 +13,8 @@ function displayName(stackKey) {
   return STACK_DISPLAY_NAMES[stackKey]?.name ?? stackKey;
 }
 
-export const DisplayUtils = {
+const DisplayUtils = {
   displayName,
 };
+
+export { DisplayUtils };

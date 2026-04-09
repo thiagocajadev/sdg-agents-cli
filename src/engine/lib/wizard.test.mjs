@@ -91,12 +91,11 @@ describe('WizardUtils (Non-Interactive)', () => {
       assert.equal(selections.versions.typescript, 'ts@5.9');
     });
 
-    it('should handle idioms with no versions gracefully', () => {
+    it('should not throw when versions object is missing and auto-populate from registry', () => {
       const selections = { flavor: 'mvc', idioms: ['typescript'], versions: {} };
 
       autoSelectVersions(selections);
 
-      // Should not throw
       assert.ok(selections.versions.typescript);
     });
   });
