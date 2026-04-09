@@ -1,7 +1,7 @@
 {
   "name": "sdg-agents",
   "version": "1.0.5",
-  "description": "Agnostic Markdown specs for AI development. Transform your repository into a highly-disciplined environment for AI Agents.",
+  "description": "Structured working protocol and engineering rules for AI agents. Works with Claude Code, Antigravity, Codex, and others.",
   "type": "module",
   "main": "./src/engine/bin/index.mjs",
   "bin": {
