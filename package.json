@@ -1,0 +1,72 @@
+{
+  "name": "sdg-agents",
+  "version": "1.0.0",
+  "description": "Agnostic Markdown specs for AI development. Transform your repository into a highly-disciplined environment for AI Agents.",
+  "type": "module",
+  "main": "./src/engine/bin/index.mjs",
+  "bin": {
+    "sdg-agents": "./src/engine/bin/index.mjs"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "node src/engine/bin/index.mjs",
+    "build": "node src/engine/bin/build-bundle.mjs",
+    "review": "node src/engine/bin/review-bundle.mjs",
+    "bump": "node src/engine/bin/auto-bump.mjs",
+    "add-idiom": "node src/engine/bin/add-idiom.mjs",
+    "clear": "node src/engine/bin/clear-bundle.mjs",
+    "test": "node --test src/engine/lib/*.test.mjs",
+    "test:watch": "node --test --watch src/engine/lib/*.test.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "specs",
+    "markdown",
+    "claude",
+    "cursor",
+    "windsurf",
+    "copilot",
+    "codex",
+    "gemini",
+    "rules",
+    "architecture",
+    "cli",
+    "developer-tools"
+  ],
+  "author": "thiagocajadev",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thiagocajadev/sdg-agents.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thiagocajadev/sdg-agents/issues"
+  },
+  "homepage": "https://github.com/thiagocajadev/sdg-agents#readme",
+  "dependencies": {
+    "@inquirer/prompts": "^8.3.2",
+    "dedent": "^1.7.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1"
+  },
+  "lint-staged": {
+    "**/*.mjs": "eslint --fix",
+    "**/*.{json,md}": "prettier --write"
+  }
+}

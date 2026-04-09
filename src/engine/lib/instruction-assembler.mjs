@@ -1,0 +1,516 @@
+/**
+ * Instruction Assembler — Builds and writes the final master instructions.
+ * Assembles agent config files and the project manifest.
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import dedent from 'dedent';
+
+import { STACK_DISPLAY_NAMES } from '../config/stack-display.mjs';
+import { DisplayUtils } from './display-utils.mjs';
+import { ManifestUtils } from './manifest-utils.mjs';
+import { FsUtils } from './fs-utils.mjs';
+
+const { displayName } = DisplayUtils;
+const { computeHashes } = ManifestUtils;
+const { getDirname } = FsUtils;
+
+const __dirname = getDirname(import.meta.url);
+const SOURCE_INSTRUCTIONS = path.join(__dirname, '..', '..', 'assets', 'instructions');
+
+/**
+ * --- Module Level Pure Logic (SLA & Testability) ---
+ * Decouples stack detection from Markdown formatting.
+ */
+
+function computeStackMetrics(idioms) {
+  const hasBackend = idioms.some((idiomId) => STACK_DISPLAY_NAMES[idiomId]?.isBackend);
+  const hasFrontend = idioms.some((idiomId) => STACK_DISPLAY_NAMES[idiomId]?.isFrontend);
+
+  const metrics = {
+    hasBackend,
+    hasFrontend,
+  };
+
+  return metrics;
+}
+
+/**
+ * Assembles the full master instruction content from inline laws + workflow + links.
+ */
+function buildMasterInstructions(selections) {
+  const templatesDir = path.join(SOURCE_INSTRUCTIONS, 'templates');
+  const workflow = fs.readFileSync(path.join(templatesDir, 'workflow.md'), 'utf8');
+
+  const manifesto = buildStaffManifesto();
+  const firstSession = buildFirstSessionNote();
+  const instructionLinks = buildInstructionLinks(selections);
+
+  const fullInstructionContent = `${manifesto}\n\n${firstSession}\n\n${workflow}\n\n${instructionLinks}`;
+
+  return fullInstructionContent;
+
+  // --- Scoped Internal Helpers (The Stepdown Rule & Lexical Scoping) ---
+
+  function buildStaffManifesto() {
+    const manifestoString = dedent`
+      # Staff Engineer — Governance Command Center
+
+      <ruleset name="StaffManifesto">
+
+      > [!IMPORTANT]
+      > **THE GOVERNANCE OATH**
+      > "I am a Staff Engineer. I do not just write code; I orchestrate evolution.
+      > I prioritize Hardening over Features, Resilience over Exceptions, and Clarity over Cleverness.
+      > Every line I produce must be secure, observable, and part of a top-down narrative."
+
+      ## The 4 Laws of the SDG Constitution
+
+      ### 1. The Law of Hardening (Security-First)
+      > <rule name="LawOfHardening">
+      > Total configuration isolation. Zero runtime surprises. Fail fast if the environment is incomplete. Default to deny at every boundary.
+      > </rule>
+
+      ### 2. The Law of Resilience (Stability)
+      > <rule name="LawOfResilience">
+      > Defensive dominance. Software must withstand both failure and repetition. Idempotency and graceful degradation are non-negotiable.
+      > </rule>
+
+      ### 3. The Law of the Cascade (Narrative)
+      > <rule name="NarrativeCascade">
+      > [!IMPORTANT]
+      > **Code should be like a short story, a complete and meaningful narrative.**
+      >
+      > **The Principles:**
+      > - **Stepdown Rule**: Callers sitting at the top. The file reads top-down from headline to details.
+      > - **Rich Object Flow**: Peer elements receive the same rich object, maintaining consistent contracts.
+      > - **Explaining Returns**: The return reflects the final task or a named result. Avoid large anonymous objects.
+      > - **SLA (Single Level of Abstraction)**: Orchestrate or implement — never both in the same body.
+      > - **Shallow Boundaries**: Destructure Level 1/2. Stop deep navigation dead in its tracks.
+      > - **Vertical Density**: Visual grouping of related variables/logic with single blank lines (para-logical grouping).
+      > - **Revealing Module Pattern**: Define functions/logic first, create a named object at the end, then export only that object.
+      > - **Lexical Scoping**: One-off helpers must be encapsulated inside their parent's scope.
+      > - **Humanized Writing**: Apply \`.ai/instructions/core/writing-soul.md\` to all documentation, UI text, and communication. Eliminate "AI-isms" and promotional slop to maintain a pulse in every technical artifact.
+      >
+      > *Comments explain "why", never "what". If naming is right, comments disappear.*
+      > </rule>
+
+      ### 4. The Law of Visual Excellence (Aesthetics)
+      > <rule name="LawOfVisualExcellence">
+      > Premium aesthetics by default. High contrast, modern typography, and meaningful micro-interactions. Maintain the chosen design language with absolute rigor.
+      > </rule>
+
+      </ruleset>`;
+
+    return manifestoString;
+  }
+
+  function buildFirstSessionNote() {
+    const firstSessionString = dedent`
+      ## First Session
+
+      > [!NOTE]
+      > **New project:** start with \`feat: Foundation\` to initialize the project structure following the governance pipeline.
+      > Read \`.ai/workflows/governance.md\` to understand the 8-phase architectural trail before starting.
+      >
+      > **Existing project:** before the first \`feat:\` or \`fix:\`, read the project silently:
+      > - **Local Context First**: Always look for \`.ai-backlog/context.md\` first to avoid redundant project analysis.
+      > - Scan the file tree and identify key directories and entry points if context is missing.
+      > - Read \`README.md\` if it exists.
+      > - Identify existing patterns, naming conventions, and main modules.
+      >
+      > Do this once per session. After that, use \`feat:\`, \`fix:\`, or \`docs:\` to begin.`;
+
+    return firstSessionString;
+  }
+
+  function buildInstructionLinks(currentSelections) {
+    const blocks = [
+      buildContextRoutingHeader(),
+      buildProjectContextRouting(),
+      buildCoreGovernanceRouting(),
+      buildArchitecturalContextRouting(currentSelections.flavor),
+      buildTechnicalExecutionRouting(currentSelections.idioms),
+      buildUIUXDesignRouting(currentSelections),
+      buildWorkingCyclesRouting(),
+    ];
+
+    const finalContextRouting = blocks.filter((block) => block !== null).join('\n\n');
+
+    return finalContextRouting;
+
+    // --- Inner Routing Builders ---
+
+    function buildProjectContextRouting() {
+      const routingString = dedent`
+        <context_routing category="0. Project Context">
+          <file_ref path=".ai-backlog/context.md" purpose="Project Brief — read this before anything else" />
+          <file_ref path=".ai-backlog/tasks.md" purpose="Active tasks and handoff state — check for in-progress work" />
+        </context_routing>`;
+
+      return routingString;
+    }
+
+    function buildContextRoutingHeader() {
+      const headerString = dedent`
+        ## Project Command Center
+
+        > [!IMPORTANT]
+        > **CONTEXT LOADING MANDATE (STOP-LOSS)**
+        > You do not have the complete architectural context yet. The following \`<file_ref>\` tags point to your core operational rules.
+        > If your IDE cannot lazily read these paths via globbing or MCP, you MUST explicitly invoke your host environment's execution tools (like file-read, bash cat, etc.) to read the contents of these files BEFORE executing complex tasks.
+        > Do not assume or hallucinate project structures without reading the flavor and idioms rules.`;
+
+      return headerString;
+    }
+
+    function buildCoreGovernanceRouting() {
+      const governanceString = dedent`
+        <context_routing category="I. Universal Governance (The Core)">
+          <file_ref path=".ai/instructions/core/staff-dna.md" purpose="Staff DNA / Core Principles" />
+          <file_ref path=".ai/instructions/core/security.md" purpose="Security Strategy" />
+          <file_ref path=".ai/instructions/core/security-pipeline.md" purpose="Security Pipeline" />
+          <file_ref path=".ai/instructions/core/engineering-standards.md" purpose="Engineering Standards" />
+          <file_ref path=".ai/instructions/core/naming.md" purpose="Naming Discipline (Taboos, Booleans, Verbs, Files)" />
+          <file_ref path=".ai/instructions/core/code-style.md" purpose="Code Style & Scannability" />
+          <file_ref path=".ai/instructions/core/writing-soul.md" purpose="Writing Soul (Docs & UI Humanization)" />
+          <file_ref path=".ai/instructions/core/testing-principles.md" purpose="Testing Principles" />
+          <file_ref path=".ai/instructions/core/observability.md" purpose="Observability" />
+        </context_routing>`;
+
+      return governanceString;
+    }
+
+    function buildArchitecturalContextRouting(flavor) {
+      const architectureString = dedent`
+        <context_routing category="II. Architectural Context">
+          <file_ref path=".ai/instructions/flavor/principles.md" purpose="Flavor: ${displayName(flavor)}" />
+        </context_routing>`;
+
+      return architectureString;
+    }
+
+    function buildTechnicalExecutionRouting(idioms) {
+      const { hasBackend, hasFrontend } = computeStackMetrics(idioms); // Decision Layer
+
+      const idiomRefs = idioms.map((idiomId) => {
+        const label = STACK_DISPLAY_NAMES[idiomId]?.name ?? idiomId;
+        const refLink = `  <file_ref path=".ai/instructions/idioms/${idiomId}/patterns.md" purpose="${label} Idioms & Patterns" />`;
+        return refLink;
+      });
+
+      const backendRefs = hasBackend
+        ? [
+            `  <file_ref path=".ai/instructions/competencies/backend.md" purpose="BFF + API Strategy" />`,
+            `  <file_ref path=".ai/instructions/core/data-access.md" purpose="Data Access" />`,
+            `  <file_ref path=".ai/instructions/core/sql-style.md" purpose="SQL Aesthetics (SDG Linear Flow)" />`,
+            `  <file_ref path=".ai/instructions/core/api-design.md" purpose="API Design" />`,
+            `  <file_ref path=".ai/instructions/core/ci-cd.md" purpose="CI/CD" />`,
+            `  <file_ref path=".ai/instructions/core/cloud.md" purpose="Cloud & Containers" />`,
+          ]
+        : [];
+
+      const frontendRefs = hasFrontend
+        ? [
+            `  <file_ref path=".ai/instructions/competencies/frontend.md" purpose="Contract-Based UI System" />`,
+          ]
+        : [];
+
+      const allRefs = [...idiomRefs, ...backendRefs, ...frontendRefs].join('\n'); // Implementation Layer
+
+      const technicalRoutingBlock = [
+        `<context_routing category="III. Technical Execution">`,
+        allRefs,
+        `</context_routing>`,
+      ].join('\n'); // Explaining Return
+
+      return technicalRoutingBlock;
+    }
+
+    function buildUIUXDesignRouting(selectionsObj) {
+      const { idioms } = selectionsObj; // Shallow Boundaries
+      const designPreset = selectionsObj.designPreset ?? 'UNIVERSAL'; // Defensive Dominance
+      const { hasFrontend } = computeStackMetrics(idioms); // Reuse Decision Logic
+
+      if (!hasFrontend) return null;
+
+      const designLabel = designPreset.toUpperCase();
+
+      const uiuxRoutingBlock = dedent`
+        <context_routing category="IV. UI/UX Design System (Target: ${designLabel})">
+          <file_ref path=".ai/instructions/core/ui/standards.md" purpose="Visual Standards" />
+          <file_ref path=".ai/instructions/core/ui/architecture.md" purpose="Component Architecture" />
+          <file_ref path=".ai/instructions/core/ui/presets.md" purpose="Interface Presets" />
+          <file_ref path=".ai/instructions/core/ui/design-thinking.md" purpose="Visual Contracts (Phase 0)" />
+        </context_routing>`;
+
+      return uiuxRoutingBlock;
+    }
+
+    function buildWorkingCyclesRouting() {
+      const workingCyclesString = dedent`
+        <context_routing category="V. Working Cycles & Intents">
+          <!-- Trigger specialized behavior by prefixing your instructions to the AI with feat:, fix:, or docs: -->
+          <file_ref path=".ai/commands/sdg-feat.md" purpose="Feature Cycle (Specs & Implementation)" />
+          <file_ref path=".ai/commands/sdg-fix.md" purpose="Fix Cycle (Forensics & Regression)" />
+          <file_ref path=".ai/commands/sdg-docs.md" purpose="Documentation Cycle (ADRs & Logs)" />
+        </context_routing>`;
+
+      return workingCyclesString;
+    }
+  }
+}
+
+/**
+ * Builds the stub content for projects initialized in Prompts Only mode.
+ */
+function buildPromptModeStub() {
+  const stubString = dedent`
+    # Project Specification Prompts
+
+    > [!NOTE]
+    > This project has been initialized with SDG-Agents in **Prompts Only** mode.
+    > The AI Agents governance rules (Staff-level engineering instructions) were NOT injected into the workspace.
+    >
+    > If you are an AI Agent operating in this project, you will only have access to the specification templates located at \`.ai/prompts/\`.
+    >
+    > **To Developers:**
+    > If you want to augment this repository with full AI Governance instructions, run the following command in the terminal:
+    > \`npx sdg-agents init\``;
+
+  return stubString;
+}
+
+/**
+ * Writes .ai-backlog/context.md and .ai-backlog/tasks.md at the project root.
+ * Only writes each file if it does not already exist — never overwrites user content.
+ */
+function writeBacklogFiles(targetDir, selections) {
+  const backlogDir = path.join(targetDir, '.ai-backlog');
+  if (!fs.existsSync(backlogDir)) fs.mkdirSync(backlogDir, { recursive: true });
+
+  writeContextFile(backlogDir, targetDir, selections);
+  writeTasksFile(backlogDir);
+
+  // --- Scoped helpers ---
+
+  function writeContextFile(backlogDirPath, projectDir, currentSelections) {
+    const contextPath = path.join(backlogDirPath, 'context.md');
+    if (fs.existsSync(contextPath)) return;
+
+    const stackLine = (currentSelections.idioms ?? [])
+      .map((id) => STACK_DISPLAY_NAMES[id]?.name ?? id)
+      .join(', ');
+
+    const contextContent = dedent`
+      # ${path.basename(projectDir)} — [what this project does in one sentence]
+
+      stack: ${stackLine}
+      pattern: [architecture pattern]
+      entry: [main entry point file]
+
+      ## Decisions
+      - [decision]: [rationale]
+
+      ## Now
+      [what is actively being worked on]
+
+      ## Engineering Insights
+      - [topic]: [lesson learned or research finding]
+    `;
+
+    fs.writeFileSync(contextPath, contextContent);
+  }
+
+  function writeTasksFile(backlogDirPath) {
+    const tasksPath = path.join(backlogDirPath, 'tasks.md');
+    if (fs.existsSync(tasksPath)) return;
+
+    const tasksContent = dedent`
+      # Tasks
+
+      > Managed by AI agents. Update status after each atomic task.
+      > Recovery: if lost, ask the agent to read recent git commits and reconstruct.
+
+      ## Active
+      <!-- [IN_PROGRESS] description — context of where it stopped and what comes next -->
+
+      ## Backlog
+      <!-- [TODO] description -->
+
+      ## Done
+      <!-- [DONE] description -->
+    `;
+
+    fs.writeFileSync(tasksPath, tasksContent);
+  }
+}
+
+/**
+ * Builds the Claude Code-specific CLAUDE.md content.
+ * Uses @-import syntax so Claude Code loads governance files natively on session start.
+ * Distinct from AGENTS.md: references rather than duplicates content.
+ */
+function buildClaudeContent() {
+  const claudeContent = dedent`
+    # SDG Agents — Claude Code Governance
+
+    > [!IMPORTANT]
+    > This file is read automatically by Claude Code on every session start.
+    > Do not edit manually — regenerate with \`npx sdg-agents init --claude\`.
+
+    ## Auto-Load: Governance Context
+
+    @.ai/skill/AGENTS.md
+
+    ## Session Start Protocol
+
+    On every new session, execute in order:
+
+    1. **Check backlog**: Read \`.ai-backlog/context.md\` — understand the project brief. **Priority**: Always check the local directory first to avoid redundant scans.
+    2. **Check tasks**: Read \`.ai-backlog/tasks.md\` — resume any \`[IN_PROGRESS]\` task before accepting new work.
+    3. **Bootstrap if missing**: If \`.ai-backlog/context.md\` does not exist, run the Context Bootstrap below.
+
+    ## Context Bootstrap (run only when .ai-backlog/context.md is absent)
+
+    Analyze the project silently and generate \`.ai-backlog/context.md\` using this template:
+
+    \`\`\`md
+    # <project-name> — <one-line description derived from package.json or README>
+
+    stack: <detected from package.json dependencies>
+    pattern: <detected architectural pattern>
+    entry: <main entry point file>
+
+    ## Decisions
+    - <decision inferred from code or config>: <rationale>
+
+    ## Now
+    - Ready for next instruction.
+
+    ## Engineering Insights
+    - [topic]: [lesson learned or research finding]
+    \`\`\`
+
+    **Rules:**
+    - Read: \`package.json\`, \`README.md\`, entry points, folder structure, \`CHANGELOG.md\`
+    - Only record what can be proven with evidence — never invent
+    - After generating, announce: *"context.md created with initial analysis. Review and adjust as needed."*
+    - If \`context.md\` already exists: **never overwrite it**
+
+    ## Intent Routing (quick reference)
+
+    | Prefix | Action |
+    | :----- | :----- |
+    | \`feat: ...\` | Feature Cycle — read \`.ai/commands/sdg-feat.md\` |
+    | \`fix: ...\` | Fix Cycle — read \`.ai/commands/sdg-fix.md\` |
+    | \`docs: ...\` | Docs Cycle — read \`.ai/commands/sdg-docs.md\` |
+    | Trivial change | CODE directly → END (no CHANGELOG) |
+  `;
+
+  return claudeContent;
+}
+
+/**
+ * Writes the universal agent config file inside .ai/skill/.
+ * A single AGENTS.md serves as the entry point for all AI Agents —
+ * it references only the rules relevant to the project's stack.
+ * If agents/ides are selected, it will also dump the rules to the native target.
+ */
+function writeAgentConfig(targetDir, content, requestedAgents = []) {
+  // Always create the generic fallback AGENTS.md
+  const skillDir = path.join(targetDir, '.ai', 'skill');
+  if (!fs.existsSync(skillDir)) fs.mkdirSync(skillDir, { recursive: true });
+  fs.writeFileSync(path.join(skillDir, 'AGENTS.md'), content);
+
+  if (!requestedAgents || requestedAgents.length === 0) return;
+
+  const ideTargets = {
+    cursor: { dir: '.cursor/rules', file: 'sdg-agents.mdc' },
+    windsurf: { dir: '.', file: '.windsurfrules' },
+    vscode: { dir: '.github', file: 'copilot-instructions.md' },
+    copilot: { dir: '.github', file: 'copilot-instructions.md' }, // alias used in frontend
+    claude: { dir: '.', file: 'CLAUDE.md' },
+    roocode: { dir: '.', file: '.clinerules' },
+    gemini: { dir: '.', file: 'AI_INSTRUCTIONS.md' }, // alias for gemini
+  };
+
+  for (const agent of requestedAgents) {
+    if (agent === 'none' || agent === 'antigravity' || agent === 'all') continue;
+
+    const target = ideTargets[agent];
+    if (target) {
+      const fullDir = path.join(targetDir, target.dir);
+      if (!fs.existsSync(fullDir)) fs.mkdirSync(fullDir, { recursive: true });
+
+      let finalContent = content;
+      if (agent === 'cursor') {
+        finalContent = `---\ndescription: Project Governance and Architectural Rules\nglob: *\n---\n\n${content}`;
+      } else if (agent === 'claude') {
+        finalContent = buildClaudeContent();
+      }
+
+      fs.writeFileSync(path.join(fullDir, target.file), finalContent);
+    }
+  }
+}
+
+/**
+ * Writes or updates .gitignore to block env files from being committed.
+ * Idempotent — only appends entries that are not already present.
+ */
+function writeGitignore(targetDir) {
+  const gitignorePath = path.join(targetDir, '.gitignore');
+
+  const SDG_BLOCK_HEADER = '# Environment files — never commit secrets (managed by SDG Agents)';
+  const REQUIRED_ENTRIES = ['.env', '.env.*'];
+
+  const existingContent = fs.existsSync(gitignorePath)
+    ? fs.readFileSync(gitignorePath, 'utf8')
+    : '';
+
+  const missingEntries = REQUIRED_ENTRIES.filter((entry) => {
+    const lines = existingContent.split('\n').map((line) => line.trim());
+    const isAlreadyPresent = lines.includes(entry);
+    return !isAlreadyPresent;
+  });
+
+  if (missingEntries.length === 0) return;
+
+  const alreadyHasHeader = existingContent.includes(SDG_BLOCK_HEADER);
+  const entriesToAppend = alreadyHasHeader ? missingEntries : [SDG_BLOCK_HEADER, ...missingEntries];
+
+  const separator = existingContent.length > 0 && !existingContent.endsWith('\n') ? '\n' : '';
+  const appendBlock = `${separator}\n${entriesToAppend.join('\n')}\n`;
+
+  fs.appendFileSync(gitignorePath, appendBlock);
+}
+
+/**
+ * Writes the .sdg-manifest.json with content hashes for future diff checks.
+ */
+function writeManifest(targetDir, selections, pkgVersion) {
+  const manifest = {
+    generatedAt: new Date().toISOString(),
+    sdgAgentVersion: pkgVersion,
+    selections,
+    contentHashes: computeHashes(selections, SOURCE_INSTRUCTIONS),
+  };
+
+  const aiDir = path.join(targetDir, '.ai');
+  if (!fs.existsSync(aiDir)) fs.mkdirSync(aiDir, { recursive: true });
+  fs.writeFileSync(path.join(aiDir, '.sdg-manifest.json'), JSON.stringify(manifest, null, 2));
+}
+
+const InstructionAssembler = {
+  buildMasterInstructions,
+  buildClaudeContent,
+  buildPromptModeStub,
+  writeAgentConfig,
+  writeBacklogFiles,
+  writeGitignore,
+  writeManifest,
+};
+
+export { InstructionAssembler };
