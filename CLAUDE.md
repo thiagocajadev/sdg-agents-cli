@@ -24,3 +24,4 @@ On every new session, execute in order:
 | `feat: ...` | Feature Cycle — read `.ai/commands/sdg-feat.md` |
 | `fix: ...`  | Fix Cycle — read `.ai/commands/sdg-fix.md`      |
 | `docs: ...` | Docs Cycle — read `.ai/commands/sdg-docs.md`    |
+| `end:`      | END Phase — read `.ai/commands/sdg-end.md`      |

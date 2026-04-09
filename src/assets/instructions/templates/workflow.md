@@ -9,13 +9,14 @@
 
 On every request, classify intent before acting:
 
-| Signal                    | Cycle                                                                       |
-| :------------------------ | :-------------------------------------------------------------------------- |
-| `land: ...`               | Read `.ai/commands/sdg-land.md` → Follow **Land Cycle** (inception only)    |
-| `feat: ...`               | Read `.ai/commands/sdg-feat.md` (Context Charge) → Follow **Feature Cycle** |
-| `fix: ...`                | Read `.ai/commands/sdg-fix.md` (Context Charge) → Follow **Fix Cycle**      |
-| `docs: ...`               | Read `.ai/commands/sdg-docs.md` (Context Charge) → Follow **Docs Cycle**    |
-| No prefix, intent unclear | Ask once: "land, feat, fix, or docs?" — then proceed                        |
+| Signal                    | Cycle                                                                          |
+| :------------------------ | :----------------------------------------------------------------------------- |
+| `land: ...`               | Read `.ai/commands/sdg-land.md` → Follow **Land Cycle** (inception only)       |
+| `feat: ...`               | Read `.ai/commands/sdg-feat.md` (Context Charge) → Follow **Feature Cycle**    |
+| `fix: ...`                | Read `.ai/commands/sdg-fix.md` (Context Charge) → Follow **Fix Cycle**         |
+| `docs: ...`               | Read `.ai/commands/sdg-docs.md` (Context Charge) → Follow **Docs Cycle**       |
+| `end:`                    | Read `.ai/commands/sdg-end.md` → Execute **END Phase** checklist (no argument) |
+| No prefix, intent unclear | Ask once: "land, feat, fix, or docs?" — then proceed                           |
 
 ---
 
