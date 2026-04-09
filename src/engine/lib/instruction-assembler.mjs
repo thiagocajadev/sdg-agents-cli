@@ -254,7 +254,8 @@ function buildMasterInstructions(selections) {
         | \`.ai/commands/sdg-land.md\` | Land Cycle (Project Inception & Backlog) |
         | \`.ai/commands/sdg-feat.md\` | Feature Cycle (Specs & Implementation) |
         | \`.ai/commands/sdg-fix.md\` | Fix Cycle (Forensics & Regression) |
-        | \`.ai/commands/sdg-docs.md\` | Documentation Cycle (ADRs & Logs) |`;
+        | \`.ai/commands/sdg-docs.md\` | Documentation Cycle (ADRs & Logs) |
+        | \`.ai/commands/sdg-end.md\` | END Phase — close the active cycle (changelog, backlog, commit) |`;
 
       return workingCyclesString;
     }
@@ -377,6 +378,7 @@ function buildClaudeContent() {
     | \`feat: ...\` | Feature Cycle — read \`.ai/commands/sdg-feat.md\` |
     | \`fix: ...\` | Fix Cycle — read \`.ai/commands/sdg-fix.md\` |
     | \`docs: ...\` | Docs Cycle — read \`.ai/commands/sdg-docs.md\` |
+    | \`end:\` | END Phase — read \`.ai/commands/sdg-end.md\` |
   `;
 
   return claudeContent;

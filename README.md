@@ -83,21 +83,24 @@ Agent-specific entry files (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, etc.)
 
 When you prefix a message to the agent, it enters the corresponding cycle:
 
-| Trigger               | Cycle   | What happens                                                                                                  |
-| :-------------------- | :------ | :------------------------------------------------------------------------------------------------------------ |
-| `land: <description>` | Land    | Agent turns a raw vision into a grounded backlog of sequenced `feat:` tasks — runs before any code is written |
-| `feat: <description>` | Feature | Agent runs SPEC → PLAN → CODE → TEST → END                                                                    |
-| `fix: <description>`  | Fix     | Agent runs SPEC → PLAN → CODE → TEST → END with RCA focus                                                     |
-| `docs: <description>` | Docs    | Agent updates changelogs, ADRs, or specs                                                                      |
-| No prefix             | —       | Agent asks: "land, feat, fix, or docs?" — then proceeds                                                       |
+| Trigger               | Cycle   | What happens                                                                                                                                        |
+| :-------------------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `land: <description>` | Land    | Agent turns a raw vision into a grounded backlog of sequenced `feat:` tasks — runs before any code is written                                       |
+| `feat: <description>` | Feature | Agent runs SPEC → PLAN → CODE → TEST → END                                                                                                          |
+| `fix: <description>`  | Fix     | Agent runs SPEC → PLAN → CODE → TEST → END with RCA focus                                                                                           |
+| `docs: <description>` | Docs    | Agent updates changelogs, ADRs, or specs                                                                                                            |
+| `end:`                | —       | Close the active cycle — runs the END Phase checklist (changelog, backlog, commit). Also recovers a cycle if the agent loses track mid-conversation |
+| No prefix             | —       | Agent asks: "land, feat, fix, or docs?" — then proceeds                                                                                             |
 
 The agent **stops and waits for your approval** at SPEC and PLAN before writing any code.
 
 ```
 SPEC  →  PLAN  →  CODE  →  TEST  →  END
-  ↑           ↑
-  Wait        Wait        (approval required)
+  ↑           ↑                       ↑
+  Wait        Wait                 "end:"
 ```
+
+> Type `end:` to close the active cycle. The agent runs the full END checklist — changelog, backlog sync, commit proposal. If the agent loses track mid-conversation, `end:` also recovers the cycle.
 
 For a detailed walkthrough of each phase and its rules, see [Spec-Driven Development Guide](src/assets/dev-guides/spec-driven-dev-guide.md).
 For a visual breakdown of the internal decision gates and loops, see [Agent Deep-Flow](src/assets/dev-guides/agent-deep-flow.md).

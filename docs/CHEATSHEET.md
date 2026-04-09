@@ -91,13 +91,16 @@ npx sdg-agents clear     # Remove the entire .ai/ governance layer
 
 Prefix your message to the AI Agent to activate the corresponding governance cycle:
 
-| Trigger               | Cycle   | Intent                                                                    |
-| :-------------------- | :------ | :------------------------------------------------------------------------ |
-| `land: <description>` | Land    | Project inception — vision to sequenced `feat:` backlog, no code written. |
-| `feat: <description>` | Feature | New implementation — requires SPEC and PLAN approval before any code.     |
-| `fix: <description>`  | Fix     | Bug resolution — Root Cause Analysis and regression test mandatory.       |
-| `docs: <description>` | Docs    | Technical memory sync — Changelogs, ADRs, Specs.                          |
-| No prefix             | —       | Agent asks: "land, feat, fix, or docs?" — then proceeds.                  |
+| Trigger               | Cycle   | Intent                                                                                                                                               |
+| :-------------------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `land: <description>` | Land    | Project inception — vision to sequenced `feat:` backlog, no code written.                                                                            |
+| `feat: <description>` | Feature | New implementation — requires SPEC and PLAN approval before any code.                                                                                |
+| `fix: <description>`  | Fix     | Bug resolution — Root Cause Analysis and regression test mandatory.                                                                                  |
+| `docs: <description>` | Docs    | Technical memory sync — Changelogs, ADRs, Specs.                                                                                                     |
+| `end:`                | —       | Close the active cycle — runs the END Phase checklist (changelog, backlog, commit). Also recovers a cycle if the agent loses track mid-conversation. |
+| No prefix             | —       | Agent asks: "land, feat, fix, or docs?" — then proceeds.                                                                                             |
+
+> `end:` takes no argument. Type it to close the active cycle — the agent runs the full END checklist (changelog, backlog sync, commit proposal). If the agent loses track mid-conversation, `end:` also recovers the cycle.
 
 ---
 
@@ -107,8 +110,8 @@ Every `feat:`, `fix:`, and `docs:` task follows this sequence:
 
 ```
 SPEC  →  PLAN  →  CODE  →  TEST  →  END
-  ↑           ↑
-  Wait        Wait
+  ↑           ↑                       ↑
+  Wait        Wait                 "end:"
 ```
 
 The Agent **stops and waits for explicit Developer approval** at SPEC and PLAN before proceeding.
