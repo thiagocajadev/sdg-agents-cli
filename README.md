@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/assets/img/sdg-agents-icon-light.svg" alt="SDG Agents" width="480" height="480" style="border-radius: 1rem;">
+  <img src="https://raw.githubusercontent.com/thiagocajadev/sgd-agents-cli/main/src/assets/img/sdg-agents-icon-light.svg" alt="SDG Agents" width="480" height="480" style="border-radius: 1rem;">
   <h1 align="center">Spec-Driven Guide — Agents</h1>
   <p align="center">
     A CLI that installs a structured instruction set for AI agents into your project.<br>
@@ -12,13 +12,12 @@
 <br>
 
 <p align="center">
-  <kbd><img src="src/assets/img/sdg-agents-menu-v1.png" alt="Spec Driven Guide CLI in action" /></kbd>
+  <kbd><img src="https://raw.githubusercontent.com/thiagocajadev/sgd-agents-cli/main/src/assets/img/sdg-agents-menu-v1.png" alt="Spec Driven Guide CLI in action" /></kbd>
 </p>
 
 `sdg-agents` installs a set of markdown instruction files into your project. AI agents (Claude Code, Cursor, Windsurf, Copilot, Codex, and others) read these files and follow the defined protocol for every task.
 
-> [!NOTE]
-> If your agent does not pick up the rules automatically, reference `.ai/skill/AGENTS.md` at the start of the session.
+> **Note:** If your agent does not pick up the rules automatically, reference `.ai/skill/AGENTS.md` at the start of the session.
 
 The instruction set covers:
 
@@ -155,8 +154,7 @@ npx sdg-agents clear     # Remove the .ai/ folder
 
 ---
 
-> [!WARNING]
-> This project is in early development. Review and adjust the installed rules to fit your team's standards before relying on them.
+> **Warning:** This project is in early development. Review and adjust the installed rules to fit your team's standards before relying on them.
 
 _Balance is the key._
 

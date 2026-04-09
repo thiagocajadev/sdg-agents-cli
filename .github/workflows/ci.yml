@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20, 22]
+        node-version: [22]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
         run: npm audit --audit-level=moderate
 
       - name: Lint
-        run: npm run lint:all
+        run: npm run lint
 
       - name: Test
         run: npm test

@@ -42,14 +42,30 @@
   ],
   "author": "thiagocajadev",
   "license": "ISC",
+  "files": [
+    "src/engine/bin/index.mjs",
+    "src/engine/bin/add-idiom.mjs",
+    "src/engine/config/",
+    "src/engine/lib/cli-parser.mjs",
+    "src/engine/lib/display-utils.mjs",
+    "src/engine/lib/fs-utils.mjs",
+    "src/engine/lib/instruction-assembler.mjs",
+    "src/engine/lib/manifest-utils.mjs",
+    "src/engine/lib/prompt-utils.mjs",
+    "src/engine/lib/result-utils.mjs",
+    "src/engine/lib/ruleset-injector.mjs",
+    "src/engine/lib/ui-utils.mjs",
+    "src/engine/lib/wizard.mjs",
+    "src/assets/"
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thiagocajadev/sdg-agents.git"
+    "url": "git+https://github.com/thiagocajadev/sgd-agents-cli.git"
   },
   "bugs": {
-    "url": "https://github.com/thiagocajadev/sdg-agents/issues"
+    "url": "https://github.com/thiagocajadev/sgd-agents-cli/issues"
   },
-  "homepage": "https://github.com/thiagocajadev/sdg-agents#readme",
+  "homepage": "https://github.com/thiagocajadev/sgd-agents-cli#readme",
   "dependencies": {
     "@inquirer/prompts": "^8.3.2",
     "dedent": "^1.7.2"
