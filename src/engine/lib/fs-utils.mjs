@@ -74,7 +74,9 @@ function getDirname(importMetaUrl) {
 }
 
 function runIfDirect(importMetaUrl, fn) {
-  if (fileURLToPath(importMetaUrl) === path.resolve(process.argv[1])) {
+  const currentFile = fileURLToPath(importMetaUrl);
+  const entryFile = fs.realpathSync(path.resolve(process.argv[1]));
+  if (currentFile === entryFile) {
     fn().catch((error) => {
       if (error.name === 'ExitPromptError') {
         console.log('\n\n  Aborted.\n');
