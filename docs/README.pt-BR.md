@@ -84,12 +84,13 @@ Arquivos de entrada por agente (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, e
 
 Ao prefixar uma mensagem ao agente, ele entra no ciclo correspondente:
 
-| Trigger             | Ciclo   | O que acontece                                                 |
-| :------------------ | :------ | :------------------------------------------------------------- |
-| `feat: <descrição>` | Feature | Agente executa SPEC → PLAN → CODE → TEST → END                 |
-| `fix: <descrição>`  | Fix     | Agente executa SPEC → PLAN → CODE → TEST → END com foco em RCA |
-| `docs: <descrição>` | Docs    | Agente atualiza changelogs, ADRs ou specs                      |
-| Sem prefixo         | Direto  | Agente faz a alteração imediatamente (apenas edições triviais) |
+| Trigger             | Ciclo   | O que acontece                                                                                                              |
+| :------------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------- |
+| `land: <descrição>` | Land    | Agente transforma uma visão bruta em um backlog de tarefas `feat:` sequenciadas — roda antes de qualquer código ser escrito |
+| `feat: <descrição>` | Feature | Agente executa SPEC → PLAN → CODE → TEST → END                                                                              |
+| `fix: <descrição>`  | Fix     | Agente executa SPEC → PLAN → CODE → TEST → END com foco em RCA                                                              |
+| `docs: <descrição>` | Docs    | Agente atualiza changelogs, ADRs ou specs                                                                                   |
+| Sem prefixo         | —       | Agente pergunta: "land, feat, fix ou docs?" — e então prossegue                                                             |
 
 O agente **para e aguarda sua aprovação** em SPEC e PLAN antes de escrever qualquer código.
 

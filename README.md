@@ -84,12 +84,13 @@ Agent-specific entry files (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, etc.)
 
 When you prefix a message to the agent, it enters the corresponding cycle:
 
-| Trigger               | Cycle   | What happens                                              |
-| :-------------------- | :------ | :-------------------------------------------------------- |
-| `feat: <description>` | Feature | Agent runs SPEC → PLAN → CODE → TEST → END                |
-| `fix: <description>`  | Fix     | Agent runs SPEC → PLAN → CODE → TEST → END with RCA focus |
-| `docs: <description>` | Docs    | Agent updates changelogs, ADRs, or specs                  |
-| No prefix             | —       | Agent asks: "land, feat, fix, or docs?" — then proceeds   |
+| Trigger               | Cycle   | What happens                                                                                                  |
+| :-------------------- | :------ | :------------------------------------------------------------------------------------------------------------ |
+| `land: <description>` | Land    | Agent turns a raw vision into a grounded backlog of sequenced `feat:` tasks — runs before any code is written |
+| `feat: <description>` | Feature | Agent runs SPEC → PLAN → CODE → TEST → END                                                                    |
+| `fix: <description>`  | Fix     | Agent runs SPEC → PLAN → CODE → TEST → END with RCA focus                                                     |
+| `docs: <description>` | Docs    | Agent updates changelogs, ADRs, or specs                                                                      |
+| No prefix             | —       | Agent asks: "land, feat, fix, or docs?" — then proceeds                                                       |
 
 The agent **stops and waits for your approval** at SPEC and PLAN before writing any code.
 
