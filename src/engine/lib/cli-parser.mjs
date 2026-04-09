@@ -19,6 +19,7 @@ function parseCliArgs(argv) {
     help: argv.includes('--help') || argv.includes('-h'),
     version: argv.includes('--version') || argv.includes('-v'),
     dryRun: argv.includes('--dry-run'),
+    noDevGuides: argv.includes('--no-dev-guides'),
     flavor: getArgValue(argv, '--flavor'),
     idioms: getArgValues(argv, '--idiom'),
     agents: getArgValues(argv, '--agents'),

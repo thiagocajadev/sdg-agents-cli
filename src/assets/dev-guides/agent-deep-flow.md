@@ -126,4 +126,4 @@ Closing the loop and ensuring project observability.
 ---
 
 > [!TIP]
-> This deep-flow ensures that every AI Agent operating in an SDG-native repo behaves like a **Staff-level Engineer**, maintaining consistency and zero technical debt.
+> This deep-flow is the internal model the agent follows on every task cycle. Use it to understand why the agent stops where it does and what it checks at each gate.

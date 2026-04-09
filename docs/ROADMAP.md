@@ -1,39 +1,30 @@
-# SDG Agents Roadmap
+# Roadmap
 
-This document outlines the strategic vision and future milestones for the **Spec Driven Guide (SDG)** ecosystem. While the [CHANGELOG.md](../CHANGELOG.md) records our technical history, this Roadmap focuses on what lies ahead.
+## Milestones
 
-## Strategic Milestones
-
-| Target   | Main Focus                                                    | Status         |
-| :------- | :------------------------------------------------------------ | :------------- |
-| **v0.9** | **Guardrails**: Reasoning context & Stop-Loss protocols.      | 🚜 In Progress |
-| **v1.0** | **Plugin Core**: System for custom idioms and local patterns. | 📋 Planned     |
-| **v1.1** | **MCP Integration**: Optimized embeddings & semantic search.  | 📋 Backlog     |
-| **v1.2** | **Visual Governance**: Auto-generation of architecture flows. | 📋 Backlog     |
+| Target   | Focus                                                              | Status     |
+| :------- | :----------------------------------------------------------------- | :--------- |
+| **v1.0** | Foundation: CLI, instruction set, 5-phase protocol, multi-stack.   | ✅ Shipped |
+| **v1.1** | Plugin Core: support for custom idioms and local flavor patterns.  | 📋 Planned |
+| **v1.2** | MCP Integration: semantic search over installed instruction files. | 📋 Backlog |
+| **v1.3** | Visual Governance: auto-generation of architecture flow diagrams.  | 📋 Backlog |
 
 ---
 
-## Future Vision
+## What's Next
 
-We are building the infrastructure for the next generation of AI-native engineering. Our vision is centered on three pillars:
+### v1.1 — Plugin Core
 
-### 1. Hardened Governance
+Allow teams to define their own idioms and flavors with the same structure as the built-in templates. The goal is for any engineering team to extend the instruction set without forking the package.
 
-Moving beyond simple instructions to active enforcement. We are developing mechanisms to prevent technical drift by integrating deeper reasoning into the validation cycles.
+### v1.2 — MCP Integration
 
-### 2. Framework Agnosticism & Plugin Core
+Implement Model Context Protocol support so agents can query the installed instruction files semantically, surfacing only the rules relevant to the current task rather than loading everything up front.
 
-Expanding the system to allow any engineering team to define their own "Flavor" and "Idiom" with the same level of precision as our core templates through a robust Plugin Core.
+### v1.3 — Visual Governance
 
-### 3. MCP Integration (Semantic Context)
-
-Implementing the **Model Context Protocol (MCP)** to enable optimized embeddings and semantic search. This will allow agents to surface the most relevant architectural tokens and historical data with zero decision lag.
-
-### 4. Deep Reasoning Integration
-
-Optimizing prompts and context routing specifically for high-reasoning models, ensuring the "Under the Hood" logic is transparent and verifiable.
+Auto-generate architecture flow diagrams from the installed flavor and idiom configuration, keeping visual documentation in sync with the rules the agent is actually following.
 
 ---
 
-> [!TIP]
-> **Technical History**: For a detailed list of all past changes, fixed bugs, and added features, please see the [**CHANGELOG.md**](../CHANGELOG.md).
+> For the full technical history, see [CHANGELOG.md](../CHANGELOG.md).

@@ -430,29 +430,33 @@ function writeAgentConfig(targetDir, content, requestedAgents = []) {
     cursor: { dir: '.cursor/rules', file: 'sdg-agents.mdc' },
     windsurf: { dir: '.', file: '.windsurfrules' },
     vscode: { dir: '.github', file: 'copilot-instructions.md' },
-    copilot: { dir: '.github', file: 'copilot-instructions.md' }, // alias used in frontend
+    copilot: { dir: '.github', file: 'copilot-instructions.md' },
     claude: { dir: '.', file: 'CLAUDE.md' },
     roocode: { dir: '.', file: '.clinerules' },
-    gemini: { dir: '.', file: 'AI_INSTRUCTIONS.md' }, // alias for gemini
+    gemini: { dir: '.', file: 'AI_INSTRUCTIONS.md' },
   };
 
-  for (const agent of requestedAgents) {
-    if (agent === 'none' || agent === 'antigravity' || agent === 'all') continue;
+  const expandedAgents = requestedAgents.includes('all')
+    ? Object.keys(ideTargets)
+    : requestedAgents;
+
+  for (const agent of expandedAgents) {
+    if (agent === 'none' || agent === 'antigravity') continue;
 
     const target = ideTargets[agent];
-    if (target) {
-      const fullDir = path.join(targetDir, target.dir);
-      if (!fs.existsSync(fullDir)) fs.mkdirSync(fullDir, { recursive: true });
+    if (!target) continue;
 
-      let finalContent = content;
-      if (agent === 'cursor') {
-        finalContent = `---\ndescription: Project Governance and Architectural Rules\nglob: *\n---\n\n${content}`;
-      } else if (agent === 'claude') {
-        finalContent = buildClaudeContent();
-      }
+    const fullDir = path.join(targetDir, target.dir);
+    if (!fs.existsSync(fullDir)) fs.mkdirSync(fullDir, { recursive: true });
 
-      fs.writeFileSync(path.join(fullDir, target.file), finalContent);
+    let finalContent = content;
+    if (agent === 'cursor') {
+      finalContent = `---\ndescription: Project Governance and Architectural Rules\nglob: *\n---\n\n${content}`;
+    } else if (agent === 'claude') {
+      finalContent = buildClaudeContent();
     }
+
+    fs.writeFileSync(path.join(fullDir, target.file), finalContent);
   }
 }
 

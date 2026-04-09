@@ -15,7 +15,8 @@ const __dirname = getDirname(import.meta.url);
 const SOURCE_INSTRUCTIONS = path.join(__dirname, '..', '..', 'assets', 'instructions');
 const SOURCE_WORKFLOWS = path.join(SOURCE_INSTRUCTIONS, 'workflows');
 const SOURCE_COMMANDS = path.join(SOURCE_INSTRUCTIONS, 'commands');
-const SOURCE_DEV_TRACKS = path.join(__dirname, '..', '..', 'assets', 'dev-guides', 'prompt-tracks');
+const SOURCE_DEV_GUIDES = path.join(__dirname, '..', '..', 'assets', 'dev-guides');
+const SOURCE_DEV_TRACKS = path.join(SOURCE_DEV_GUIDES, 'prompt-tracks');
 const SOURCE_COMPETENCIES = path.join(SOURCE_INSTRUCTIONS, 'competencies');
 
 /**
@@ -34,7 +35,7 @@ function prepareProjectStructure(targetDir) {
 /**
  * Injects core, flavor, idiom, and template rulesets into the target project.
  */
-function injectRulesets(targetDir, selections) {
+function injectRulesets(targetDir, selections, { noDevGuides = false } = {}) {
   const { flavor, idioms } = selections;
   const projectAiInstructions = path.join(targetDir, '.ai', 'instructions');
 
@@ -66,6 +67,17 @@ function injectRulesets(targetDir, selections) {
   if (fs.existsSync(SOURCE_COMMANDS)) {
     copyRecursiveSync(SOURCE_COMMANDS, path.join(targetDir, '.ai', 'commands'));
   }
+
+  if (!noDevGuides) injectDevGuides(targetDir);
+}
+
+/**
+ * Copies dev-guides (reference files, spec templates, guides) into the target project.
+ * Always included alongside the instruction set.
+ */
+function injectDevGuides(targetDir) {
+  if (!fs.existsSync(SOURCE_DEV_GUIDES)) return;
+  copyRecursiveSync(SOURCE_DEV_GUIDES, path.join(targetDir, '.ai', 'dev-guides'));
 }
 
 /**
@@ -109,6 +121,7 @@ function collectOutputSummary(selections) {
     directories.push('.ai/instructions/competencies/');
     directories.push('.ai/workflows/');
     directories.push('.ai/commands/');
+    directories.push('.ai/dev-guides/');
   } else if (mode === 'prompts') {
     if (track) directories.push('.ai/prompts/dev-tracks/');
   }
@@ -164,6 +177,7 @@ function injectFilteredIdiom(idiom, targetVersion, projectAiInstructions) {
 export const RulesetInjector = {
   prepareProjectStructure,
   injectRulesets,
+  injectDevGuides,
   injectPrompts,
   collectOutputSummary,
 };

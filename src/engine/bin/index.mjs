@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Spec Driven Guide — Staff-level AI Rule Orchestrator
- * Main CLI Entry Point — Supports interactive and non-interactive modes.
+ * sdg-agents — Main CLI Entry Point
+ * Supports interactive and non-interactive modes.
  */
 
 import { createRequire } from 'node:module';
@@ -140,6 +140,7 @@ async function handleInitSubcommand(args) {
   const isNonInteractive = args.mode || args.flavor || args.idioms.length > 0;
   await SDG.run(args.targetDir, {
     dryRun: args.dryRun,
+    noDevGuides: args.noDevGuides,
     selections: isNonInteractive
       ? {
           mode: args.mode || 'agents',

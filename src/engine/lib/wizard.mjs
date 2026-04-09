@@ -105,21 +105,17 @@ async function executeWizardStep(step, context) {
 
 async function promptInitialChoice() {
   const result = await safeSelect({
-    message: 'What would you like to build?',
+    message: 'What would you like to do?',
     choices: [
       {
-        name: '1. SDG - Agents   — Inject Staff-level rules and instructions for AI Agents',
+        name: '1. Set up this project — install the instruction set and working protocol',
         value: 'agents',
       },
       {
-        name: '2. SDG - Prompts  — Inject Specification Pipeline templates for Developers',
-        value: 'prompts',
-      },
-      {
-        name: '3. Quick Setup    — Ready-to-go Staff toolkit (Agents & Prompts)',
+        name: '2. Quick setup — install with defaults (lite + JS/TS, includes everything)',
         value: 'quick',
       },
-      { name: '4. Back', value: 'back' },
+      { name: '3. Back', value: 'back' },
     ],
   });
   if (result === 'back') return fail('', 'USER_BACK');
@@ -305,13 +301,14 @@ async function promptIdeSelection() {
   const result = await safeSelect({
     message: 'Which Primary IDE / AI Agent should perform Auto-Load?',
     choices: [
-      { name: '1. Cursor (.cursorrules)', value: 'cursor' },
-      { name: '2. Windsurf (.windsurfrules)', value: 'windsurf' },
-      { name: '3. Claude Code (CLAUDE.md)', value: 'claude' },
-      { name: '4. VSCode Copilot (.github/copilot-instructions.md)', value: 'vscode' },
-      { name: '5. Roo Code (.clinerules)', value: 'roocode' },
-      { name: '6. None / Antigravity / Raw (.ai/skill/AGENTS.md)', value: 'none' },
-      { name: '7. Back', value: 'back' },
+      { name: '1. Claude Code (CLAUDE.md)', value: 'claude' },
+      { name: '2. Antigravity / Raw (.ai/skill/AGENTS.md only)', value: 'none' },
+      { name: '3. GitHub Copilot (.github/copilot-instructions.md)', value: 'vscode' },
+      { name: '4. Cursor (.cursorrules)', value: 'cursor' },
+      { name: '5. Windsurf (.windsurfrules)', value: 'windsurf' },
+      { name: '6. Cline / Roo Code (.clinerules)', value: 'roocode' },
+      { name: '7. All — write every config file', value: 'all' },
+      { name: '8. Back', value: 'back' },
     ],
   });
 

@@ -11,7 +11,7 @@ const { collectOutputSummary } = RulesetInjector;
 const { safeConfirm } = PromptUtils;
 
 function printWelcome() {
-  console.log('\n  Spec Driven Guide — Inject Staff rules into project');
+  console.log('\n  Installing instruction set...');
   console.log('  ' + '─'.repeat(55));
 }
 
@@ -24,7 +24,7 @@ function printAborted() {
 }
 
 function printQuickSetupStart() {
-  console.log(`\n  ⚡ Quick Setup: Initializing Full Staff Toolkit...`);
+  console.log(`\n  ⚡ Quick setup — installing with defaults...`);
 }
 
 function printProjectRoot(targetDir) {
@@ -32,50 +32,45 @@ function printProjectRoot(targetDir) {
 }
 
 function printActivationGuide() {
-  console.log('\n  ┌─ Activate your context ─────────────────────────────────┐');
-  console.log('  │  Paste to your AI Agent:                                │');
-  console.log('  │                                                         │');
-  console.log('  │  Read .ai/skill/AGENTS.md — routes to only the rules    │');
-  console.log("  │  relevant to this project's stack.                      │");
-  console.log('  └─────────────────────────────────────────────────────────┘\n');
+  console.log('\n  Your agent is ready. Start with a task.');
+  console.log('  If it does not auto-load the rules, paste this once:');
+  console.log('\n    Read .ai/skill/AGENTS.md\n');
 }
 
 function printSuccessAgents(targetDir) {
-  console.log('\n  ✅ Agent instructions injected successfully!');
+  console.log('\n  ✅ Done.');
   console.log('  ' + '─'.repeat(55));
   console.log(`  Project: ${targetDir}\n`);
-  console.log('  .ai/skill/AGENTS.md  — universal entry point for all AI Agents');
-  console.log('  .ai/instructions/           — rules loaded on demand (backend, frontend, idiom)');
-  console.log('  .ai/commands/               — feat / fix / docs cycles');
+  console.log('  .ai/');
+  console.log('  .ai-backlog/             (gitignored)');
   printActivationGuide();
 }
 
 function printSuccessPrompts(targetDir) {
-  console.log('\n  ✅ Specification Pipeline injected successfully!');
+  console.log('\n  ✅ Done.');
   console.log('  ' + '─'.repeat(55));
   console.log(`  Project: ${targetDir}\n`);
   console.log('  .ai/prompts/dev-tracks/  — specification templates\n');
 }
 
 function printQuickSuccess(targetDir) {
-  console.log('\n  ⚡ Staff Engineering Toolkit Ready!');
+  console.log('\n  ⚡ Done.');
   console.log('  ' + '─'.repeat(55));
   console.log(`  Project: ${targetDir}\n`);
-  console.log('  .ai/skill/AGENTS.md  — universal entry point for all AI Agents');
-  console.log('  .ai/instructions/           — rules loaded on demand (backend, frontend, idiom)');
-  console.log('  .ai/prompts/                — specification templates');
+  console.log('  .ai/');
+  console.log('  .ai-backlog/             (gitignored)');
   printActivationGuide();
 }
 
 function printQuickDryRun(targetDir) {
-  console.log(`\n  ⚡ [DRY RUN] Quick Setup: Initializing Full Staff Toolkit...`);
+  console.log(`\n  ⚡ [DRY RUN] Quick setup — nothing will be written.`);
   console.log('  ' + '─'.repeat(55));
-  console.log(`  Project Root: ${targetDir}\n`);
+  console.log(`  Project: ${targetDir}\n`);
   console.log(`  [1/5] Would prepare .ai/ structure`);
-  console.log(`  [2/5] Would inject Lite AI Rules (JS/TS + Glass) -> .ai/`);
-  console.log(`  [3/5] Would write .ai/skill/AGENTS.md`);
-  console.log(`  [4/5] Would inject Lite Prompt Track -> .ai/prompts/dev-tracks/`);
-  console.log(`  [5/5] Finalizing...`);
+  console.log(`  [2/5] Would inject rules and dev-guides → .ai/`);
+  console.log(`  [3/5] Would assemble AGENTS.md`);
+  console.log(`  [4/5] Would write agent config and backlog`);
+  console.log(`  [5/5] Would inject spec templates → .ai/prompts/dev-tracks/`);
   console.log('\n  Run without --dry-run to apply.\n');
 }
 
@@ -160,9 +155,9 @@ async function printBuildSummary(selections) {
  * Renders the CLI header with version info.
  */
 function printHeader(version) {
-  console.log(`\n  Spec Driven Guide v${version} — Staff-level Context for AI Agents`);
+  console.log(`\n  Spec-Driven Guide — Agents v${version}`);
   console.log('  ' + '─'.repeat(50));
-  console.log('  Standardizing engineering excellence for AI Agents.');
+  console.log('  A working protocol and engineering rules for your AI agent.');
   console.log('  Press Ctrl+C to exit.\n');
 }
 
@@ -170,8 +165,7 @@ function printHeader(version) {
  * Renders the CLI footer with GitHub link.
  */
 function printFooter() {
-  console.log('  Check out this project on GitHub: https://github.com/thiagocajadev/sdg-agents');
-  console.log('\n  Goodbye engineer!\n');
+  console.log('\n  See you.\n');
 }
 
 /**
@@ -179,38 +173,38 @@ function printFooter() {
  */
 function printHelp(version) {
   console.log(`
-  Spec Driven Guide v${version}
-  Transform any repository into a high-discipline environment for AI Agents.
+  sdg-agents v${version}
+  Installs a structured instruction set for AI agents into your project.
 
   Usage:
     npx sdg-agents [command] [options]
 
   Commands:
-    init         Build project context (inject Staff-level rules)
-    review       Compare local rules vs core source
-    sync         Generate prompt to update patterns via web
-    update       Refresh LTS versions registry
-    add          Generate prompt for a new idiom
-    clear        Reset all generated content
+    init         Install the instruction set (interactive or via flags)
+    review       Compare local rules vs source
+    sync         Update patterns from source
+    update       Refresh the LTS version registry
+    add          Add a language idiom to an existing project
+    clear        Remove the .ai/ folder
 
   Global Options:
-    -h, --help       Show this help message
-    -v, --version    Show version number
+    -h, --help       Show this help
+    -v, --version    Show version
 
   Init Options:
-    --flavor <name>    Architecture flavor (vertical-slice, mvc, lite, legacy)
-    --idiom <name>     Language/framework (repeatable or comma-separated)
-    --dry-run          Preview files without writing
+    --flavor <name>      Architecture flavor (vertical-slice, mvc, lite, legacy)
+    --idiom <name>       Language idiom — repeatable or comma-separated
+    --no-dev-guides      Skip reference files and spec templates
+    --dry-run            Preview without writing files
 
   Examples:
-    npx sdg-agents                                            Interactive mode
-    npx sdg-agents init                                       Interactive build wizard
+    npx sdg-agents
     npx sdg-agents init --flavor vertical-slice --idiom typescript
-    npx sdg-agents init --idiom go,rust --flavor mvc --dry-run
-    npx sdg-agents review                                     Check for rule updates
-    npx sdg-agents clear                                      Remove all generated files
-
-  Documentation: https://github.com/thiagocajadev/sdg-agents
+    npx sdg-agents init --flavor mvc --idiom typescript,python
+    npx sdg-agents init --flavor lite --idiom go --no-dev-guides
+    npx sdg-agents init --flavor mvc --idiom python --dry-run
+    npx sdg-agents add
+    npx sdg-agents clear
 `);
 }
 

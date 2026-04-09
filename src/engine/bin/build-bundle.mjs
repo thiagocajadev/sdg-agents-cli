@@ -1,6 +1,5 @@
 /**
- * Build Bundle — Staff-level CLI Orchestrator
- * Delegates wizard, injection, and assembly to dedicated modules.
+ * Build Bundle — Orchestrates wizard, injection, and assembly.
  */
 
 import { createRequire } from 'node:module';
@@ -43,8 +42,7 @@ const require = createRequire(import.meta.url);
 const packageJson = require('../../../package.json');
 
 /**
- * CLI Orchestrator: The Top-Down Narrative of Bundle Generation
- * Supports both interactive (wizard) and non-interactive (flags) modes.
+ * Entry point for both interactive (wizard) and non-interactive (flags) modes.
  */
 async function run(targetDir = process.cwd(), options = {}) {
   printWelcome();
@@ -57,7 +55,7 @@ async function run(targetDir = process.cwd(), options = {}) {
 }
 
 async function runNonInteractive(targetDir, options) {
-  const { dryRun = false, selections } = options;
+  const { dryRun = false, noDevGuides = false, selections } = options;
 
   const validationResult = validateSelections(selections);
   if (validationResult.isFailure) {
@@ -68,7 +66,11 @@ async function runNonInteractive(targetDir, options) {
   autoSelectVersions(selections);
 
   const state = { step: 'execute', userSelections: selections };
-  const result = await handleFinalExecutionPhase(state, targetDir, { dryRun, skipConfirm: true });
+  const result = await handleFinalExecutionPhase(state, targetDir, {
+    dryRun,
+    noDevGuides,
+    skipConfirm: true,
+  });
   if (result.isFailure) {
     console.log(`\n  ⚠️  ${result.error.message}`);
     process.exit(1);
@@ -112,11 +114,11 @@ async function handleSelectionPhase(state, targetDir) {
 }
 
 async function handleFinalExecutionPhase(state, targetDir, options = {}) {
-  const { dryRun = false, skipConfirm = false } = options;
+  const { dryRun = false, noDevGuides = false, skipConfirm = false } = options;
   const selections = state.userSelections;
 
   if (selections.mode === 'quick') {
-    return runQuickMode(state, targetDir, { dryRun });
+    return runQuickMode(state, targetDir, { dryRun, noDevGuides });
   }
 
   if (dryRun) {
@@ -129,16 +131,16 @@ async function handleFinalExecutionPhase(state, targetDir, options = {}) {
     return runPromptsMode(state, targetDir, selections, { skipConfirm });
   }
 
-  return runAgentsMode(state, targetDir, selections, { skipConfirm });
+  return runAgentsMode(state, targetDir, selections, { skipConfirm, noDevGuides });
 }
 
 // --- Mode Runners (Narrative Orchestration) ---
 
-async function runQuickMode(state, targetDir, { dryRun }) {
+async function runQuickMode(state, targetDir, { dryRun, noDevGuides = false }) {
   if (dryRun) return abortForDryRun(state, targetDir, printQuickDryRun);
 
   printQuickSetupStart();
-  executeQuickPipeline(targetDir, state.userSelections);
+  executeQuickPipeline(targetDir, state.userSelections, { noDevGuides });
 
   printQuickSuccess(targetDir);
   state.step = 'done';
@@ -157,12 +159,17 @@ async function runPromptsMode(state, targetDir, selections, { skipConfirm = fals
   return success();
 }
 
-async function runAgentsMode(state, targetDir, selections, { skipConfirm = false } = {}) {
+async function runAgentsMode(
+  state,
+  targetDir,
+  selections,
+  { skipConfirm = false, noDevGuides = false } = {}
+) {
   const confirmed = skipConfirm || (await printBuildSummary(selections));
   if (!confirmed) return abortExecution(state);
 
   printProjectRoot(targetDir);
-  executeAgentsPipeline(targetDir, selections);
+  executeAgentsPipeline(targetDir, selections, { noDevGuides });
 
   printSuccessAgents(targetDir);
   state.step = 'done';
@@ -183,22 +190,22 @@ function abortExecution(state) {
   return success();
 }
 
-function executeQuickPipeline(targetDir, selections) {
+function executeQuickPipeline(targetDir, selections, { noDevGuides = false } = {}) {
   printStep(1, 5, 'Preparing .ai/ structure...');
   prepareProjectStructure(targetDir);
 
-  printStep(2, 5, 'Injecting Lite AI Rules (JS/TS + Glass)...');
-  injectRulesets(targetDir, selections);
+  printStep(2, 5, 'Injecting rules and dev-guides...');
+  injectRulesets(targetDir, selections, { noDevGuides });
 
-  printStep(3, 5, 'Generating master instructions...');
+  printStep(3, 5, 'Assembling AGENTS.md...');
   const content = buildMasterInstructions(selections);
 
-  printStep(4, 5, 'Writing agent config...');
+  printStep(4, 5, 'Writing agent config and backlog...');
   writeAgentConfig(targetDir, content, getActiveAgents(selections));
   writeBacklogFiles(targetDir, selections);
   writeGitignore(targetDir);
 
-  printStep(5, 5, 'Injecting Lite Prompt Track...');
+  printStep(5, 5, 'Injecting spec templates...');
   injectPrompts(targetDir, selections.track);
   writeManifest(targetDir, selections, packageJson.version);
 }
@@ -216,17 +223,17 @@ function executePromptsPipeline(targetDir, selections) {
   writeGitignore(targetDir);
 }
 
-function executeAgentsPipeline(targetDir, selections) {
+function executeAgentsPipeline(targetDir, selections, { noDevGuides = false } = {}) {
   printStep(1, 5, 'Preparing .ai/ structure...');
   prepareProjectStructure(targetDir);
 
-  printStep(2, 5, 'Injecting rulesets...');
-  injectRulesets(targetDir, selections);
+  printStep(2, 5, 'Injecting rules and dev-guides...');
+  injectRulesets(targetDir, selections, { noDevGuides });
 
-  printStep(3, 5, 'Generating master instructions...');
+  printStep(3, 5, 'Assembling AGENTS.md...');
   const content = buildMasterInstructions(selections);
 
-  printStep(4, 5, 'Writing agent config...');
+  printStep(4, 5, 'Writing agent config and backlog...');
   writeAgentConfig(targetDir, content, getActiveAgents(selections));
   writeBacklogFiles(targetDir, selections);
   writeGitignore(targetDir);

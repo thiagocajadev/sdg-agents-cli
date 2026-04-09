@@ -1,95 +1,114 @@
-# Technical Blueprint: Project Structure & Governance
+# Project Structure
 
-SDG implements a multi-layered governance engine. This document provides a deep dive into the technical role of every directory and artifact injected during initialization.
+This document describes every directory and file installed by `sdg-agents init`.
 
-## The Governance Tree
+## Installed Tree
 
 ```text
 your-project/
-├── .ai-backlog/                 ← Task Memory (gitignored)
-│   ├── context.md               ← Cross-session Project Brief
-│   └── tasks.md                 ← Operational state (TODO/Active/Done)
-└── .ai/                         ← Governance & Automation (Generated)
+├── .ai-backlog/                 ← Session memory (gitignored)
+│   ├── context.md               ← Project brief: stack, decisions, current state
+│   └── tasks.md                 ← Task list (TODO / IN_PROGRESS / DONE)
+└── .ai/                         ← Instruction set (committed)
     ├── skill/
-    │   └── AGENTS.md            ← The Universal Entry Point
-    ├── instructions/            ← The Instruction Engine
-    │   ├── core/                ← Base DNA (Security, Style, Testing)
-    │   │   ├── ui/              ← UI Standards and Architecture
-    │   │   ├── staff-dna.md     ← Philosophical & Technical Laws
-    │   │   └── engineering-standards.md ← Tactical execution (Clean Code, Resilience, DoD)
-    │   ├── flavors/             ← Architectural Patterns (Vertical Slice, MVC)
-    │   ├── idioms/              ← Language-specific Syntax (TS, Python, C#)
-    │   └── competencies/        ← Layer Expertise (Frontend, Backend)
-    ├── commands/                ← Context Charges (/sdg-feat, /sdg-fix)
-    ├── workflows/               ← Governance Protocol (governance.md)
+    │   └── AGENTS.md            ← Main entry point — auto-loaded by agents
+    ├── instructions/
+    │   ├── core/                ← Base rules (security, style, naming, testing)
+    │   │   ├── ui/              ← UI-specific rules (design tokens, component standards)
+    │   │   ├── staff-dna.md     ← Engineering laws (the 7 principles)
+    │   │   └── engineering-standards.md ← Tactical rules (clean code, resilience, DoD)
+    │   ├── flavors/             ← Architectural patterns (vertical-slice, mvc, etc.)
+    │   ├── idioms/              ← Language conventions (typescript, python, go, etc.)
+    │   └── competencies/        ← Layer rules (frontend, backend)
+    ├── commands/                ← Context files for feat/fix/docs cycles
+    ├── workflows/               ← Workflow protocol
     └── prompts/
-        └── dev-tracks/          ← Specification Pipeline (Lite, New Evolution)
+        └── dev-tracks/          ← SPEC phase prompt templates
 ```
 
----
-
-## 💾 .ai-backlog/ (Task Memory Engine)
-
-This directory ensures **Cross-Session Continuity**. It overcomes the "forgetfulness" of AI Agents by persisting the project's state.
-
-- **context.md** → **The Technical Brief**. Injected on the first run, it captures:
-  - **Stack**: Detected languages and frameworks.
-  - **Patterns**: Identified architectural choices.
-  - **Decisions**: A running log of technical trade-offs.
-- **tasks.md** → **The Operational Ledger**. A numbered list of atomic tasks.
-  - `[TODO]` → Pending work.
-  - `[IN_PROGRESS]` → The current focus (prevents context drift).
-  - `[DONE]` → Completed items (for historical reference).
+Agent-specific root files are also written (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, etc.) based on which agents are detected or selected during init.
 
 ---
 
-## 🛡️ .ai/ (The Governance Engine)
+## .ai-backlog/
 
-### 1. The Core DNA (`instructions/core/`)
+Gitignored. Persists project state across sessions so any agent — in any session — can pick up where the last one stopped.
 
-These are the non-negotiable standards of the project.
+**context.md** — written on first run, maintained by the agent at END of each cycle. Captures:
 
-- **staff-dna.md**: Defines the **Universal Engineering Laws** (Hardening, Resilience, Cascade, Visual Excellence).
-- **engineering-standards.md**: **The project's most critical tactical guide**. It defines strict rules for Clean Code, Resilience Patterns, the Result Pattern, and the final Definition of Done (DoD).
-- **writing-soul.md**: Enforces high-density, "AI-slop free" communication.
-- **security-pipeline.md**: Prevents the leakage of PII and environment variable templates.
-- **code-style.md**: Mandates the **Narrative Cascade** and **Vertical Scansion**.
+- Stack and frameworks detected
+- Architectural decisions and their rationale
+- Current objective (`## Now`)
+- Engineering insights from past cycles
 
-### 2. Architectural Flavors (`instructions/flavors/`)
+**tasks.md** — the task list. Each task has one of three states:
 
-Flavors define the **Path of Data**. Selecting a flavor (e.g., `vertical-slice`) injects specific rules about where logic belongs (UseCases vs Services vs Controllers).
+- `[TODO]` — pending
+- `[IN_PROGRESS]` — the active task (only one at a time)
+- `[DONE]` — completed (kept for reference)
 
-### 3. Language Idioms (`instructions/idioms/`)
-
-Specific best practices for the chosen stack. For example, `idioms/typescript/patterns.md` ensures the agent uses modern TS features (Enums, Types vs Interfaces) correctly.
-
-### 4. Cycle Commands (`commands/`)
-
-SDG uses **Context Charges** to load relevant instructions only when needed:
-
-- `/sdg-feat` → Loads expansion rules and domain modeling.
-- `/sdg-fix` → Loads Root-Cause Analysis (RCA) and regression testing rules.
-- `/sdg-docs` → Loads technical accuracy and structural rules.
-
-### 5. Specification Pipeline (`prompts/dev-tracks/`)
-
-This is the **Developer's Toolkit**. It contains nested prompt tracks that help you author the **SPEC** phase:
-
-- **00-lite-mode**: For fast, single-file iterations.
-- **01-new-evolution**: For complex, multi-layer features.
-- **02-legacy-modernization**: For refactoring old code with zero regression.
+The agent reads this at session start before accepting new work.
 
 ---
 
-## 🔄 Artifact Lifecycle
+## .ai/ — Instruction Set
 
-Every file in the `.ai/` structure is used strategically during the **5-Phase Lifecycle**:
+### skill/AGENTS.md
 
-1. **SPEC** → Uses `prompts/dev-tracks/` templates.
-2. **PLAN** → Syncs with `.ai-backlog/tasks.md`.
-3. **CODE** → Validates against `core/code-style.md` and `idioms/`.
-4. **TEST** → Follows `core/testing-principles.md`.
-5. **END** → Updates `context.md` and generates the **Semantic Commit**.
+The main entry point. This file is referenced by `CLAUDE.md` (and equivalent files for other agents) so it loads automatically at session start. It contains the working protocol and links to all other instruction files.
 
-> [!IMPORTANT]
-> **Single Source of Truth**: This structure ensures that both **Developers and Agents** share the same mental model of the project, eliminating "context drift" and technical debt.
+### instructions/core/
+
+Non-negotiable rules that apply to every project, regardless of stack or flavor:
+
+| File                       | Purpose                                                        |
+| :------------------------- | :------------------------------------------------------------- |
+| `staff-dna.md`             | The 7 engineering laws (security, resilience, cascade, etc.)   |
+| `engineering-standards.md` | Tactical clean code rules and definition of done               |
+| `code-style.md`            | Narrative Cascade and Vertical Scansion conventions            |
+| `naming.md`                | Naming rules (no abbreviations, banned verbs, etc.)            |
+| `writing-soul.md`          | Communication rules (no filler, no AI-isms, technical density) |
+| `security-pipeline.md`     | Prevents leaking PII and environment variable templates        |
+| `testing-principles.md`    | Test structure and regression requirements                     |
+
+### instructions/flavors/
+
+Rules for the project's architectural pattern. Defines where logic belongs — for example, whether business logic lives in UseCases, Services, or Controllers.
+
+### instructions/idioms/
+
+Language-specific conventions. Each idiom file covers patterns, anti-patterns, and idiomatic usage for that stack (TypeScript, Python, Go, etc.).
+
+### instructions/competencies/
+
+Layer-specific rules for frontend and backend work — data flow, component boundaries, API contract rules.
+
+### commands/
+
+Context files loaded on demand when a specific cycle is triggered:
+
+- `sdg-feat.md` — loaded when the agent enters a `feat:` cycle
+- `sdg-fix.md` — loaded when the agent enters a `fix:` cycle
+- `sdg-docs.md` — loaded when the agent enters a `docs:` cycle
+
+These files are not loaded on session start — only when the relevant cycle begins.
+
+### prompts/dev-tracks/
+
+Prompt templates for authoring the SPEC phase:
+
+- `00-lite-mode` — single-file or isolated changes
+- `01-new-evolution` — multi-layer features
+- `02-legacy-modernization` — refactoring existing code
+
+---
+
+## How the Files Are Used Per Phase
+
+| Phase | Files read                                                                   |
+| :---- | :--------------------------------------------------------------------------- |
+| SPEC  | `prompts/dev-tracks/`, `commands/sdg-feat.md` (or fix/docs)                  |
+| PLAN  | `.ai-backlog/tasks.md`                                                       |
+| CODE  | `core/code-style.md`, `core/engineering-standards.md`, `idioms/`, `flavors/` |
+| TEST  | `core/testing-principles.md`                                                 |
+| END   | `.ai-backlog/context.md`, `.ai-backlog/tasks.md`                             |

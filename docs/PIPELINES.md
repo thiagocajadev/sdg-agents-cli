@@ -1,44 +1,66 @@
-# Architectural Pipelines (Flavors)
+# Architectural Pipelines
 
-SDG implements standardized architectural flows based on your chosen **Flavor**. These patterns represent the data and execution path of each architecture, ensuring consistency across the codebase.
+Each flavor defines the data and execution path the agent uses when reading or writing code. Selecting a flavor tells the agent where logic belongs — no ambiguity about whether something is a UseCase, a Service, or a Controller.
 
-## Standard Patterns
+## Flavors
 
-### ⚡ Vertical Slice (Feature-Driven)
+### ⚡ Vertical Slice
 
-Focuses on grouping code by feature rather than layer. Each slice is an independent vertical of the application.
+Groups code by feature rather than layer. Each feature is an independent vertical with its own endpoint, use case, and data access.
 
 `Request` → `Endpoint` → `UseCase` → `Domain` → `Repository` → `Response`
 
-### 🏗️ MVC (Classic Layered)
-
-The traditional Model-View-Controller approach, emphasizing clear separation between UI, logic, and data.
-
-`Request` → `Controller` → `Service` → `Domain` → `Repository` → `Response`
-
-### 🌐 Frontend (Client-Side Standard)
-
-Standard flow for modern SPA/Client applications.
-
-`Request` → `UI (Action)` → `ApiClient` → `Mapper` → `UI (Response)`
-
-### 🎨 UI Component (Creation Flow)
-
-Specific patterns for building reusable UI atomic components.
-
-`UI` → `ViewModel` → `State` → `Effects`
-
-### 🕰️ Legacy (Refactoring Standard)
-
-A specialized flow designed to safely bridge legacy code towards cleaner patterns.
-
-`UI (Shell)` → `Service` → `Repository` → `UI (Response DTO)`
+Use when: monorepos, domain-heavy APIs, or any project where features evolve independently.
 
 ---
 
-## Why Use Flavors?
+### 🏗️ MVC
 
-Using a specific Flavor ensures that AI Agents understand the **intent** of every file they create or modify. It eliminates ambiguity regarding where a piece of logic belongs, resulting in a codebase that reads like a unified narrative.
+Classic layered architecture with clear separation between Controller, Service, and Domain.
+
+`Request` → `Controller` → `Service` → `Domain` → `Repository` → `Response`
+
+Use when: standard REST services where the layered boundary is the primary organizational unit.
+
+---
+
+### 🕰️ Legacy
+
+A bridging pattern for migrating existing codebases without full rewrites. New logic wraps the old through a service layer, keeping regressions contained.
+
+`UI (Shell)` → `Service` → `Repository` → `UI (Response DTO)`
+
+Use when: refactoring old codebases incrementally, keeping the existing entry points intact.
+
+---
+
+### 🪶 Lite
+
+No layers, no abstractions. Logic lives directly at the point of interaction — a single file or flat module. Engineering rules still apply; structural ceremony does not.
+
+`Input` → `Handler` → `Output`
+
+Use when: CLIs, scripts, utilities, or small tools where adding layers would be overhead with no benefit.
+
+---
+
+## Frontend Reference Patterns
+
+These are not CLI flavor options. They describe data flow within the UI layer — used as reference by the agent when working on frontend code inside any project, regardless of the top-level flavor.
+
+### 🌐 Client-Side Flow
+
+Standard data path for modern SPAs and client applications.
+
+`Request` → `UI (Action)` → `ApiClient` → `Mapper` → `UI (Response)`
+
+### 🎨 UI Component Flow
+
+Data path for building reusable UI components with local state.
+
+`UI` → `ViewModel` → `State` → `Effects`
+
+---
 
 > [!NOTE]
-> You can choose your flavor during `npx sdg-agents` initialization or specify it via the `--flavor` flag.
+> Select your flavor during `npx sdg-agents` initialization or with the `--flavor` flag. You can see all options in the [Quick Reference](CHEATSHEET.md).

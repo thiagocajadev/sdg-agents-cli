@@ -1,142 +1,158 @@
 <div align="center">
-  <img src="packages/cli/src/assets/img/sdg-agents-icon-light.svg" alt="SDG Icon" width="480" height="480" style="border-radius: 1rem; opacity: 0.95;">
-  <h1 align="center">Spec Driven Guide</h1>
+  <img src="src/assets/img/sdg-agents-icon-light.svg" alt="SDG Agents" width="160" height="160" style="border-radius: 1rem;">
+  <h1 align="center">sdg-agents</h1>
   <p align="center">
-    Your guide to Spec-Driven Development with AI Agents<br>
+    A CLI that installs a structured instruction set for AI agents into your project.<br>
     <a href="docs/README.pt-BR.md">Versão em Português (Brasil)</a>
   </p>
-  <a href="https://github.com/thiagocajadev/sdg-agents/actions/workflows/ci.yml"><img src="https://github.com/thiagocajadev/sdg-agents/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square&logo=nodedotjs" alt="Node" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D22-brightgreen?style=flat-square&logo=nodedotjs" alt="Node" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-ISC-blue?style=flat-square" alt="License: ISC" /></a>
-  <img src="https://img.shields.io/badge/idioms-14%20stacks-purple?style=flat-square" alt="Idioms" />
-  <img src="https://img.shields.io/badge/agents-5%20supported-orange?style=flat-square" alt="Agents" />
 </div>
-<p align="center"><b><a href="https://sdg-agents.vercel.app">Try the Web Prompt Generator (Preview)</a></b></p>
+
 <br>
 
-> **SDG** is a **Standardized Architectural Governance** framework for AI-native repositories. It serves as a guide for both **AI Assistants** and **Developers** to work under strict process orientation. By bridging fundamental engineering concepts with applied intelligence, SDG ensures Staff-level execution through integrated instructions and automated cycles.
-> **"Balance is the key."**
+`sdg-agents` installs a set of markdown instruction files into your project. AI agents (Claude Code, Cursor, Windsurf, Copilot, Codex, and others) read these files and follow the defined protocol for every task.
 
-<p align="center">
-  <kbd><img src="packages/cli/src/assets/sdg-agents-menu.png" alt="Spec Driven Guide CLI in action" /></kbd>
-</p>
+> [!NOTE]
+> If your agent does not pick up the rules automatically, reference `.ai/skill/AGENTS.md` at the start of the session.
+
+The instruction set covers:
+
+- **Working protocol**: a 5-phase cycle (SPEC → PLAN → CODE → TEST → END) that structures how the agent handles any task
+- **Engineering rules**: naming, code style, clean code standards, security boundaries
+- **Language patterns**: idiomatic conventions for your specific stack
+- **Architectural guidance**: rules for your project's structural pattern (vertical slice, MVC, etc.)
+- **Session memory**: a `.ai-backlog/` folder that persists context and task state across sessions
 
 ---
 
-## Quick Start (CLI)
-
-Inject Staff-level engineering rules and prompts directly into your project:
+## Quick Start
 
 ```bash
 npx sdg-agents
 ```
 
-### Quick Reference
-
-For a complete map of all available CLI commands and AI instruction triggers, check the [**Quick Reference Cheat Sheet (docs/CHEATSHEET.md)**](docs/CHEATSHEET.md).
-
-### Standard Modes
-
-1. **SDG - Agents**: Injects instructions for AI Agents (Claude, Cursor, Windsurf, etc.).
-2. **SDG - Prompts**: Injects **Specification Pipeline** templates for Developers.
-3. **Quick Setup**: Standard choice. Injects both Agent rules and Prompts in one go.
-
-### Generated Structure
-
-After initialization, your project receives a standardized governance structure:
-
-```
-├── .ai/               ← Governance (instructions, commands, prompts)
-└── .ai-backlog/       ← Task Memory (gitignored context & tasks)
-```
-
-> [!TIP]
-> **Technical Deep Dive**: For a detailed breakdown of each folder, artifact role, and the **Specification Pipeline**, check our [**Project Structure Guide (docs/PROJECT-STRUCTURE.md)**](docs/PROJECT-STRUCTURE.md).
-
-### IDE Integration
-
-SDG auto-loads rules for **Claude Code** (`CLAUDE.md`), **Antigravity (Gemini)**, **Codex**, **Copilot**, **Cursor** (`.mdc`), **Windsurf** (`.windsurfrules`), and more.
-
----
-
-## Agent-Led Engineering
-
-Instead of writing every line yourself, you set the direction and let the Agent handle execution. It reads the codebase, proposes a structured plan, writes the code, and runs the tests, stopping at the key checkpoints for your approval before moving on.
-
-You stay in control of the decisions that need real judgment. The Agent handles the rest.
-
----
-
-## Architectural Flavors & Multi-Stack
-
-During initialization, you select the **Architectural Flavor** that best fits your project. This ensures the AI Agent understands the data flow and structural rules of your codebase.
-
-`Vertical Slice` → Feature-driven development with independent vertical verticals.  
-`MVC` → Classic layered architecture (Model-View-Controller).  
-`Frontend` → Standard client-side data flow for modern SPAs.  
-`UI Component` → Atomic design and state-driven component flows.  
-`Legacy` → Specialized refactoring patterns for bridging old code.
-
-> [!TIP]
-> **View Architectural Pipelines**: For a detailed breakdown of each flavor's data path, check the [**Architectural Pipelines (docs/PIPELINES.md)**](docs/PIPELINES.md).
-
-SDG supports **14+ stacks** out of the box, including:  
-`C#` · `TypeScript` · `JavaScript` · `Python` · `Go` · `Rust` · `Java` · `Kotlin` · `Swift` · `Flutter` · `SQL` · `VB.NET`
-
----
-
-## The 5-Phase Spec-Driven Lifecycle
-
-Every task follows a high-discipline cycle to ensure architectural alignment and zero technical debt:
-
-| Phase    | Goal         | Key Outcome                                                         |
-| :------- | :----------- | :------------------------------------------------------------------ |
-| **SPEC** | Contract     | Formal request spec & checklist (using **Specification Pipeline**). |
-| **PLAN** | Strategy     | Numbered plan approved and written to `.ai-backlog/tasks.md`.       |
-| **CODE** | Execution    | Clean implementation following the approved plan.                   |
-| **TEST** | Verification | All checklist items passed (Fix loop if needed).                    |
-| **END**  | Delivery     | Changelog updated, tasks cleared, context synced.                   |
-
-> [!TIP]
-> **Staff-Level Flow**: The Agent stops for **Developer approval** at every critical junction (Spec and Plan).
-> [**Read the Full Spec-Driven Development Guide**](packages/cli/src/assets/dev-guides/spec-driven-dev-guide.md).
-
----
-
-## Governance & The SDG Constitution
-
-The core of SDG is built on the [**Standard Engineering Laws**](docs/CONSTITUTION.md), ensuring every change is hardened and resilient:
-
-`Hardening` · `Resilience` · `The Cascade` · `Visual Excellence` · `Boundaries` · `Reflection` · `The Writing Soul`
-
-### Technical Blueprints
-
-- [**SDLC (Developer's Architectural Trail)**](packages/cli/src/assets/dev-guides/software-development-lifecycle-sdlc.md) → _A handbook for developers to monitor and audit large evolutions._
-- [**The SDG Constitution (Engineering Laws)**](docs/CONSTITUTION.md) → _The philosophical foundation and non-negotiable standards of the project._
-- [**Technical Project Structure**](docs/PROJECT-STRUCTURE.md) → _Detailed breakdown of Governance, Task Memory, and local paths._
-
----
-
-## Advanced Maintenance
+The interactive wizard guides you through selecting an architectural flavor and one or more language idioms. For non-interactive use:
 
 ```bash
-npx sdg-agents review    # Compare local rules vs source
-npx sdg-agents sync      # Update patterns via web
-npx sdg-agents clear     # Removes the .ai/ folder (Governance)
+# TypeScript + Vertical Slice
+npx sdg-agents init --flavor vertical-slice --idiom typescript
+
+# Multiple idioms
+npx sdg-agents init --flavor mvc --idiom typescript,python
+
+# Preview without writing files
+npx sdg-agents init --flavor mvc --idiom python --dry-run
 ```
 
 ---
 
-## Project State
+## What Gets Installed
 
-- [**Roadmap**](docs/ROADMAP.md) → Future vision and strategic milestones.
-- [**CHANGELOG**](CHANGELOG.md) → Full technical history and past releases.
+After running `init`, your project receives:
+
+```
+your-project/
+├── .ai/                         ← Instruction set (committed)
+│   ├── skill/
+│   │   └── AGENTS.md            ← Main entry point — auto-loaded by agents
+│   ├── instructions/
+│   │   ├── core/                ← Engineering rules (style, naming, security, testing)
+│   │   ├── flavors/             ← Architectural patterns (vertical-slice, mvc, etc.)
+│   │   ├── idioms/              ← Language-specific conventions (TS, Python, Go, etc.)
+│   │   └── competencies/        ← Layer-specific rules (frontend, backend)
+│   ├── commands/                ← Context files for feat/fix/docs cycles
+│   └── dev-guides/              ← Reference files, spec templates, and guides
+└── .ai-backlog/                 ← Session memory (gitignored)
+    ├── context.md               ← Project brief, decisions, current state
+    └── tasks.md                 ← Task list (TODO / IN_PROGRESS / DONE)
+```
+
+`dev-guides/` is always included. It contains the 5-phase cycle guide, the internal decision-gate flow, SDLC reference, UI prompt guide, and spec templates (`prompt-tracks/`) for authoring the SPEC phase of any task.
+
+Agent-specific entry files (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, etc.) are also written to the project root.
+
+> For a detailed breakdown of each file's role, see [Project Structure](docs/PROJECT-STRUCTURE.md).
+
+---
+
+## How the Protocol Works
+
+When you prefix a message to the agent, it enters the corresponding cycle:
+
+| Trigger               | Cycle   | What happens                                              |
+| :-------------------- | :------ | :-------------------------------------------------------- |
+| `feat: <description>` | Feature | Agent runs SPEC → PLAN → CODE → TEST → END                |
+| `fix: <description>`  | Fix     | Agent runs SPEC → PLAN → CODE → TEST → END with RCA focus |
+| `docs: <description>` | Docs    | Agent updates changelogs, ADRs, or specs                  |
+| No prefix             | Direct  | Agent makes the change immediately (trivial edits only)   |
+
+The agent **stops and waits for your approval** at SPEC and PLAN before writing any code.
+
+```
+SPEC  →  PLAN  →  CODE  →  TEST  →  END
+  ↑           ↑
+  Wait        Wait        (approval required)
+```
+
+For a detailed walkthrough of each phase and its rules, see [Spec-Driven Development Guide](src/assets/dev-guides/spec-driven-dev-guide.md).
+For a visual breakdown of the internal decision gates and loops, see [Agent Deep-Flow](src/assets/dev-guides/agent-deep-flow.md).
+
+---
+
+## Architectural Flavors
+
+Select the flavor that matches your project's structure:
+
+| Flavor           | Pattern                                 | Use when                     |
+| :--------------- | :-------------------------------------- | :--------------------------- |
+| `vertical-slice` | Feature-driven vertical cuts            | Monorepo or domain-heavy API |
+| `mvc`            | Classic layered (Model-View-Controller) | Standard REST service        |
+| `lite`           | Minimal scaffold                        | Scripts, CLIs, utilities     |
+| `legacy`         | Refactor-safe bridge patterns           | Migrating existing codebases |
+
+For the data flow diagram of each flavor, see [Architectural Pipelines](docs/PIPELINES.md).
+
+---
+
+## Language Idioms
+
+Install language-specific patterns alongside the protocol:
+
+`typescript` · `javascript` · `python` · `csharp` · `java` · `kotlin` · `go` · `rust` · `swift` · `flutter` · `sql` · `vbnet`
+
+```bash
+# Add an idiom to an existing project
+npx sdg-agents add
+```
+
+---
+
+## Maintenance
+
+```bash
+npx sdg-agents review    # Detect drift between local rules and source
+npx sdg-agents sync      # Update rulesets from source
+npx sdg-agents update    # Refresh the LTS version registry
+npx sdg-agents clear     # Remove the .ai/ folder
+```
+
+---
+
+## Reference
+
+- [Quick Reference (CHEATSHEET)](docs/CHEATSHEET.md) — all CLI flags and agent triggers
+- [Project Structure](docs/PROJECT-STRUCTURE.md) — detailed breakdown of every generated file
+- [Architectural Pipelines](docs/PIPELINES.md) — data flow diagrams for each flavor
+- [Engineering Laws (CONSTITUTION)](docs/CONSTITUTION.md) — the principles behind the rules
+- [Roadmap](docs/ROADMAP.md) — planned work
+- [Changelog](CHANGELOG.md) — release history
 
 ---
 
 > [!WARNING]
-> **Experimental Project**: This project is in its early stages. Use it with care and adapt the rules to your requirements.
+> This project is in early development. Review and adjust the installed rules to fit your team's standards before relying on them.
 
-SDG is in constant evolution. There is no 100% perfect solution, our goal is to continuously improve the development process.
+_Balance is the key._
 
-Feel free to contribute, fork, and share!
+SDG is in constant evolution — there is no perfect solution, only continuous improvement. Feel free to contribute, fork, and share.

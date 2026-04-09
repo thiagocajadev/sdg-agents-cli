@@ -1,50 +1,53 @@
-# The SDG Constitution: The 7 Laws of Engineering
+# The SDG Constitution: 7 Engineering Laws
 
-This document defines the philosophical and technical foundation of the **Spec-Driven Guide**. 
+This document defines the philosophical and technical foundation of `sdg-agents`.
 
-## The Collaboration Model: Agent-Led Engineering
+## How the Model Works
 
-We operate under an **Agent-Led, Developer-Orchestrated** symbiosis. The **AI Agent** is empowered to propose high-density, Staff-level technical solutions autonomously, while the **Developer** acts as the Orchestrator, ensuring that every proposal aligns with the project's strategic intent and domain context through active supervision (**Follow-up**).
+The developer sets direction and approves decisions. The agent handles execution — reading the codebase, proposing a structured plan, writing the code, and running the tests. The agent stops at SPEC and PLAN for explicit approval before proceeding.
 
-While our AI Agents follow these rules through strict technical instructions, this manifesto serves as the mental model for the **Developers** who orchestrate them.
+This document is the mental model for developers. The technical rules the agent follows are in [`.ai/instructions/core/staff-dna.md`](../src/assets/instructions/core/staff-dna.md).
 
 ---
 
 ## 1. Hardening (Security Execution)
 
 **Security is not a layer; it is the foundation.**
-We prioritize configuration isolation and boundary-level safety. We prohibit the use of environment templates (`.env.example`) to prevent information disclosure, mandating a strict "Configuration Contract" defined during the specification phase.
+
+Configuration isolation is mandatory. Environment templates (`.env.example`) are prohibited — they leak information. All required configuration is declared as a "Configuration Contract" during the SPEC phase, with abstract key names only.
 
 ## 2. Resilience (Fault Tolerance)
 
 **Software must withstand repetition and failure.**
-Every operation involving side-effects must be idempotent. We design for defensive dominance, ensuring that system stability remains intact even when external dependencies fail. Graceful degradation is a mandatory standard, not an option.
+
+Every operation with side-effects must be idempotent. Design for graceful degradation — system stability cannot depend on external dependencies being available.
 
 ## 3. The Cascade (Orchestration Scansion)
 
 **Code is a technical narrative.**
-We follow the **Stepdown Rule**: entry points are defined at the top, revealing high-level logic first, with implementation details following below. Expressive naming is our primary documentation. If a comment is required to explain _what_ the code does, the name is wrong.
+
+Follow the Stepdown Rule: entry points at the top, high-level logic first, implementation details below. Expressive naming is primary documentation. If a comment is needed to explain _what_ the code does, the name is wrong.
 
 ## 4. Visual Excellence (Consistency)
 
 **Aesthetics are a signal of quality.**
-We maintain rigorous adherence to semantic design tokens and high-contrast typography. Professional interfaces demand visual consistency and attention to micro-interactions to foster trust and technical clarity.
+
+Semantic design tokens and high-contrast typography are not optional. Visual consistency and attention to micro-interactions are part of the definition of done for interface work.
 
 ## 5. Boundaries (Scope Integrity)
 
 **Protect the state through atomic focus.**
-Modifications are strictly limited to the files and functions defined in the current sprint. We enforce a **Circuit Breaker** protocol: the agent must proactively stop and report if execution enters a loop (3+ repeated errors), stalls without progress, or hits non-bypassable access barriers. We prevent cascading regressions and resource exhaustion by maintaining hard boundaries and definitive termination points.
+
+Changes are limited to files and functions defined in the current task. The Circuit Breaker rule applies: the agent stops and reports if it hits the same error 3 times, makes no progress in 3 turns, or encounters a non-bypassable access barrier.
 
 ## 6. Reflection (Systematic Reasoning)
 
 **Reason first, act later.**
-We mandate a systematic architecture evaluation before any proposal. We perform deep reasoning traces to validate approaches against domain rules and architectural standards, ensuring that every line of code serves a deliberate purpose.
+
+The agent evaluates architecture before proposing anything. Every line of code must serve a deliberate purpose that traces back to the approved SPEC.
 
 ## 7. The Writing Soul (Technical Density)
 
 **High signal, zero noise.**
-We communicate with technical density and directness. We eliminate "AI-isms" and promotional fillers, focusing entirely on authoritative, implementation-ready insights. Our goal is clarity through precision.
 
----
-
-> **Developer-Focused Execution**: While this manifesto is for Developers, the technical implementation followed by our AI Agents is located in [**`.ai/instructions/core/staff-dna.md`**](../packages/cli/src/assets/instructions/core/staff-dna.md).
+Technical communication is direct and precise. No filler phrases, no summaries of what was just done, no "AI-isms". Output only what the developer needs to make a decision or understand an outcome.

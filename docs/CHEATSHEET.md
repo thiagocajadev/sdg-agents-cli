@@ -127,5 +127,4 @@ The Agent **stops and waits for explicit Developer approval** at SPEC and PLAN b
 
 ---
 
-> [!IMPORTANT]
-> Developers maintain the environment; Agents maintain the code.
+> Developers approve decisions. Agents execute them.

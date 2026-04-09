@@ -36,7 +36,7 @@ The cycle follows five mandatory phases: **SPEC → PLAN → CODE → TEST → E
   - **Task Decomposition**: Split complex tasks into sub-tasks to maintain vertical density and prevent context exhaustion.
   - **Triviality Exception**: Skip only for single-file, self-contained changes (e.g., fixing a label or constant).
 - **Mandate**: The agent must halt for explicit Developer approval of the Plan.
-- **Reasoning Exception**: Autonomous models with built-in reasoning may proceed to Code after validating that the plan reflects the project's Staff DNA.
+- **Reasoning Exception**: Autonomous models with built-in reasoning may proceed to Code after validating that the plan reflects the project's engineering rules.
 
 ---
 
@@ -79,4 +79,4 @@ The cycle follows five mandatory phases: **SPEC → PLAN → CODE → TEST → E
 ---
 
 > [!IMPORTANT]
-> This lifecycle is the core of **Architectural Governance**. It prevents technical drift and ensures architectural alignment across the entire codebase.
+> The agent only writes code after SPEC and PLAN are approved. This is the mechanism that keeps changes traceable to an explicit decision, not a guess.

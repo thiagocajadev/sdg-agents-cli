@@ -1,142 +1,156 @@
 <div align="center">
-  <img src="../packages/cli/src/assets/img/sdg-agents-icon-light.svg" alt="SDG Icon" width="480" height="480" style="border-radius: 1rem; opacity: 0.95;">
-  <h1 align="center">Spec Driven Guide</h1>
+  <img src="../src/assets/img/sdg-agents-icon-light.svg" alt="SDG Agents" width="160" height="160" style="border-radius: 1rem;">
+  <h1 align="center">sdg-agents</h1>
   <p align="center">
-    Seu guia para Desenvolvimento Baseado em Especificações com Agentes de IA<br>
+    Um CLI que instala um conjunto de instruções para agentes de IA no seu projeto.<br>
     <a href="../README.md">Read in English</a>
   </p>
-  <a href="https://github.com/thiagocajadev/sdg-agents/actions/workflows/ci.yml"><img src="https://github.com/thiagocajadev/sdg-agents/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square&logo=nodedotjs" alt="Node" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D22-brightgreen?style=flat-square&logo=nodedotjs" alt="Node" /></a>
   <a href="../LICENSE"><img src="https://img.shields.io/badge/license-ISC-blue?style=flat-square" alt="License: ISC" /></a>
-  <img src="https://img.shields.io/badge/idiomas-14%20stacks-purple?style=flat-square" alt="Idiomas" />
-  <img src="https://img.shields.io/badge/agentes-5%20suportados-orange?style=flat-square" alt="Agentes" />
 </div>
-<p align="center"><b><a href="https://sdg-agents.vercel.app">Teste o Preview no Gerador de Prompts Web</a></b></p>
+
 <br>
 
-> **SDG** é um framework de **Governança Arquitetural Padronizada** para repositórios nativos em IA. Ele atua como um guia para que ambos, **Agentes de IA** e **Desenvolvedores**, trabalhem sob uma orientação rigorosa de processos. Ao distinguir conceitos fundamentais de engenharia da inteligência aplicada na automação, o SDG garante uma execução de nível Staff através de instruções integradas e ciclos automatizados.
-> **"O equilíbrio é a chave."**
+`sdg-agents` instala um conjunto de arquivos de instrução em markdown no seu projeto. Agentes de IA (Claude Code, Cursor, Windsurf, Copilot, Codex e outros) leem esses arquivos e seguem o protocolo definido em cada tarefa.
 
-<p align="center">
-  <kbd><img src="../packages/cli/src/assets/sdg-agents-menu.png" alt="Spec Driven Guide CLI em ação" /></kbd>
-</p>
+> [!NOTE]
+> Se o seu agente não carregar as regras automaticamente, referencie `.ai/skill/AGENTS.md` no início da sessão.
+
+O conjunto de instruções cobre:
+
+- **Protocolo de trabalho**: um ciclo de 5 fases (SPEC → PLAN → CODE → TEST → END) que estrutura como o agente conduz qualquer tarefa
+- **Regras de engenharia**: nomenclatura, estilo de código, padrões de clean code, limites de segurança
+- **Padrões de linguagem**: convenções idiomáticas para o seu stack específico
+- **Guia arquitetural**: regras para o padrão estrutural do projeto (vertical slice, MVC, etc.)
+- **Memória de sessão**: uma pasta `.ai-backlog/` que persiste contexto e estado de tarefas entre sessões
 
 ---
 
-## Início Rápido (CLI)
-
-Injete regras de engenharia e prompts diretamente no seu projeto:
+## Início Rápido
 
 ```bash
 npx sdg-agents
 ```
 
-### Referência Rápida
-
-Para um mapa completo de todos os comandos CLI e triggers de instrução para IA, consulte o [**Cheat Sheet de Referência Rápida (docs/CHEATSHEET.md)**](CHEATSHEET.md).
-
-### Modos Padrão
-
-1. **SDG - Agents**: Injeta instruções para Agentes de IA (Claude, Cursor, Windsurf, etc.).
-2. **SDG - Prompts**: Injeta os templates da **Esteira de Especificações** para Desenvolvedores.
-3. **Quick Setup**: Escolha padrão. Injeta tanto as regras para Agentes quanto os Prompts de uma só vez.
-
-### Estrutura Gerada
-
-Após a inicialização, seu projeto recebe uma estrutura de **Governança Técnica** padronizada:
-
-```
-├── .ai/               ← Governança (instruções, comandos, prompts)
-└── .ai-backlog/       ← Memória de Trabalho (contexto e tarefas gitignored)
-```
-
-> [!TIP]
-> **Mergulho Técnico Profundo**: Para um detalhamento completo de cada pasta, papel dos artefatos e da **Esteira de Especificações**, consulte nosso [**Guia de Estrutura do Projeto (PROJECT-STRUCTURE.md)**](PROJECT-STRUCTURE.md).
-
-### Integração com IDEs
-
-O SDG carrega automaticamente as regras para **Claude Code** (`CLAUDE.md`), **Antigravity (Gemini)**, **Codex**, **Copilot**, **Cursor** (`.mdc`), **Windsurf** (`.windsurfrules`) e outros.
-
----
-
-## Engenharia Liderada por Agente
-
-Em vez de escrever cada linha você mesmo, você define a direção e deixa o Agente cuidar da execução. Ele lê a base de código, propõe um plano estruturado, escreve o código e roda os testes, parando nos pontos certos para a sua aprovação antes de continuar.
-
-Você mantém o controle das decisões que exigem julgamento real. O Agente cuida do resto.
-
----
-
-## Sabores Arquiteturais e Multi-Stack
-
-Durante a inicialização, você escolhe o **Sabor Arquitetural** (Flavor) que melhor se adapta ao seu projeto. Isso garante que o Agente de IA entenda o fluxo dos dados e as regras estruturais da sua base de código.
-
-`Vertical Slice` → Desenvolvimento orientado a funcionalidades com fatias verticais independentes.  
-`MVC` → Arquitetura clássica em camadas (Model-View-Controller).  
-`Frontend` → Fluxo de dados cliente padrão para SPAs modernas.  
-`UI Component` → Design atômico e fluxos de componentes baseados em estado.  
-`Legacy` → Padrões de refatoração especializados para migração de código antigo.
-
-> [!TIP]
-> **Ver Pipelines Arquiteturais**: Para um detalhamento completo do caminho de dados de cada sabor, consulte o guia de [**Pipelines Arquiteturais (PIPELINES.md)**](PIPELINES.md).
-
-O SDG suporta **14+ stacks** nativamente, incluindo:  
-`C#` · `TypeScript` · `JavaScript` · `Python` · `Go` · `Rust` · `Java` · `Kotlin` · `Swift` · `Flutter` · `SQL` · `VB.NET`
-
----
-
-## O Ciclo Spec-Driven de 5 Fases
-
-Cada tarefa segue um ciclo de alta disciplina para garantir o alinhamento arquitetural e dívida técnica zero:
-
-| Fase     | Objetivo    | Resultado Principal                                                        |
-| :------- | :---------- | :------------------------------------------------------------------------- |
-| **SPEC** | Contrato    | Especificação formal & checklist (usando a **Esteira de Especificações**). |
-| **PLAN** | Estratégia  | Plano numerado aprovado e escrito em `.ai-backlog/tasks.md`.               |
-| **CODE** | Execução    | Implementação limpa seguindo o plano aprovado.                             |
-| **TEST** | Verificação | Todos os itens do checklist passados (Loop de correção se preciso).        |
-| **END**  | Entrega     | Changelog atualizado, tarefas limpas, contexto sincronizado.               |
-
-> [!TIP]
-> **Fluxo Nível Staff**: O Agente para para **aprovação do desenvolvedor** em cada ponto crítico (Spec e Plano).
-> [**Leia o Guia Completo de Desenvolvimento Spec-Driven**](../packages/cli/src/assets/dev-guides/spec-driven-dev-guide.md).
-
----
-
-## As Leis da Governança Técnica
-
-A Governança do SDG não é apenas sobre pastas; trata-se de princípios inegociáveis que garantem a qualidade de nível Staff:
-
-`Hardening` · `Resiliência` · `A Cascata` · `Excelência Visual` · `Fronteiras` · `Reflexão` · `The Writing Soul`
-
-### Exploração Técnica
-
-- [**SDLC (Trilha Arquitetural para Desenvolvedores)**](../packages/cli/src/assets/dev-guides/software-development-lifecycle-sdlc.md) → _Manual para acompanhamento e auditoria do desenvolvedor em grandes evoluções._
-- [**A Constituição SDG (Leis de Engenharia)**](CONSTITUTION.md) → _A fundação filosófica e os padrões inegociáveis do projeto._
-- [**Estrutura Técnica do Projeto**](PROJECT-STRUCTURE.md) → _Detalhamento de Governança, Memória de Trabalho e caminhos locais._
-
----
-
-## Manutenção Avançada
+O assistente interativo guia você na escolha do flavor arquitetural e um ou mais idiomas. Para uso não-interativo:
 
 ```bash
-npx sdg-agents review    # Compara regras locais vs fonte
-npx sdg-agents sync      # Atualiza padrões via web
-npx sdg-agents clear     # Remove a pasta .ai/ (Governança)
+# TypeScript + Vertical Slice
+npx sdg-agents init --flavor vertical-slice --idiom typescript
+
+# Múltiplos idiomas
+npx sdg-agents init --flavor mvc --idiom typescript,python
+
+# Visualizar sem gravar arquivos
+npx sdg-agents init --flavor mvc --idiom python --dry-run
 ```
 
 ---
 
-## Estado do Projeto
+## O Que É Instalado
 
-- [**Roadmap**](ROADMAP.md) → Visão futura e marcos estratégicos.
-- [**CHANGELOG**](../CHANGELOG.md) → Histórico técnico completo e versões passadas.
+Após rodar `init`, seu projeto recebe:
+
+```
+seu-projeto/
+├── .ai/                         ← Conjunto de instruções (commitado)
+│   ├── skill/
+│   │   └── AGENTS.md            ← Ponto de entrada — carregado automaticamente pelos agentes
+│   ├── instructions/
+│   │   ├── core/                ← Regras de engenharia (estilo, nomenclatura, segurança, testes)
+│   │   ├── flavors/             ← Padrões arquiteturais (vertical-slice, mvc, etc.)
+│   │   ├── idioms/              ← Convenções por linguagem (TS, Python, Go, etc.)
+│   │   └── competencies/        ← Regras por camada (frontend, backend)
+│   ├── commands/                ← Arquivos de contexto para os ciclos feat/fix/docs
+│   └── dev-guides/              ← Arquivos de referência, templates de spec e guias
+└── .ai-backlog/                 ← Memória de sessão (gitignored)
+    ├── context.md               ← Briefing do projeto, decisões, estado atual
+    └── tasks.md                 ← Lista de tarefas (TODO / IN_PROGRESS / DONE)
+```
+
+Arquivos de entrada por agente (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, etc.) também são escritos na raiz do projeto.
+
+> Para um detalhamento do papel de cada arquivo, veja [Estrutura do Projeto](PROJECT-STRUCTURE.md).
+
+---
+
+## Como o Protocolo Funciona
+
+Ao prefixar uma mensagem ao agente, ele entra no ciclo correspondente:
+
+| Trigger             | Ciclo   | O que acontece                                                 |
+| :------------------ | :------ | :------------------------------------------------------------- |
+| `feat: <descrição>` | Feature | Agente executa SPEC → PLAN → CODE → TEST → END                 |
+| `fix: <descrição>`  | Fix     | Agente executa SPEC → PLAN → CODE → TEST → END com foco em RCA |
+| `docs: <descrição>` | Docs    | Agente atualiza changelogs, ADRs ou specs                      |
+| Sem prefixo         | Direto  | Agente faz a alteração imediatamente (apenas edições triviais) |
+
+O agente **para e aguarda sua aprovação** em SPEC e PLAN antes de escrever qualquer código.
+
+```
+SPEC  →  PLAN  →  CODE  →  TEST  →  END
+  ↑           ↑
+  Wait        Wait        (aprovação obrigatória)
+```
+
+Para um guia detalhado de cada fase, veja [Guia Spec-Driven](../src/assets/dev-guides/spec-driven-dev-guide.md).
+Para um diagrama visual dos gates de decisão, veja [Agent Deep-Flow](../src/assets/dev-guides/agent-deep-flow.md).
+
+---
+
+## Flavors Arquiteturais
+
+Escolha o flavor que corresponde à estrutura do seu projeto:
+
+| Flavor           | Padrão                                    | Use quando                          |
+| :--------------- | :---------------------------------------- | :---------------------------------- |
+| `vertical-slice` | Cortes verticais por feature              | Monorepo ou API orientada a domínio |
+| `mvc`            | Camadas clássicas (Model-View-Controller) | Serviço REST padrão                 |
+| `lite`           | Scaffold mínimo                           | Scripts, CLIs, utilitários          |
+| `legacy`         | Padrões bridge seguros para refatoração   | Migrando bases de código existentes |
+
+Para o diagrama de fluxo de dados de cada flavor, veja [Pipelines Arquiteturais](PIPELINES.md).
+
+---
+
+## Idiomas
+
+Instale padrões específicos da linguagem junto com o protocolo:
+
+`typescript` · `javascript` · `python` · `csharp` · `java` · `kotlin` · `go` · `rust` · `swift` · `flutter` · `sql` · `vbnet`
+
+```bash
+# Adicionar um idioma a um projeto existente
+npx sdg-agents add
+```
+
+---
+
+## Manutenção
+
+```bash
+npx sdg-agents review    # Detectar drift entre regras locais e a fonte
+npx sdg-agents sync      # Atualizar rulesets da fonte
+npx sdg-agents update    # Atualizar o registro de versões LTS
+npx sdg-agents clear     # Remover a pasta .ai/
+```
+
+---
+
+## Referência
+
+- [Referência Rápida (CHEATSHEET)](CHEATSHEET.md) — todos os flags do CLI e triggers do agente
+- [Estrutura do Projeto](PROJECT-STRUCTURE.md) — detalhamento de cada arquivo gerado
+- [Pipelines Arquiteturais](PIPELINES.md) — diagramas de fluxo por flavor
+- [Leis de Engenharia (CONSTITUTION)](CONSTITUTION.md) — os princípios por trás das regras
+- [Roadmap](ROADMAP.md) — trabalho planejado
+- [Changelog](../CHANGELOG.md) — histórico de versões
 
 ---
 
 > [!WARNING]
-> **Projeto Experimental**: Este projeto está em fase inicial. Use com cuidado e adapte as regras conforme necessário.
+> Este projeto está em desenvolvimento inicial. Revise e ajuste as regras instaladas conforme os padrões da sua equipe antes de depender delas.
 
-O SDG está em constante evolução. Não existe uma solução 100% perfeita, nosso propósito é melhorar continuamente o processo de desenvolvimento.
+_O equilíbrio é a chave._
 
-Sinta-se à vontade para contribuir, fazer fork e compartilhar!
+O SDG está em constante evolução — não existe solução perfeita, apenas melhoria contínua. Sinta-se à vontade para contribuir, fazer fork e compartilhar.
