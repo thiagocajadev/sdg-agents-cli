@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="../src/assets/img/sdg-agents-icon-light.svg" alt="SDG Agents" width="160" height="160" style="border-radius: 1rem;">
-  <h1 align="center">sdg-agents</h1>
+  <img src="../src/assets/img/sdg-agents-icon-light.svg" alt="SDG Agents" width="480" height="480" style="border-radius: 1rem;">
+  <h1 align="center">Spec-Driven Guide — Agents</h1>
   <p align="center">
     Um CLI que instala um conjunto de instruções para agentes de IA no seu projeto.<br>
     <a href="../README.md">Read in English</a>
@@ -10,6 +10,10 @@
 </div>
 
 <br>
+
+<p align="center">
+  <kbd><img src="../src/assets/img/sdg-agents-menu-v1.png" alt="Spec Driven Guide CLI in action" /></kbd>
+</p>
 
 `sdg-agents` instala um conjunto de arquivos de instrução em markdown no seu projeto. Agentes de IA (Claude Code, Cursor, Windsurf, Copilot, Codex e outros) leem esses arquivos e seguem o protocolo definido em cada tarefa.
 
@@ -67,6 +71,8 @@ seu-projeto/
     ├── context.md               ← Briefing do projeto, decisões, estado atual
     └── tasks.md                 ← Lista de tarefas (TODO / IN_PROGRESS / DONE)
 ```
+
+`dev-guides/` é sempre incluído. Contém o guia do ciclo de 5 fases, o fluxo de decisão interno, referência de SDLC, guia de prompts de UI e templates de spec (`prompt-tracks/`) para autoria da fase SPEC de qualquer tarefa.
 
 Arquivos de entrada por agente (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, etc.) também são escritos na raiz do projeto.
 
