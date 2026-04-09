@@ -1,6 +1,6 @@
 {
   "name": "sdg-agents",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Structured working protocol and engineering rules for AI agents. Works with Claude Code, Antigravity, Codex, and others.",
   "type": "module",
   "main": "./src/engine/bin/index.mjs",
@@ -8,7 +8,7 @@
     "sdg-agents": "./src/engine/bin/index.mjs"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "dev": "node src/engine/bin/index.mjs",
@@ -43,19 +43,7 @@
   "author": "thiagocajadev",
   "license": "ISC",
   "files": [
-    "src/engine/bin/index.mjs",
-    "src/engine/bin/add-idiom.mjs",
-    "src/engine/config/",
-    "src/engine/lib/cli-parser.mjs",
-    "src/engine/lib/display-utils.mjs",
-    "src/engine/lib/fs-utils.mjs",
-    "src/engine/lib/instruction-assembler.mjs",
-    "src/engine/lib/manifest-utils.mjs",
-    "src/engine/lib/prompt-utils.mjs",
-    "src/engine/lib/result-utils.mjs",
-    "src/engine/lib/ruleset-injector.mjs",
-    "src/engine/lib/ui-utils.mjs",
-    "src/engine/lib/wizard.mjs",
+    "src/engine/",
     "src/assets/"
   ],
   "repository": {

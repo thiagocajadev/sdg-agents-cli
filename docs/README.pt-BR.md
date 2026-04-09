@@ -5,7 +5,7 @@
     Um CLI que instala um conjunto de instruções para agentes de IA no seu projeto.<br>
     <a href="../README.md">Read in English</a>
   </p>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D22-brightgreen?style=flat-square&logo=nodedotjs" alt="Node" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D24-brightgreen?style=flat-square&logo=nodedotjs" alt="Node" /></a>
   <a href="../LICENSE"><img src="https://img.shields.io/badge/license-ISC-blue?style=flat-square" alt="License: ISC" /></a>
 </div>
 

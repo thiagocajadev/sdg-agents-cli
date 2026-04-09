@@ -1,11 +1,2 @@
 # Test files
 src/engine/lib/*.test.mjs
-
-# Internal dev scripts (not exposed via bin)
-src/engine/bin/auto-bump.mjs
-src/engine/bin/build-bundle.mjs
-src/engine/bin/review-bundle.mjs
-src/engine/bin/clear-bundle.mjs
-src/engine/bin/check-sync.mjs
-src/engine/bin/sync-rulesets.mjs
-src/engine/bin/update-versions.mjs

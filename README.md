@@ -5,7 +5,7 @@
     A CLI that installs a structured instruction set for AI agents into your project.<br>
     <a href="docs/README.pt-BR.md">Versão em Português (Brasil)</a>
   </p>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D22-brightgreen?style=flat-square&logo=nodedotjs" alt="Node" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D24-brightgreen?style=flat-square&logo=nodedotjs" alt="Node" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-ISC-blue?style=flat-square" alt="License: ISC" /></a>
 </div>
 
