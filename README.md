@@ -12,6 +12,12 @@
 <br>
 
 <p align="center">
+    Read the manifesto and visual guide at <a href="https://specdrivenguide.org">specdrivenguide.org</a>
+</p>
+
+<br>
+
+<p align="center">
   <kbd><img src="https://raw.githubusercontent.com/thiagocajadev/sgd-agents-cli/main/src/assets/img/sdg-agents-menu-v1.png" alt="Spec Driven Guide CLI in action" /></kbd>
 </p>
 
