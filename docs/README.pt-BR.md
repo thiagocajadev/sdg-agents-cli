@@ -69,9 +69,11 @@ seu-projeto/
 │   │   └── competencies/        ← Regras por camada (frontend, backend)
 │   ├── commands/                ← Arquivos de contexto para os ciclos feat/fix/docs
 │   └── dev-guides/              ← Arquivos de referência, templates de spec e guias
-└── .ai-backlog/                 ← Memória de sessão (gitignored)
-    ├── context.md               ← Briefing do projeto, decisões, estado atual
-    └── tasks.md                 ← Lista de tarefas (TODO / IN_PROGRESS / DONE)
+└── .ai-backlog/                 ← Memória de Sessão & Expertise (gitignored)
+    ├── context.md               ← Briefing do projeto e decisões
+    ├── tasks.md                 ← Gerenciamento de tarefas (TODO/DONE)
+    ├── learned.md               ← Tríade: Padrões de sucesso e pesquisa
+    └── troubleshoot.md          ← Tríade: RCA e logs de incidentes
 ```
 
 `dev-guides/` é sempre incluído. Contém o guia do ciclo de 5 fases, o fluxo de decisão interno, referência de SDLC, guia de prompts de UI e templates de spec (`prompt-tracks/`) para autoria da fase SPEC de qualquer tarefa.
@@ -86,14 +88,14 @@ Arquivos de entrada por agente (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, e
 
 Ao prefixar uma mensagem ao agente, ele entra no ciclo correspondente:
 
-| Trigger             | Ciclo   | O que acontece                                                                                                                                                   |
-| :------------------ | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `land: <descrição>` | Land    | Agente transforma uma visão bruta em um backlog de tarefas `feat:` sequenciadas — roda antes de qualquer código ser escrito                                      |
-| `feat: <descrição>` | Feature | Agente executa SPEC → PLAN → CODE → TEST → END                                                                                                                   |
-| `fix: <descrição>`  | Fix     | Agente executa SPEC → PLAN → CODE → TEST → END com foco em RCA                                                                                                   |
-| `docs: <descrição>` | Docs    | Agente atualiza changelogs, ADRs ou specs                                                                                                                        |
-| `end:`              | —       | Encerra o ciclo ativo — executa o checklist do Phase: END (changelog, backlog, commit). Também recupera um ciclo se o agente perder o fio numa conversa paralela |
-| Sem prefixo         | —       | Agente pergunta: "land, feat, fix ou docs?" — e então prossegue                                                                                                  |
+| Trigger             | Ciclo   | O que acontece                                                                                                                                                |
+| :------------------ | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `land: <descrição>` | Land    | Agente transforma uma visão bruta em um backlog de tarefas `feat:` sequenciadas — roda antes de qualquer código ser escrito                                   |
+| `feat: <descrição>` | Feature | Agente executa SPEC → PLAN → CODE → TEST → END                                                                                                                |
+| `fix: <descrição>`  | Fix     | Agente executa SPEC → PLAN → CODE → TEST → END com foco em RCA                                                                                                |
+| `docs: <descrição>` | Docs    | Agente atualiza changelogs, ADRs ou specs                                                                                                                     |
+| `end:`              | —       | Encerra o ciclo ativo e executa o checklist de entrega (changelog, backlog, commit). Também recupera um ciclo se o agente perder o fio numa conversa paralela |
+| Sem prefixo         | —       | Agente pergunta: "land, feat, fix ou docs?" — e então prossegue                                                                                               |
 
 O agente **para e aguarda sua aprovação** em SPEC e PLAN antes de escrever qualquer código.
 
