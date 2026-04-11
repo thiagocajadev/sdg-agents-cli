@@ -140,7 +140,7 @@ On every request, classify intent before acting:
 ### END Checklist (mandatory — execute in order, mark each before proceeding)
 
 - [ ] **SUMMARIZE** — one sentence per completed PLAN task written in response
-- [ ] **CHANGELOG** — entry appended under `## [Unreleased]` (`### Added` for feat, `### Fixed` for fix; skip for docs)
+- [ ] **CHANGELOG** — Append entry. **Identify next version** (check \`package.json\`) to determine the header (\`## [NEXT_VERSION] - YYYY-MM-DD\` for releases/auto-bump, or \`## [Unreleased]\`). Categories: \`### Added\` (feat), \`### Fixed\` (fix).
 - [ ] **BACKLOG: tasks.md** — all completed tasks moved to `## Done` with `[DONE]` status
 - [ ] **BACKLOG: context.md** — \`## Now\` updated with next objective or cleared
 - [ ] **KNOWLEDGE** — Log any patterns, findings, or rework discovered during this cycle. Update \`.ai-backlog/learned.md\` (for successful feats) or \`.ai-backlog/troubleshoot.md\` (for fixed incidents). Curate stale or irrelevant items.

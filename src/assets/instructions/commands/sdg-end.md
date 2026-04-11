@@ -12,14 +12,20 @@ Write one sentence per completed PLAN task. If no PLAN existed (e.g. `[S]` tasks
 
 ## Step 2 — CHANGELOG
 
-Append an entry under `## [Unreleased]` in `CHANGELOG.md`:
+- Append an entry under `## [Unreleased]` in `CHANGELOG.md`:
 
-- `feat:` cycle → `### Added`
-- `fix:` cycle → `### Fixed`
-- `docs:` cycle → skip this step
-- `land:` cycle → skip this step
+1. **Identify Version**: Check `package.json` (or equivalent) for the current version.
+2. **Calculate Next**: Determine the next version (patch/minor) based on the cycle type (`feat` → minor/patch, `fix` → patch).
+3. **Update Header**:
+   - If the project uses auto-bump or a release is intended: Create/Update the header to `## [NEXT_VERSION] - YYYY-MM-DD`.
+   - Otherwise: Append under `## [Unreleased]`.
+4. **Append Entry**:
+   - `feat:` cycle → `### Added`
+   - `fix:` cycle → `### Fixed`
+   - `docs:` cycle → skip this step
+   - `land:` cycle → skip this step
 
-If `## [Unreleased]` does not exist, create it above the most recent versioned entry.
+If `## [Unreleased]` (or the appropriate version header) does not exist, create it above the most recent entry.
 
 ## Step 3 — BACKLOG: tasks.md
 
