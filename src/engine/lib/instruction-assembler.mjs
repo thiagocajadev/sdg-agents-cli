@@ -573,7 +573,7 @@ function writeAutomationScripts(targetDir, selections) {
     const nvmShim = dedent`
       # NVM Shim (Essential for projects Staff in Linux/NVM)
       export NVM_DIR="$HOME/.nvm"
-      [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
     `;
 
     const bumpCmd = 'npm run bump fix';
@@ -587,7 +587,6 @@ function writeAutomationScripts(targetDir, selections) {
     } else {
       const prePushContent = dedent`
         #!/usr/bin/env sh
-        . "$(dirname -- "$0")/_/husky.sh"
 
         ${nvmShim}
 
