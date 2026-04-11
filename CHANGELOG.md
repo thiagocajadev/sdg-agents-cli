@@ -11,11 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-## [1.5.0] - 2026-04-11
+## [1.6.0] - 2026-04-11
 
 ### Added
 
+- Pedagogical Writing Soul — refined `writing-soul.md` instruction set with inviting, prose-centric guidance; eliminated em dashes and negation-affirmation patterns in favor of direct engineering wisdom.
+- Internal Governance Sync — automated the synchronization of project assets to the local `.ai/` directory via CLI `init` protocol.
+
+## [1.4.0] - 2026-04-11
+
 ### Fixed
+
+- Governance terminology synchronization in Portuguese and English documentation.
 
 ## [1.3.0] - 2026-04-11
 
