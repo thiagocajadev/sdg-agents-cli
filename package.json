@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./src/engine/bin/index.mjs",
   "bin": {
-    "sdg-agents": "./src/engine/bin/index.mjs"
+    "sdg-agents": "src/engine/bin/index.mjs"
   },
   "engines": {
     "node": ">=24.0.0"
