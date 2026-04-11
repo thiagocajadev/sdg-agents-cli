@@ -226,6 +226,7 @@ function buildOrderSummary(order) {
 - **Idempotency:** Operations involving money, state changes, or side-effects must use **Idempotency Keys (UUIDs)**.
 - **Graceful Degradation:** Use **Error Boundaries** and defensive type checking (`data?.user?.name`) to prevent UI collapses.
 - **Failure Narrative:** Prefer typed error objects (or Result objects when they clarify the happy/failure path) over magic strings or raw exceptions. Do not force the pattern where idiomatic error handling is already clear.
+- **Toolchain Discoverability & Boot Sanity:** Non-interactive processes (hooks, CI, agents) must explicitly verify or discover their dependencies instead of assuming a pre-configured interactive `$PATH`. Any script that relies on a specific binary (Node, Go, Python, etc.) should fail-fast with a clear diagnostic message if the binary is missing, or attempt to locate it in common installation paths.
   </rule>
 
 ## Rule: Result Pattern & HTTP Envelope

@@ -409,7 +409,8 @@ function buildClaudeContent() {
 
     1. **Check backlog**: Read \`.ai-backlog/context.md\` — understand the project brief. **Priority**: Always check the local directory first to avoid redundant scans.
     2. **Check tasks**: Read \`.ai-backlog/tasks.md\` — resume any \`[IN_PROGRESS]\` task before accepting new work.
-    3. **Bootstrap if missing**: If \`.ai-backlog/context.md\` does not exist, follow the **Context Bootstrap** defined in the Working Protocol (loaded via \`@.ai/skill/AGENTS.md\` above).
+    3. **Terminal Sanity Check**: Run \`node -v\` and \`npm -v\` (or the project's primary toolchain) to "wake up" the terminal and confirm execution capabilities in the current shell.
+    4. **Bootstrap if missing**: If \`.ai-backlog/context.md\` does not exist, follow the **Context Bootstrap** defined in the Working Protocol (loaded via \`@.ai/skill/AGENTS.md\` above).
 
     ## Intent Routing (quick reference)
 

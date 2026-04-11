@@ -216,7 +216,29 @@ export default UserService;
 >
 > </rule>
 
->
+---
+
+## Operational Resilience
+
+### Node Discovery (Shell Resilience)
+
+> <rule name="NodeDiscovery">
+> When writing shell hooks (Husky, CI, git hooks) for a Node project, attempt to discover `node` and `npm` if they are missing from the current `$PATH`. This prevents failures in restricted environments (AI agents, GUI clients).
+
+```bash
+# Node Discovery — Staff-grade Resilience
+if ! command -v node >/dev/null 2>&1; then
+  export PATH="$PATH:/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin"
+  # Source common environment managers
+  [ -f "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh" && nvm use --silent >/dev/null 2>&1
+  [ -f "$HOME/.asdf/asdf.sh" ] && . "$HOME/.asdf/asdf.sh" >/dev/null 2>&1
+fi
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "❌ Error: 'node' not found in PATH."
+  exit 1
+fi
+```
 
 > </rule>
 
