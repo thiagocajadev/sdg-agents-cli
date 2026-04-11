@@ -13,13 +13,12 @@ import crypto from 'node:crypto';
 import { FsUtils } from '../lib/fs-utils.mjs';
 import { ResultUtils } from '../lib/result-utils.mjs';
 
-const { getDirname, runIfDirect } = FsUtils;
+const { runIfDirect } = FsUtils;
 const { success, fail } = ResultUtils;
 
-const __dirname = getDirname(import.meta.url);
-const MONOREPO_ROOT = path.join(__dirname, '..', '..', '..', '..', '..');
-const ASSETS_DIR = path.join(MONOREPO_ROOT, 'packages', 'cli', 'src', 'assets', 'instructions');
-const AI_DIR = path.join(MONOREPO_ROOT, 'packages', 'cli', '.ai', 'instructions');
+const PROJECT_ROOT = process.cwd();
+const ASSETS_DIR = path.join(PROJECT_ROOT, 'src', 'assets', 'instructions');
+const AI_DIR = path.join(PROJECT_ROOT, '.ai', 'instructions');
 
 // why: flavor/ in .ai/ is populated by renaming flavors/{id}/ — no direct mirror exists in src/assets/flavor/
 const MIRRORED_DIRS = ['core', 'idioms', 'templates', 'competencies'];

@@ -39,6 +39,11 @@ async function run() {
   // Resolve target directory early for the entire cycle
   args.targetDir = path.resolve(args.targetDir || process.cwd());
 
+  // Maintainer Protocol: ensuring core instructions are synced to .ai/ for the agent
+  if (!args.subcommand && !args.help && !args.version) {
+    await ensureMaintainerSync(args.targetDir);
+  }
+
   if (args.subcommand) {
     await executeSubcommand(args);
   } else {
@@ -209,6 +214,35 @@ async function runSettingsMenu(targetDir) {
 }
 
 // --- System ---
+
+async function ensureMaintainerSync(targetDir) {
+  const { isMaintainerMode } = PromptUtils;
+  if (!isMaintainerMode()) return;
+
+  const { SyncChecker } = await import('./check-sync.mjs');
+  const syncResult = SyncChecker.run();
+
+  if (syncResult.isFailure) {
+    console.log('\n  🛠️  MAINTAINER MODE: Drift detected in core instructions.');
+    console.log('  🔄 Automatic sync in progress...\n');
+
+    const { ManifestUtils } = await import('../lib/manifest-utils.mjs');
+    const { SDG } = await import('./build-bundle.mjs');
+    const manifest = ManifestUtils.loadManifest(targetDir);
+
+    if (manifest) {
+      try {
+        await SDG.run(targetDir, { selections: manifest.selections });
+        console.log('\n  ✅ Core instructions synchronized. Agent rules are up-to-date.\n');
+        console.log('─'.repeat(50) + '\n');
+      } catch (error) {
+        console.log(`\n  ⚠️  Automatic sync failed: ${error.message}\n`);
+      }
+    } else {
+      console.log('  ⚠️  Cannot auto-sync: No manifest found. Run "init" once.\n');
+    }
+  }
+}
 
 function handleExitError(error) {
   if (error.message?.includes('force closed') || error.name === 'ExitPromptError') {
