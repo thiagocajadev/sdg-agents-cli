@@ -15,15 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-### Fixed
-
-## [1.10.3] - 2026-04-11
-
-### Added
+- **Gatekeeper Delivery Workflow** — Hardened the `pre-push` hook to block pushes when unversioned narratives exist in `CHANGELOG.md`; eliminated the automatic `post-commit` versioning loop to prevent history noise and race conditions.
+- **Atomic Release Cycle** — Upgraded `scripts/bump.mjs` to perform an all-in-one release delivery (changelog promotion + version bump + release commit); formalized the use of `npm run bump` as the standard cycle termination tool.
+- **Narrative Guard Refinement** — Updated `check-narrative.mjs` to support dual-mode validation (staged `commit-msg` and full-repo `pre-push` checks).
 
 ### Fixed
-
-- test narrative block
 
 ## [1.10.2] - 2026-04-11
 
