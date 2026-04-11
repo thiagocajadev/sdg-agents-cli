@@ -9,25 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Narrative Discipline — hardened `sdg-end.md` to mandate populating the `[Unreleased]` section before every commit when automation is active.
+
 ### Fixed
+
+- Changelog Narrative Restoration — retroactively added descriptions for versions 1.7.1 through 1.7.3.
 
 ## [1.7.3] - 2026-04-11
 
 ### Added
 
-### Fixed
+- Governance Hardening (Zero Mutation Push) — removed the `npm run bump` command from pre-push hooks to prevent workspace drift during the delivery cycle; enforced "Validate at Commit, Zero Mutation at Push" strategy.
 
 ## [1.7.2] - 2026-04-11
 
-### Added
-
 ### Fixed
+
+- Husky Shell Syntax — resolved shell compatibility issues in `.husky/pre-push` hooks caused by incorrect NVM shims and deprecated Husky boilerplate.
 
 ## [1.7.1] - 2026-04-11
 
-### Added
-
 ### Fixed
+
+- Automated Changelog Promotion — corrected the `auto-bump.mjs` script to properly read and migrate `[Unreleased]` content to the active version header.
 
 ## [1.7.0] - 2026-04-11
 

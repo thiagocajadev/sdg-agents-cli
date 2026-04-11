@@ -15,8 +15,8 @@ Write one sentence per completed PLAN task. If no PLAN existed (e.g. `[S]` tasks
 Prepare your technical narrative in the `CHANGELOG.md`.
 
 1. **Identify Strategy**:
-   - **Automated**: If `auto-bump.mjs` exists in the project (or is configured in `.ai/.sdg-manifest.json`), you only need to append your entries to the `## [Unreleased]` section. The automated pipeline will handle version promotion during the commit.
-   - **Manual**: If no automation is detected, you must promote the header manually (e.g., `## [1.2.0] - 2026-04-11`) or run the designated `bump` script.
+   - **Automated**: If `auto-bump.mjs` exists, you **MUST** first manually populate the `## [Unreleased]` section with your technical narrative. The automated pipeline will promote this content to the new version header during the commit. **DO NOT commit with an empty [Unreleased] section.**
+   - **Manual**: If no automation is present, you must promote the header manually (e.g., `## [1.2.0] - 2026-04-11`) or run the designated `bump` script.
 
 2. **Append Entry**:
    - `feat:` cycle → Add under `### Added`
