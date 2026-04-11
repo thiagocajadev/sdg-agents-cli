@@ -61,13 +61,17 @@ If a lint script exists (`lint`, `lint:fix`, `lint:all`, or a config file is det
 - If non-auto-fixable violations remain, surface them explicitly.
 - Block commit if errors remain.
 
-## Step 8 — COMMIT
+## Step 8 — COMMIT & RELEASE
 
 Propose the commit message and **WAIT** for explicit Developer approval before committing.
+
+- **Option A (Manual)**: If you just want to save progress without a version bump, commit with `feat:` or `fix:`. Remember you **MUST** have content in `[Unreleased]`.
+- **Option B (End Cycle)**: If the cycle is complete, run `npm run bump <fix|feat|major>` to consolidate the narrative and bump the version.
 
 ## Step 9 — PUSH
 
 **ASK** for explicit permission before pushing to remote.
+The `pre-push` hook will **BLOCK** the push if any `[Unreleased]` narrative remains (preventing unversioned leaks to main).
 
 ---
 

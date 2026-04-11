@@ -45,6 +45,11 @@ function run() {
     // 4. Update CHANGELOG.md
     updateChangelog(newVersion);
 
+    // 5. Commit the bump
+    console.log('📦 Committing release...');
+    execSync('git add package.json CHANGELOG.md', { stdio: 'inherit' });
+    execSync(`git commit -m "chore: release ${newVersion}"`, { stdio: 'inherit' });
+
     console.log(`✅ Success: ${oldVersion} → ${newVersion}`);
     console.log('🔗 CHANGELOG.md updated and promoted to current date.');
   } catch (error) {

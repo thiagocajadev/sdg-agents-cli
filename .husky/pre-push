@@ -4,17 +4,8 @@
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-# Pre-push check (non-mutating)
+# 1. Pre-push sanity check (tests must pass)
 npm test
 
-# NVM Shim (Essential for projects Staff in Linux/NVM)
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-# Pre-push check (non-mutating)
-npm test
-
-# NVM Shim (Essential for projects Staff in Linux/NVM)
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-# Pre-push check (non-mutating)
-npm test
+# 2. Narrative Guard (ensure everything is versioned before push)
+node src/engine/bin/check-narrative.mjs --pre-push
