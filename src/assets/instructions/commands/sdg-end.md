@@ -12,20 +12,19 @@ Write one sentence per completed PLAN task. If no PLAN existed (e.g. `[S]` tasks
 
 ## Step 2 — CHANGELOG
 
-- Append an entry under `## [Unreleased]` in `CHANGELOG.md`:
+Prepare your technical narrative in the `CHANGELOG.md`.
 
-1. **Identify Version**: Check `package.json` (or equivalent) for the current version.
-2. **Calculate Next**: Determine the next version (patch/minor) based on the cycle type (`feat` → minor/patch, `fix` → patch).
-3. **Update Header**:
-   - If the project uses auto-bump or a release is intended: Create/Update the header to `## [NEXT_VERSION] - YYYY-MM-DD`.
-   - Otherwise: Append under `## [Unreleased]`.
-4. **Append Entry**:
-   - `feat:` cycle → `### Added`
-   - `fix:` cycle → `### Fixed`
-   - `docs:` cycle → skip this step
-   - `land:` cycle → skip this step
+1. **Identify Strategy**:
+   - **Automated**: If `auto-bump.mjs` exists in the project (or is configured in `.ai/.sdg-manifest.json`), you only need to append your entries to the `## [Unreleased]` section. The automated pipeline will handle version promotion during the commit.
+   - **Manual**: If no automation is detected, you must promote the header manually (e.g., `## [1.2.0] - 2026-04-11`) or run the designated `bump` script.
 
-If `## [Unreleased]` (or the appropriate version header) does not exist, create it above the most recent entry.
+2. **Append Entry**:
+   - `feat:` cycle → Add under `### Added`
+   - `fix:` cycle → Add under `### Fixed`
+   - `docs:` cycle → Optional (for major architectural docs)
+   - `land:` cycle → Skip
+
+3. **Verify Header**: Ensure `## [Unreleased]` exists at the top. If missing, create it above the most recent version entry.
 
 ## Step 3 — BACKLOG: tasks.md
 

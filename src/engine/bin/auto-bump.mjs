@@ -12,6 +12,7 @@ const { runIfDirect } = FsUtils;
 // bin/ → engine/ → src/ → root
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../');
 const PACKAGE_PATHS = [path.join(ROOT_DIR, 'package.json')];
+const CHANGELOG_PATH = path.join(ROOT_DIR, 'CHANGELOG.md');
 
 // --- Orchestrator ---
 
@@ -27,7 +28,13 @@ async function run() {
   const rootPkg = readPackageJson(resolveRootPackagePath());
   const nextVersion = bumpVersion(rootPkg.version, bumpType);
 
+  // 1. Promote Changelog
+  updateChangelog(nextVersion);
+
+  // 2. Sync Package.json files
   syncAllPackages(nextVersion);
+
+  // 3. Commit the bump
   stageAndCommit(nextVersion);
 
   console.log(`  auto-bump: ${rootPkg.version} → ${nextVersion} (${bumpType})`);
@@ -57,7 +64,35 @@ function bumpVersion(current, bumpType) {
       return `${major}.${minor + 1}.0`;
     case 'patch':
       return `${major}.${minor}.${patch + 1}`;
+    default:
+      return current;
   }
+}
+
+function updateChangelog(newVersion) {
+  if (!fs.existsSync(CHANGELOG_PATH)) return;
+
+  const content = fs.readFileSync(CHANGELOG_PATH, 'utf8');
+  const today = new Date().toISOString().split('T')[0];
+
+  // Pattern to find the [Unreleased] section
+  const unreleasedRegex = /##\s*\[Unreleased\](\s*-\s*\d{4}-\d{2}-\d{2})?/i;
+
+  if (!unreleasedRegex.test(content)) return;
+
+  const newHeader = `## [${newVersion}] - ${today}`;
+
+  // 1. Promote Unreleased to New Version
+  let updatedContent = content.replace(unreleasedRegex, newHeader);
+
+  // 2. Inject new [Unreleased] block at the top if it was promoted
+  const insertIndex = updatedContent.indexOf(newHeader);
+  const nextBlock = `## [Unreleased]\n\n### Added\n\n### Fixed\n\n`;
+
+  updatedContent =
+    updatedContent.slice(0, insertIndex) + nextBlock + updatedContent.slice(insertIndex);
+
+  fs.writeFileSync(CHANGELOG_PATH, updatedContent);
 }
 
 // --- Sync & Commit ---
@@ -71,7 +106,8 @@ function syncAllPackages(nextVersion) {
 
 function stageAndCommit(nextVersion) {
   const paths = resolvePackagePaths();
-  const files = paths.filter((p) => fs.existsSync(p)).join(' ');
+  const files = [...paths, CHANGELOG_PATH].filter((p) => fs.existsSync(p)).join(' ');
+
   execSync(`git add ${files}`, { stdio: 'inherit' });
   execSync(`git commit -m "chore: bump version to ${nextVersion}"`, { stdio: 'inherit' });
 }

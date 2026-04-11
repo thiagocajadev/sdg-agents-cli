@@ -63,7 +63,6 @@ function updateChangelog(newVersion) {
   const today = new Date().toISOString().split('T')[0];
 
   // Pattern to find the [Unreleased] section
-  // It handles both formats: ## [Unreleased] and ## [Unreleased] - YYYY-MM-DD
   const unreleasedRegex = /##\s*\[Unreleased\](\s*-\s*\d{4}-\d{2}-\d{2})?/i;
 
   if (!unreleasedRegex.test(content)) {
