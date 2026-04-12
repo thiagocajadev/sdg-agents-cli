@@ -140,8 +140,8 @@ On every request, classify intent before acting:
 ### END Checklist (mandatory — execute in order, mark each before proceeding)
 
 - [ ] **SUMMARIZE** — one sentence per completed PLAN task written in response
+- [ ] **CHANGELOG** — Prepare your technical narrative in the `CHANGELOG.md` under `## [Unreleased]`. This MUST be done before bumping.
 - [ ] **BUMP** — run \`npm run bump <feat|fix>\` to promote CHANGELOG and package.json version. Skip if not applicable.
-- [ ] **CHANGELOG** — Verify [Unreleased] content was promoted. Append any manual notes if needed.
 - [ ] **BACKLOG: tasks.md** — all completed tasks moved to `## Done` with `[DONE]` status
 - [ ] **BACKLOG: context.md** — \`## Now\` updated with next objective or cleared
 - [ ] **KNOWLEDGE** — Log any patterns, findings, or rework discovered during this cycle. Update \`.ai-backlog/learned.md\` (for successful feats) or \`.ai-backlog/troubleshoot.md\` (for fixed incidents). Curate stale or irrelevant items.

@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.14.0] - 2026-04-12
+
+### Added
+
+- **UI/UX Governance Evolution** — formalized the "Elevation Stack" (S0-S3) to replace the basic theme inversion law; introduced dedicated logic for dark mode elevation where surfaces become lighter as they "ascend" towards the user.
+- **Component Nesting (Anilhamento)** — codified the "Concentric Radius Rule" (Outer - Padding = Inner) and border hierarchy standards for complex structural interfaces.
+- **OKLCH Adaptive Chroma** — refined the perceptual color progression scale with "Vibe Control" (Vibrant vs Muted) modifiers to prevent visual weight issues in dark themes.
+- **Visual Density Standards** — quantified spacing levels L1 through L4 with specific pixel/Tailwind targets to ensure information density consistency.
+
+### Fixed
+
 ## [1.13.0] - 2026-04-12
 
 ### Added

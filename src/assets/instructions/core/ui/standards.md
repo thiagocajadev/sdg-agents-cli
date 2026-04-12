@@ -90,6 +90,7 @@ Every interactive UI MUST implement:
   - must meet WCAG AA (4.5:1 for normal text, 3:1 for large text)
   - avoid low-contrast combinations (e.g. muted on muted)
   - OKLCH quick check: Lightness delta between text and background must be ≥ 40 percentage points (e.g., text at L=55% on background at L=97% → delta=42% ✔)
+  - **Contextual Contrast**: Secondary text (muted) on `S1/S2` surfaces should maintain a Lightness delta of ≥ 25% (e.g. text L=70% on surface L=95%).
   - for token generation ensuring compliant contrast, see [design-thinking.md](./design-thinking.md)
 
 - ARIA:
@@ -130,6 +131,23 @@ Every interactive UI MUST implement:
 - Same interaction → same visual response
 - Same component → same states everywhere
 - Do not redefine behavior per screen
+
+</rule>
+
+---
+
+## Rule: Density & Spacing (L1–L4)
+
+<rule name="Density">
+
+Spacing must follow a consistent hierarchy to avoid visual noise.
+
+| Level  | Role                     | Gap/Padding | Value (Tailwind)        |
+| :----- | :----------------------- | :---------- | :---------------------- |
+| **L1** | Internal (Button/Icon)   | `4–8px`     | `gap-1`, `gap-2`, `p-2` |
+| **L2** | Siblings (Items in Card) | `16–20px`   | `gap-4`, `p-4`, `p-5`   |
+| **L3** | Sections (Card in Grid)  | `24–40px`   | `gap-6`, `gap-10`       |
+| **L4** | Global (Page containers) | `64px+`     | `py-16`, `px-6`         |
 
 </rule>
 

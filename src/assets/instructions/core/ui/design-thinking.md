@@ -114,60 +114,50 @@ Then generate the full scale using the **OKLCH Progression Formula**:
 
 | Step | L (Lightness) | C (Chroma) | Notes                               |
 | ---: | :------------ | :--------- | :---------------------------------- |
-|   50 | `97%`         | `0.02`     | Near-white background tint          |
-|  100 | `93%`         | `0.05`     | Very light surface tint             |
-|  200 | `87%`         | `0.08`     | Light border / subtle dividers      |
-|  300 | `79%`         | `0.11`     | Soft accent                         |
-|  400 | `68%`         | `0.13`     | Light mode hover state              |
-|  500 | `58%`         | `0.15`     | **Primary action** (buttons, links) |
-|  600 | `48%`         | `0.14`     | Light mode hover on primary-500     |
-|  700 | `38%`         | `0.12`     | Strong accent                       |
-|  800 | `29%`         | `0.09`     | Dark surface tint                   |
-|  900 | `21%`         | `0.06`     | Near-black background tint          |
+|   50 | `98%`         | `0.01`     | Near-white background tint          |
+|  100 | `96%`         | `0.03`     | Very light surface tint             |
+|  200 | `90%`         | `0.06`     | Light border / subtle dividers      |
+|  300 | `82%`         | `0.09`     | Soft accent                         |
+|  400 | `72%`         | `0.12`     | Light mode hover state              |
+|  500 | `60%`         | `0.15`     | **Primary action** (buttons, links) |
+|  600 | `50%`         | `0.14`     | Light mode hover on primary-500     |
+|  700 | `40%`         | `0.12`     | Strong accent                       |
+|  800 | `25%`         | `0.09`     | Dark surface tint                   |
+|  900 | `15%`         | `0.05`     | Near-black background tint          |
 
-> The Hue (H) is **fixed** across the entire scale. Only L and C change.
-> To switch the brand color: **change only H**.
+> **Vibe Control**: For a **Vibrant** look, keep Chroma (C) at `0.15` for steps 400-600. For a **Muted** look, reduce C to `0.08` across the entire scale. Default to **Muted** for Premium SaaS.
 
 </rule>
 
 ---
 
-## Phase 0.2 — Light / Dark Token Inversion
+## Phase 0.2 — The Elevation Stack (Deep Theme Balance)
 
-<rule name="LightDarkInversion">
+<rule name="ElevationStack">
 
 > [!IMPORTANT]
-> **The most common agent failure: applying light-mode hover logic to dark mode.**
+> **Avoid "Floating Darkness".** Dark mode surface logic must reflect physical elevation: as an object gets closer to the light source (user), it gets **lighter**, not darker.
 
-Dark mode inverts the Lightness axis. The same token value that reads as "lighter" in light mode reads as "wrong direction" in dark mode.
+### Surface Mapping
 
-### The Inversion Law
+| Layer          | Role               | Light Mode (Zinc)     | Dark Mode (Zinc) |
+| :------------- | :----------------- | :-------------------- | :--------------- |
+| **S0** (Base)  | Page Background    | `50` or `White`       | `950` or `Black` |
+| **S1** (Inner) | Sidebars, Sections | `100`                 | `900`            |
+| **S2** (Card)  | Floating Elements  | `White` + Shadow      | `800`            |
+| **S3** (Pop)   | Modals, Tooltips   | `White` + Deep Shadow | `700`            |
 
-| Context    | Base  | Action (hover/active) | Direction  |
-| :--------- | :---- | :-------------------- | :--------- |
-| Light mode | `500` | `600`                 | Go darker  |
-| Dark mode  | `500` | `400`                 | Go lighter |
+### The Hover Law (Inversion)
+
+| Context    | Base | Action | Direction  | Value Delta |
+| :--------- | :--- | :----- | :--------- | :---------- |
+| Light mode | `S2` | `S1`   | Go Darker  | L-5%        |
+| Dark mode  | `S2` | `S3`   | Go Lighter | L+10%       |
 
 ```html
-<!-- Correct — both themes use the right direction -->
-<button class="bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-400">Ação</button>
+<!-- Correct — Dark mode "elevates" on hover by getting lighter -->
+<div class="bg-zinc-800 hover:bg-zinc-700 transition-colors">Card</div>
 ```
-
-```html
-<!-- ❌ Wrong — dark hover goes darker, feels invisible -->
-<button class="bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-600">Ação</button>
-```
-
-### Why this happens (mental model)
-
-In light mode, the page background is near-white → `primary-500` sits on a light plane → hover must move toward the dark end to create contrast.
-
-In dark mode, the page background is near-black → `primary-500` sits on a dark plane → hover must move toward the light end to surface.
-
-The OKLCH Lightness axis makes this mechanical:
-
-- **Light hover** = lower L → `600` (L=48%)
-- **Dark hover** = higher L → `400` (L=68%)
 
 </rule>
 
@@ -292,6 +282,31 @@ Every interface uses **exactly 2 font families** — one Display, one Body. No e
 - Display font at body size (< 16px) → breaks readability → **Display is h1–h3 only**
 - More than 2 families in layout flow → visual noise → **remove the third; code blocks are the only exception**
 - `Cal Sans` — not on Google Fonts, requires manual hosting → **use `Bricolage Grotesque` instead**
+
+</rule>
+
+---
+
+## Phase 0.6 — Component Nesting (Concentricity)
+
+<rule name="Nesting">
+
+Nested elements (cards inside sections, inputs inside cards) must maintain visual logic.
+
+### 1. The Concentric Radius Rule
+
+Outer container and inner child must share a common center.
+`Inner Radius = Outer Radius - Padding`.
+
+- Outer: `rounded-2xl` (16px) | Padding: `p-4` (16px) → Inner: `rounded-none` (0px)
+- Outer: `rounded-2xl` (16px) | Padding: `p-2` (8px) → Inner: `rounded-lg` (8px)
+
+### 2. Border Hierarchy
+
+To prevent "Wireframe Look", adjust border visibility based on depth.
+
+- **S1/S2 Boundary**: `border-border/40` (subtle)
+- **S2/Action Boundary**: `border-primary/20` (contextual)
 
 </rule>
 

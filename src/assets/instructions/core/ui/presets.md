@@ -25,9 +25,9 @@ Each preset MUST define:
 - Personality: Modular dashboard
 - Typography: Sans (UI) + Serif (highlights)
 - Grid: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[minmax(180px,1fr)]`
-- Cards: `flex flex-col h-full transition-colors hover:border-primary/20`
+- Cards: `S2` (e.g. `bg-card`)
 - Radius: `rounded-xl / rounded-2xl`
-- Density: Medium
+- Density: Medium (`gap-4` to `gap-6`)
 - States:
   - hover: `border-primary/20`
   - focus: `ring-2 ring-primary`
@@ -39,7 +39,7 @@ Each preset MUST define:
 
 - Personality: Layered, depth-driven
 - Typography: Sans clean
-- Surface: `bg-card/60 backdrop-blur-xl`
+- Surface: `S2 / S3` (e.g. `bg-card/60 backdrop-blur-xl`)
 - Borders: `border-border/30`
 - Radius: `rounded-2xl`
 - Elevation: Blur + subtle shadow
@@ -143,7 +143,18 @@ Each UI must declare:
 - `default + mono` → developer tools (Palette: Zinc monochromatic)
 - `bento + brutalism` → experimental layouts (Palette: any high-C primary)
 
-> For token generation and light/dark inversion rules for each palette, see [design-thinking.md](./design-thinking.md).
+> For token generation and light/dark inversion rules, see the **Elevation Stack (S0-S3)** in [design-thinking.md](./design-thinking.md).
+
+---
+
+## C4. The Nesting Pattern (Anilhamento)
+
+Presets with structural containers (BENTO, GLASS, CLEAN) MUST follow the **Elevation Stack** when nesting components:
+
+1. **Base**: `S0` (Page Background)
+2. **Container**: `S1` or `S2`
+3. **Child Element**: Move one layer up (e.g., child of `S2` is `S3`).
+4. **Contrast**: Apply the **S1/S2 Boundary** border rules from [design-thinking.md](./design-thinking.md).
 
 ---
 
