@@ -154,6 +154,15 @@ function printHeader(version) {
   console.log('  Press Ctrl+C to exit.\n');
 }
 
+function printUpdateNotification(current, latest) {
+  console.log('  ┌──────────────────────────────────────────────────────┐');
+  console.log(`  │  🚀 NEW VERSION AVAILABLE: v${latest.padEnd(25)} │`);
+  console.log(`  │  Your version: v${current.padEnd(32)} │`);
+  console.log('  │                                                      │');
+  console.log('  │  Update with: npm install -g sdg-agents              │');
+  console.log('  └──────────────────────────────────────────────────────┘\n');
+}
+
 function printFooter() {
   console.log('\n  See you.\n');
 }
@@ -209,6 +218,7 @@ const BundleUI = {
   printDryRunPreview,
   printBuildSummary,
   printHeader,
+  printUpdateNotification,
   printFooter,
   printHelp,
 };

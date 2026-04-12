@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.13.0] - 2026-04-12
+
+### Added
+
+### Fixed
+
+## [1.12.0] - 2026-04-12
+
+### Added
+
+- **CLI Update Suggestion** — implemented a non-blocking check for new versions of `sdg-agents` on the npm registry; displays a professional "Update Available" notification when a newer version is detected during interactive sessions.
+
+### Fixed
+
 ## [1.11.3] - 2026-04-12
 
 ### Added

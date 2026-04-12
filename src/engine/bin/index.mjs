@@ -12,6 +12,7 @@ import { FsUtils } from '../lib/fs-utils.mjs';
 import { PromptUtils } from '../lib/prompt-utils.mjs';
 import { CliParser } from '../lib/cli-parser.mjs';
 import { BundleUI } from '../lib/ui-utils.mjs';
+import { VersionUtils } from '../lib/version-utils.mjs';
 
 const { runIfDirect } = FsUtils;
 const { safeSelect } = PromptUtils;
@@ -55,6 +56,11 @@ async function run() {
 
 async function startInteractiveMode(args) {
   BundleUI.printHeader(packageJson.version);
+
+  const updateInfo = await VersionUtils.checkForUpdates(packageJson.version);
+  if (updateInfo.hasUpdate) {
+    BundleUI.printUpdateNotification(packageJson.version, updateInfo.latest);
+  }
 
   try {
     while (true) {
