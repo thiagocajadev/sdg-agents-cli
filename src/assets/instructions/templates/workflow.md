@@ -119,11 +119,12 @@ On every request, classify intent before acting:
 
 ### Session Start
 
-1. Read `.ai-backlog/context.md` — understand the project brief.
+1. **Terminal Sanity Check**: Run `node -v` and `npm -v` (or the project's primary toolchain) to "wake up" the terminal and confirm execution capabilities in the current shell.
+2. Read `.ai-backlog/context.md` — understand the project brief.
    - **Local Priority**: Always look for the `.ai-backlog/` folder in the current directory first to avoid redundancy.
    - **If missing**: analyze the project (read `package.json`, `README.md`, `CHANGELOG.md`, entry points, folder structure) and generate `.ai-backlog/context.md` using the bootstrap template below. Announce: _"context.md created with initial analysis. Review and adjust as needed."_ Never overwrite an existing file.
-2. Read `.ai-backlog/tasks.md` — check for `[IN_PROGRESS]` tasks before accepting new work.
-3. If an `[IN_PROGRESS]` task exists: resume it. Announce what was in progress and continue from the checkpoint.
+3. Read `.ai-backlog/tasks.md` — check for `[IN_PROGRESS]` tasks before accepting new work.
+4. If an `[IN_PROGRESS]` task exists: resume it. Announce what was in progress and continue from the checkpoint.
 
 #### context.md Bootstrap Template
 
