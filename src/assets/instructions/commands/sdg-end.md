@@ -39,9 +39,10 @@ Update `## Now` with the next objective, or set it to `Ready for next instructio
 
 Log any patterns, findings, or rework discovered during this cycle. Curate stale or irrelevant entries.
 
-- **feat:** cycle → Update `.ai-backlog/learned.md` with success patterns and research findings.
-- **fix:** cycle → Update `.ai-backlog/troubleshoot.md` with the Root Cause Analysis (RCA) and "gotchas" discovered.
-- **Other:** If specific insights exist but don't fit the above, announce them or update `.ai-backlog/learned.md`.
+- [ ] **KNOWLEDGE** — Log findings in `.ai-backlog/learned.md` or `troubleshoot.md`. Curate stale items.
+- [ ] **CURATE** — Final scan for slop/AI-isms. Run `git status`.
+- [ ] **PURGE SESSION (GSD)** — Mandatório se chat longo (>10 mensagens). Sugira fechar chat e abrir novo após commit. Limpa "context rot".
+- [ ] **LINT** — Run `lint`, `lint:fix`, or equivalent. Block commit if errors remain.
 
 ## Step 6 — CURATE
 

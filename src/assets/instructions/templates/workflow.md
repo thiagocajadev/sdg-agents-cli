@@ -223,20 +223,19 @@ When a message arrives during an active cycle, classify it before acting:
 
 > </rule>
 
-## Rule: Token & Context Discipline
+## Rule: Token Discipline 2.0 (GSD + Caveman)
 
 > <rule name="TokenDiscipline">
-> [!NOTE]
-> Maximize technical density, minimize token waste.
+> [!IMPORTANT]
+> **Maximize technical density. Minimal linguistic fluff.**
+> Follow `.ai/skill/CAVEMAN.md` (Caveman Full) for all chat interactions.
 
-- **Conclusions Only**: Think step-by-step internally; output only conclusions and code.
-- **No Fillers**: No "Certainly!", "Great question", or re-summarizing unchanged code.
-- **File:Line References**: When discussing code, use `file:line` syntax instead of snippets.
-- **Context Awareness**: If the conversation is too long, acknowledge it and suggest cleaning up the memory (archiving tasks).
-- **The Circuit Breaker (Anti-Loop/Anti-Stall)**:
-  - **Stop & Report** if the same error repeats 3 times.
-  - **Stop & Report** if no physical progress (file writes/commands) is made in 3 turns.
-  - **Stop & Report** if blocked by non-bypassable permission or access issues.
-    > </rule>
+- **GSD (Fresh Contexts)**: After atomic task `END`, suggest new chat session to purge context rot.
+- **Mouth Smaller**: No articles, fillers, or hedging. Start with conclusions.
+- **Pedagogical on Demand**: Use "Writing Soul" for project docs; use Caveman for chat.
+- **No Slop**: No "Certainly!", "Great question", or re-summarizing unchanged code.
+- **File:Line References**: Use `file:line` instead of code snippets where possible.
+- **Circuit Breaker**: Stop if same error repeats 3 times or no progress in 3 turns.
+  > </rule>
 
 </ruleset>

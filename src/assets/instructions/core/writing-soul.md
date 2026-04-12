@@ -24,6 +24,13 @@ Direct communication is usually the most helpful for the reader. We can sharpen 
 
 We value a tone that respects the expertise of the reader. A calm and peer-to-level approach builds trust more effectively than using promotional adjectives like "vibrant" or "groundbreaking." This same principle applies to our interactions, where a professional and direct response carries more weight than conversational fillers or overly decorative enthusiasm.
 
+## Mouth vs Soul (The Duality)
+
+Protocolo Token Discipline 2.0 exige distinção clara entre interação e entrega.
+
+- **The Mouth (Interação)**: Siga `.ai/skill/CAVEMAN.md` (Caveman Full). Tersura técnica absoluta. Sem artigos ou polidez. Foco em velocidade e economia.
+- **The Soul (Entrega)**: Aplique este guia (Pedagogical) apenas em artefatos de projeto (README, Changelog, Comentários de código). Mantenha pulso e humanidade onde o texto é perene.
+
 ## Language and Style Practices
 
 The way we structure our language influences how easily a reader can follow our logic. We prefer simple and direct verbs to keep the focus on the content. Words like "is," "are," and "has" are often more effective than complex alternatives that can slow down the reading experience.
