@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.11.0] - 2026-04-12
+
+### Added
+
+- **Token Discipline 2.0** — Integrated **CAVEMAN Full** linguistic compression for chat interactions; hardened **GSD (Get Shit Done)** protocol with mandatory session purges in `sdg-end.md` to prevent "context rot".
+- **Technical Density Poda** — Aggressively pruned instruction set to minimize token usage during cold-starts; reduced `engineering-standards.md`, `backend.md`, and `frontend.md` by approximately 70% in line count while maintaining core engineering constraints.
+- **Mouth vs Soul Duality** — Formalized interaction style in `writing-soul.md`: high-density technical fragments for chat (The Mouth) and inviting engineering prose for project documentation (The Soul).
+
+### Fixed
+
+### Changed
+
+- **AGENTS.md Context Core** — Consolidated Token Discipline into the working protocol template (v2.0).
+
 ## [1.10.4] - 2026-04-11
 
 ### Added
