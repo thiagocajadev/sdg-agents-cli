@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.19.2] - 2026-04-12
+
+### Added
+
+### Fixed
+
+- **Harness Engineering (Memory) Label** — refined the terminology label from "Harness Engineering" to "Harness Engineering (Memory)" across all documentation for conceptual clarity.
+
+## [1.19.1] - 2026-04-12
+
+### Added
+
+### Fixed
+
+- **Harness Engineering Terminology** — updated `README.md`, `README.pt-BR.md`, and `PROJECT-STRUCTURE.md` to replace "Session memory & Expertise" with the official term "Harness Engineering" across all documentation.
+
 ## [1.19.0] - 2026-04-12
 
 ### Added

@@ -24,7 +24,7 @@ The instruction set covers:
 - **Engineering rules**: naming, code style, clean code standards, security boundaries
 - **Language patterns**: idiomatic conventions for your specific stack
 - **Architectural guidance**: rules for your project's structural pattern (vertical slice, MVC, etc.)
-- **Session memory**: a `.ai-backlog/` folder that persists context and task state across sessions
+- **Harness Engineering (Memory)**: a `.ai-backlog/` folder that persists context and task state across sessions
 
 ---
 
@@ -71,7 +71,7 @@ your-project/
 │   ├── commands/                ← Context files for feat/fix/docs cycles
 │   ├── workflows/               ← Workflow protocol
 │   └── dev-guides/              ← Reference files, spec templates, and guides
-└── .ai-backlog/                 ← Session memory & Expertise (gitignored)
+└── .ai-backlog/                 ← Harness Engineering (Memory) — gitignored
     └── ...                      ← (See docs/PROJECT-STRUCTURE.md for details)
 ```
 

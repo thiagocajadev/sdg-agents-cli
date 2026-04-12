@@ -6,7 +6,7 @@ This document describes every directory and file installed by `sdg-agents init`.
 
 ```text
 your-project/
-├── .ai-backlog/                 ← Session memory & Expertise (gitignored)
+├── .ai-backlog/                 ← Harness Engineering (Memory) — gitignored
 │   ├── context.md               ← Project brief: stack, tech decisions, current state
 │   ├── tasks.md                 ← Task list (TODO / IN_PROGRESS / DONE)
 │   ├── learned.md               ← Lessons learned: success patterns and research findings

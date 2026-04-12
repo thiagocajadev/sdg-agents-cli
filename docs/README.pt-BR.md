@@ -24,7 +24,7 @@ O conjunto de instruções cobre:
 - **Regras de engenharia**: nomenclatura, estilo de código, padrões de clean code, limites de segurança
 - **Padrões de linguagem**: convenções idiomáticas para o seu stack específico
 - **Guia arquitetural**: regras para o padrão estrutural do projeto (vertical slice, MVC, etc.)
-- **Memória de sessão**: uma pasta `.ai-backlog/` que persiste contexto e estado de tarefas entre sessões
+- **Harness Engineering (Memory)**: uma pasta `.ai-backlog/` que persiste contexto e estado de tarefas entre sessões
 
 ---
 
@@ -71,7 +71,7 @@ seu-projeto/
 │   ├── commands/                ← Arquivos de contexto para os ciclos feat/fix/docs
 │   ├── workflows/               ← Protocolo de workflow
 │   └── dev-guides/              ← Arquivos de referência, templates de spec e guias
-└── .ai-backlog/                 ← Memória de sessão & Expertise (gitignored)
+└── .ai-backlog/                 ← Harness Engineering (Memory) — gitignored
     └── ...                      ← (Veja docs/PROJECT-STRUCTURE.md para detalhes)
 ```
 
