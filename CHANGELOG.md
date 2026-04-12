@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.16.0] - 2026-04-12
+
+### Added
+
+- **Zero-Leak END Resilience** — hardened the delivery cycle with mandatory workspace audits and catch-all staging (`git add .`) to prevent uncommitted side-effects.
+- **Self-Healing Technical Quality** — integrated automatic lint-repair (`lint --fix`) into the END phase to resolve formatting blockers without interrupting the delivery.
+- **Automated Context Bootstrapping** — added fallback logic to the END cycle to automatically recreate `.ai-backlog/context.md` if it is missing or lost.
+- **Contextual Narrative Guard** — refactored the engine to allow semantic release commits by validating against specifically promoted version headers.
+
+### Fixed
+
 ## [1.15.0] - 2026-04-12
 
 ### Added

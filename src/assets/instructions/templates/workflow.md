@@ -100,12 +100,12 @@ On every request, classify intent before acting:
 > **Steps:**
 >
 > 1. **Task Summary**: Writes one sentence per completed task.
-> 2. **Changelog**: Adds an entry under `## [Unreleased]`: `### Added` for feat · `### Fixed` for fix.
-> 3. **Backlog Sync**: Moves all finished tasks to `## Done` in `tasks.md`.
-> 4. **Context Update**: Updates `## Now` in `context.md` with the next objective or clears it.
-> 5. **Lint**: Runs any final linting scripts, fixes what's possible, and blocks the commit if errors remain.
-> 6. **Commit**: Proposes a commit message and waits for your approval.
-> 7. **Next Step**: Suggests what comes next: push · deploy · or a new task.
+> 2. **Changelog**: Adds a narrative entry under `## [Unreleased]`.
+> 3. **Zero-Leak Staging**: Runs `git add .` to capture all side-effects and metadata.
+> 4. **Context Resilience**: Updates `context.md` (or bootstraps it if missing).
+> 5. **Self-Healing Quality**: Runs linting and attempts auto-repair (`lint --fix`) if needed.
+> 6. **Release (Audit & Commit)**: Runs `npm run bump <feat|fix>`, performs a final workspace audit, and proposes a semantic release commit.
+> 7. **Final Delivery**: Proposes `git push` and a fresh session.
 >
 > [!WARNING]
 > Do NOT perform `git commit` or `git push` autonomously. Always **PROPOSE** and **WAIT**.

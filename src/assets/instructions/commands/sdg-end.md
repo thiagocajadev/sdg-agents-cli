@@ -1,61 +1,70 @@
-# Cycle Terminator — Phase: END (The Delivery) — MODE: PLANNING
+# Phase: END (The Delivery) — MODE: PLANNING
 
-This command has no arguments. Type `end:` to close the active cycle.
-
-Executing the **Phase: END** checklist in strict order. Each step must be completed and announced before advancing.
+This command closes the current development cycle and is the **Ultimate Guarantor of Zero Context Leak**. Follow all 7 steps with total rigor.
 
 ---
 
 ## Step 1 — Task Summary
 
-Writes one sentence per completed task. Professional, direct, and technical.
+Write a concise summary of the work performed.
 
-## Step 2 — Changelog
+- One sentence per completed task from `.ai-backlog/tasks.md`.
+- Focus on technical outcomes.
 
-Adds an entry under `## [Unreleased]`: `### Added` for feat · `### Fixed` for fix.
+## Step 2 — Changelog Narrative
 
-- **Hard Rule**: Do NOT run the bump script until the narrative is written.
+Update `CHANGELOG.md` to maintain the project's technical history.
 
-## Step 3 — Backlog Sync
+- **Action**: Add entries under `## [Unreleased]`.
+- **Categorization**: Use `### Added` for `feat:` or `### Fixed` for `fix:`.
+- **Integrity**: Ensure the narrative allows for a professional semantic release.
 
-Moves all finished tasks to `## Done` in `tasks.md`.
+## Step 3 — Backlog Sync & Catch-all Staging
 
-- **Knowledge/Insights**: Update `.ai-backlog/learned.md` or `troubleshoot.md` with findings.
-- **Zero Context Leak (Curation)**: Final scan for slop. Run `git status` — confirm:
-  - No uncommitted files (like `package-lock.json` or modified instructions).
-  - No unfinished comments (`TODO`, `FIXME`, `...`).
-  - No "AI-isms" or promotional language.
-  - Confirm only intended files are staged.
+Synchronize state and ensure ALL side-effects are captured.
 
-## Step 4 — Context Update
+- **Backlog**: Move all `Active` tasks to `Done` in `.ai-backlog/tasks.md`.
+- **Catch-all Stage**: Run `git add .` to capture metadata updates (package-lock.json, manifests) and any uncommitted side-effects.
+- **Audit**: Perform a **Zero Context Leak** check: no `TODO` remnants or internal-only files.
 
-Updates `## Now` in `context.md` with the next objective or clears it.
+## Step 4 — Context Resilience (Bootstrap & Update)
 
-## Step 5 — Lint
+Update the project context. If the project state is lost, this is the healing moment.
 
-Runs the project's linting script (e.g., `npm run lint`).
+- **Self-Healing**: If `.ai-backlog/context.md` is missing, analyze the project and **Bootstrap** it using the template from `workflow.md`.
+- **Update**: Set `## Now` to `Ready for next instruction.`.
 
-- **Auto-fix**: Resolve what is possible.
-- **Blocker**: If non-auto-fixable errors remain, you **MUST** report them and stop. Do not propose a commit with lint errors.
+## Step 5 — Technical Quality (Self-Healing Lint)
 
-## Step 6 — Commit
+Perform a final quality sweep. No delivery with broken quality.
 
-Proposes a commit message following the project's naming discipline and waits for your approval.
+- **Lint**: Run the project's linting script.
+- **Self-Healing**: If lint fails, you **MUST** run a one-time repair attempt (e.g., `npm run lint -- --fix`) before reporting a failure.
+- **Blocker**: If non-auto-fixable errors remain, you **MUST** report them and stop.
 
-- **Autonomous Action**: You are **FORBIDDEN** from running `git commit` or any automated bump script that performs a commit until the Developer says "go".
+## Step 6 — Semantic Release (Audit & Commit)
 
-## Step 7 — Next Step
+Execute the delivery using the automated semantic pipeline.
 
-Suggests what comes next: push · deploy · or a new task.
+1. **Identify**: Determine if the cycle was a `feat` or `fix`.
+2. **Execute**: Run `npm run bump <feat|fix>`.
+3. **Workspace Audit**: Run `git status` to ensure the staging area is 100% clean and nothing was left behind after the bump. Stage any remaining metadata changes with `git add .`.
+4. **Semantic Commit**: Propose exactly: `git commit -m "<feat|fix>: release v<version>"`.
+5. **Approval**: **PROPOSE** and **WAIT** for explicit Developer authorization.
+
+## Step 7 — Final Stroke (Push & Purge)
+
+Complete the delivery cycle.
+
+- **Push**: Propose `git push` to synchronize remote.
+- **GSD**: Suggest starting a brand new chat session to purge the current context and prevent token rot.
 
 ---
 
 > [!WARNING]
 > The cycle is **INCOMPLETE** until all 7 steps are checked.
-> Do NOT accept new work or start a new cycle until this phase is finalized.
+> You are **FORBIDDEN** from accepting new work until this phase is finalized and the workspace is clean.
 
 ---
 
-> [!WARNING]
-> The cycle is **INCOMPLETE** until all 7 steps are checked.
-> Do NOT accept new work or start a new cycle until this phase is finalized.
+> Read `.ai/instructions/core/agent-roles.md` for the multi-agent handoff protocol (Planning + Fast roles).
