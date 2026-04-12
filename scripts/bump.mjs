@@ -28,32 +28,57 @@ function run() {
   };
 
   const npmType = typeMap[bumpType];
+  const oldVersion = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')).version;
+  const oldChangelog = fs.existsSync(CHANGELOG_PATH)
+    ? fs.readFileSync(CHANGELOG_PATH, 'utf8')
+    : null;
 
   try {
-    // 1. Get current version
-    const pkg = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8'));
-    const oldVersion = pkg.version;
-
-    // 2. Bump version in package.json (no git tag/commit yet)
+    // 1. Bump version in package.json (no git tag/commit yet)
     console.log(`🚀 Bumping version (${npmType})...`);
     execSync(`npm version ${npmType} --no-git-tag-version`, { stdio: 'inherit' });
 
-    // 3. Get new version
-    const newPkg = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8'));
-    const newVersion = newPkg.version;
+    // 2. Get new version
+    const newVersion = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')).version;
 
-    // 4. Update CHANGELOG.md
+    // 3. Update CHANGELOG.md
     updateChangelog(newVersion);
 
-    // 5. Commit the bump
+    // 4. Commit the bump
     console.log('📦 Committing release...');
     execSync('git add .', { stdio: 'inherit' });
     execSync(`git commit -m "chore: release ${newVersion}"`, { stdio: 'inherit' });
 
     console.log(`✅ Success: ${oldVersion} → ${newVersion}`);
     console.log('🔗 CHANGELOG.md updated and promoted to current date.');
-  } catch (error) {
-    console.error('❌ Error during bump strategy:', error.message);
+  } catch {
+    console.error('\n❌ Release failed. Attempting to revert versioning changes...\n');
+
+    // Restoration focus: only metadata files. Developer code is safely preserved.
+    fs.writeFileSync(
+      PACKAGE_JSON_PATH,
+      JSON.stringify(
+        { ...JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')), version: oldVersion },
+        null,
+        2
+      )
+    );
+
+    if (oldChangelog !== null) {
+      fs.writeFileSync(CHANGELOG_PATH, oldChangelog);
+    }
+
+    // Try to sync lockfile if it exists
+    if (fs.existsSync(path.join(ROOT_DIR, 'package-lock.json'))) {
+      try {
+        execSync('npm install --package-lock-only', { stdio: 'ignore' });
+      } catch {
+        // Silent fail for lockfile sync
+      }
+    }
+
+    console.error('⚠️  Metadata reverted to', oldVersion);
+    console.error('🛠️  Fix the issue (e.g. lint errors) and run "npm run bump" again.');
     process.exit(1);
   }
 }
