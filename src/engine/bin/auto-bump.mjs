@@ -105,10 +105,7 @@ function syncAllPackages(nextVersion) {
 }
 
 function stageAndCommit(nextVersion) {
-  const paths = resolvePackagePaths();
-  const files = [...paths, CHANGELOG_PATH].filter((p) => fs.existsSync(p)).join(' ');
-
-  execSync(`git add ${files}`, { stdio: 'inherit' });
+  execSync('git add .', { stdio: 'inherit' });
   execSync(`git commit -m "chore: bump version to ${nextVersion}"`, { stdio: 'inherit' });
 }
 

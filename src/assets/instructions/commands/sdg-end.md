@@ -44,15 +44,14 @@ Log any patterns, findings, or rework discovered during this cycle. Curate stale
 - [ ] **PURGE SESSION (GSD)** — Mandatório se chat longo (>10 mensagens). Sugira fechar chat e abrir novo após commit. Limpa "context rot".
 - [ ] **LINT** — Run `lint`, `lint:fix`, or equivalent. Block commit if errors remain.
 
-## Step 6 — CURATE
+## Step 6 — CURATE (Zero Context Leak)
 
-Scan all changed files for:
+Scan all changed files for technical slop. Run `git status` — **You MUST ensure the workspace is 100% clean.**
 
-- Unfinished comments (`TODO`, `FIXME`, `...`)
-- "AI-isms" or promotional language in docs/UI text
-- Dead code introduced during the cycle
-
-Run `git status` — confirm only intended files are staged.
+- No uncommitted files (like `package-lock.json` or modified instructions).
+- No unfinished comments (`TODO`, `FIXME`, `...`).
+- No "AI-isms" or promotional language.
+- Run `git status` — confirm only intended files are staged/committed.
 
 ## Step 7 — LINT
 

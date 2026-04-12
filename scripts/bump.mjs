@@ -47,7 +47,7 @@ function run() {
 
     // 5. Commit the bump
     console.log('📦 Committing release...');
-    execSync('git add package.json CHANGELOG.md', { stdio: 'inherit' });
+    execSync('git add .', { stdio: 'inherit' });
     execSync(`git commit -m "chore: release ${newVersion}"`, { stdio: 'inherit' });
 
     console.log(`✅ Success: ${oldVersion} → ${newVersion}`);

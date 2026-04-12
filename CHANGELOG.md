@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.11.2] - 2026-04-12
+
+### Added
+
+- **Zero Context Leak Protocol** — Hardened `end:` cycle and bump scripts to enforce 100% workspace synchronization; switched to `git add .` in release commits to catch `package-lock.json` and mirrored assets automatically.
+
+### Fixed
+
 ## [1.11.1] - 2026-04-12
 
 ### Added
