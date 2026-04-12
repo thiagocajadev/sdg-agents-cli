@@ -433,10 +433,16 @@ function buildClaudeContent() {
  * If agents/ides are selected, it will also dump the rules to the native target.
  */
 function writeAgentConfig(targetDir, content, requestedAgents = []) {
-  // Always create the generic fallback AGENTS.md
+  // Always create the generic fallback AGENTS.md and CAVEMAN.md
   const skillDir = path.join(targetDir, '.ai', 'skill');
   if (!fs.existsSync(skillDir)) fs.mkdirSync(skillDir, { recursive: true });
   fs.writeFileSync(path.join(skillDir, 'AGENTS.md'), content);
+
+  const cavemanSource = path.join(SOURCE_INSTRUCTIONS, 'core', 'caveman.md');
+  if (fs.existsSync(cavemanSource)) {
+    const cavemanContent = fs.readFileSync(cavemanSource, 'utf8');
+    fs.writeFileSync(path.join(skillDir, 'CAVEMAN.md'), cavemanContent);
+  }
 
   if (!requestedAgents || requestedAgents.length === 0) return;
 
