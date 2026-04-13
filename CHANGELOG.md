@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.4.3] - 2026-04-13
+
+### Added
+
+- **One-Line Entry Point Mandate** — formalized the rule that `run()`, `start()`, and `init()` must be limited to a single line of delegation.
+- **Automated SLA Heuristics** — updated the governance auditor to programmatically detect Pure Entry Point violations and enforce Explaining Returns Project-wide.
+
+### Fixed
+
+- **Narrative Cascade (Law 3) in index.mjs** — refactored the main CLI entry point to 100% compliance, implementing a pure one-line `run()` delegator and narrative sibling patterns.
+- **Audit Tool Blind Spots** — expanded scansion scope to include the project root bin and hardened regex-based heuristics for complex multi-line orchestrations.
+
 ## [2.4.2] - 2026-04-13
 
 ### Added

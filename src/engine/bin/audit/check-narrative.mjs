@@ -34,6 +34,7 @@ function collectTargetFiles() {
     path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'core'),
     path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'domain'),
     path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'infra'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin'),
     path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'init'),
     path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'audit'),
     path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'maintenance'),
