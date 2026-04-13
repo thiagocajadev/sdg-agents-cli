@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.20.1] - 2026-04-13
+
+### Added
+
+- **Roadmap Revision (Vision 2.x)** — Updated `ROADMAP.md` to reflect `v1.20.0` resilience achievements and projected the next maturity stages: Governance Observability (`sdg audit`), Global Instruction Registry (`sdg use`), MCP Semantic Indexing, and Visual Governance.
+
+### Fixed
+
 ## [1.20.0] - 2026-04-13
 
 ### Added
