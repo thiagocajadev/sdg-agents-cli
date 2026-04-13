@@ -24,6 +24,7 @@ O conjunto de instruções cobre:
 - **Regras de engenharia**: nomenclatura, estilo de código, padrões de clean code, limites de segurança
 - **Padrões de linguagem**: convenções idiomáticas para o seu stack específico
 - **Guia arquitetural**: regras para o padrão estrutural do projeto (vertical slice, MVC, etc.)
+- **Toolkit de Design Criativo**: instruções especializadas para branding, estratégia de redes sociais e blueprints de landing pages
 - **Harness Engineering (Memory)**: uma pasta `.ai-backlog/` que persiste contexto e estado de tarefas entre sessões
 
 ---
@@ -44,11 +45,11 @@ O assistente interativo guia você na escolha do flavor arquitetural e um ou mai
 # TypeScript + Vertical Slice
 npx sdg-agents init --flavor vertical-slice --idiom typescript
 
-# Múltiplos idiomas
+# Suporte multi-idioma
 npx sdg-agents init --flavor mvc --idiom typescript,python
 
-# Visualizar sem gravar arquivos
-npx sdg-agents init --flavor mvc --idiom python --dry-run
+# Toolkit de Design Criativo (Apenas Injeção)
+npx sdg-agents add --toolkit creative
 ```
 
 ---
@@ -64,6 +65,7 @@ seu-projeto/
 │   │   └── AGENTS.md            ← Ponto de entrada — carregado automaticamente pelos agentes
 │   ├── instructions/
 │   │   ├── core/                ← Regras de engenharia (estilo, nomenclatura, segurança, testes)
+│   │   ├── creative/            ← Toolkit de Design Criativo (Branding, Social, Landing Page)
 │   │   ├── flavors/             ← Padrões arquiteturais (vertical-slice, mvc, etc.)
 │   │   ├── idioms/              ← Convenções por linguagem (TS, Python, Go, etc.)
 │   │   ├── competencies/        ← Regras por camada (frontend, backend)

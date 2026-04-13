@@ -19,14 +19,15 @@ your-project/
     │   │   ├── ui/              ← UI-specific rules (design tokens, component standards)
     │   │   ├── staff-dna.md     ← Engineering laws (the 7 principles)
     │   │   └── engineering-standards.md ← Tactical rules (clean code, resilience, DoD)
+    │   ├── creative/            ← Creative Toolkit (Branding, Social Media, Landing Pages)
     │   ├── flavors/             ← Architectural patterns (vertical-slice, mvc, etc.)
     │   ├── idioms/              ← Language conventions (typescript, python, go, etc.)
     │   ├── competencies/        ← Layer rules (frontend, backend)
     │   └── templates/           ← Context and backlog templates
     ├── commands/                ← Context files for feat/fix/docs cycles
     ├── workflows/               ← Workflow protocol
-    └── prompts/
-        └── dev-tracks/          ← SPEC phase prompt templates
+    └── dev-guides/              ← Reference files and guides
+        └── prompt-tracks/       ← SPEC phase prompt templates
 ```
 
 Agent-specific root files are also written (`CLAUDE.md`, `.cursorrules`, `.windsurfrules`, etc.) based on which agents are detected or selected during init.
@@ -42,6 +43,7 @@ Gitignored. Persists project state across sessions so any agent — in any sessi
 - Stack and frameworks used
 - Architectural decisions and their rationale
 - Current objective (`## Now`)
+- Developer metadata (`## Partner`)
 
 **tasks.md** — the task list. Tracks atomic units of work across sessions:
 
@@ -85,6 +87,15 @@ Non-negotiable rules that apply to every project, regardless of stack or flavor:
 | `security-pipeline.md`     | Prevents leaking PII and environment variable templates        |
 | `testing-principles.md`    | Test structure and regression requirements                     |
 
+### instructions/creative/
+
+Specialized rules for creative and branding workflows. These include:
+
+- **Branding**: Brand DNA, visual identity, and logo technical specs.
+- **Social Media**: Platform-specific strategy (IG, TikTok, LinkedIn, YouTube) including safe zones and prompt logic.
+- **Landing Pages**: Conversion-focused blueprints and conversion structural patterns.
+- **Tactic Guides**: Pro-level creative prompting and platform engagement rules.
+
 ### instructions/flavors/
 
 Rules for the project's architectural pattern. Defines where logic belongs — for example, whether business logic lives in UseCases, Services, or Controllers.
@@ -107,9 +118,9 @@ Context files loaded on demand when a specific cycle is triggered:
 
 These files are not loaded on session start — only when the relevant cycle begins.
 
-### prompts/dev-tracks/
+### dev-guides/prompt-tracks/
 
-Prompt templates for authoring the SPEC phase:
+Prompt templates for authoring the SPEC phase (replaces the legacy `prompts/` directory):
 
 - `00-lite-mode` — single-file or isolated changes
 - `01-new-evolution` — multi-layer features
@@ -121,7 +132,7 @@ Prompt templates for authoring the SPEC phase:
 
 | Phase | Files read                                                                             |
 | :---- | :------------------------------------------------------------------------------------- |
-| SPEC  | `prompts/dev-tracks/`, `commands/sdg-feat.md` (or fix/docs)                            |
+| SPEC  | `dev-guides/prompt-tracks/`, `commands/sdg-feat.md` (or fix/docs)                      |
 | PLAN  | `.ai-backlog/tasks.md`                                                                 |
 | CODE  | `core/code-style.md`, `core/engineering-standards.md`, `learned.md`, `troubleshoot.md` |
 | TEST  | `core/testing-principles.md`                                                           |

@@ -24,6 +24,7 @@ The instruction set covers:
 - **Engineering rules**: naming, code style, clean code standards, security boundaries
 - **Language patterns**: idiomatic conventions for your specific stack
 - **Architectural guidance**: rules for your project's structural pattern (vertical slice, MVC, etc.)
+- **Creative Design Toolkit**: specialized instructions for branding, social media strategy, and landing page blueprints
 - **Harness Engineering (Memory)**: a `.ai-backlog/` folder that persists context and task state across sessions
 
 ---
@@ -44,11 +45,11 @@ The interactive wizard guides you through selecting an architectural flavor and 
 # TypeScript + Vertical Slice
 npx sdg-agents init --flavor vertical-slice --idiom typescript
 
-# Multiple idioms
+# Multi-idiom Support
 npx sdg-agents init --flavor mvc --idiom typescript,python
 
-# Preview without writing files
-npx sdg-agents init --flavor mvc --idiom python --dry-run
+# Creative Design Toolkit (Injection Only)
+npx sdg-agents add --toolkit creative
 ```
 
 ---
@@ -64,6 +65,7 @@ your-project/
 │   │   └── AGENTS.md            ← Main entry point — auto-loaded by agents
 │   ├── instructions/
 │   │   ├── core/                ← Engineering rules (style, naming, security, testing)
+│   │   ├── creative/            ← Creative Design Toolkit (Branding, Social, Landing Page)
 │   │   ├── flavors/             ← Architectural patterns (vertical-slice, mvc, etc.)
 │   │   ├── idioms/              ← Language-specific conventions (TS, Python, Go, etc.)
 │   │   ├── competencies/        ← Layer-specific rules (frontend, backend)

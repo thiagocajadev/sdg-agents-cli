@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.21.3] - 2026-04-13
+
+### Added
+
+### Fixed
+- **Documentation Sync** — updated `README.md`, `docs/README.pt-BR.md`, and `docs/PROJECT-STRUCTURE.md` to reflect the new Creative Design Toolkit features, Item 4 menu logic, and centralized architecture.
+
 ## [1.21.2] - 2026-04-13
 
 ### Added
