@@ -196,23 +196,19 @@ function buildOrderSummary(order) {
 > [!IMPORTANT]
 > Before finishing any file, verify every item. Binary pass/fail — no partial credit.
 
-- [ ] Entry point is the **first function** after imports/constants (Stepdown Rule)
+- [ ] **Stepdown Rule**: entry point is the first function after imports/constants
 - [ ] **SLA applied**: every function either orchestrates or implements — never both
 - [ ] **Lexical Scoping**: every helper used by only one function is declared _inside_ that function
-- [ ] **Explaining Returns**: no bare `return ok(...)`, `return fail(...)`, or `response.status(...).json(...)` — named `const` above every return
-- [ ] **No framework abbreviations**: `req` → `request`, `res` → `response`; No Abbreviations rule has no framework exception
-- [ ] **Vertical Density applied**: logical parts grouped by "Paragraphs of Intent" (single blank line between groups, none within)
-- [ ] **Revealing Module Pattern**: public contract defined via named object + named export at file footer
-- [ ] **Shallow Boundaries**: no property chain deeper than 3 levels — slice into a named `const` first
+- [ ] **Explaining Returns**: named `const` above every return statement
+- [ ] **No framework abbreviations**: `req` → `request`, `res` → `response`
+- [ ] **Vertical Density applied**: logical parts grouped by "Paragraphs of Intent"
+- [ ] **Revealing Module Pattern**: public contract defined via named object + named export at footer
+- [ ] **Shallow Boundaries**: no property chain deeper than 3 levels (level 2 preferred)
 - [ ] Destructuring happens inside the function body, not in the parameter signature
-- [ ] No `helpers.js`, `utils.js`, or `common.js` — files named by domain + operation
-- [ ] Every name reveals its role without needing a comment
-- [ ] No explanatory comments — only `// why:` for non-obvious constraints or deliberate trade-offs
-- [ ] A new reader understands the module's purpose without scrolling past the first screen
-- [ ] **Boolean names carry a prefix**: no bare `loading`, `error`, `active` — use `isLoading`, `hasError`, `isActive`
-- [ ] No raw entities in responses — OutputFilter (DTO) applied at every API boundary
-- [ ] **Config Contract defined**: all environment variables listed in the SPEC with abstract naming
-- [ ] **No config templates**: confirmed no `.env.example` or similar committed to the repository
+- [ ] **Boolean names carry a prefix**: (e.g., `isLoading`, `hasError`, `isActive`)
+- [ ] **No explanatory comments**: only `// why:` for non-obvious constraints
+- [ ] **No Section Banners**: zero narrative interruptions via `// --- Section ---`
+- [ ] Code reads like a "Short Story" headline-to-details (Narrative Cascade)
 
 </rule>
 

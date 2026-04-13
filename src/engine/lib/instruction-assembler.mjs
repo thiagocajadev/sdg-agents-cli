@@ -588,7 +588,7 @@ function getActiveAgents(selections) {
   return activeAgents;
 }
 
-const InstructionAssembler = {
+export const InstructionAssembler = {
   buildMasterInstructions,
   buildClaudeContent,
   buildPromptModeStub,
@@ -599,5 +599,3 @@ const InstructionAssembler = {
   writeAutomationScripts,
   getActiveAgents,
 };
-
-export { InstructionAssembler };

@@ -169,7 +169,7 @@ async function printPromptUI(content, title = 'AI Prompt Generated') {
   console.log('  ' + '─'.repeat(60) + '\n');
 }
 
-const PromptUtils = {
+export const PromptUtils = {
   isMaintainerMode,
   savePromptToFile,
   copyToClipboard,
@@ -180,5 +180,3 @@ const PromptUtils = {
   safeInput,
   sanitizeInput,
 };
-
-export { PromptUtils };

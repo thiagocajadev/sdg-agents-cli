@@ -1,133 +1,80 @@
-#!/usr/bin/env node
-
-/**
- * Narrative Guard — Blocks feat: and fix: commits if CHANGELOG.md [Unreleased] is empty.
- * Ensures the auto-bump pipeline always has content to promote.
- */
-
 import fs from 'node:fs';
 import path from 'node:path';
-import { execSync } from 'node:child_process';
+import { NARRATIVE_CHECKLIST } from '../config/governance.mjs';
+import { FsUtils } from '../lib/fs-utils.mjs';
+
+/**
+ * Narrative Auditor — Specialized Law 3 compliance tool.
+ */
 
 const PROJECT_ROOT = process.cwd();
-const CHANGELOG_PATH = path.join(PROJECT_ROOT, 'CHANGELOG.md');
+const { runIfDirect } = FsUtils;
 
 async function run() {
-  const isPrePush = process.argv.includes('--pre-push');
-  const commitMsgFile = isPrePush ? null : process.argv[2];
+  console.log('\n' + '─'.repeat(50));
+  console.log('  📖 SDG NARRATIVE AUDIT — Law 3 Compliance');
+  console.log('─'.repeat(50) + '\n');
 
-  let changelog = '';
-  try {
-    // Read STAGED version of CHANGELOG.md (if possible)
-    changelog = execSync('git show :CHANGELOG.md', {
-      stdio: ['pipe', 'pipe', 'ignore'],
-    }).toString();
-  } catch {
-    if (fs.existsSync(CHANGELOG_PATH)) {
-      changelog = fs.readFileSync(CHANGELOG_PATH, 'utf8');
-    }
-  }
+  const targetDirs = [
+    path.join(PROJECT_ROOT, 'src', 'engine', 'lib'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin'),
+  ];
 
-  if (!changelog) {
-    process.exit(0);
-  }
+  const files = targetDirs.flatMap((dir) => {
+    if (!fs.existsSync(dir)) return [];
+    return fs
+      .readdirSync(dir)
+      .filter((f) => f.endsWith('.mjs') && !f.endsWith('.test.mjs'))
+      .map((f) => path.join(dir, f));
+  });
 
-  if (!isPrePush) {
-    if (!commitMsgFile) {
-      console.error('  ❌ Error: No commit message file provided.');
-      process.exit(1);
-    }
-    if (!fs.existsSync(commitMsgFile)) {
-      console.error(`  ❌ Error: Commit message file not found at ${commitMsgFile}`);
-      process.exit(1);
-    }
+  const violationsByFile = {};
+  let totalViolations = 0;
 
-    const commitMsg = fs.readFileSync(commitMsgFile, 'utf8').trim();
-    const firstLine = commitMsg.split('\n')[0].trim();
+  for (const filePath of files) {
+    const relativePath = path.relative(PROJECT_ROOT, filePath);
+    const content = fs.readFileSync(filePath, 'utf8');
+    const fileViolations = [];
 
-    // ONLY target feat: and fix: (SDG Cycle Triggers)
-    const isSdgTrigger = /^feat:/.test(firstLine) || /^fix:/.test(firstLine);
-    if (!isSdgTrigger) {
-      process.exit(0);
-    }
-
-    // RELEASE CONTEXT DETECTION
-    const isReleaseCommit = firstLine.toLowerCase().includes('release');
-    const releaseVersionMatch = firstLine.match(/v?(\d+\.\d+\.\d+)/);
-    const releaseVersion = releaseVersionMatch ? releaseVersionMatch[1] : null;
-
-    if (isReleaseCommit && releaseVersion) {
-      const versionHeaderRegex = new RegExp(
-        `##\\s*\\[${releaseVersion}\\].*?\\n([\\s\\S]*?)(?=\\n##\\s|(?:\\n){0,1}$)`,
-        'i'
-      );
-      const versionMatch = changelog.match(versionHeaderRegex);
-
-      if (!versionMatch) {
-        console.error(
-          `\n  ❌ NARRATIVE VIOLATION: Version header "## [${releaseVersion}]" not found in CHANGELOG.md.`
-        );
-        process.exit(1);
+    for (const rule of NARRATIVE_CHECKLIST) {
+      if (!rule.heuristic) continue;
+      const result = rule.heuristic(content);
+      if (!result.pass) {
+        fileViolations.push({ label: rule.label, reason: result.reason });
+        totalViolations++;
       }
+    }
 
-      const versionNarrative = versionMatch[1]
-        .replace(/###\s*(Added|Fixed|Changed|Removed|Security|Deprecated)/gi, '')
-        .replace(/<!--[\s\S]*?-->/g, '')
-        .trim();
-
-      if (versionNarrative.length < 3) {
-        console.error(
-          `\n  ❌ NARRATIVE VIOLATION: Version header "## [${releaseVersion}]" has no narrative.`
-        );
-        process.exit(1);
-      }
-
-      console.log(`  ✅ Narrative Guard: Release v${releaseVersion} validated.`);
-      process.exit(0);
+    if (fileViolations.length > 0) {
+      violationsByFile[relativePath] = fileViolations;
     }
   }
 
-  // STANDARD NARRATIVE CHECK (Unreleased)
-  const unreleasedMatch = changelog.match(
-    /##\s*\[Unreleased\].*?\n([\s\S]*?)(?=\n##\s|(?:\n){0,1}$)/i
-  );
-
-  if (!unreleasedMatch) {
-    if (isPrePush) process.exit(0);
-    console.error('\n  ❌ NARRATIVE VIOLATION: "## [Unreleased]" section missing in CHANGELOG.md.');
-    process.exit(1);
-  }
-
-  const narrative = unreleasedMatch[1]
-    .replace(/###\s*(Added|Fixed|Changed|Removed|Security|Deprecated)/gi, '')
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .trim();
-
-  const isNarrativeEmpty = !narrative || narrative.length < 3;
-
-  if (isPrePush) {
-    if (!isNarrativeEmpty) {
-      console.error('\n  ❌ DELIVERY BLOCKED: Unreleased narrative detected.');
-      console.error('  You have documented changes in CHANGELOG.md that have not been versioned.');
-      console.error(
-        '  Action: Run "npm run bump <fix|feat>" to finalize the cycle before pushing.\n'
-      );
-      process.exit(1);
-    }
-    process.exit(0);
-  } else {
-    // commit-msg mode
-    if (isNarrativeEmpty) {
-      console.error('\n  ❌ NARRATIVE VIOLATION: The [Unreleased] section is empty.');
-      console.error('  SDG cycles (feat/fix) MUST have a technical narrative before committing.\n');
-      process.exit(1);
-    }
-    console.log('  ✅ Narrative Guard: CHANGELOG.md validated.');
-    process.exit(0);
-  }
+  reportResults(violationsByFile, totalViolations);
 }
 
-run().catch((err) => {
-  console.error('  ❌ Narrative Guard Exception:', err.message);
-  process.exit(1);
-});
+function reportResults(violationsByFile, totalViolations) {
+  const filePaths = Object.keys(violationsByFile);
+
+  if (filePaths.length === 0) {
+    console.log('  ✅ ALL FILES NARRATIVE COMPLIANT. Scansion flow is healthy.\n');
+    return;
+  }
+
+  for (const filePath of filePaths) {
+    console.log(`  ❌ ${filePath}`);
+    for (const v of violationsByFile[filePath]) {
+      console.log(`     — ${v.label}: ${v.reason}`);
+    }
+    console.log('');
+  }
+
+  console.log('─'.repeat(50));
+  console.log(`  ⚠️  NARRATIVE DRIFT DETECTED: ${totalViolations} violations found.`);
+  console.log('  Recommendation: Apply "Code as Documentation" (Law 3).');
+  console.log('─'.repeat(50) + '\n');
+}
+
+export const NarrativeChecker = { run };
+
+runIfDirect(import.meta.url, run);

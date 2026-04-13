@@ -80,16 +80,21 @@ function getDirname(importMetaUrl) {
 
 function runIfDirect(importMetaUrl, fn) {
   const currentFile = fileURLToPath(importMetaUrl);
+  if (!process.argv[1]) return;
+
   const entryFile = fs.realpathSync(path.resolve(process.argv[1]));
   if (currentFile === entryFile) {
-    fn().catch((error) => {
-      if (error.name === 'ExitPromptError') {
-        console.log('\n\n  Aborted.\n');
-        process.exit(0);
-      }
-      console.error(error);
-      process.exit(1);
-    });
+    const result = fn();
+    if (result && typeof result.catch === 'function') {
+      result.catch((error) => {
+        if (error.name === 'ExitPromptError') {
+          console.log('\n\n  Aborted.\n');
+          process.exit(0);
+        }
+        console.error(error);
+        process.exit(1);
+      });
+    }
   }
 }
 
@@ -126,7 +131,7 @@ function safeReadJson(filePath) {
   }
 }
 
-const FsUtils = {
+export const FsUtils = {
   getDirectories,
   copyRecursiveSync,
   filterContentByVersion,
@@ -136,5 +141,3 @@ const FsUtils = {
   writeJsonAtomic,
   safeReadJson,
 };
-
-export { FsUtils };

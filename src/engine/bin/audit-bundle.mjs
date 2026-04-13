@@ -1,17 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { SyncChecker } from './check-sync.mjs';
-
-/**
- * AuditRunner — Comprehensive Governance Audit for SDG Agents.
- *
- * 1. Drift Detection (Assets vs .ai/)
- * 2. Narrative Health (CHANGELOG integrity)
- * 3. Law 3 compliance (Lexical Scoping & Named Exports)
- * 4. Documentation pulse (README & Soul)
- */
+import { NARRATIVE_CHECKLIST } from '../config/governance.mjs';
+import { FsUtils } from '../lib/fs-utils.mjs';
 
 const PROJECT_ROOT = process.cwd();
+const { runIfDirect } = FsUtils;
 
 async function run() {
   console.log('\n' + '─'.repeat(50));
@@ -24,201 +19,204 @@ async function run() {
     law3: null,
     soul: null,
     tests: null,
+    hygiene: null,
   };
 
-  // --- Step 1: Drift Detection ---
-  console.log('  [1/4] Checking Instruction Sync...');
+  console.log('  [1/6] Checking Instruction Sync...');
   auditResults.drift = SyncChecker.run();
 
-  // --- Step 2: Narrative Health ---
-  console.log('  [2/4] Checking Narrative Health...');
+  console.log('  [2/6] Checking Narrative Health...');
   auditResults.narrative = checkChangelogHealth();
 
-  // --- Step 3: Law 3 Compliance (Static Analysis) ---
-  console.log('  [3/4] Validating Law 3 (Narrative Cascade)...');
+  console.log('  [3/6] Validating Law 3 (Narrative Cascade)...');
   auditResults.law3 = checkLaw3Compliance();
 
-  // --- Step 4: Writing Soul Check ---
-  console.log('  [4/5] Verifying Writing Soul...');
+  console.log('  [4/6] Verifying Writing Soul...');
   auditResults.soul = checkSoulPulse();
 
-  // --- Step 5: Test Governance (Named Expectations) ---
-  console.log('  [5/5] Auditing Test Expectations...');
+  console.log('  [5/6] Auditing Test Expectations...');
   auditResults.tests = checkTestNamedExpectations();
 
+  console.log('  [6/6] Verifying Code Hygiene (Soft check)...');
+  auditResults.hygiene = checkHygienePulse();
+
   reportSummary(auditResults);
-}
 
-function checkChangelogHealth() {
-  const changelogPath = path.join(PROJECT_ROOT, 'CHANGELOG.md');
-  if (!fs.existsSync(changelogPath)) return { isFailure: true, reason: 'CHANGELOG.md missing' };
+  function checkChangelogHealth() {
+    const changelogPath = path.join(PROJECT_ROOT, 'CHANGELOG.md');
+    if (!fs.existsSync(changelogPath)) return { isFailure: true, reason: 'CHANGELOG.md missing' };
 
-  const content = fs.readFileSync(changelogPath, 'utf8');
-  const hasUnreleased = /##\s*\[Unreleased\]/i.test(content);
+    const content = fs.readFileSync(changelogPath, 'utf8');
+    const hasUnreleased = /##\s*\[Unreleased\]/i.test(content);
+    const unreleasedMatch = content.match(
+      /##\s*\[Unreleased\].*?\n([\s\S]*?)(?=\n##\s|(?:\n){0,1}$)/i
+    );
+    const narrative = unreleasedMatch ? unreleasedMatch[1].replace(/###.*?\n/g, '').trim() : '';
 
-  const unreleasedMatch = content.match(
-    /##\s*\[Unreleased\].*?\n([\s\S]*?)(?=\n##\s|(?:\n){0,1}$)/i
-  );
-  const narrative = unreleasedMatch ? unreleasedMatch[1].replace(/###.*?\n/g, '').trim() : '';
-
-  if (hasUnreleased && narrative.length > 5) {
-    return { isFailure: true, reason: 'Pending narrative in [Unreleased]. Run npm run bump.' };
+    if (hasUnreleased && narrative.length > 5) {
+      return { isFailure: true, reason: 'Pending narrative in [Unreleased]. Run npm run bump.' };
+    }
+    return { isFailure: false };
   }
 
-  return { isFailure: false };
-}
+  function checkLaw3Compliance() {
+    const targetDirs = [
+      path.join(PROJECT_ROOT, 'src', 'engine', 'lib'),
+      path.join(PROJECT_ROOT, 'src', 'engine', 'bin'),
+    ];
 
-function checkLaw3Compliance() {
-  const libDir = path.join(PROJECT_ROOT, 'src', 'engine', 'lib');
-  const files = fs
-    .readdirSync(libDir)
-    .filter((f) => f.endsWith('.mjs') && !f.endsWith('.test.mjs'));
-  const violations = [];
+    const files = targetDirs.flatMap((dir) => {
+      if (!fs.existsSync(dir)) return [];
+      return fs
+        .readdirSync(dir)
+        .filter((f) => f.endsWith('.mjs') && !f.endsWith('.test.mjs'))
+        .map((f) => path.join(dir, f));
+    });
 
-  for (const file of files) {
-    const content = fs.readFileSync(path.join(libDir, file), 'utf8');
+    const violations = [];
+    for (const filePath of files) {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const fileName = path.basename(filePath);
 
-    // Check for "export default" (Violation: Named exports only)
-    if (content.includes('export default')) {
-      violations.push(`${file}: Uses export default (Law 3 requires Named Exports)`);
+      for (const rule of NARRATIVE_CHECKLIST) {
+        if (!rule.heuristic) continue;
+        const result = rule.heuristic(content);
+        if (!result.pass) {
+          violations.push(`${fileName}: ${result.reason}`);
+        }
+      }
     }
 
-    // Check for loose helpers (Simplified Lexical Scoping check)
-    // Counts non-exported functions at top level.
-    // This is a heuristic: if many functions are top-level and not in the export block, it might be a violation.
-    const topLevelFunctions = (content.match(/^function\s+\w+/gm) || []).length;
-    const exportedCount = (content.match(/^\s+\w+,/gm) || []).length; // Heuristic for Revealing Module members
-
-    if (topLevelFunctions > 5 && exportedCount < topLevelFunctions / 2) {
-      // violations.push(`${file}: High top-level function density. Recommend Lexical Scoping.`);
-    }
+    return {
+      isFailure: violations.length > 0,
+      violations,
+      score: violations.length === 0 ? '100%' : `${Math.max(0, 100 - violations.length * 10)}%`,
+    };
   }
 
-  return {
-    isFailure: violations.length > 0,
-    violations,
-    score: violations.length === 0 ? '100%' : `${Math.max(0, 100 - violations.length * 10)}%`,
-  };
-}
+  function checkTestNamedExpectations() {
+    const libDir = path.join(PROJECT_ROOT, 'src', 'engine', 'lib');
+    if (!fs.existsSync(libDir)) return { isFailure: false, violations: [] };
 
-/**
- * checkTestNamedExpectations()
- *
- * Heuristic audit for the "Named Expectations" protocol in unit tests.
- * Flagged: Missing AAA comments, magic literals in assertions, missing triad variables.
- */
-function checkTestNamedExpectations() {
-  const libDir = path.join(PROJECT_ROOT, 'src', 'engine', 'lib');
-  const files = fs.readdirSync(libDir).filter((f) => f.endsWith('.test.mjs'));
-  const violations = [];
+    const files = fs.readdirSync(libDir).filter((f) => f.endsWith('.test.mjs'));
+    const violations = [];
 
-  for (const file of files) {
-    const content = fs.readFileSync(path.join(libDir, file), 'utf8');
+    for (const file of files) {
+      const content = fs.readFileSync(path.join(libDir, file), 'utf8');
+      const slopMatches = content.match(/\/\/\s*(Arrange|Act|Assert)/gi);
+      if (slopMatches) {
+        violations.push(
+          `${file}: Detected narrative slop (${slopMatches.join(', ')}). Use Vertical Scansion.`
+        );
+      }
 
-    // Heuristic 1: Narrative Slop (AAA comments avoidance)
-    if (
-      content.includes('// Arrange') ||
-      content.includes('// Act') ||
-      !content.includes('// Assert')
-    ) {
-      // Logic: we BAN Arrange and Act. We also BAN Assert meta-comment.
-    }
+      if (!content.includes('actual') || !content.includes('expected')) {
+        violations.push(`${file}: Missing Named Expectations triad (actual/expected variables).`);
+      }
 
-    const slopMatches = content.match(/\/\/\s*(Arrange|Act|Assert)/gi);
-    if (slopMatches) {
-      violations.push(
-        `${file}: Detected narrative slop (${slopMatches.join(', ')}). Use Vertical Scansion.`
+      const numberedMatches = content.match(/\b(input|actual|expected)[0-9]+\b/g);
+      if (numberedMatches) {
+        violations.push(
+          `${file}: Detected numbered variables (${Array.from(new Set(numberedMatches)).join(', ')}).`
+        );
+      }
+
+      const strictMagicMatch = content.match(
+        /assert\.(?:equal|deepEqual|strictEqual)\s*\([^,]+,\s*(?:['"`0-9]|\b(?:null|true|false)\b)/
       );
+      if (strictMagicMatch) {
+        violations.push(`${file}: Detected magic values in assertions. Use named constants.`);
+      }
     }
 
-    // Heuristic 2: Triad variable naming (input/actual/expected)
-    // We expect "actual" and "expected" at minimum.
-    if (!content.includes('actual') || !content.includes('expected')) {
-      violations.push(`${file}: Missing Named Expectations triad (actual/expected variables).`);
+    return {
+      isFailure: violations.length > 0,
+      violations,
+      score: violations.length === 0 ? '100%' : `${Math.max(0, 100 - violations.length * 10)}%`,
+    };
+  }
+
+  function checkSoulPulse() {
+    const files = ['README.md', 'docs/README.pt-BR.md', 'docs/ROADMAP.md'];
+    const missing = files.filter((f) => !fs.existsSync(path.join(PROJECT_ROOT, f)));
+    return { isFailure: missing.length > 0, missing };
+  }
+
+  function checkHygienePulse() {
+    const results = { lint: 'SKIPPED', test: 'SKIPPED', isFailure: false };
+    try {
+      const lint = spawnSync('npm', ['run', 'lint', '--silent'], {
+        cwd: PROJECT_ROOT,
+        shell: true,
+        encoding: 'utf8',
+      });
+      results.lint = lint.status === 0 ? 'PASS' : 'FAIL';
+    } catch {
+      results.lint = 'UNAVAILABLE';
     }
 
-    // Heuristic 2.1: Numbered Variable Avoidance (Narrative Slop Detection)
-    const numberedMatches = content.match(/\b(input|actual|expected)[0-9]+\b/g);
-    if (numberedMatches) {
-      violations.push(
-        `${file}: Detected numbered variables (${Array.from(new Set(numberedMatches)).join(', ')}). Use descriptive names instead.`
-      );
+    try {
+      const test = spawnSync('npm', ['test', '--silent'], {
+        cwd: PROJECT_ROOT,
+        shell: true,
+        encoding: 'utf8',
+      });
+      results.test = test.status === 0 ? 'PASS' : 'FAIL';
+    } catch {
+      results.test = 'UNAVAILABLE';
     }
 
-    // Heuristic 3: Magic Literals in assert.equal/deepEqual/strictEqual
-    // Regex matches assert(args, literal) where literal is a string, number, or boolean.
-    // We use a non-greedy catch for the first argument and look specifically for the second arg starting with a literal.
-    // Refinement: Even if it matches, check if the match is actually a literal at the end of the call
-    // A better approach is to flag any call that has a literal as the LAST argument.
-    const strictMagicMatch = content.match(
-      /assert\.(?:equal|deepEqual|strictEqual)\s*\([^,]+,\s*(?:['"`0-9]|\b(?:null|true|false)\b)/
+    results.isFailure = results.lint === 'FAIL' || results.test === 'FAIL';
+    return results;
+  }
+
+  function reportSummary(results) {
+    console.log('\n' + '─'.repeat(50));
+    console.log('  AUDIT SUMMARY');
+    console.log('─'.repeat(50));
+
+    printResult('Instruction Sync', !results.drift.isFailure);
+    printResult('Narrative (Changelog)', !results.narrative.isFailure, results.narrative.reason);
+    printResult('Law 3 compliance', !results.law3.isFailure, results.law3.violations[0]);
+    printResult('Test Expectations', !results.tests.isFailure, results.tests.violations[0]);
+    printResult(
+      'Writing Soul',
+      !results.soul.isFailure,
+      results.soul.missing.length ? `Missing: ${results.soul.missing.join(', ')}` : null
+    );
+    printResult(
+      'Code Hygiene',
+      !results.hygiene.isFailure,
+      `Lint: ${results.hygiene.lint} | Tests: ${results.hygiene.test}`
     );
 
-    if (strictMagicMatch) {
-      violations.push(`${file}: Detected magic values in assertions. Use named constants.`);
+    const totalFailures = [
+      results.drift,
+      results.narrative,
+      results.law3,
+      results.soul,
+      results.tests,
+      results.hygiene,
+    ].filter((r) => r && r.isFailure).length;
+
+    if (totalFailures === 0) {
+      console.log('\n  ✅ PROJECT COMPLIANT. Governance at 100%.\n');
+    } else {
+      console.log(`\n  ⚠️  PROJECT DRIFT: ${totalFailures} governance gaps found.\n`);
     }
   }
 
-  return {
-    isFailure: violations.length > 0,
-    violations,
-    score: violations.length === 0 ? '100%' : `${Math.max(0, 100 - violations.length * 10)}%`,
-  };
-}
-
-function checkSoulPulse() {
-  const files = ['README.md', 'docs/README.pt-BR.md', 'docs/ROADMAP.md'];
-  const missing = files.filter((f) => !fs.existsSync(path.join(PROJECT_ROOT, f)));
-
-  return {
-    isFailure: missing.length > 0,
-    missing,
-  };
-}
-
-function reportSummary(results) {
-  console.log('\n' + '─'.repeat(50));
-  console.log('  AUDIT SUMMARY');
-  console.log('─'.repeat(50));
-
-  printResult('Instruction Sync', !results.drift.isFailure);
-  printResult('Narrative (Changelog)', !results.narrative.isFailure, results.narrative.reason);
-  printResult('Law 3 compliance', !results.law3.isFailure, results.law3.violations[0]);
-  printResult('Test Expectations', !results.tests.isFailure, results.tests.violations[0]);
-  printResult(
-    'Writing Soul',
-    !results.soul.isFailure,
-    results.soul.missing.length ? `Missing: ${results.soul.missing.join(', ')}` : null
-  );
-
-  const totalFailures = [
-    results.drift,
-    results.narrative,
-    results.law3,
-    results.soul,
-    results.tests,
-  ].filter((r) => r.isFailure).length;
-
-  if (totalFailures === 0) {
-    console.log('\n  ✅ PROJECT COMPLIANT. Governance at 100%.\n');
-  } else {
-    console.log(`\n  ⚠️  PROJECT DRIFT: ${totalFailures} governance gaps found.\n`);
+  function printResult(label, success, reason) {
+    const icon = success ? '✅' : '❌';
+    console.log(`  ${icon} ${label.padEnd(25)} ${reason ? `— ${reason}` : ''}`);
   }
-}
-
-function printResult(label, success, reason) {
-  const icon = success ? '✅' : '❌';
-  console.log(`  ${icon} ${label.padEnd(25)} ${reason ? `— ${reason}` : ''}`);
 }
 
 export const AuditRunner = { run };
 
-// Entry point for direct CLI execution
-const isMain =
-  import.meta.url.endsWith(process.argv[1]) || process.argv[1]?.endsWith('audit-bundle.mjs');
-if (isMain) {
+runIfDirect(import.meta.url, () => {
   run().catch((err) => {
     console.error('Audit failed:', err);
     process.exit(1);
   });
-}
+});

@@ -73,9 +73,7 @@ function validateInit(args) {
   return null;
 }
 
-const CliParser = {
+export const CliParser = {
   parseCliArgs,
   validateInit,
 };
-
-export { CliParser };

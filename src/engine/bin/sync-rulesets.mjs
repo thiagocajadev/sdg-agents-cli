@@ -19,9 +19,6 @@ const SOURCE_INSTRUCTIONS = path.join(SOURCE_ROOT, 'assets', 'instructions');
 const PROJECT_ROOT = process.cwd();
 const TODAY = new Date().toISOString().split('T')[0];
 
-/**
- * Prints a ready-to-use prompt for an AI Agent to sync rulesets with official docs.
- */
 async function run() {
   const manifest = loadManifest(PROJECT_ROOT);
   if (!manifest) {
@@ -49,7 +46,7 @@ function resolveTargets(manifest) {
   const { idioms, versions } = selections;
   const targets = [];
 
-  // 1. Idiom-specific patterns
+  // Idiom-specific patterns
   for (const idiom of idioms) {
     let filePath = path.join(PROJECT_ROOT, '.ai', 'instructions', 'idioms', idiom, 'patterns.md');
     if (!fs.existsSync(filePath)) {
@@ -66,7 +63,7 @@ function resolveTargets(manifest) {
     });
   }
 
-  // 2. Core UI standards (Universal Design System)
+  // Core UI standards (Universal Design System)
   const uiSourceDir = path.join(SOURCE_INSTRUCTIONS, 'core', 'ui');
   if (fs.existsSync(uiSourceDir)) {
     const uiFiles = fs.readdirSync(uiSourceDir).filter((f) => f.endsWith('.md'));

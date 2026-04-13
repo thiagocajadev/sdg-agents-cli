@@ -93,8 +93,6 @@ async function runInteractive(targetDir, options) {
   }
 }
 
-// --- Phase Handlers (Storytelling) ---
-
 async function handleExecutionStep(state, targetDir, options) {
   switch (state.step) {
     case 'selections':
@@ -139,8 +137,6 @@ async function handleFinalExecutionPhase(state, targetDir, options = {}) {
 
   return runAgentsMode(state, targetDir, selections, { skipConfirm, noDevGuides });
 }
-
-// --- Mode Runners (Narrative Orchestration) ---
 
 async function runQuickMode(state, targetDir, { dryRun, noDevGuides = false }) {
   if (dryRun) return abortForDryRun(state, targetDir, printQuickDryRun);
@@ -188,8 +184,6 @@ async function runCreativesMode(state, targetDir) {
   state.step = 'done';
   return result;
 }
-
-// --- Implementation Details ---
 
 function abortForDryRun(state, targetDir, printer) {
   printer(targetDir);

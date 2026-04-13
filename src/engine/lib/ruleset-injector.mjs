@@ -1,8 +1,3 @@
-/**
- * Ruleset Injector — Copies instruction files into the target project.
- * Handles version-aware filtering of markdown/XML content blocks.
- */
-
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -19,9 +14,6 @@ const SOURCE_DEV_GUIDES = path.join(__dirname, '..', '..', 'assets', 'dev-guides
 const SOURCE_DEV_TRACKS = path.join(SOURCE_DEV_GUIDES, 'prompt-tracks');
 const SOURCE_COMPETENCIES = path.join(SOURCE_INSTRUCTIONS, 'competencies');
 
-/**
- * Creates the .ai/instructions directory structure in the target project.
- */
 function prepareProjectStructure(targetDir) {
   const instructionsDir = path.join(targetDir, '.ai', 'instructions');
   const workflowsDir = path.join(targetDir, '.ai', 'workflows');
@@ -32,9 +24,6 @@ function prepareProjectStructure(targetDir) {
   fs.mkdirSync(commandsDir, { recursive: true });
 }
 
-/**
- * Injects core, flavor, idiom, and template rulesets into the target project.
- */
 function injectRulesets(targetDir, selections, { noDevGuides = false } = {}) {
   const { flavor, idioms } = selections;
   const projectAiInstructions = path.join(targetDir, '.ai', 'instructions');
@@ -74,33 +63,23 @@ function injectRulesets(targetDir, selections, { noDevGuides = false } = {}) {
   injectCreativeToolkit(targetDir);
 }
 
-/**
- * Copies dev-guides (reference files, spec templates, guides) into the target project.
- * Always included alongside the instruction set.
- */
 function injectDevGuides(targetDir) {
   if (!fs.existsSync(SOURCE_DEV_GUIDES)) return;
   copyRecursiveSync(SOURCE_DEV_GUIDES, path.join(targetDir, '.ai', 'dev-guides'));
 }
 
-/**
- * Injects specification templates (tracks) into the target project.
- */
 function injectPrompts(targetDir, track) {
   const projectRootPromptsDir = path.join(targetDir, '.ai', 'prompts');
   const devTracksDir = path.join(projectRootPromptsDir, 'dev-tracks');
 
-  // Total replacement: clear the WHOLE .ai/prompts directory if it exists
   if (fs.existsSync(projectRootPromptsDir)) {
     fs.rmSync(projectRootPromptsDir, { recursive: true, force: true });
   }
   fs.mkdirSync(devTracksDir, { recursive: true });
 
   if (track === 'all') {
-    // Copy all tracks from source to project
     copyRecursiveSync(SOURCE_DEV_TRACKS, devTracksDir);
   } else {
-    // Copy specific track folder into dev-tracks
     const trackSrc = path.join(SOURCE_DEV_TRACKS, track);
     const dest = path.join(devTracksDir, track);
     if (fs.existsSync(trackSrc)) {
@@ -109,9 +88,6 @@ function injectPrompts(targetDir, track) {
   }
 }
 
-/**
- * Collects the list of directories and files that would be created (for --dry-run).
- */
 function collectOutputSummary(selections) {
   const { mode, flavor, idioms, track } = selections;
   const directories = [];
@@ -125,8 +101,6 @@ function collectOutputSummary(selections) {
     directories.push('.ai/workflows/');
     directories.push('.ai/commands/');
     directories.push('.ai/dev-guides/');
-
-    // Creative toolkit directories
     directories.push('.ai/instructions/creative/');
     directories.push('.ai/instructions/creative/templates/');
     directories.push('.ai/instructions/creative/guides/');
@@ -137,9 +111,6 @@ function collectOutputSummary(selections) {
   return { directories };
 }
 
-/**
- * Injected the specialized Creative Design Toolkit assets.
- */
 function injectCreativeToolkit(targetDir) {
   const sourceCreative = path.join(SOURCE_INSTRUCTIONS, 'core', 'creative');
   const sourceCreativePrompts = path.join(SOURCE_INSTRUCTIONS, 'templates', 'creatives');
@@ -147,13 +118,11 @@ function injectCreativeToolkit(targetDir) {
 
   const destRoot = path.join(targetDir, '.ai', 'instructions', 'creative');
 
-  // Cleanup old structures for migration/cleanliness
   const oldPrompts = path.join(targetDir, '.ai', 'prompts', 'creatives');
   const oldGuides = path.join(targetDir, '.ai', 'dev-guides', 'creatives');
   if (fs.existsSync(oldPrompts)) fs.rmSync(oldPrompts, { recursive: true, force: true });
   if (fs.existsSync(oldGuides)) fs.rmSync(oldGuides, { recursive: true, force: true });
 
-  // Ensure root exists
   fs.mkdirSync(destRoot, { recursive: true });
 
   if (fs.existsSync(sourceCreative)) {
@@ -170,8 +139,6 @@ function injectCreativeToolkit(targetDir) {
     copyRecursiveSync(sourceCreativeGuides, path.join(destRoot, 'guides'));
   }
 }
-
-// --- Private ---
 
 function injectCompetencies(selections, projectAiInstructions) {
   if (!fs.existsSync(SOURCE_COMPETENCIES)) return;

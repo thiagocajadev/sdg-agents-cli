@@ -204,7 +204,7 @@ function printHelp(version) {
 `);
 }
 
-const BundleUI = {
+export const BundleUI = {
   printWelcome,
   printStep,
   printAborted,
@@ -222,5 +222,3 @@ const BundleUI = {
   printFooter,
   printHelp,
 };
-
-export { BundleUI };

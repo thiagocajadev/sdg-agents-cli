@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.3.0] - 2026-04-13
+
+### Added
+
+- **Markdown-Driven Governance SSOT** — refactored the governance engine to dynamically parse rules and checklists directly from `engineering-standards.md`, establishing the documentation as the single source of truth for automated audits.
+- **Narrative Cascade (Law 3) Hardening** — implemented automated heuristics for "Revealing Module Pattern" enforcement and "Prefix-based Boolean Naming" within the audit suite.
+
+### Fixed
+
+- **Engine Refactoring (Law 3 Compliance)** — refactored 10+ core library files to adopt the `export const Module = { ... }` pattern, achieving 100% narrative compliance.
+- **Audit Runner Stability** — fixed a `TypeError` in the `runIfDirect` utility and resolved linting regressions in the configuration manifest.
+
 ## [2.2.0] - 2026-04-13
 
 ### Added

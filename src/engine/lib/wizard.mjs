@@ -580,10 +580,8 @@ function autoSelectVersions(selections) {
   }
 }
 
-const WizardUtils = {
+export const WizardUtils = {
   gatherUserSelections,
   validateSelections,
   autoSelectVersions,
 };
-
-export { WizardUtils };

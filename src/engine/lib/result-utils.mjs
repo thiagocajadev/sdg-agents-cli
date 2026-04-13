@@ -6,9 +6,7 @@ function fail(message, code) {
   return { isSuccess: false, isFailure: true, value: null, error: { message, code } };
 }
 
-const ResultUtils = {
+export const ResultUtils = {
   success,
   fail,
 };
-
-export { ResultUtils };

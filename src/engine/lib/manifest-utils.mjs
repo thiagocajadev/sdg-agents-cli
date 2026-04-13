@@ -117,12 +117,10 @@ function loadManifest(projectRoot) {
   }
 }
 
-const ManifestUtils = {
+export const ManifestUtils = {
   hashFile,
   computeHashes,
   compareHashes,
   daysAgo,
   loadManifest,
 };
-
-export { ManifestUtils };

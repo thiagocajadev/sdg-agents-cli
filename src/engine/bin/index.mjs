@@ -21,8 +21,6 @@ const { parseCliArgs, validateInit } = CliParser;
 const require = createRequire(import.meta.url);
 const packageJson = require('../../../package.json');
 
-// --- Orchestrator ---
-
 async function run() {
   const args = parseCliArgs(process.argv.slice(2));
   const version = packageJson.version;
@@ -51,8 +49,6 @@ async function run() {
     await startInteractiveMode(args);
   }
 }
-
-// --- Interactive Mode ---
 
 async function startInteractiveMode(args) {
   BundleUI.printHeader(packageJson.version);
@@ -106,6 +102,11 @@ async function executeMenuAction(menuChoice, args) {
       await AuditRunner.run();
       break;
     }
+    case 'narrative': {
+      const { NarrativeChecker } = await import('./check-narrative.mjs');
+      await NarrativeChecker.run();
+      break;
+    }
     case 'settings':
       await runSettingsMenu(args.targetDir);
       break;
@@ -116,8 +117,6 @@ async function executeMenuAction(menuChoice, args) {
     }
   }
 }
-
-// --- Subcommand Router ---
 
 async function executeSubcommand(args) {
   switch (args.subcommand) {
@@ -154,15 +153,20 @@ async function executeSubcommand(args) {
       await AuditRunner.run();
       break;
     }
+    case 'narrative': {
+      const { NarrativeChecker } = await import('./check-narrative.mjs');
+      await NarrativeChecker.run();
+      break;
+    }
     default:
       console.log(`\n  Unknown command: "${args.subcommand}". Run with --help for usage.\n`);
   }
 }
 
 async function handleInitSubcommand(args) {
-  const error = validateInit(args);
-  if (error) {
-    console.log(`\n${error}\n`);
+  const validationError = validateInit(args);
+  if (validationError) {
+    console.log(`\n${validationError}\n`);
     return;
   }
 
@@ -188,8 +192,6 @@ async function handleInitSubcommand(args) {
     selections: selectionPayload,
   });
 }
-
-// --- Settings Menu ---
 
 async function runSettingsMenu(targetDir) {
   const settingsChoice = await safeSelect({
@@ -237,8 +239,6 @@ async function runSettingsMenu(targetDir) {
     }
   }
 }
-
-// --- System ---
 
 async function ensureMaintainerSync(targetDir) {
   const { isMaintainerMode } = PromptUtils;

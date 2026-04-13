@@ -1,11 +1,3 @@
-/**
- * Check Sync — Detects drift between the source-of-truth assets and the live .ai/ directory.
- * Compares only the mirrored directories — not flavor/ which is generated with a rename.
- * The .ai/ directory is a curated subset of src/assets/ — not a full mirror.
- *
- * FOLLOWS: Narrative Cascade & Lexical Scoping (nested helpers)
- */
-
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -20,13 +12,8 @@ const PROJECT_ROOT = process.cwd();
 const ASSETS_DIR = path.join(PROJECT_ROOT, 'src', 'assets', 'instructions');
 const AI_DIR = path.join(PROJECT_ROOT, '.ai', 'instructions');
 
-// why: flavor/ in .ai/ is populated by renaming flavors/{id}/ — no direct mirror exists in src/assets/flavor/
 const MIRRORED_DIRS = ['core', 'idioms', 'templates', 'competencies'];
 
-/**
- * Compares files present in .ai/ mirrored directories against src/assets/.
- * Reports any files that exist in .ai/ but differ from their src/assets/ counterpart.
- */
 function run() {
   const driftedFiles = [];
 
@@ -39,8 +26,6 @@ function run() {
 
   const runResult = reportResult(driftedFiles);
   return runResult;
-
-  // --- Scoped Internal Helpers (The Stepdown Rule & Lexical Scoping) ---
 
   function collectDriftedFiles(liveDir, sourceDir, relPrefix) {
     if (!fs.existsSync(liveDir)) return [];

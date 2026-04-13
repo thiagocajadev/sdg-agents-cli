@@ -65,8 +65,6 @@ async function checkForUpdates(currentVersion) {
   return result;
 }
 
-const VersionUtils = {
+export const VersionUtils = {
   checkForUpdates,
 };
-
-export { VersionUtils };
