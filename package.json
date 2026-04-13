@@ -1,6 +1,6 @@
 {
   "name": "sdg-agents",
-  "version": "1.24.0",
+  "version": "2.0.0",
   "description": "Structured working protocol and engineering rules for AI agents. Works with Claude Code, Antigravity, Codex, and others.",
   "type": "module",
   "main": "./src/engine/bin/index.mjs",

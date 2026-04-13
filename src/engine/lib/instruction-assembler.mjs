@@ -247,6 +247,7 @@ function buildMasterInstructions(selections) {
         | \`.ai/commands/sdg-feat.md\` | Feature Cycle (Specs & Implementation) |
         | \`.ai/commands/sdg-fix.md\` | Fix Cycle (Forensics & Regression) |
         | \`.ai/commands/sdg-docs.md\` | Documentation Cycle (ADRs & Logs) |
+        | \`.ai/commands/sdg-audit.md\` | Governance Audit (drift detection & compliance) |
         | \`.ai/commands/sdg-end.md\` | END Phase — close the active cycle (changelog, backlog, commit) |`;
 
       return workingCyclesString;

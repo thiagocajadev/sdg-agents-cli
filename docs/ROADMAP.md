@@ -4,14 +4,14 @@ This document outlines the future vision of **sdg-agents-cli**, tracing the path
 
 ## Milestones
 
-| Target   | Focus                                                                         | Status     |
-| :------- | :---------------------------------------------------------------------------- | :--------- |
-| **v1.0** | **Foundation**: CLI, 5-phase protocol, multi-stack, initial idioms.           | ✅ Shipped |
-| **v1.x** | **Resilience & Hardening**: SSOT, Token Discipline, Universal Cycle Coverage. | ✅ Shipped |
-| **v2.0** | **Governance Observability**: Compliancy auditing via `sdg audit`.            | 📋 Planned |
-| **v2.1** | **Global Instruction Registry**: Remote pattern import via `sdg use`.         | 📅 Backlog |
-| **v2.2** | **Deep Context Intelligence**: Semantic indexing with MCP support.            | 📅 Backlog |
-| **v2.3** | **Visual Governance**: Auto-generated architecture flow diagrams.             | 📅 Backlog |
+| Target   | Focus                                                                                 | Status     |
+| :------- | :------------------------------------------------------------------------------------ | :--------- |
+| **v1.0** | **Foundation**: CLI, 5-phase protocol, multi-stack, initial idioms.                   | ✅ Shipped |
+| **v1.x** | **Resilience & Hardening**: SSOT, Token Discipline, Universal Cycle Coverage.         | ✅ Shipped |
+| **v2.0** | **Governance Observability**: Formal auditing via `audit:` and Circuit Breaker logic. | ✅ Shipped |
+| **v2.1** | **Global Instruction Registry**: Remote pattern import via `sdg use`.                 | 📅 Backlog |
+| **v2.2** | **Deep Context Intelligence**: Semantic indexing with MCP support.                    | 📅 Backlog |
+| **v2.3** | **Visual Governance**: Auto-generated architecture flow diagrams.                     | 📅 Backlog |
 
 ---
 
@@ -21,9 +21,9 @@ This document outlines the future vision of **sdg-agents-cli**, tracing the path
 
 The current stage focused on transforming the CLI into an industrial-grade tool. We implemented the **Single Source of Truth (SSOT)** architecture centralized in `AGENTS.md`, introduced **Token Discipline 2.0** (Caveman/Soul duality), and expanded to universal cycles (`land:`, `docs:`, `fix:`), ensuring no development activity escapes governance.
 
-### v2.0 — Governance Observability
+### v2.0 — Governance Observability (Current Baseline)
 
-The next major leap. We will introduce the `sdg audit` command to detect "governance drift." The CLI will be able to analyze the current codebase and compare it against the `.ai/` instructions, highlighting where architecture, security, or style standards are being violated.
+A major leap in technical maturity. We introduced the `audit:` command to detect "governance drift" and the **Circuit Breaker** safety mechanism to prevent infinite refactoring loops. The CLI now actively analyzes project alignment against rulesets, making governance visible and enforceable.
 
 ### v2.1 — Global Instruction Registry
 

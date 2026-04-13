@@ -20,7 +20,7 @@
 
 O conjunto de instruções cobre:
 
-- **Protocolo de trabalho**: um ciclo de 5 fases (SPEC → PLAN → CODE → TEST → END) que estrutura como o agente conduz qualquer tarefa
+- **Protocolo de trabalho**: um ciclo de 5 fases (SPEC → PLAN → CODE → TEST → END) que estrutura como o agente conduz qualquer tarefa. Inclui **Quality Gate** (CODE), **Audit Gate** (TEST) e um **Circuit Breaker** de 3 tentativas (STOP).
 - **Regras de engenharia**: nomenclatura, estilo de código, padrões de clean code, limites de segurança
 - **Padrões de linguagem**: convenções idiomáticas para o seu stack específico
 - **Guia arquitetural**: regras para o padrão estrutural do projeto (vertical slice, MVC, etc.)
@@ -60,19 +60,12 @@ Após rodar `init`, seu projeto recebe:
 
 ```
 seu-projeto/
-├── .ai/                         ← Conjunto de instruções (commitado)
-│   ├── skill/
-│   │   └── AGENTS.md            ← Ponto de entrada — carregado automaticamente pelos agentes
-│   ├── instructions/
-│   │   ├── core/                ← Regras de engenharia (estilo, nomenclatura, segurança, testes)
-│   │   ├── creative/            ← Toolkit de Design Criativo (Branding, Social, Landing Page)
-│   │   ├── flavors/             ← Padrões arquiteturais (vertical-slice, mvc, etc.)
-│   │   ├── idioms/              ← Convenções por linguagem (TS, Python, Go, etc.)
-│   │   ├── competencies/        ← Regras por camada (frontend, backend)
-│   │   └── templates/           ← Templates de contexto e backlog
-│   ├── commands/                ← Arquivos de contexto para os ciclos feat/fix/docs
-│   ├── workflows/               ← Protocolo de workflow
-│   └── dev-guides/              ← Arquivos de referência, templates de spec e guias
+├── .ai/                         ← Conjuntos de instruções (commitado)
+│   ├── skill/AGENTS.md          ← Ponto de entrada
+│   ├── instructions/            ← Lógica core, flavors e idiomas
+│   ├── commands/                ← Contexto para os ciclos (feat/fix/docs/audit/land)
+│   ├── workflows/               ← Protocolo de processos
+│   └── dev-guides/              ← Templates de spec e guias
 └── .ai-backlog/                 ← Harness Engineering (Memory) — gitignored
     └── ...                      ← (Veja docs/PROJECT-STRUCTURE.md para detalhes)
 ```
@@ -95,8 +88,9 @@ Ao prefixar uma mensagem ao agente, ele entra no ciclo correspondente:
 | `feat: <descrição>` | Feature | Agente executa SPEC → PLAN → CODE → TEST → END                                                                                                                   |
 | `fix: <descrição>`  | Fix     | Agente executa SPEC → PLAN → CODE → TEST → END com foco em RCA                                                                                                   |
 | `docs: <descrição>` | Docs    | Agente atualiza changelogs, ADRs ou specs                                                                                                                        |
+| `audit: <escopo>`   | Audit   | Agente verifica alinhamento do projeto contra as regras (detecção de drift)                                                                                      |
 | `end:`              | —       | Encerra o ciclo ativo — executa o checklist do Phase: END (changelog, backlog, commit). Também recupera um ciclo se o agente perder o fio numa conversa paralela |
-| Sem prefixo         | —       | Agente pergunta: "land, feat, fix ou docs?" — e então prossegue                                                                                                  |
+| Sem prefixo         | —       | Agente pergunta: "land, feat, fix, docs ou audit?" — e então prossegue                                                                                           |
 
 O agente **para e aguarda sua aprovação** em SPEC e PLAN antes de escrever qualquer código.
 

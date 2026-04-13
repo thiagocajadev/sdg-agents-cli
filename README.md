@@ -20,7 +20,7 @@
 
 The instruction set covers:
 
-- **Working protocol**: a 5-phase cycle (SPEC → PLAN → CODE → TEST → END) that structures how the agent handles any task
+- **Working protocol**: a 5-phase cycle (SPEC → PLAN → CODE → TEST → END) that structures how the agent handles any task. Includes **Quality Gate** (CODE), **Audit Gate** (TEST), and a 3-strike **Circuit Breaker** (STOP) to prevent regression loops.
 - **Engineering rules**: naming, code style, clean code standards, security boundaries
 - **Language patterns**: idiomatic conventions for your specific stack
 - **Architectural guidance**: rules for your project's structural pattern (vertical slice, MVC, etc.)
@@ -62,24 +62,13 @@ After running `init`, your project receives:
 ```
 your-project/
 ├── .ai/                         ← Instruction set (committed)
-│   ├── skill/
-│   │   └── AGENTS.md            ← Main entry point — auto-loaded by agents
-│   ├── instructions/
-│   │   ├── core/                ← Engineering rules (style, naming, security, testing)
-│   │   ├── creative/            ← Creative Design Toolkit (Branding, Social, Landing Page)
-│   │   ├── flavors/             ← Architectural patterns (vertical-slice, mvc, etc.)
-│   │   ├── idioms/              ← Language-specific conventions (TS, Python, Go, etc.)
-│   │   ├── competencies/        ← Layer-specific rules (frontend, backend)
-│   │   └── templates/           ← Context and backlog templates
-│   ├── commands/                ← Context files for feat/fix/docs cycles
-│   ├── workflows/               ← Workflow protocol
-│   └── dev-guides/              ← Reference files, spec templates, and guides
+│   ├── skill/AGENTS.md          ← Main entry point
+│   ├── instructions/            ← Core logic, flavors, and idioms
+│   ├── commands/                ← Context for cycles (feat/fix/docs/audit/land)
+│   ├── workflows/               ← Process protocol
+│   └── dev-guides/              ← Spec templates and guides
 └── .ai-backlog/                 ← Harness Engineering (Memory) — gitignored
-    ├── context.md               ← Project brief
-    ├── tasks.md                 ← Active task list
-    ├── learned.md               ← Success patterns
-    ├── troubleshoot.md          ← Failure logs
-    └── impact-map.md            ← Blast-radius map (volatile — created at PLAN, cleared at END)
+    └── ...                      ← (See docs/PROJECT-STRUCTURE.md for details)
 ```
 
 `dev-guides/` is always included. It contains the 5-phase cycle guide, the internal decision-gate flow, SDLC reference, UI prompt guide, and spec templates (`prompt-tracks/`) for authoring the SPEC phase of any task.
@@ -100,8 +89,9 @@ When you prefix a message to the agent, it enters the corresponding cycle:
 | `feat: <description>` | Feature | Agent runs SPEC → PLAN → CODE → TEST → END                                                                                                          |
 | `fix: <description>`  | Fix     | Agent runs SPEC → PLAN → CODE → TEST → END with RCA focus                                                                                           |
 | `docs: <description>` | Docs    | Agent updates changelogs, ADRs, or specs                                                                                                            |
+| `audit: <scope>`      | Audit   | Agent verifies project alignment against rulesets (drift detection)                                                                                 |
 | `end:`                | —       | Close the active cycle — runs the END Phase checklist (changelog, backlog, commit). Also recovers a cycle if the agent loses track mid-conversation |
-| No prefix             | —       | Agent asks: "land, feat, fix, or docs?" — then proceeds                                                                                             |
+| No prefix             | —       | Agent asks: "land, feat, fix, docs, or audit?" — then proceeds                                                                                      |
 
 The agent **stops and waits for your approval** at SPEC and PLAN before writing any code.
 

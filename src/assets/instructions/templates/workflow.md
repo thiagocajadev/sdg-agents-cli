@@ -26,7 +26,8 @@ On every request, classify intent before acting:
 | `fix: ...`                | Read `.ai/commands/sdg-fix.md` (Context Charge) → Follow **Fix Cycle**         |
 | `docs: ...`               | Read `.ai/commands/sdg-docs.md` (Context Charge) → Follow **Docs Cycle**       |
 | `end:`                    | Read `.ai/commands/sdg-end.md` → Execute **END Phase** checklist (no argument) |
-| No prefix, intent unclear | Ask once: "land, feat, fix, or docs?" — then proceed                           |
+| `audit:`                  | Read `.ai/commands/sdg-audit.md` → Follow **Governance Audit Cycle**           |
+| No prefix, intent unclear | Ask once: "land, feat, fix, docs, or audit?" — then proceed                    |
 
 ---
 
@@ -125,9 +126,10 @@ On every request, classify intent before acting:
 >
 > 1. **Checklist Verification**: Goes through every item on the Spec's Verification Checklist.
 > 2. **Regression Check**: For `fix:` cycles: confirms the bug is gone and nothing else broke.
-> 3. **Fix Loop**: If something fails: fix and re-run. Up to 3 attempts before escalating.
+> 3. **Audit Gate**: Analyzes the modified files (`impact-map.md`) against the 6 Laws of Engineering to detect governance drift.
 > 4. **Lint Fix**: Runs the linter and fixes what it can before wrapping up.
-> 5. **Report**: Reports the result of each checklist item and lint status before moving on.
+> 5. **Fix Loop (Circuit Breaker)**: If anything fails (Tests, Lint, or Audit): fall back to Phase CODE to fix, then re-run TEST. Max 3 attempts total. Upon the 3rd failure, STOP the cycle immediately and generate an explicit Failure Report for the developer so you can jointly explore alternatives.
+> 6. **Report**: Reports the result of each checklist item, linting, and audit status before moving on.
 >    </rule>
 
 ## Phase: END (The Delivery) — MODE: PLANNING
