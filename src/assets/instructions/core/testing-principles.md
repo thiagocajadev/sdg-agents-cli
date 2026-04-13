@@ -80,6 +80,7 @@ describe('ValidateCredentials', () => {
 - **Act**: Execute exactly ONE action — the method under test.
 - **Assert**: Verify ONE behavior per test. Multiple assertions are acceptable only if they verify the same logical outcome.
 - **Isolation**: Tests must not depend on execution order or shared mutable state.
+- **Meta-Comments**: Do NOT use `// Arrange`, `// Act`, or `// Assert` comments. Use **Vertical Scansion** (blank lines) to separate phases. The code must be narrative enough to be self-documenting.
   </rule>
 
 ## Rule: Named Expectations
@@ -87,15 +88,21 @@ describe('ValidateCredentials', () => {
 <rule name="NamedExpectations">
 
 > [!IMPORTANT]
-> **Avoid magic strings in assertions.**
-> Always explicitly define the input data and the expected result in named constants (`const content = ...`, `const expected = ...`).
+> **Non-Negotiable Staff Rule: Avoid magic strings and literal values in assertions.**
+> Always explicitly define the input data and the expected result in named constants (`const input = ...`, `const expected = ...`).
 > This mirrors the "Explaining Variables" pattern and makes the test's intent clear at a glance.
 
 #### Instructions
 
 - Tests should clearly show the transformation (or lack thereof) through variable naming.
-- For tests where the input should not change, use `const expected = content`.
-- Do NOT pass literal strings directly into assertion functions.
+- For tests where the input should not change, use `const expected = input`.
+- Do NOT pass literal strings or objects directly into assertion functions.
+- Every `it` block must follow the **triad**: `input` -> `actual` -> `expected`.
+- **Descriptive Naming**: If multiple inputs or outputs are required, do NOT use numbered variables (e.g., `input1`, `input2`, `actual1`). Use descriptive names (e.g., `inputFix`, `inputFeature`).
+- **Transformation Scansion**: If the result of a method (`actualRaw`) needs formatting or refinement before the assertion, define both explicitly to separate the "computation" from the "presentation" check.
+  - `actualRaw`: The direct, unformatted return value.
+  - `actual`: The refined/plucked value used for the final comparison.
+  - This preserves the `actual` -> `expected` visual alignment in the assertion.
 
 #### ❌ Bad Example
 
@@ -118,6 +125,16 @@ it('should remove H1 heading', () => {
   assert.strictEqual(actual, expected);
 });
 ```
+
+#### AI Agent Self-Audit
+
+Before proposing test code, verify:
+
+- [ ] Are there any literal values inside `assert.equal` or `assert.deepEqual`? (If yes, move to `const expected`).
+- [ ] Is the method under test being called with a magic string? (If yes, move to `const input`).
+- [ ] Does the test follow the **triad pattern** (`input` -> `actual` -> `expected`) without redundant meta-comments (`// Arrange`, etc.)?
+- [ ] Are all variables descriptively named? (No `input1`, `input2`, etc.)
+- [ ] Is **Vertical Scansion** used to separate logic phases?
 
 </rule>
 

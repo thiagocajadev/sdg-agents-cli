@@ -72,10 +72,14 @@ async function startInteractiveMode(args) {
             value: 'init',
           },
           {
-            name: '2. ⚙️  Settings & Maintenance — Review rules, sync patterns, and dev tools',
+            name: '2. 🔍 Governance Audit — Detect drift and law violations',
+            value: 'audit',
+          },
+          {
+            name: '3. ⚙️  Settings & Maintenance — Review rules, sync patterns, and dev tools',
             value: 'settings',
           },
-          { name: '3. ❌ Exit', value: 'exit' },
+          { name: '4. ❌ Exit', value: 'exit' },
         ],
       });
 
@@ -95,6 +99,11 @@ async function executeMenuAction(menuChoice, args) {
     case 'init': {
       const { SDG } = await import('./build-bundle.mjs');
       await SDG.run(args.targetDir, { dryRun: args.dryRun });
+      break;
+    }
+    case 'audit': {
+      const { AuditRunner } = await import('./audit-bundle.mjs');
+      await AuditRunner.run();
       break;
     }
     case 'settings':
@@ -138,6 +147,11 @@ async function executeSubcommand(args) {
     case 'clear': {
       const { Cleaner } = await import('./clear-bundle.mjs');
       await Cleaner.run(args.targetDir);
+      break;
+    }
+    case 'audit': {
+      const { AuditRunner } = await import('./audit-bundle.mjs');
+      await AuditRunner.run();
       break;
     }
     default:

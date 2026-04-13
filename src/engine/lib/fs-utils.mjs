@@ -29,6 +29,36 @@ function copyRecursiveSync(src, dest, options = {}) {
 }
 
 function filterContentByVersion(content, targetVersion) {
+  function parseVersionNumber(v) {
+    const match = String(v).match(/(\d+(\.\d+)?)/);
+    return match ? parseFloat(match[1]) : null;
+  }
+
+  function evaluateVersionCondition(condition, targetNum) {
+    const match = condition.match(/([<>=]+)?\s*(\d+(\.\d+)?)/);
+    if (!match) return true;
+
+    const operator = match[1] || '==';
+    const condNum = parseFloat(match[2]);
+
+    switch (operator) {
+      case '>=':
+        return targetNum >= condNum;
+      case '<=':
+        return targetNum <= condNum;
+      case '>':
+        return targetNum > condNum;
+      case '<':
+        return targetNum < condNum;
+      case '==':
+        return targetNum === condNum;
+      case '=':
+        return targetNum === condNum;
+      default:
+        return true;
+    }
+  }
+
   if (!targetVersion) return content;
 
   const targetNum = parseVersionNumber(targetVersion);
@@ -42,36 +72,6 @@ function filterContentByVersion(content, targetVersion) {
     }
     return '';
   });
-}
-
-function parseVersionNumber(v) {
-  const match = String(v).match(/(\d+(\.\d+)?)/);
-  return match ? parseFloat(match[1]) : null;
-}
-
-function evaluateVersionCondition(condition, targetNum) {
-  const match = condition.match(/([<>=]+)?\s*(\d+(\.\d+)?)/);
-  if (!match) return true;
-
-  const operator = match[1] || '==';
-  const condNum = parseFloat(match[2]);
-
-  switch (operator) {
-    case '>=':
-      return targetNum >= condNum;
-    case '<=':
-      return targetNum <= condNum;
-    case '>':
-      return targetNum > condNum;
-    case '<':
-      return targetNum < condNum;
-    case '==':
-      return targetNum === condNum;
-    case '=':
-      return targetNum === condNum;
-    default:
-      return true;
-  }
 }
 
 function getDirname(importMetaUrl) {
@@ -130,8 +130,6 @@ const FsUtils = {
   getDirectories,
   copyRecursiveSync,
   filterContentByVersion,
-  parseVersionNumber,
-  evaluateVersionCondition,
   getDirname,
   runIfDirect,
   detectIndentation,

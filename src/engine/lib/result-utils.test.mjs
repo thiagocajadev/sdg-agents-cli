@@ -7,57 +7,84 @@ const { success, fail } = ResultUtils;
 describe('ResultUtils', () => {
   describe('success()', () => {
     it('should create a success result with a value', () => {
-      const result = success('hello');
+      const input = 'hello';
+      const expectedValue = input;
+      const expectedSuccess = true;
+      const expectedFailure = false;
+      const expectedNull = null;
 
-      assert.equal(result.isSuccess, true);
-      assert.equal(result.isFailure, false);
-      assert.equal(result.value, 'hello');
-      assert.equal(result.error, null);
+      const actual = success(input);
+
+      assert.equal(actual.isSuccess, expectedSuccess);
+      assert.equal(actual.isFailure, expectedFailure);
+      assert.equal(actual.value, expectedValue);
+      assert.equal(actual.error, expectedNull);
     });
 
     it('should create a success result with undefined when no value is passed', () => {
-      const result = success();
+      const expectedValue = undefined;
+      const expectedSuccess = true;
+      const expectedFailure = false;
+      const expectedNull = null;
 
-      assert.equal(result.isSuccess, true);
-      assert.equal(result.isFailure, false);
-      assert.equal(result.value, undefined);
-      assert.equal(result.error, null);
+      const actual = success();
+
+      assert.equal(actual.isSuccess, expectedSuccess);
+      assert.equal(actual.isFailure, expectedFailure);
+      assert.equal(actual.value, expectedValue);
+      assert.equal(actual.error, expectedNull);
     });
 
     it('should preserve complex objects as values', () => {
-      const data = { id: 1, name: 'test', nested: { key: 'value' } };
-      const result = success(data);
+      const input = { id: 1, name: 'test', nested: { key: 'value' } };
+      const expected = input;
 
-      assert.deepEqual(result.value, data);
+      const actual = success(input);
+
+      assert.deepEqual(actual.value, expected);
     });
 
     it('should handle null as a valid value', () => {
-      const result = success(null);
+      const input = null;
+      const expectedValue = null;
+      const expectedSuccess = true;
 
-      assert.equal(result.isSuccess, true);
-      assert.equal(result.value, null);
+      const actual = success(input);
+
+      assert.equal(actual.isSuccess, expectedSuccess);
+      assert.equal(actual.value, expectedValue);
     });
   });
 
   describe('fail()', () => {
     it('should create a failure result with message and code', () => {
-      const result = fail('Something went wrong', 'ERR_001');
+      const inputMessage = 'Something went wrong';
+      const inputCode = 'ERR_001';
+      const expectedError = {
+        message: inputMessage,
+        code: inputCode,
+      };
+      const expectedSuccess = false;
+      const expectedFailure = true;
+      const expectedNull = null;
 
-      assert.equal(result.isSuccess, false);
-      assert.equal(result.isFailure, true);
-      assert.equal(result.value, null);
-      assert.deepEqual(result.error, {
-        message: 'Something went wrong',
-        code: 'ERR_001',
-      });
+      const actual = fail(inputMessage, inputCode);
+
+      assert.equal(actual.isSuccess, expectedSuccess);
+      assert.equal(actual.isFailure, expectedFailure);
+      assert.equal(actual.value, expectedNull);
+      assert.deepEqual(actual.error, expectedError);
     });
 
     it('should guarantee isSuccess and isFailure are always opposite', () => {
-      const ok = success('data');
-      const err = fail('oops', 'FAIL');
+      const inputOk = 'data';
+      const inputErr = 'oops';
 
-      assert.notEqual(ok.isSuccess, ok.isFailure);
-      assert.notEqual(err.isSuccess, err.isFailure);
+      const actualOk = success(inputOk);
+      const actualErr = fail(inputErr, 'FAIL');
+
+      assert.notEqual(actualOk.isSuccess, actualOk.isFailure);
+      assert.notEqual(actualErr.isSuccess, actualErr.isFailure);
     });
   });
 });

@@ -20,13 +20,18 @@ describe('InstructionAssembler', () => {
   describe('writeAgentConfig()', () => {
     it('should write .ai/skill/AGENTS.md', () => {
       const tmpDir = makeTempDir();
+      const inputContent = 'content';
+      const expectedPath = path.join(tmpDir, '.ai', 'skill', 'AGENTS.md');
+      const expectedContent = inputContent;
+
       try {
-        writeAgentConfig(tmpDir, 'content');
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'skill', 'AGENTS.md')));
-        assert.equal(
-          fs.readFileSync(path.join(tmpDir, '.ai', 'skill', 'AGENTS.md'), 'utf8'),
-          'content'
-        );
+        writeAgentConfig(tmpDir, inputContent);
+
+        const actualExists = fs.existsSync(expectedPath);
+        const actualContent = fs.readFileSync(expectedPath, 'utf8');
+
+        assert.ok(actualExists);
+        assert.equal(actualContent, expectedContent);
       } finally {
         cleanup(tmpDir);
       }
@@ -34,9 +39,13 @@ describe('InstructionAssembler', () => {
 
     it('should create .ai/skill/ directory if it does not exist', () => {
       const tmpDir = makeTempDir();
+      const expectedDir = path.join(tmpDir, '.ai', 'skill');
+
       try {
         writeAgentConfig(tmpDir, 'content');
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'skill')));
+
+        const actualExists = fs.existsSync(expectedDir);
+        assert.ok(actualExists);
       } finally {
         cleanup(tmpDir);
       }
@@ -46,10 +55,14 @@ describe('InstructionAssembler', () => {
   describe('writeManifest()', () => {
     it('should create .ai/.sdg-manifest.json', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
+      const expectedFile = path.join(tmpDir, '.ai', '.sdg-manifest.json');
+
       try {
-        const selections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
-        writeManifest(tmpDir, selections, '1.0.0');
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', '.sdg-manifest.json')));
+        writeManifest(tmpDir, inputSelections, '1.0.0');
+
+        const actualExists = fs.existsSync(expectedFile);
+        assert.ok(actualExists);
       } finally {
         cleanup(tmpDir);
       }
@@ -57,10 +70,14 @@ describe('InstructionAssembler', () => {
 
     it('should create .ai/ directory if it does not exist', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = { flavor: 'lite', idioms: ['go'], versions: {} };
+      const expectedDir = path.join(tmpDir, '.ai');
+
       try {
-        const selections = { flavor: 'lite', idioms: ['go'], versions: {} };
-        writeManifest(tmpDir, selections, '1.0.0');
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai')));
+        writeManifest(tmpDir, inputSelections, '1.0.0');
+
+        const actualExists = fs.existsSync(expectedDir);
+        assert.ok(actualExists);
       } finally {
         cleanup(tmpDir);
       }
@@ -68,15 +85,20 @@ describe('InstructionAssembler', () => {
 
     it('should write valid JSON with all required fields', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = { flavor: 'lite', idioms: ['go'], versions: {} };
+      const inputVersion = '2.0.0';
+      const manifestPath = path.join(tmpDir, '.ai', '.sdg-manifest.json');
+
       try {
-        const selections = { flavor: 'lite', idioms: ['go'], versions: {} };
-        writeManifest(tmpDir, selections, '2.0.0');
-        const raw = fs.readFileSync(path.join(tmpDir, '.ai', '.sdg-manifest.json'), 'utf8');
-        const manifest = JSON.parse(raw);
-        assert.ok(manifest.generatedAt);
-        assert.equal(manifest.sdgAgentVersion, '2.0.0');
-        assert.ok(typeof manifest.contentHashes === 'object');
-        assert.deepEqual(manifest.selections, selections);
+        writeManifest(tmpDir, inputSelections, inputVersion);
+
+        const actualRaw = fs.readFileSync(manifestPath, 'utf8');
+        const actual = JSON.parse(actualRaw);
+
+        assert.ok(actual.generatedAt);
+        assert.equal(actual.sdgAgentVersion, inputVersion);
+        assert.ok(typeof actual.contentHashes === 'object');
+        assert.deepEqual(actual.selections, inputSelections);
       } finally {
         cleanup(tmpDir);
       }
@@ -84,17 +106,18 @@ describe('InstructionAssembler', () => {
 
     it('should store selections exactly as passed', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = {
+        flavor: 'vertical-slice',
+        idioms: ['typescript', 'python'],
+        versions: { typescript: '6.0', python: '3.13' },
+      };
+      const manifestPath = path.join(tmpDir, '.ai', '.sdg-manifest.json');
+
       try {
-        const selections = {
-          flavor: 'vertical-slice',
-          idioms: ['typescript', 'python'],
-          versions: { typescript: '6.0', python: '3.13' },
-        };
-        writeManifest(tmpDir, selections, '1.0.0');
-        const manifest = JSON.parse(
-          fs.readFileSync(path.join(tmpDir, '.ai', '.sdg-manifest.json'), 'utf8')
-        );
-        assert.deepEqual(manifest.selections, selections);
+        writeManifest(tmpDir, inputSelections, '1.0.0');
+
+        const actual = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        assert.deepEqual(actual.selections, inputSelections);
       } finally {
         cleanup(tmpDir);
       }
@@ -102,15 +125,17 @@ describe('InstructionAssembler', () => {
 
     it('should store a valid ISO generatedAt timestamp', () => {
       const tmpDir = makeTempDir();
+      const before = Date.now();
+      const manifestPath = path.join(tmpDir, '.ai', '.sdg-manifest.json');
+
       try {
-        const before = Date.now();
         writeManifest(tmpDir, { flavor: 'lite', idioms: ['go'], versions: {} }, '1.0.0');
+
         const after = Date.now();
-        const manifest = JSON.parse(
-          fs.readFileSync(path.join(tmpDir, '.ai', '.sdg-manifest.json'), 'utf8')
-        );
-        const ts = new Date(manifest.generatedAt).getTime();
-        assert.ok(ts >= before && ts <= after);
+        const actualManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        const actualTs = new Date(actualManifest.generatedAt).getTime();
+
+        assert.ok(actualTs >= before && actualTs <= after);
       } finally {
         cleanup(tmpDir);
       }
@@ -119,92 +144,127 @@ describe('InstructionAssembler', () => {
 
   describe('buildMasterInstructions()', () => {
     it('should include pointer to Universal Engineering Manifesto', () => {
-      const selections = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
-      const result = buildMasterInstructions(selections);
-      assert.ok(result.includes('Universal Engineering Manifesto'));
-      assert.ok(result.includes('.ai/instructions/core/staff-dna.md'));
+      const input = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
+      const expectedSubstring1 = 'Universal Engineering Manifesto';
+      const expectedSubstring2 = '.ai/instructions/core/staff-dna.md';
+
+      const actual = buildMasterInstructions(input);
+
+      assert.ok(actual.includes(expectedSubstring1));
+      assert.ok(actual.includes(expectedSubstring2));
     });
 
     it('should include land: in the intent routing table', () => {
-      const selections = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
-      const result = buildMasterInstructions(selections);
-      assert.ok(result.includes('land:'));
-      assert.ok(result.includes('feat:'));
+      const input = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
+      const expectedSubstring1 = 'land:';
+      const expectedSubstring2 = 'feat:';
+
+      const actual = buildMasterInstructions(input);
+
+      assert.ok(actual.includes(expectedSubstring1));
+      assert.ok(actual.includes(expectedSubstring2));
     });
 
     it('should include the Working Protocol workflow content', () => {
-      const selections = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
-      const result = buildMasterInstructions(selections);
-      assert.ok(result.includes('Working Protocol'));
+      const input = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
+      const expectedSubstring = 'Working Protocol';
+
+      const actual = buildMasterInstructions(input);
+
+      assert.ok(actual.includes(expectedSubstring));
     });
 
     it('should include intent prefix guide (land/feat/fix/docs)', () => {
-      const selections = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
-      const result = buildMasterInstructions(selections);
-      assert.ok(result.includes('land:'));
-      assert.ok(result.includes('feat:'));
-      assert.ok(result.includes('fix:'));
-      assert.ok(result.includes('docs:'));
+      const input = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
+      const expectedSubstrings = ['land:', 'feat:', 'fix:', 'docs:'];
+
+      const actual = buildMasterInstructions(input);
+
+      expectedSubstrings.forEach((expected) => {
+        assert.ok(actual.includes(expected));
+      });
     });
 
     it('should include backend competency link for backend-only idiom (go)', () => {
-      const selections = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
-      const result = buildMasterInstructions(selections);
-      assert.ok(result.includes('.ai/instructions/competencies/backend.md'));
-      assert.ok(!result.includes('.ai/instructions/competencies/frontend.md'));
+      const input = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
+      const expectedSubstring = '.ai/instructions/competencies/backend.md';
+      const forbiddenSubstring = '.ai/instructions/competencies/frontend.md';
+
+      const actual = buildMasterInstructions(input);
+
+      assert.ok(actual.includes(expectedSubstring));
+      assert.ok(!actual.includes(forbiddenSubstring));
     });
 
     it('should include both competency links for fullstack idiom (typescript)', () => {
-      const selections = {
+      const input = {
         flavor: 'lite',
         idioms: ['typescript'],
         versions: {},
         designPreset: 'glass',
       };
-      const result = buildMasterInstructions(selections);
-      assert.ok(result.includes('.ai/instructions/competencies/backend.md'));
-      assert.ok(result.includes('.ai/instructions/competencies/frontend.md'));
+      const expectedSubstring1 = '.ai/instructions/competencies/backend.md';
+      const expectedSubstring2 = '.ai/instructions/competencies/frontend.md';
+
+      const actual = buildMasterInstructions(input);
+
+      assert.ok(actual.includes(expectedSubstring1));
+      assert.ok(actual.includes(expectedSubstring2));
     });
 
     it('should include design preset note in uppercase when designPreset is set', () => {
-      const selections = {
+      const input = {
         flavor: 'lite',
         idioms: ['typescript'],
         versions: {},
         designPreset: 'bento',
       };
-      const result = buildMasterInstructions(selections);
-      assert.ok(result.includes('BENTO'));
+      const expectedSubstring = 'BENTO';
+
+      const actual = buildMasterInstructions(input);
+
+      assert.ok(actual.includes(expectedSubstring));
     });
 
     it('should not include design preset note when designPreset is null', () => {
-      const selections = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
-      const result = buildMasterInstructions(selections);
-      assert.ok(!result.includes('Initial Design Preset'));
+      const input = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
+      const forbiddenSubstring = 'Initial Design Preset';
+
+      const actual = buildMasterInstructions(input);
+
+      assert.ok(!actual.includes(forbiddenSubstring));
     });
 
     it('should include an instruction link for each idiom', () => {
-      const selections = {
+      const input = {
         flavor: 'lite',
         idioms: ['typescript', 'python'],
         versions: {},
         designPreset: null,
       };
-      const result = buildMasterInstructions(selections);
-      assert.ok(result.includes('idioms/typescript/patterns.md'));
-      assert.ok(result.includes('idioms/python/patterns.md'));
+      const expectedSubstring1 = 'idioms/typescript/patterns.md';
+      const expectedSubstring2 = 'idioms/python/patterns.md';
+
+      const actual = buildMasterInstructions(input);
+
+      assert.ok(actual.includes(expectedSubstring1));
+      assert.ok(actual.includes(expectedSubstring2));
     });
 
     it('should unconditionally include Agent Roles block', () => {
-      const selections = {
+      const input = {
         flavor: 'lite',
         idioms: ['go'],
         versions: {},
         designPreset: null,
       };
-      const result = buildMasterInstructions(selections);
-      assert.ok(result.includes('## Agent Roles'));
-      assert.ok(result.includes('agent-roles.md'));
+      const expectedSubstring1 = '## Agent Roles';
+      const expectedSubstring2 = 'agent-roles.md';
+
+      const actual = buildMasterInstructions(input);
+
+      assert.ok(actual.includes(expectedSubstring1));
+      assert.ok(actual.includes(expectedSubstring2));
     });
   });
 });

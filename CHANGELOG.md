@@ -11,6 +11,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.2.0] - 2026-04-13
+
+### Added
+
+- **Hardened Governance Audit** — implemented narrative slop detection in `audit-bundle.mjs` to flag structural meta-comments (`// Arrange/Act/Assert`) and non-descriptive numbered variables (`input1`, `actual2`).
+- **Transformation Scansion Protocol** — formalized the `actualRaw` vs. `actual` pattern in `testing-principles.md` to separate computation from presentation check.
+
+### Fixed
+
+- **Narrative Debt Removal** — refactored the entire unit test suite (9 files) to eliminate structural meta-comments in favor of vertical scansion.
+- **Expressive Test Naming** — refactored `auto-bump.test.mjs` and `fs-utils.test.mjs` to replace numbered input variables with intent-based identifiers.
+
+## [2.1.0] - 2026-04-13
+
+### Added
+
+- **Governance Audit Command** — implemented a dedicated `audit` subcommand in the CLI that performs comprehensive project health checks, including drift detection, narrative health, and Law 3 compliance analysis.
+- **Audit Runner** — created `src/engine/bin/audit-bundle.mjs` to consolidate all governance checks into a single reportable audit summary.
+
+### Fixed
+
+- **Law 3 Compliance (Lexical Scoping)** — refactored `FsUtils` to encapsulate internal versioning helpers inside `filterContentByVersion`, aligning with the project's Narrative Cascade standards.
+- **FsUtils Test Regression** — refactored unit tests to cover internal logic via the public API after the Lexical Scoping refactor.
+
 ## [2.0.0] - 2026-04-13
 
 ### 🏆 Milestone: Governance Observability

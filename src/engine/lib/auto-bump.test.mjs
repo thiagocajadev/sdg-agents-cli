@@ -7,50 +7,110 @@ const { detectBumpType, bumpVersion } = AutoBump;
 describe('AutoBump', () => {
   describe('detectBumpType()', () => {
     it('should return patch for fix: commits', () => {
-      assert.equal(detectBumpType('fix: corrige typo no README'), 'patch');
+      const input = 'fix: corrige typo no README';
+      const expected = 'patch';
+
+      const actual = detectBumpType(input);
+
+      assert.equal(actual, expected);
     });
 
     it('should return patch for chore: commits', () => {
-      assert.equal(detectBumpType('chore: atualiza dependencias'), 'patch');
+      const input = 'chore: atualiza dependencias';
+      const expected = 'patch';
+
+      const actual = detectBumpType(input);
+
+      assert.equal(actual, expected);
     });
 
     it('should return minor for feat: commits', () => {
-      assert.equal(detectBumpType('feat: adiciona novo comando export'), 'minor');
+      const input = 'feat: adiciona novo comando export';
+      const expected = 'minor';
+
+      const actual = detectBumpType(input);
+
+      assert.equal(actual, expected);
     });
 
     it('should return major for breaking change via ! prefix', () => {
-      assert.equal(detectBumpType('feat!: remove suporte a Node 18'), 'major');
-      assert.equal(detectBumpType('fix!: altera contrato da API'), 'major');
+      const inputFeature = 'feat!: remove suporte a Node 18';
+      const inputFix = 'fix!: altera contrato da API';
+      const expected = 'major';
+
+      const actualFeature = detectBumpType(inputFeature);
+      const actualFix = detectBumpType(inputFix);
+
+      assert.equal(actualFeature, expected);
+      assert.equal(actualFix, expected);
     });
 
     it('should return major for BREAKING CHANGE in footer', () => {
-      const msg = 'refactor: reestrutura pipeline\n\nBREAKING CHANGE: remove flag --legacy';
-      assert.equal(detectBumpType(msg), 'major');
+      const input = 'refactor: reestrutura pipeline\n\nBREAKING CHANGE: remove flag --legacy';
+      const expected = 'major';
+
+      const actual = detectBumpType(input);
+
+      assert.equal(actual, expected);
     });
 
     it('should return skip for chore: bump version commits', () => {
-      assert.equal(detectBumpType('chore: bump version to 1.2.3'), 'skip');
-      assert.equal(detectBumpType('chore: bump version to 0.13.0'), 'skip');
+      const inputMajor = 'chore: bump version to 1.2.3';
+      const inputMinor = 'chore: bump version to 0.13.0';
+      const expected = 'skip';
+
+      const actualMajor = detectBumpType(inputMajor);
+      const actualMinor = detectBumpType(inputMinor);
+
+      assert.equal(actualMajor, expected);
+      assert.equal(actualMinor, expected);
     });
   });
 
   describe('bumpVersion()', () => {
     it('should increment patch', () => {
-      assert.equal(bumpVersion('0.12.1', 'patch'), '0.12.2');
+      const inputVersion = '0.12.1';
+      const inputType = 'patch';
+      const expected = '0.12.2';
+
+      const actual = bumpVersion(inputVersion, inputType);
+
+      assert.equal(actual, expected);
     });
 
     it('should increment minor and reset patch', () => {
-      assert.equal(bumpVersion('0.12.1', 'minor'), '0.13.0');
+      const inputVersion = '0.12.1';
+      const inputType = 'minor';
+      const expected = '0.13.0';
+
+      const actual = bumpVersion(inputVersion, inputType);
+
+      assert.equal(actual, expected);
     });
 
     it('should increment major and reset minor + patch', () => {
-      assert.equal(bumpVersion('0.12.1', 'major'), '1.0.0');
+      const inputVersion = '0.12.1';
+      const inputType = 'major';
+      const expected = '1.0.0';
+
+      const actual = bumpVersion(inputVersion, inputType);
+
+      assert.equal(actual, expected);
     });
 
     it('should handle version 0.0.0', () => {
-      assert.equal(bumpVersion('0.0.0', 'patch'), '0.0.1');
-      assert.equal(bumpVersion('0.0.0', 'minor'), '0.1.0');
-      assert.equal(bumpVersion('0.0.0', 'major'), '1.0.0');
+      const inputVersion = '0.0.0';
+      const expectedPatch = '0.0.1';
+      const expectedMinor = '0.1.0';
+      const expectedMajor = '1.0.0';
+
+      const actualPatch = bumpVersion(inputVersion, 'patch');
+      const actualMinor = bumpVersion(inputVersion, 'minor');
+      const actualMajor = bumpVersion(inputVersion, 'major');
+
+      assert.equal(actualPatch, expectedPatch);
+      assert.equal(actualMinor, expectedMinor);
+      assert.equal(actualMajor, expectedMajor);
     });
   });
 });

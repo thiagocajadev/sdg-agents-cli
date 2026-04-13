@@ -7,96 +7,120 @@ const { validateSelections, autoSelectVersions } = WizardUtils;
 describe('WizardUtils (Non-Interactive)', () => {
   describe('validateSelections()', () => {
     it('should accept valid flavor and idioms', () => {
-      const result = validateSelections({
+      const input = {
         flavor: 'vertical-slice',
         idioms: ['typescript'],
         versions: {},
-      });
+      };
+      const expectedSuccess = true;
 
-      assert.equal(result.isSuccess, true);
+      const actual = validateSelections(input);
+
+      assert.equal(actual.isSuccess, expectedSuccess);
     });
 
     it('should reject missing flavor', () => {
-      const result = validateSelections({ idioms: ['typescript'], versions: {} });
+      const input = { idioms: ['typescript'], versions: {} };
+      const expectedFailure = true;
+      const expectedCode = 'MISSING_FLAVOR';
 
-      assert.equal(result.isFailure, true);
-      assert.equal(result.error.code, 'MISSING_FLAVOR');
+      const actual = validateSelections(input);
+
+      assert.equal(actual.isFailure, expectedFailure);
+      assert.equal(actual.error.code, expectedCode);
     });
 
     it('should reject unknown flavor', () => {
-      const result = validateSelections({
+      const input = {
         flavor: 'nonexistent',
         idioms: ['typescript'],
         versions: {},
-      });
+      };
+      const expectedFailure = true;
+      const expectedCode = 'INVALID_FLAVOR';
+      const expectedInMessage = 'nonexistent';
 
-      assert.equal(result.isFailure, true);
-      assert.equal(result.error.code, 'INVALID_FLAVOR');
-      assert.ok(result.error.message.includes('nonexistent'));
+      const actual = validateSelections(input);
+
+      assert.equal(actual.isFailure, expectedFailure);
+      assert.equal(actual.error.code, expectedCode);
+      assert.ok(actual.error.message.includes(expectedInMessage));
     });
 
     it('should reject empty idioms', () => {
-      const result = validateSelections({
+      const input = {
         flavor: 'mvc',
         idioms: [],
         versions: {},
-      });
+      };
+      const expectedFailure = true;
+      const expectedCode = 'MISSING_IDIOM';
 
-      assert.equal(result.isFailure, true);
-      assert.equal(result.error.code, 'MISSING_IDIOM');
+      const actual = validateSelections(input);
+
+      assert.equal(actual.isFailure, expectedFailure);
+      assert.equal(actual.error.code, expectedCode);
     });
 
     it('should reject unknown idiom', () => {
-      const result = validateSelections({
+      const input = {
         flavor: 'mvc',
         idioms: ['cobol'],
         versions: {},
-      });
+      };
+      const expectedFailure = true;
+      const expectedCode = 'INVALID_IDIOM';
+      const expectedInMessage = 'cobol';
 
-      assert.equal(result.isFailure, true);
-      assert.equal(result.error.code, 'INVALID_IDIOM');
-      assert.ok(result.error.message.includes('cobol'));
+      const actual = validateSelections(input);
+
+      assert.equal(actual.isFailure, expectedFailure);
+      assert.equal(actual.error.code, expectedCode);
+      assert.ok(actual.error.message.includes(expectedInMessage));
     });
 
     it('should accept multiple valid idioms', () => {
-      const result = validateSelections({
+      const input = {
         flavor: 'vertical-slice',
         idioms: ['typescript', 'python', 'go'],
         versions: {},
-      });
+      };
+      const expectedSuccess = true;
 
-      assert.equal(result.isSuccess, true);
+      const actual = validateSelections(input);
+
+      assert.equal(actual.isSuccess, expectedSuccess);
     });
   });
 
   describe('autoSelectVersions()', () => {
     it('should auto-select the latest version for each idiom', () => {
-      const selections = { flavor: 'mvc', idioms: ['typescript', 'csharp'], versions: {} };
+      const input = { flavor: 'mvc', idioms: ['typescript', 'csharp'], versions: {} };
 
-      autoSelectVersions(selections);
+      autoSelectVersions(input);
 
-      assert.ok(selections.versions.typescript);
-      assert.ok(selections.versions.csharp);
+      assert.ok(input.versions.typescript);
+      assert.ok(input.versions.csharp);
     });
 
     it('should not override explicitly set versions', () => {
-      const selections = {
+      const input = {
         flavor: 'mvc',
         idioms: ['typescript'],
         versions: { typescript: 'ts@5.9' },
       };
+      const expected = 'ts@5.9';
 
-      autoSelectVersions(selections);
+      autoSelectVersions(input);
 
-      assert.equal(selections.versions.typescript, 'ts@5.9');
+      assert.equal(input.versions.typescript, expected);
     });
 
     it('should not throw when versions object is missing and auto-populate from registry', () => {
-      const selections = { flavor: 'mvc', idioms: ['typescript'], versions: {} };
+      const input = { flavor: 'mvc', idioms: ['typescript'], versions: {} };
 
-      autoSelectVersions(selections);
-
-      assert.ok(selections.versions.typescript);
+      assert.doesNotThrow(() => autoSelectVersions(input));
+      assert.ok(input.versions.typescript);
     });
   });
 });

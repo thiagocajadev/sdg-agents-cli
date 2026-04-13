@@ -19,15 +19,15 @@ A practical workflow for every development cycle:
 
 On every request, classify intent before acting:
 
-| Signal                    | Cycle                                                                          |
-| :------------------------ | :----------------------------------------------------------------------------- |
-| `land: ...`               | Read `.ai/commands/sdg-land.md` → Follow **Land Cycle** (inception only)       |
-| `feat: ...`               | Read `.ai/commands/sdg-feat.md` (Context Charge) → Follow **Feature Cycle**    |
-| `fix: ...`                | Read `.ai/commands/sdg-fix.md` (Context Charge) → Follow **Fix Cycle**         |
-| `docs: ...`               | Read `.ai/commands/sdg-docs.md` (Context Charge) → Follow **Docs Cycle**       |
-| `end:`                    | Read `.ai/commands/sdg-end.md` → Execute **END Phase** checklist (no argument) |
-| `audit:`                  | Read `.ai/commands/sdg-audit.md` → Follow **Governance Audit Cycle**           |
-| No prefix, intent unclear | Ask once: "land, feat, fix, docs, or audit?" — then proceed                    |
+| Signal                    | Cycle                                                                                  |
+| :------------------------ | :------------------------------------------------------------------------------------- |
+| `land: ...`               | Read `.ai/commands/sdg-land.md` → Follow **Land Cycle** (inception only)               |
+| `feat: ...`               | Read `.ai/commands/sdg-feat.md` (Context Charge) → Follow **Feature Cycle**            |
+| `fix: ...`                | Read `.ai/commands/sdg-fix.md` (Context Charge) → Follow **Fix Cycle**                 |
+| `docs: ...`               | Read `.ai/commands/sdg-docs.md` (Context Charge) → Follow **Docs Cycle**               |
+| `end:`                    | Read `.ai/commands/sdg-end.md` → Execute **END Phase** checklist (no argument)         |
+| `audit:`                  | Read `.ai/commands/sdg-audit.md` → Run `npx sdg-agents audit` → Follow **Audit Cycle** |
+| No prefix, intent unclear | Ask once: "land, feat, fix, docs, or audit?" — then proceed                            |
 
 ---
 
@@ -101,8 +101,9 @@ On every request, classify intent before acting:
 > [!IMPORTANT]
 > Follow the approved plan strictly.
 >
-> 1. **Context Load**: Reads the project's standards and style guide before writing anything (read `engineering-standards.md`, `code-style.md`, and competencies).
-> 2. **Quality Gate**: Reviews every function against the guide's readability rules before moving on.
+> 1. **DNA-Check**: Before starting, explicitly list which **6 Laws (staff-dna.md)** apply to the current task and why. Confirm mental alignment.
+> 2. **Context Load**: Reads the project's standards and style guide before writing anything (read `engineering-standards.md`, `code-style.md`, and competencies).
+> 3. **Quality Gate**: Reviews every function against the guide's readability rules before moving on.
 >
 > _Narrative Gate Checklist:_
 >
@@ -112,10 +113,12 @@ On every request, classify intent before acting:
 > - [ ] **Lexical Scoping** — one-off helpers defined inside their only caller
 > - [ ] **Explaining Returns** — return value assigned to a named `const`; no bare returns
 > - [ ] **Boolean Prefix** — `isLoading`, `hasError`, `isActive`; never bare `loading`, `error`
+> - [ ] **Named Expectations** (Tests) — `input`/`actual`/`expected` triad; no magic values in `assert`
+> - [ ] **Boundary Resilience** — error handling (_try/catch_ or _Early Return_) at critical I/O or data points
 > - [ ] **Code as Documentation** — no "what" comments; only `// why:` for non-obvious constraints
 >
-> 3. **Plan Adherence**: Follows the agreed plan. No extra features or refactors outside what was approved.
-> 4. **Blocker Surface**: Raises blockers immediately. Never quietly works around them.
+> 4. **Plan Adherence**: Follows the agreed plan. No extra features or refactors outside what was approved.
+> 5. **Blocker Surface**: Raises blockers immediately. Never quietly works around them.
 >    </rule>
 
 ## Phase: TEST (The Verification) — MODE: FAST
@@ -126,7 +129,7 @@ On every request, classify intent before acting:
 >
 > 1. **Checklist Verification**: Goes through every item on the Spec's Verification Checklist.
 > 2. **Regression Check**: For `fix:` cycles: confirms the bug is gone and nothing else broke.
-> 3. **Audit Gate**: Analyzes the modified files (`impact-map.md`) against the 6 Laws of Engineering to detect governance drift.
+> 3. **Audit Gate (Confirmation)**: Analyzes the modified files against the 6 Laws. The audit is the final confirmation that the **Phase: CODE** quality was maintained.
 > 4. **Lint Fix**: Runs the linter and fixes what it can before wrapping up.
 > 5. **Fix Loop (Circuit Breaker)**: If anything fails (Tests, Lint, or Audit): fall back to Phase CODE to fix, then re-run TEST. Max 3 attempts total. Upon the 3rd failure, STOP the cycle immediately and generate an explicit Failure Report for the developer so you can jointly explore alternatives.
 > 6. **Report**: Reports the result of each checklist item, linting, and audit status before moving on.

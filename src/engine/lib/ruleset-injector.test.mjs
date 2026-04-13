@@ -21,11 +21,18 @@ describe('RulesetInjector', () => {
   describe('prepareProjectStructure()', () => {
     it('should create .ai/instructions, .ai/workflows and .ai/commands directories', () => {
       const tmpDir = makeTempDir();
+      const expectedDirs = [
+        path.join(tmpDir, '.ai', 'instructions'),
+        path.join(tmpDir, '.ai', 'workflows'),
+        path.join(tmpDir, '.ai', 'commands'),
+      ];
+
       try {
         prepareProjectStructure(tmpDir);
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'instructions')));
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'workflows')));
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'commands')));
+
+        expectedDirs.forEach((expectedDir) => {
+          assert.ok(fs.existsSync(expectedDir));
+        });
       } finally {
         cleanup(tmpDir);
       }
@@ -33,8 +40,10 @@ describe('RulesetInjector', () => {
 
     it('should be idempotent — calling twice does not throw', () => {
       const tmpDir = makeTempDir();
+
       try {
         prepareProjectStructure(tmpDir);
+
         assert.doesNotThrow(() => prepareProjectStructure(tmpDir));
       } finally {
         cleanup(tmpDir);
@@ -45,11 +54,15 @@ describe('RulesetInjector', () => {
   describe('injectRulesets()', () => {
     it('should copy core/ to .ai/instructions/core/', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
+      const expectedDir = path.join(tmpDir, '.ai', 'instructions', 'core');
+
       try {
-        const selections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
         prepareProjectStructure(tmpDir);
-        injectRulesets(tmpDir, selections);
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'instructions', 'core')));
+
+        injectRulesets(tmpDir, inputSelections);
+
+        assert.ok(fs.existsSync(expectedDir));
       } finally {
         cleanup(tmpDir);
       }
@@ -57,11 +70,15 @@ describe('RulesetInjector', () => {
 
     it('should copy flavor files to .ai/instructions/flavor/', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
+      const expectedDir = path.join(tmpDir, '.ai', 'instructions', 'flavor');
+
       try {
-        const selections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
         prepareProjectStructure(tmpDir);
-        injectRulesets(tmpDir, selections);
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'instructions', 'flavor')));
+
+        injectRulesets(tmpDir, inputSelections);
+
+        assert.ok(fs.existsSync(expectedDir));
       } finally {
         cleanup(tmpDir);
       }
@@ -69,11 +86,15 @@ describe('RulesetInjector', () => {
 
     it('should copy idiom files to .ai/instructions/idioms/{idiom}/', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
+      const expectedDir = path.join(tmpDir, '.ai', 'instructions', 'idioms', 'go');
+
       try {
-        const selections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
         prepareProjectStructure(tmpDir);
-        injectRulesets(tmpDir, selections);
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'instructions', 'idioms', 'go')));
+
+        injectRulesets(tmpDir, inputSelections);
+
+        assert.ok(fs.existsSync(expectedDir));
       } finally {
         cleanup(tmpDir);
       }
@@ -81,12 +102,17 @@ describe('RulesetInjector', () => {
 
     it('should copy templates and commands to .ai/', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
+      const expectedDir1 = path.join(tmpDir, '.ai', 'instructions', 'templates');
+      const expectedDir2 = path.join(tmpDir, '.ai', 'commands');
+
       try {
-        const selections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
         prepareProjectStructure(tmpDir);
-        injectRulesets(tmpDir, selections);
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'instructions', 'templates')));
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'commands')));
+
+        injectRulesets(tmpDir, inputSelections);
+
+        assert.ok(fs.existsSync(expectedDir1));
+        assert.ok(fs.existsSync(expectedDir2));
       } finally {
         cleanup(tmpDir);
       }
@@ -94,13 +120,18 @@ describe('RulesetInjector', () => {
 
     it('should inject only backend.md for backend-only idiom (go)', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
+      const expectedBackend = 'backend.md';
+      const forbiddenFrontend = 'frontend.md';
+
       try {
-        const selections = { flavor: 'lite', idioms: ['go'], versions: { go: null } };
         prepareProjectStructure(tmpDir);
-        injectRulesets(tmpDir, selections);
+
+        injectRulesets(tmpDir, inputSelections);
+
         const competenciesDir = path.join(tmpDir, '.ai', 'instructions', 'competencies');
-        assert.ok(fs.existsSync(path.join(competenciesDir, 'backend.md')));
-        assert.ok(!fs.existsSync(path.join(competenciesDir, 'frontend.md')));
+        assert.ok(fs.existsSync(path.join(competenciesDir, expectedBackend)));
+        assert.ok(!fs.existsSync(path.join(competenciesDir, forbiddenFrontend)));
       } finally {
         cleanup(tmpDir);
       }
@@ -108,17 +139,22 @@ describe('RulesetInjector', () => {
 
     it('should inject both backend.md and frontend.md for fullstack idiom (typescript)', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = {
+        flavor: 'lite',
+        idioms: ['typescript'],
+        versions: { typescript: null },
+      };
+      const expectedBackend = 'backend.md';
+      const expectedFrontend = 'frontend.md';
+
       try {
-        const selections = {
-          flavor: 'lite',
-          idioms: ['typescript'],
-          versions: { typescript: null },
-        };
         prepareProjectStructure(tmpDir);
-        injectRulesets(tmpDir, selections);
+
+        injectRulesets(tmpDir, inputSelections);
+
         const competenciesDir = path.join(tmpDir, '.ai', 'instructions', 'competencies');
-        assert.ok(fs.existsSync(path.join(competenciesDir, 'backend.md')));
-        assert.ok(fs.existsSync(path.join(competenciesDir, 'frontend.md')));
+        assert.ok(fs.existsSync(path.join(competenciesDir, expectedBackend)));
+        assert.ok(fs.existsSync(path.join(competenciesDir, expectedFrontend)));
       } finally {
         cleanup(tmpDir);
       }
@@ -126,12 +162,16 @@ describe('RulesetInjector', () => {
 
     it('should inject only backend.md for backend-only idiom (python)', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = { flavor: 'lite', idioms: ['python'], versions: { python: null } };
+      const expectedBackend = 'backend.md';
+
       try {
-        const selections = { flavor: 'lite', idioms: ['python'], versions: { python: null } };
         prepareProjectStructure(tmpDir);
-        injectRulesets(tmpDir, selections);
+
+        injectRulesets(tmpDir, inputSelections);
+
         const competenciesDir = path.join(tmpDir, '.ai', 'instructions', 'competencies');
-        assert.ok(fs.existsSync(path.join(competenciesDir, 'backend.md')));
+        assert.ok(fs.existsSync(path.join(competenciesDir, expectedBackend)));
         assert.ok(!fs.existsSync(path.join(competenciesDir, 'frontend.md')));
       } finally {
         cleanup(tmpDir);
@@ -140,16 +180,21 @@ describe('RulesetInjector', () => {
 
     it('should handle multiple idioms and copy all of them', () => {
       const tmpDir = makeTempDir();
+      const inputSelections = {
+        flavor: 'vertical-slice',
+        idioms: ['typescript', 'python'],
+        versions: { typescript: null, python: null },
+      };
+      const expectedDir1 = path.join(tmpDir, '.ai', 'instructions', 'idioms', 'typescript');
+      const expectedDir2 = path.join(tmpDir, '.ai', 'instructions', 'idioms', 'python');
+
       try {
-        const selections = {
-          flavor: 'vertical-slice',
-          idioms: ['typescript', 'python'],
-          versions: { typescript: null, python: null },
-        };
         prepareProjectStructure(tmpDir);
-        injectRulesets(tmpDir, selections);
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'instructions', 'idioms', 'typescript')));
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'instructions', 'idioms', 'python')));
+
+        injectRulesets(tmpDir, inputSelections);
+
+        assert.ok(fs.existsSync(expectedDir1));
+        assert.ok(fs.existsSync(expectedDir2));
       } finally {
         cleanup(tmpDir);
       }
@@ -159,9 +204,13 @@ describe('RulesetInjector', () => {
   describe('injectPrompts()', () => {
     it('should create .ai/prompts/dev-tracks/ with the selected track', () => {
       const tmpDir = makeTempDir();
+      const inputTrack = '00-lite-mode';
+      const expectedDir = path.join(tmpDir, '.ai', 'prompts', 'dev-tracks');
+
       try {
-        injectPrompts(tmpDir, '00-lite-mode');
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'prompts', 'dev-tracks')));
+        injectPrompts(tmpDir, inputTrack);
+
+        assert.ok(fs.existsSync(expectedDir));
       } finally {
         cleanup(tmpDir);
       }
@@ -169,15 +218,19 @@ describe('RulesetInjector', () => {
 
     it('should replace existing .ai/prompts/ on re-injection', () => {
       const tmpDir = makeTempDir();
+      const inputTrack = '00-lite-mode';
+      const promptsDir = path.join(tmpDir, '.ai', 'prompts');
+      const staleFile = path.join(promptsDir, 'old-file.txt');
+      const expectedDir = path.join(tmpDir, '.ai', 'prompts', 'dev-tracks');
+
       try {
-        const promptsDir = path.join(tmpDir, '.ai', 'prompts');
         fs.mkdirSync(promptsDir, { recursive: true });
-        fs.writeFileSync(path.join(promptsDir, 'old-file.txt'), 'stale content');
+        fs.writeFileSync(staleFile, 'stale content');
 
-        injectPrompts(tmpDir, '00-lite-mode');
+        injectPrompts(tmpDir, inputTrack);
 
-        assert.ok(!fs.existsSync(path.join(promptsDir, 'old-file.txt')));
-        assert.ok(fs.existsSync(path.join(tmpDir, '.ai', 'prompts', 'dev-tracks')));
+        assert.ok(!fs.existsSync(staleFile));
+        assert.ok(fs.existsSync(expectedDir));
       } finally {
         cleanup(tmpDir);
       }
@@ -185,12 +238,15 @@ describe('RulesetInjector', () => {
 
     it('should copy all tracks when track is "all"', () => {
       const tmpDir = makeTempDir();
+      const inputTrack = 'all';
+      const expectedDir = path.join(tmpDir, '.ai', 'prompts', 'dev-tracks');
+
       try {
-        injectPrompts(tmpDir, 'all');
-        const devTracksDir = path.join(tmpDir, '.ai', 'prompts', 'dev-tracks');
-        assert.ok(fs.existsSync(devTracksDir));
-        const tracks = fs.readdirSync(devTracksDir);
-        assert.ok(tracks.length > 1);
+        injectPrompts(tmpDir, inputTrack);
+
+        assert.ok(fs.existsSync(expectedDir));
+        const actualTracks = fs.readdirSync(expectedDir);
+        assert.ok(actualTracks.length > 1);
       } finally {
         cleanup(tmpDir);
       }
@@ -199,36 +255,49 @@ describe('RulesetInjector', () => {
 
   describe('collectOutputSummary()', () => {
     it('should list correct directories for agents mode', () => {
-      const selections = {
+      const inputSelections = {
         mode: 'agents',
         flavor: 'lite',
         idioms: ['typescript', 'go'],
         track: null,
       };
-      const { directories } = collectOutputSummary(selections);
-      assert.ok(directories.includes('.ai/instructions/core/'));
-      assert.ok(directories.includes('.ai/instructions/flavor/'));
-      assert.ok(directories.includes('.ai/instructions/idioms/typescript/'));
-      assert.ok(directories.includes('.ai/instructions/idioms/go/'));
-      assert.ok(directories.includes('.ai/workflows/'));
-      assert.ok(directories.includes('.ai/commands/'));
+      const expectedDirs = [
+        '.ai/instructions/core/',
+        '.ai/instructions/flavor/',
+        '.ai/instructions/idioms/typescript/',
+        '.ai/instructions/idioms/go/',
+        '.ai/workflows/',
+        '.ai/commands/',
+      ];
+
+      const { directories: actual } = collectOutputSummary(inputSelections);
+
+      expectedDirs.forEach((expected) => {
+        assert.ok(actual.includes(expected));
+      });
     });
 
     it('should list prompt track directory for prompts mode', () => {
-      const selections = {
+      const inputSelections = {
         mode: 'prompts',
         flavor: null,
         idioms: [],
         track: '00-lite-mode',
       };
-      const { directories } = collectOutputSummary(selections);
-      assert.ok(directories.includes('.ai/prompts/dev-tracks/'));
+      const expectedDir = '.ai/prompts/dev-tracks/';
+
+      const { directories: actual } = collectOutputSummary(inputSelections);
+
+      assert.ok(actual.includes(expectedDir));
     });
 
     it('should return empty directories for unknown mode', () => {
-      const selections = { mode: 'unknown', flavor: null, idioms: [], track: null };
-      const { directories } = collectOutputSummary(selections);
-      assert.deepEqual(directories, []);
+      const inputSelections = { mode: 'unknown', flavor: null, idioms: [], track: null };
+      const expected = [];
+
+      const { directories: actual } = collectOutputSummary(inputSelections);
+
+      assert.deepEqual(actual, expected);
     });
   });
 });
