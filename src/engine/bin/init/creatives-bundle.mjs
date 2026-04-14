@@ -5,13 +5,14 @@ import { ManifestUtils } from '../../lib/domain/manifest-utils.mjs';
 import { BundleUI } from '../../lib/core/ui-utils.mjs';
 import { ResultUtils } from '../../lib/core/result-utils.mjs';
 
-const { injectCreativeToolkit } = RulesetInjector;
+const { prepareProjectStructure, injectRulesets } = RulesetInjector;
 const {
   buildMasterInstructions,
   writeAgentConfig,
   writeBacklogFiles,
   getActiveAgents,
   writeManifest,
+  writeGitignore,
 } = InstructionAssembler;
 const { loadManifest } = ManifestUtils;
 const { printStep, printProjectRoot } = BundleUI;
@@ -21,7 +22,7 @@ const require = createRequire(import.meta.url);
 const packageJson = require('../../../../package.json');
 
 async function run(targetDirectory = process.cwd()) {
-  await orchestrateCreativeInjection(targetDirectory);
+  return await orchestrateCreativeInjection(targetDirectory);
 }
 
 async function orchestrateCreativeInjection(targetDirectory) {
@@ -37,8 +38,9 @@ async function orchestrateCreativeInjection(targetDirectory) {
 
   printProjectRoot(targetDirectory);
 
-  printStep(1, 4, 'Injecting Creative Skills and Templates...');
-  injectCreativeToolkit(targetDirectory);
+  printStep(1, 4, 'Preparing structure and core rules...');
+  prepareProjectStructure(targetDirectory);
+  injectRulesets(targetDirectory, selections);
 
   printStep(2, 4, 'Updating AGENTS.md with routing...');
   const content = buildMasterInstructions(selections);
@@ -46,8 +48,9 @@ async function orchestrateCreativeInjection(targetDirectory) {
   const activeAgents = getActiveAgents(selections);
   writeAgentConfig(targetDirectory, content, activeAgents);
 
-  printStep(3, 4, 'Syncing Backlog...');
+  printStep(3, 4, 'Syncing Backlog & Environment...');
   writeBacklogFiles(targetDirectory, selections);
+  writeGitignore(targetDirectory);
 
   printStep(4, 4, 'Finalizing Manifest...');
   writeManifest(targetDirectory, selections, packageJson.version);

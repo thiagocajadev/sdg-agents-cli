@@ -139,6 +139,8 @@ function buildMasterInstructions(selections) {
     }
 
     function buildArchitecturalContextRouting(flavor) {
+      if (!flavor || flavor === 'none') return null;
+
       const architectureString = dedent`
         **Architectural Context**
 
@@ -174,7 +176,10 @@ function buildMasterInstructions(selections) {
         ? [`| \`.ai/instructions/competencies/frontend.md\` | Contract-Based UI System |`]
         : [];
 
-      const allRows = [...idiomRows, ...backendRows, ...frontendRows].join('\n');
+      const allRowsList = [...idiomRows, ...backendRows, ...frontendRows];
+      if (allRowsList.length === 0) return null;
+
+      const allRows = allRowsList.join('\n');
 
       const technicalRoutingBlock = [
         `**Technical Execution**`,

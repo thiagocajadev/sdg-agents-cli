@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.8.1] - 2026-04-14
+
+### Added
+
+- **Hardened Creative Toolkit Injection**: Updated the creative flow to ensure core governance instructions (`core/`, `workflows/`, `commands/`) and backlog files are present, providing full context for AI agents in "zero-project" scenarios.
+- **Resilient Instruction Assembly**: Hardened `AGENTS.md` generation to gracefully handle projects without a technical stack or flavor, preventing broken links and malformed tables.
+
+### Fixed
+
+- **Creative Bundle Pure Entry Point**: Fixed a missing `return` in `Creatives.run` and refactored it to a one-line delegator to satisfy SLA governance and prevent CLI crashes in empty projects.
+
 ## [2.8.0] - 2026-04-14
 
 ### Added
