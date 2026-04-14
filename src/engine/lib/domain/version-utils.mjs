@@ -49,9 +49,9 @@ function isNewer(current, latest) {
   const currentParts = current.split('.').map(Number);
   const latestParts = latest.split('.').map(Number);
 
-  for (let i = 0; i < 3; i++) {
-    const currentPart = currentParts[i] || 0;
-    const latestPart = latestParts[i] || 0;
+  for (let index = 0; index < 3; index++) {
+    const currentPart = currentParts[index] || 0;
+    const latestPart = latestParts[index] || 0;
 
     if (latestPart > currentPart) {
       const isGreater = true;

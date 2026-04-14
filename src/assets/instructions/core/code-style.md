@@ -56,6 +56,71 @@ if (canDelete) {
 - **Guard Clauses**: Prefer early returns over nested conditionals. Kill the "Arrow Antipattern".
 - **Explaining Returns**: The final value must be assigned to a named variable before returning — `const result = ...; return result;`. Never return large anonymous objects or inline ternaries.
 - **Narrative Siblings (Local Helpers)**: If a helper is only used by one function, define it as a local (non-exported) sibling immediately following its caller to maintain clean top-down scannability.
+- **Strategy over Switch**: Replace large `switch` or `if/else` chains with **Strategy Objects** (Maps) to separate data/logic from orchestration (SLA).
+
+#### Strategy Patterns (vs Switch-Bombing)
+
+> [!TIP]
+> Use Lookup Maps to maintain high technical density and low visual noise.
+
+````carousel
+```typescript
+// ❌ BAD: Switch-Bombing — high visual noise, repeats logic structure
+function getStatusLabel(status) {
+  switch (status) {
+    case 'active': return 'User is Active';
+    case 'pending': return 'Waiting Approval';
+    case 'banned': return 'Access Denied';
+    default: return 'Unknown';
+  }
+}
+```
+<!-- slide -->
+```typescript
+// ✅ GOOD: Strategy Map — clean data/logic separation (SLA)
+function getStatusLabel(status) {
+  const STATUS_LABELS = {
+    active: 'User is Active',
+    pending: 'Waiting Approval',
+    banned: 'Access Denied',
+  };
+
+  const label = STATUS_LABELS[status] ?? 'Unknown';
+  return label;
+}
+```
+````
+
+#### Explaining Returns & Dedent
+
+> [!IMPORTANT]
+> Large template literals MUST be assigned to an "explaining const" and use the **dedent** utility to maintain vertical scansion in the source code.
+
+````carousel
+```typescript
+// ❌ BAD: Bare Template Return — messy indentation in source
+function buildWelcome(name) {
+  return `
+Welcome, ${name}!
+    Let's get started.
+  `;
+}
+```
+<!-- slide -->
+```typescript
+// ✅ GOOD: Explaining Return + Dedent — readable source and output
+import dedent from 'dedent';
+
+function buildWelcome(name) {
+  const welcomeMessage = dedent`
+    Welcome, ${name}!
+    Let's get started.
+  `;
+
+  return welcomeMessage;
+}
+```
+````
 
 #### Guard Clauses
 

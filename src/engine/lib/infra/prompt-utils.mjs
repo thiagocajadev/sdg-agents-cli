@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { exec } from 'node:child_process';
+import dedent from 'dedent';
 import { select, checkbox, confirm, input } from '@inquirer/prompts';
 
 function isExitError(error) {
@@ -121,22 +122,17 @@ function savePromptToFile(content) {
 
 async function copyToClipboard(content) {
   const clipboardPromise = new Promise((resolve) => {
-    let command;
+    const COMMAND_MAP = {
+      darwin: 'pbcopy',
+      win32: 'clip',
+      linux: 'xclip -selection clipboard || xsel -bi',
+    };
 
-    switch (process.platform) {
-      case 'darwin':
-        command = 'pbcopy';
-        break;
-      case 'win32':
-        command = 'clip';
-        break;
-      case 'linux':
-        command = 'xclip -selection clipboard || xsel -bi';
-        break;
-      default: {
-        const fallbackResult = resolve(false);
-        return fallbackResult;
-      }
+    const command = COMMAND_MAP[process.platform];
+
+    if (!command) {
+      const unsupportedResult = resolve(false);
+      return unsupportedResult;
     }
 
     const child = exec(command, (error) => {
@@ -192,17 +188,25 @@ function renderCopyStatus(copied) {
 }
 
 function renderPersistenceInfo() {
-  console.log(`  💾 SAVED TO: .ai/last-prompt.md`);
-  console.log('  ' + '─'.repeat(60));
+  const persistenceMessage = `  💾 SAVED TO: .ai/last-prompt.md`;
+  const separator = '  ' + '─'.repeat(60);
+
+  console.log(persistenceMessage);
+  console.log(separator);
 }
 
 function renderUsageInstructions() {
-  console.log('\n  🤖 HOW TO USE WITH LOCAL AGENTS (Cursor, Claude Code, Windsurf):');
-  console.log('     Tell your agent: "Follow the instructions in .ai/last-prompt.md"');
+  const instructions = dedent`
 
-  console.log('\n  🌍 HOW TO USE WITH WEB CHATS (Claude.ai, ChatGPT, Gemini):');
-  console.log('     The prompt is already in your clipboard. Just paste it (Ctrl+V).');
-  console.log('  ' + '─'.repeat(60) + '\n');
+    🤖 HOW TO USE WITH LOCAL AGENTS (Cursor, Claude Code, Windsurf):
+       Tell your agent: "Follow the instructions in .ai/last-prompt.md"
+
+    🌍 HOW TO USE WITH WEB CHATS (Claude.ai, ChatGPT, Gemini):
+       The prompt is already in your clipboard. Just paste it (Ctrl+V).
+    ${'─'.repeat(60)}
+  `;
+
+  console.log(instructions);
 }
 
 export const PromptUtils = {

@@ -11,6 +11,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.5.1] - 2026-04-13
+
+### Added
+
+- **Hardened Naming Governance** — updated the `audit` engine with programmatically enforced heuristics to block single-letter variables (`a, b, i, v`) and abbreviations across all engine basins.
+- **Improved Heuristic Depth** — increased the Explaining Returns scansion depth and refined regex to ignore template interpolations (`${`), eliminating false positives in heavy template orchestrations.
+- **Narrative Siblings Refactor** — refactored the central `NARRATIVE_VALIDATION_STRATEGIES` engine to adopt a delegator pattern with local sibling helpers, achieving 100% SLA and Law 3 compliance within the governance config itself.
+
+### Fixed
+
+- **Naming Discipline Debt** — resolved residual single-letter variable violations in `wizard.mjs`, `cli-parser.mjs`, and `version-utils.mjs`.
+- **Governance Drift Prevention** — synchronized all core instruction assets (`code-style.md`) to ensure perfect alignment between the generator and the auditor.
+
 ## [2.5.0] - 2026-04-13
 
 ### Added

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { AutoBump } from '../bin/auto-bump.mjs';
+import { AutoBump } from '../../bin/lifecycle/auto-bump.mjs';
 
 const { detectBumpType, bumpVersion } = AutoBump;
 

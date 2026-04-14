@@ -5,29 +5,19 @@ import { STACK_DISPLAY_NAMES } from '../../config/stack-display.mjs';
  * Single source of truth — imported by all bin scripts.
  */
 function displayName(stackKey) {
-  if (!stackKey || stackKey === 'none') {
-    const defaultLabel = '(none)';
-    return defaultLabel;
-  }
-  if (stackKey === 'lite') {
-    const liteLabel = 'Lite';
-    return liteLabel;
-  }
-  if (stackKey === 'vertical-slice') {
-    const verticalLabel = 'Vertical Slice';
-    return verticalLabel;
-  }
-  if (stackKey === 'mvc') {
-    const mvcLabel = 'MVC';
-    return mvcLabel;
-  }
-  if (stackKey === 'legacy') {
-    const legacyLabel = 'Legacy Pipeline';
-    return legacyLabel;
-  }
+  const PRESET_DISPLAY_NAMES = {
+    none: '(none)',
+    lite: 'Lite',
+    'vertical-slice': 'Vertical Slice',
+    mvc: 'MVC',
+    legacy: 'Legacy Pipeline',
+  };
 
-  const registeredName = STACK_DISPLAY_NAMES[stackKey]?.name ?? stackKey;
-  return registeredName;
+  const key = stackKey || 'none';
+  const fallbackName = STACK_DISPLAY_NAMES[key]?.name ?? key;
+  const resolvedName = PRESET_DISPLAY_NAMES[key] ?? fallbackName;
+
+  return resolvedName;
 }
 
 export const DisplayUtils = {

@@ -49,9 +49,9 @@ function getArgValue(argv, flag) {
 
 function getArgValues(argv, flag) {
   const values = [];
-  for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === flag && i + 1 < argv.length) {
-      values.push(...argv[i + 1].split(','));
+  for (let index = 0; index < argv.length; index++) {
+    if (argv[index] === flag && index + 1 < argv.length) {
+      values.push(...argv[index + 1].split(','));
     }
   }
   const argValues = values;

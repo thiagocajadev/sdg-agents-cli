@@ -148,53 +148,24 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
 async function executeWizardStep(step, context) {
   const { mode } = context.selections;
 
-  switch (step) {
-    case WIZARD_STEPS.INITIAL: {
-      const stepResult = await promptInitialChoice();
-      return stepResult;
-    }
-    case WIZARD_STEPS.SCOPE: {
-      const scopeResult =
-        mode === 'prompts' ? await promptTrackSelection(context) : await promptProjectScope();
-      return scopeResult;
-    }
-    case WIZARD_STEPS.FLAVOR: {
-      const flavorResult = await promptArchitectureFlavor(context);
-      return flavorResult;
-    }
-    case WIZARD_STEPS.BACKEND: {
-      const backendResult = await promptBackendIdiom(context);
-      return backendResult;
-    }
-    case WIZARD_STEPS.FRONTEND: {
-      const frontendResult = await promptFrontendIdiom(context);
-      return frontendResult;
-    }
-    case WIZARD_STEPS.VERSIONS: {
-      const versionsResult = await promptVersionSelections(context);
-      return versionsResult;
-    }
-    case WIZARD_STEPS.DESIGN: {
-      const designResult = await promptDesignPreset(context);
-      return designResult;
-    }
-    case WIZARD_STEPS.IDE: {
-      const ideResult = await promptIdeSelection();
-      return ideResult;
-    }
-    case WIZARD_STEPS.BUMP: {
-      const bumpResult = await promptBumpAutomation(context);
-      return bumpResult;
-    }
-    case WIZARD_STEPS.PARTNER: {
-      const partnerResult = await promptPartnerInfo(context);
-      return partnerResult;
-    }
-    default: {
-      const doneResult = success({ nextStep: WIZARD_STEPS.DONE });
-      return doneResult;
-    }
-  }
+  const STEP_HANDLERS = {
+    [WIZARD_STEPS.INITIAL]: () => promptInitialChoice(),
+    [WIZARD_STEPS.SCOPE]: () =>
+      mode === 'prompts' ? promptTrackSelection(context) : promptProjectScope(),
+    [WIZARD_STEPS.FLAVOR]: () => promptArchitectureFlavor(context),
+    [WIZARD_STEPS.BACKEND]: () => promptBackendIdiom(context),
+    [WIZARD_STEPS.FRONTEND]: () => promptFrontendIdiom(context),
+    [WIZARD_STEPS.VERSIONS]: () => promptVersionSelections(context),
+    [WIZARD_STEPS.DESIGN]: () => promptDesignPreset(context),
+    [WIZARD_STEPS.IDE]: () => promptIdeSelection(),
+    [WIZARD_STEPS.BUMP]: () => promptBumpAutomation(context),
+    [WIZARD_STEPS.PARTNER]: () => promptPartnerInfo(context),
+  };
+
+  const handler = STEP_HANDLERS[step] ?? (() => success({ nextStep: WIZARD_STEPS.DONE }));
+  const stepResult = await handler();
+
+  return stepResult;
 }
 
 async function promptInitialChoice() {
@@ -254,20 +225,9 @@ function handleQuickSetup() {
 async function promptTrackSelection(context) {
   const { availableTracks } = context;
 
-  const sortedTrackChoices = [...availableTracks]
-    .sort((trackA, trackB) => trackA.localeCompare(trackB))
-    .map((trackFolderKey) => {
-      let label = displayName(trackFolderKey);
-      if (trackFolderKey === '00-lite-mode') label = '1. Lite Mode (Simple & Agile)';
-      else if (trackFolderKey === '01-new-evolution') label = '2. New Evolution (Greenfield)';
-      else if (trackFolderKey === '02-legacy-modernization')
-        label = '3. Legacy Modernization (Brownfield)';
-      const trackChoice = { name: label, value: trackFolderKey };
-      return trackChoice;
-    });
-
+  const sortedTracks = [...availableTracks].sort((trackA, trackB) => trackA.localeCompare(trackB));
   const trackChoices = [
-    ...sortedTrackChoices,
+    ...sortedTracks.map(toTrackChoice),
     { name: '4. All Tracks (Best for Full Learning)', value: 'all' },
   ];
 
@@ -282,7 +242,9 @@ async function promptTrackSelection(context) {
   }
 
   const projectPromptsDir = path.join(context.targetDirectory, '.ai', 'prompts');
-  if (fs.existsSync(projectPromptsDir)) {
+  const isExisting = fs.existsSync(projectPromptsDir);
+
+  if (isExisting) {
     const proceed = await safeConfirm({
       message: `The directory ".ai/prompts" already exists. Overwrite?`,
       default: false,
@@ -293,9 +255,22 @@ async function promptTrackSelection(context) {
     }
   }
 
-  // Final step for Prompts mode
   const promptsDoneResult = success({ nextStep: WIZARD_STEPS.DONE, track });
   return promptsDoneResult;
+}
+
+function toTrackChoice(trackFolderKey) {
+  const PRESET_LABELS = {
+    '00-lite-mode': '1. Lite Mode (Simple & Agile)',
+    '01-new-evolution': '2. New Evolution (Greenfield)',
+    '02-legacy-modernization': '3. Legacy Modernization (Brownfield)',
+  };
+
+  const defaultLabel = displayName(trackFolderKey);
+  const label = PRESET_LABELS[trackFolderKey] ?? defaultLabel;
+
+  const choice = { name: label, value: trackFolderKey };
+  return choice;
 }
 
 async function promptProjectScope() {
@@ -334,26 +309,35 @@ async function promptArchitectureFlavor(context) {
 
   const flavorResult = success({ nextStep: WIZARD_STEPS.BACKEND, flavor });
   return flavorResult;
+}
 
-  function buildFlavorChoices(flavors) {
-    const rawChoices = flavors;
-    return rawChoices
-      .sort()
-      .map((flavorFolderKey) => {
-        let label = displayName(flavorFolderKey);
-        if (flavorFolderKey === 'lite') label = `0. ${label} (Simple & Agile)`;
-        else if (flavorFolderKey === 'vertical-slice') label = `1. ${label} (Recommended)`;
-        else if (flavorFolderKey === 'mvc') label = `2. ${label} (Standard Layers)`;
-        else if (flavorFolderKey === 'legacy') label = `3. ${label} (Event-Driven / SSR)`;
-        else label = `Sub. ${label}`;
-        const flavorChoice = { name: label, value: flavorFolderKey };
-        return flavorChoice;
-      })
-      .sort((flavorA, flavorB) => {
-        const order = { lite: 0, 'vertical-slice': 1, mvc: 2, legacy: 3 };
-        return (order[flavorA.value] ?? 99) - (order[flavorB.value] ?? 99);
-      });
-  }
+function buildFlavorChoices(flavors) {
+  const RANK_ORDER = { lite: 0, 'vertical-slice': 1, mvc: 2, legacy: 3 };
+
+  const choices = flavors.map(toFlavorOption);
+  const prioritizedChoices = choices.sort((choiceA, choiceB) => {
+    const rankA = RANK_ORDER[choiceA.value] ?? 99;
+    const rankB = RANK_ORDER[choiceB.value] ?? 99;
+    return rankA - rankB;
+  });
+
+  return prioritizedChoices;
+}
+
+function toFlavorOption(flavorFolderKey) {
+  const PRESET_LABELS = {
+    lite: (base) => `0. ${base} (Simple & Agile)`,
+    'vertical-slice': (base) => `1. ${base} (Recommended)`,
+    mvc: (base) => `2. ${base} (Standard Layers)`,
+    legacy: (base) => `3. ${base} (Event-Driven / SSR)`,
+  };
+
+  const baseLabel = displayName(flavorFolderKey);
+  const formatter = PRESET_LABELS[flavorFolderKey] ?? ((base) => `Sub. ${base}`);
+  const label = formatter(baseLabel);
+
+  const choice = { name: label, value: flavorFolderKey };
+  return choice;
 }
 
 async function promptBackendIdiom(context) {
@@ -433,7 +417,10 @@ async function promptVersionSelections(context) {
     const result = await safeSelect({
       message: `Which version of ${displayName(idiom)}?`,
       choices: [
-        ...available.map((v) => ({ name: v.name, value: v.value })),
+        ...available.map((versionOption) => ({
+          name: versionOption.name,
+          value: versionOption.value,
+        })),
         { name: 'Back', value: 'back' },
       ],
     });
@@ -516,11 +503,11 @@ async function promptIdeSelection() {
 async function promptBumpAutomation(context) {
   const { selections } = context;
 
-  const hasJsTs = selections.idioms.some(
+  const hasJavaScriptOrTypeScript = selections.idioms.some(
     (idiomFolderKey) => idiomFolderKey === 'javascript' || idiomFolderKey === 'typescript'
   );
 
-  if (!hasJsTs) {
+  if (!hasJavaScriptOrTypeScript) {
     const noAutomationResult = success({ nextStep: WIZARD_STEPS.PARTNER, bump: false });
     return noAutomationResult;
   }

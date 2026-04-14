@@ -115,7 +115,7 @@ ${content}
     })
     .join('\n');
 
-  return `
+  const syncPrompt = `
 Today is ${TODAY}.
 
 Search the official release notes and "What's New" docs for the technologies and UI/UX standards below.
@@ -144,6 +144,8 @@ Rules:
 - If nothing needs updating, say so and return the file unchanged.
 ${sections}
 `;
+
+  return syncPrompt;
 }
 
 export const Syncer = {

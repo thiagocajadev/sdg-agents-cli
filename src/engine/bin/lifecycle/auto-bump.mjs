@@ -14,49 +14,35 @@ const PACKAGE_PATHS = [path.join(ROOT_DIR, 'package.json')];
 const CHANGELOG_PATH = path.join(ROOT_DIR, 'CHANGELOG.md');
 
 export function detectBumpType(commitMessage) {
-  const firstLine = commitMessage.split('\n')[0].trim();
+  const [firstLine] = commitMessage.split('\n');
   const footer = commitMessage.split('\n').slice(1).join('\n');
 
-  if (/^chore:\s*bump version/i.test(firstLine)) {
-    const skipBump = 'skip';
-    return skipBump;
-  }
-  if (/^[a-z]+!:/.test(firstLine)) {
-    const majorBump = 'major';
-    return majorBump;
-  }
-  if (/BREAKING CHANGE:/m.test(footer)) {
-    const breakerBump = 'major';
-    return breakerBump;
-  }
-  if (/^feat:/.test(firstLine)) {
-    const minorBump = 'minor';
-    return minorBump;
-  }
-  const defaultBump = 'patch';
-  return defaultBump;
+  const BUMP_RULES = [
+    { test: () => /^chore:\s*bump version/i.test(firstLine), value: 'skip' },
+    { test: () => /^[a-z]+!:/.test(firstLine), value: 'major' },
+    { test: () => /BREAKING CHANGE:/m.test(footer), value: 'major' },
+    { test: () => /^feat:/.test(firstLine), value: 'minor' },
+  ];
+
+  const matchedRule = BUMP_RULES.find((rule) => rule.test());
+  const bumpType = matchedRule?.value ?? 'patch';
+
+  return bumpType;
 }
 
 export function bumpVersion(current, bumpType) {
   const [major, minor, patch] = current.split('.').map(Number);
-  switch (bumpType) {
-    case 'major': {
-      const majorVersion = `${major + 1}.0.0`;
-      return majorVersion;
-    }
-    case 'minor': {
-      const minorVersion = `${major}.${minor + 1}.0`;
-      return minorVersion;
-    }
-    case 'patch': {
-      const patchVersion = `${major}.${minor}.${patch + 1}`;
-      return patchVersion;
-    }
-    default: {
-      const currentVersion = current;
-      return currentVersion;
-    }
-  }
+
+  const BUMP_STRATEGIES = {
+    major: () => `${major + 1}.0.0`,
+    minor: () => `${major}.${minor + 1}.0`,
+    patch: () => `${major}.${minor}.${patch + 1}`,
+  };
+
+  const calculate = BUMP_STRATEGIES[bumpType] ?? (() => current);
+  const nextVersion = calculate();
+
+  return nextVersion;
 }
 
 async function run() {

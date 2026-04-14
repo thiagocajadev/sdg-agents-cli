@@ -41,7 +41,7 @@ function loadDynamicRules() {
       id,
       label,
       description: description || '',
-      heuristic: HEURISTIC_MAP[label] || null,
+      heuristic: NARRATIVE_VALIDATION_STRATEGIES[label] || null,
     };
     return ruleObj;
   });
@@ -53,183 +53,204 @@ function loadDynamicRules() {
 /**
  * Maps Markdown rule names to JavaScript automated check functions.
  */
-const HEURISTIC_MAP = {
-  'Stepdown Rule': (_content) => {
-    const manualPass = { pass: true };
-    return manualPass;
-  },
-  'SLA applied': (content) => {
-    const entryPointRegex =
-      /async\s+function\s+(run|start|init)\s*\([\s\S]*?\)\s*\{([\s\S]*?)\n\}/g;
-    let match;
-    const violations = [];
-
-    while ((match = entryPointRegex.exec(content)) !== null) {
-      const name = match[1];
-      const body = match[2];
-      const bodyLines = body
-        .split('\n')
-        .map((l) => l.trim())
-        .filter((l) => l !== '');
-
-      if (bodyLines.length > 1) {
-        violations.push(`${name}() has ${bodyLines.length} lines (MUST be 1 line of delegation)`);
-      }
-    }
-
-    const runFunctionMatch = content.match(/async function run\(\) \{([\s\S]*?)\n\}/);
-    if (runFunctionMatch) {
-      const runBody = runFunctionMatch[1];
-      const forbiddenPatterns = [
-        { pattern: /console\.log\(/, label: 'console.log' },
-        { pattern: /path\.resolve\(/, label: 'path.resolve' },
-        { pattern: /process\.argv/, label: 'process.argv access' },
-      ];
-
-      forbiddenPatterns.forEach((item) => {
-        if (item.pattern.test(runBody))
-          violations.push(`Implementation logic (${item.label}) in run()`);
-      });
-    }
-
-    const slaResult = {
-      pass: violations.length === 0,
-      reason: violations.length > 0 ? `Pure Entry Point violation: ${violations.join('; ')}` : null,
-    };
-    const finalSlaResult = slaResult;
-    return finalSlaResult;
-  },
-  'Narrative Siblings': (content) => {
-    const topLevelFunctions = (content.match(/^function\s+\w+/gm) || []).length;
-    const exportedCount = (content.match(/^\s+\w+,/gm) || []).length;
-    // Balance is the Key: Increase threshold to 12 to favor "Chapters" over "Monolithic Nesting"
-    const isViolation = topLevelFunctions > 12 && exportedCount < topLevelFunctions / 2;
-    const siblingsResult = {
-      pass: !isViolation,
-      reason: isViolation
-        ? 'Excessive top-level function density (>12). Consider refactoring to dedicated lib.'
-        : null,
-    };
-    return siblingsResult;
-  },
-  'Explaining Returns': (content) => {
-    const lines = content.split('\n');
-    const violations = [];
-
-    for (let i = 2; i < lines.length; i++) {
-      const current = lines[i].trim();
-
-      const isCandidateReturn =
-        current.startsWith('return ') &&
-        !['return null', 'return false', 'return true', 'return;'].some((s) =>
-          current.startsWith(s)
-        );
-
-      if (isCandidateReturn) {
-        let foundExplainer = false;
-        // Scan backwards for the nearest meaningful line, skipping delimiters and blanks
-        for (let j = i - 1; j >= Math.max(0, i - 8); j--) {
-          const prev = lines[j].trim();
-          if (prev === '' || /^[\s()[]{};]*$/.test(prev)) continue;
-
-          // Exemption for 1-line Entry Points: if preceding line is function start
-          const isEntryPointStart = /(function|async)\s+(run|start|init)\s*\(/.test(prev);
-          if (isEntryPointStart && prev.includes('{')) {
-            foundExplainer = true;
-            break;
-          }
-
-          if (prev.includes('const ')) {
-            foundExplainer = true;
-            break;
-          }
-          // If we hit a block start or guard AFTER checking for const, we stop
-          if (prev.includes('if (') || (prev.includes('{') && !prev.includes('const '))) break;
-        }
-
-        if (!foundExplainer) {
-          violations.push(`line ${i + 1}`);
-        }
-      }
-    }
-
-    const explainingResult = {
-      pass: violations.length === 0,
-      reason:
-        violations.length > 0
-          ? `Bare returns detected (missing explaining const) at: ${violations.join(', ')}`
-          : null,
-    };
-    const finalExplainingResult = explainingResult;
-    return finalExplainingResult;
-  },
-  'No framework abbreviations': (content) => {
-    // Avoid self-detection by splitting the forbidden terms
-    const forbidden = ['r' + 'eq', 'r' + 'es'];
-    const pattern = new RegExp(`\\b(${forbidden.join('|')})\\b`, 'g');
-    const abbreviationMatches = content.match(pattern);
-    const abbreviationResult = {
-      pass: !abbreviationMatches,
-      reason: abbreviationMatches
-        ? `Abbreviation detected: ${abbreviationMatches.join(', ')}`
-        : null,
-    };
-    const finalAbbreviationResult = abbreviationResult;
-    return finalAbbreviationResult;
-  },
-  'Vertical Density applied': (_content) => {
-    const verticalPass = { pass: true };
-    return verticalPass;
-  },
-  'Revealing Module Pattern': (content) => {
-    const hasRevealingObj = /export const \w+ = \{[\s\S]*\};/m.test(content);
-    // Avoid self-detection by splitting the forbidden term
-    const forbiddenExport = 'export ' + 'default';
-    const hasExportDefault = content.includes(forbiddenExport);
-    const revealingResult = {
-      pass: hasRevealingObj && !hasExportDefault,
-      reason: !hasRevealingObj
-        ? 'Missing Revealing Module Pattern export.'
-        : hasExportDefault
-          ? `Uses ${forbiddenExport}.`
-          : null,
-    };
-    const finalRevealingResult = revealingResult;
-    return finalRevealingResult;
-  },
-  'Shallow Boundaries': (_content) => {
-    const shallowPass = { pass: true };
-    return shallowPass;
-  },
-  'Boolean names carry a prefix': (content) => {
-    const bareBooleanMatches = content.match(/\bconst\s+(loading|error|active|valid)\s*=/g);
-    const booleanResult = {
-      pass: !bareBooleanMatches,
-      reason: bareBooleanMatches ? `Bare boolean detected: ${bareBooleanMatches.join(', ')}` : null,
-    };
-    const finalBooleanResult = booleanResult;
-    return finalBooleanResult;
-  },
-  'No explanatory comments': (_content) => {
-    const commentPass = { pass: true };
-    return commentPass;
-  },
-  'No Section Banners': (content) => {
-    // Avoid self-detection by splitting the forbidden term
-    const bannerPrefix = '// -' + '--';
-    const matchFound = content.includes(bannerPrefix);
-    const bannerResult = {
-      pass: !matchFound,
-      reason: matchFound ? `Detected section banners (${bannerPrefix}).` : null,
-    };
-    const finalBannerResult = bannerResult;
-    return finalBannerResult;
-  },
-  'Code reads like a "Short Story"': (_content) => {
-    const storyPass = { pass: true };
-    return storyPass;
-  },
+const NARRATIVE_VALIDATION_STRATEGIES = {
+  'Stepdown Rule': () => ({ pass: true }),
+  'SLA applied': (content) => validateSlaCompliance(content),
+  'Narrative Siblings': (content) => validateNarrativeSiblings(content),
+  'Explaining Returns': (content) => validateExplainingReturns(content),
+  'No framework abbreviations': (content) => validateNamingDiscipline(content),
+  'Vertical Density applied': () => ({ pass: true }),
+  'Revealing Module Pattern': (content) => validateRevealingModulePattern(content),
+  'Shallow Boundaries': () => ({ pass: true }),
+  'Boolean names carry a prefix': (content) => validateBooleanPrefixes(content),
+  'No explanatory comments': () => ({ pass: true }),
+  'No Section Banners': (content) => validateNoSectionBanners(content),
+  'Code reads like a "Short Story"': () => ({ pass: true }),
 };
+
+function validateSlaCompliance(content) {
+  const entryPointRegex = /async\s+function\s+(run|start|init)\s*\([\s\S]*?\)\s*\{([\s\S]*?)\n\}/g;
+  const violations = [];
+  let regexMatch;
+
+  while ((regexMatch = entryPointRegex.exec(content)) !== null) {
+    const entryPointName = regexMatch[1];
+    const functionBody = regexMatch[2];
+    const bodyLines = functionBody
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line !== '');
+
+    if (bodyLines.length > 1) {
+      violations.push(
+        `${entryPointName}() has ${bodyLines.length} lines (MUST be 1 line of delegation)`
+      );
+    }
+  }
+
+  const runFunctionMatch = content.match(/async function run\(\) \{([\s\S]*?)\n\}/);
+  if (runFunctionMatch) {
+    const runBody = runFunctionMatch[1];
+    const forbiddenPatterns = [
+      { pattern: /console\.log\(/, label: 'console.log' },
+      { pattern: /path\.resolve\(/, label: 'path.resolve' },
+      { pattern: /process\.argv/, label: 'process.argv access' },
+    ];
+
+    forbiddenPatterns.forEach((item) => {
+      if (item.pattern.test(runBody)) {
+        violations.push(`Implementation logic (${item.label}) in run()`);
+      }
+    });
+  }
+
+  const slaResult = {
+    pass: violations.length === 0,
+    reason: violations.length > 0 ? `Pure Entry Point violation: ${violations.join('; ')}` : null,
+  };
+  return slaResult;
+}
+
+function validateNarrativeSiblings(content) {
+  const topLevelFunctionsCount = (content.match(/^function\s+\w+/gm) || []).length;
+  const exportedFunctionsCount = (content.match(/^\s+\w+,/gm) || []).length;
+
+  // Balance is Key: Threshold of 12 to favor "Chapters" (Narrative Siblings) over monolithic nesting
+  const isViolatingDensity =
+    topLevelFunctionsCount > 12 && exportedFunctionsCount < topLevelFunctionsCount / 2;
+
+  const siblingsResult = {
+    pass: !isViolatingDensity,
+    reason: isViolatingDensity
+      ? 'Excessive top-level function density (>12). Consider refactoring to dedicated lib.'
+      : null,
+  };
+  return siblingsResult;
+}
+
+function validateExplainingReturns(content) {
+  const lines = content.split('\n');
+  const violations = [];
+
+  for (let index = 2; index < lines.length; index++) {
+    const currentLine = lines[index].trim();
+
+    const isPotentialBareReturn =
+      currentLine.startsWith('return ') &&
+      !['return null', 'return false', 'return true', 'return;'].some((statement) =>
+        currentLine.startsWith(statement)
+      );
+
+    if (isPotentialBareReturn) {
+      const isExplained = scanForReturnExplainer(lines, index);
+      if (!isExplained) {
+        violations.push(`line ${index + 1}`);
+      }
+    }
+  }
+
+  const explainingResult = {
+    pass: violations.length === 0,
+    reason:
+      violations.length > 0
+        ? `Bare returns detected (missing explaining const) at: ${violations.join(', ')}`
+        : null,
+  };
+  return explainingResult;
+
+  function scanForReturnExplainer(sourceLines, returnLineIndex) {
+    const SCAN_DEPTH = 50;
+    const startLine = Math.max(0, returnLineIndex - SCAN_DEPTH);
+
+    for (let currentPos = returnLineIndex - 1; currentPos >= startLine; currentPos--) {
+      const lineText = sourceLines[currentPos].trim();
+      if (lineText === '' || /^[\s()[]{};]*$/.test(lineText)) continue;
+
+      // Exemption for 1-line Entry Points: if preceding line is function start
+      const isEntryPointStart = /(function|async)\s+(run|start|init)\s*\(/.test(lineText);
+      if (isEntryPointStart && lineText.includes('{')) {
+        return true;
+      }
+
+      if (lineText.includes('const ')) {
+        return true;
+      }
+
+      // If we hit a block start or guard AFTER checking for const, we stop
+      const isBlockStart =
+        (lineText.includes('{') && !lineText.includes('${')) || lineText.includes('if (');
+      if (isBlockStart && !lineText.includes('const ')) {
+        break;
+      }
+    }
+    return false;
+  }
+}
+
+function validateNamingDiscipline(content) {
+  const cleanContent = content
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Multiline comments
+    .replace(/\/\/.*/g, '') // Single line comments
+    .replace(/(['"`])(?:(?!\1)[^\\]|\\.)*\1/g, ''); // Strings
+
+  const forbiddenAbbreviations = ['r' + 'eq', 'r' + 'es'];
+  const abbreviationPattern = new RegExp(`\\b(${forbiddenAbbreviations.join('|')})\\b`, 'g');
+  const singleLetterPattern = /[\s(,]([a-z])[\s,)=+]/g;
+
+  const abbreviationMatches = cleanContent.match(abbreviationPattern) || [];
+  const singleLetterMatches = [];
+  let regexMatch;
+
+  while ((regexMatch = singleLetterPattern.exec(cleanContent)) !== null) {
+    singleLetterMatches.push(regexMatch[1]);
+  }
+
+  const totalViolations = [...abbreviationMatches, ...singleLetterMatches];
+
+  const namingResult = {
+    pass: totalViolations.length === 0,
+    reason:
+      totalViolations.length > 0 ? `Banned naming detected: ${totalViolations.join(', ')}` : null,
+  };
+  return namingResult;
+}
+
+function validateRevealingModulePattern(content) {
+  const hasRevealingObject = /export const \w+ = \{[\s\S]*\};/m.test(content);
+  const forbiddenDefaultExport = 'export ' + 'default';
+  const hasExportDefault = content.includes(forbiddenDefaultExport);
+
+  const revealingResult = {
+    pass: hasRevealingObject && !hasExportDefault,
+    reason: !hasRevealingObject
+      ? 'Missing Revealing Module Pattern export.'
+      : hasExportDefault
+        ? `Uses ${forbiddenDefaultExport}.`
+        : null,
+  };
+  return revealingResult;
+}
+
+function validateBooleanPrefixes(content) {
+  const bareBooleanMatches = content.match(/\bconst\s+(loading|error|active|valid)\s*=/g);
+
+  const booleanResult = {
+    pass: !bareBooleanMatches,
+    reason: bareBooleanMatches ? `Bare boolean detected: ${bareBooleanMatches.join(', ')}` : null,
+  };
+  return booleanResult;
+}
+
+function validateNoSectionBanners(content) {
+  const bannerPrefix = '// -' + '--';
+  const hasBanner = content.includes(bannerPrefix);
+
+  const bannerResult = {
+    pass: !hasBanner,
+    reason: hasBanner ? `Detected section banners (${bannerPrefix}).` : null,
+  };
+  return bannerResult;
+}
 
 export const GOVERNANCE_RULES = {
   LAW_1_HARDENING: {
