@@ -318,7 +318,8 @@ function buildFlavorChoices(flavors) {
   const prioritizedChoices = choices.sort((choiceA, choiceB) => {
     const rankA = RANK_ORDER[choiceA.value] ?? 99;
     const rankB = RANK_ORDER[choiceB.value] ?? 99;
-    return rankA - rankB;
+    const rankDiff = rankA - rankB;
+    return rankDiff;
   });
 
   return prioritizedChoices;
@@ -548,7 +549,9 @@ async function promptPartnerInfo(_context) {
     role: role || null,
   };
 
-  return success({ nextStep: WIZARD_STEPS.DONE, partner });
+  const partnerData = { nextStep: WIZARD_STEPS.DONE, partner };
+  const partnerResult = success(partnerData);
+  return partnerResult;
 }
 
 function validateSelections(selections) {

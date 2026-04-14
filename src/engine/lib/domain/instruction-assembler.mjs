@@ -112,7 +112,8 @@ function buildMasterInstructions(selections) {
         > [!IMPORTANT]
         > Load only what the current task requires. Start with Project Context, then add stack-specific files as needed. Read these before executing complex tasks — do not assume project structure.`;
 
-      return headerString;
+      const routingHeader = headerString;
+      return routingHeader;
     }
 
     function buildCoreGovernanceRouting() {
@@ -346,7 +347,8 @@ function writeBacklogFiles(targetDirectory, selections) {
 
     if (fs.existsSync(contextPath)) {
       handleContextInjection(contextPath, partnerInfo);
-      return;
+      const injectedResult = undefined;
+      return injectedResult;
     }
 
     const stackLine = (currentSelections.idioms ?? [])
@@ -495,10 +497,14 @@ function writeGitignore(targetDirectory) {
 
   const blocksToAppend = BLOCKS.map((block) => {
     const missingEntries = block.entries.filter((entry) => !existingLines.includes(entry));
-    if (missingEntries.length === 0) return null;
+    if (missingEntries.length === 0) {
+      const emptyBlock = null;
+      return emptyBlock;
+    }
     const alreadyHasHeader = existingContent.includes(block.header);
     const lines = alreadyHasHeader ? missingEntries : [block.header, ...missingEntries];
-    return lines.join('\n');
+    const blockContent = lines.join('\n');
+    return blockContent;
   }).filter(Boolean);
 
   if (blocksToAppend.length === 0) return;

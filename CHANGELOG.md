@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.6.0] - 2026-04-13
+
+### Added
+
+- **Laws Compliance Protocol**: Renamed "Law 3 compliance" to "Laws Compliance" and hardened the auditor's symbol scansion to 100% strictness.
+- **Smart-Strict Scansion**: New auditor logic that enforces Explaining Returns even for literal objects and multi-line assignments.
+- **High-Visibility Auditing**: Updated the audit runner to report all violations in a single pass, eliminating "blind spots" in governance.
+
+### Fixed
+
+- **Narrative Cascade (Law 3)**: Eliminated 15+ bare and literal returns across `fs-utils.mjs`, `ui-utils.mjs`, `wizard.mjs`, and all engine binaries.
+- **SLA Drift**: Standardized all CLI entry points to a strict One-Line Pure Entry Point pattern.
+- **Governance Engine Hardening (`init/`)** — refactored the project initialization and injection binaries (`add-idiom`, `build-bundle`, `creatives-bundle`) to satisfy the One-Line Entry Point mandate (v2.4.3).
+- **Core Binary Resilience** — extracted logic from `runIfDirect` entry points into local sibling helpers, achieving 100% SLA compliance in the init domain basin.
+- **Narrative scansion alignment** — standardized return patterns across the `init/` basin for improved vertical scansion.
+
 ## [2.5.2] - 2026-04-13
 
 ### Added

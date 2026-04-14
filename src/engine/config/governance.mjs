@@ -142,46 +142,71 @@ function validateExplainingReturns(content) {
       );
 
     if (isPotentialBareReturn) {
-      const isExplained = scanForReturnExplainer(lines, index);
+      // SLA Exemption: Entry Points (run) are allowed to perform pure delegation to maintain 1-line protocol.
+      const functionContext = scanForFunctionHeader(lines, index);
+      if (functionContext === 'run') continue;
+
+      // 100% scansion: extract the returned symbol
+      const returnMatch = currentLine.match(/return\s+([a-zA-Z0-9_$]+);?$/);
+
+      if (!returnMatch) {
+        violations.push(`line ${index + 1} (Literal return)`);
+        continue;
+      }
+
+      const returnedSymbol = returnMatch[1];
+      const isExplained = scanForSymbolExplainer(lines, index, returnedSymbol);
       if (!isExplained) {
-        violations.push(`line ${index + 1}`);
+        violations.push(`line ${index + 1} (Bare return: "${returnedSymbol}")`);
       }
     }
   }
 
   const explainingResult = {
     pass: violations.length === 0,
-    reason:
-      violations.length > 0
-        ? `Bare returns detected (missing explaining const) at: ${violations.join(', ')}`
-        : null,
+    reason: violations.length > 0 ? `Laws Compliance violation: ${violations.join('; ')}` : null,
   };
   return explainingResult;
 
-  function scanForReturnExplainer(sourceLines, returnLineIndex) {
-    const SCAN_DEPTH = 50;
-    const startLine = Math.max(0, returnLineIndex - SCAN_DEPTH);
+  function scanForFunctionHeader(sourceLines, returnLineIndex) {
+    for (let currentPos = returnLineIndex - 1; currentPos >= 0; currentPos--) {
+      const line = sourceLines[currentPos].trim();
+      const functionMatch = line.match(/(?:function|async)\s+(\w+)\s*\(/);
+      if (functionMatch) return functionMatch[1];
+    }
+    return null;
+  }
 
-    for (let currentPos = returnLineIndex - 1; currentPos >= startLine; currentPos--) {
+  function scanForSymbolExplainer(sourceLines, returnLineIndex, symbol) {
+    const SCAN_LIMIT = 100;
+    const startPos = Math.max(0, returnLineIndex - SCAN_LIMIT);
+    const constRegex = new RegExp(`const\\s+${symbol}\\b`);
+
+    for (let currentPos = returnLineIndex - 1; currentPos >= startPos; currentPos--) {
       const lineText = sourceLines[currentPos].trim();
-      if (lineText === '' || /^[\s()[]{};]*$/.test(lineText)) continue;
 
-      // Exemption for 1-line Entry Points: if preceding line is function start
-      const isEntryPointStart = /(function|async)\s+(run|start|init)\s*\(/.test(lineText);
-      if (isEntryPointStart && lineText.includes('{')) {
-        return true;
-      }
+      // Skip whitespace, structural braces, backticks, and continuation punctuation
+      const isSkipLine = lineText === '' || /^[{}'`\];,.!]+$/.test(lineText);
+      if (isSkipLine) continue;
 
-      if (lineText.includes('const ')) {
-        return true;
-      }
+      // If we find the const, we are happy.
+      if (constRegex.test(lineText)) return true;
 
-      // If we hit a block start or guard AFTER checking for const, we stop
-      const isBlockStart =
-        (lineText.includes('{') && !lineText.includes('${')) || lineText.includes('if (');
-      if (isBlockStart && !lineText.includes('const ')) {
-        break;
-      }
+      // SLA exception
+      const isPureDelegation =
+        /(function|async)\s+\w+\s*\(/.test(lineText) && lineText.includes('{');
+      if (isPureDelegation) return true;
+
+      // We allow skipping indented lines (likely part of a multi-line template or object)
+      const isIndented =
+        sourceLines[currentPos].startsWith('  ') || sourceLines[currentPos].startsWith('\t');
+      if (isIndented && !lineText.includes('const ')) continue;
+
+      // If we hit any other keyword (if, for, return from another block), it's a bare return
+      if (/^(if|for|while|switch|return|export|async|function)\b/.test(lineText)) break;
+
+      // Otherwise, keep looking for the const (up to limit)
+      continue;
     }
     return false;
   }

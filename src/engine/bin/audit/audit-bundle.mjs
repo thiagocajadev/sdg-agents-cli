@@ -23,9 +23,9 @@ function orchestrateGovernanceAudit() {
   const results = {
     drift: SyncChecker.run(),
     narrative: checkChangelogHealth(),
-    law3: checkLaw3Compliance(),
-    soul: checkSoulPulse(),
+    laws: checkLawsCompliance(),
     tests: checkTestNamedExpectations(),
+    soul: checkSoulPulse(),
     hygiene: checkHygienePulse(),
   };
 
@@ -65,7 +65,7 @@ function checkChangelogHealth() {
   return healthResult;
 }
 
-function checkLaw3Compliance() {
+function checkLawsCompliance() {
   const targetDirectories = [
     path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'core'),
     path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'domain'),
@@ -105,14 +105,14 @@ function checkLaw3Compliance() {
     }
   }
 
-  const law3Result = {
+  const lawsResult = {
     isFailure: violations.length > 0,
     violations,
     score: violations.length === 0 ? '100%' : `${Math.max(0, 100 - violations.length * 10)}%`,
   };
 
-  const finalLaw3Result = law3Result;
-  return finalLaw3Result;
+  const finalLawsResult = lawsResult;
+  return finalLawsResult;
 }
 
 function checkTestNamedExpectations() {
@@ -214,7 +214,14 @@ function reportSummary(results) {
 
   printResult('Instruction Sync', !results.drift.isFailure);
   printResult('Narrative (Changelog)', !results.narrative.isFailure, results.narrative.reason);
-  printResult('Law 3 compliance', !results.law3.isFailure, results.law3.violations[0]);
+  printResult(
+    'Laws Compliance',
+    !results.laws.isFailure,
+    results.laws.isFailure
+      ? `found ${results.laws.violations.length} violations:\n      - ` +
+          results.laws.violations.join('\n      - ')
+      : null
+  );
   printResult('Test Expectations', !results.tests.isFailure, results.tests.violations[0]);
   printResult(
     'Writing Soul',

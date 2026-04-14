@@ -55,8 +55,8 @@ async function orchestrateCreativeInjection(targetDirectory) {
   console.log('\n  ✅ Creative Design Toolkit injected successfully!');
   console.log('  👉 Use the chat to start your Design Thinking session.\n');
 
-  const creativeSuccess = success();
-  return creativeSuccess;
+  const injectionResult = success();
+  return injectionResult;
 }
 
 export const Creatives = { run };

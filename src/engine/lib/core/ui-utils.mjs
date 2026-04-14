@@ -173,7 +173,8 @@ function formatIdiomsLabel(idioms, versions) {
   const labels = idioms.map((idiomKey) => {
     const name = STACK_DISPLAY_NAMES[idiomKey]?.name ?? idiomKey;
     const versionLabel = versions?.[idiomKey] ? ` (${versions[idiomKey]})` : '';
-    return `${name}${versionLabel}`;
+    const label = `${name}${versionLabel}`;
+    return label;
   });
 
   const idiomsLabel = labels.join(', ');

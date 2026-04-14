@@ -298,8 +298,11 @@ export const SDG = {
   run,
 };
 
-runIfDirect(import.meta.url, () => {
+runIfDirect(import.meta.url, launchFromCli);
+
+function launchFromCli() {
   const targetDirectory = process.argv[2] ?? process.cwd();
   const dryRun = process.argv.includes('--dry-run');
-  return run(path.resolve(targetDirectory), { dryRun });
-});
+  const buildResult = run(path.resolve(targetDirectory), { dryRun });
+  return buildResult;
+}

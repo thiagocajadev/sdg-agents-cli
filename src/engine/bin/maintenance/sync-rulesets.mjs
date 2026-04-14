@@ -20,7 +20,7 @@ const PROJECT_ROOT = process.cwd();
 const TODAY = new Date().toISOString().split('T')[0];
 
 async function run() {
-  await orchestrateRulesetSync();
+  return await orchestrateRulesetSync();
 }
 
 async function orchestrateRulesetSync() {
@@ -42,10 +42,10 @@ async function orchestrateRulesetSync() {
 
   const maintainer = isMaintainerMode();
   const prompt = buildPrompt(manifest, targets, maintainer);
-  await printPromptUI(prompt, 'Spec Driven Guide — Idiom Sync');
+  await printPromptUI(prompt, 'Spec Driven Guide — Sync Patterns');
 
-  const syncResult = success();
-  return syncResult;
+  const orchestrateResult = success();
+  return orchestrateResult;
 }
 
 function resolveTargets(manifest) {
@@ -99,7 +99,7 @@ function buildPrompt(_manifest, targets, maintainer) {
     .flatMap((target) => {
       try {
         const content = fs.readFileSync(target.filePath, 'utf8');
-        return [
+        const sectionContent = [
           `
 ## ${target.label} (Current Version: ${target.version ?? 'any'}) — ${path.basename(target.filePath)}
 
@@ -107,6 +107,7 @@ function buildPrompt(_manifest, targets, maintainer) {
 ${content}
 </current_content>`,
         ];
+        return sectionContent;
       } catch (error) {
         console.error(`\n  Warning: could not read ${target.filePath} — ${error.message}`);
         const emptyResult = [];

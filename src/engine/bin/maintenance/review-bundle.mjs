@@ -20,7 +20,7 @@ const PROJECT_ROOT = process.cwd();
  * Orchestrator: Review Entry Point
  */
 async function run() {
-  await orchestrateReview();
+  return await orchestrateReview();
 }
 
 async function orchestrateReview() {
@@ -82,7 +82,8 @@ function printManifestSummary(manifest) {
   const idiomsLabels = idioms
     .map((idiom) => {
       const versionLabel = versions?.[idiom] ? ` (${versions[idiom]})` : '';
-      return `${displayName(idiom)}${versionLabel}`;
+      const label = `${displayName(idiom)}${versionLabel}`;
+      return label;
     })
     .join(', ');
 

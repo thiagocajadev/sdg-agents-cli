@@ -56,8 +56,8 @@ async function orchestrateIdiomAddition() {
     console.log(
       `\n  Idiom "${idiomFolderKey}" already exists at ${path.relative(SOURCE_ROOT, targetDirectory)}.\n`
     );
-    const alreadyExistsResult = success();
-    return alreadyExistsResult;
+    const existingResult = success();
+    return existingResult;
   }
 
   let stackVersionsContent, stackDisplayContent, corePrinciples;
@@ -76,8 +76,8 @@ async function orchestrateIdiomAddition() {
     );
   } catch (error) {
     console.error(`\n  Error: could not read required file — ${error.message}\n`);
-    const readError = fail(error.message, 'READ_ERROR');
-    return readError;
+    const failureResult = fail(error.message, 'READ_ERROR');
+    return failureResult;
   }
 
   const prompt = buildPrompt({
@@ -97,8 +97,8 @@ async function orchestrateIdiomAddition() {
   - src/config/stack-versions.mjs              (update)
   - src/config/stack-display.mjs               (update)\n`);
 
-  const additionSuccess = success();
-  return additionSuccess;
+  const orchestrateResult = success();
+  return orchestrateResult;
 }
 
 function printWelcome() {
@@ -123,7 +123,7 @@ function buildPrompt({
   const isBackend = scope === 'backend' || scope === 'both';
   const isFrontend = scope === 'frontend' || scope === 'both';
 
-  return `
+  const idiomPrompt = `
 Today is ${TODAY}.
 
 ## Task: Add a new Idiom to the Spec Driven Guide project
@@ -183,6 +183,7 @@ Return:
 2. The full updated content of \`src/config/stack-versions.mjs\`
 3. The full updated content of \`src/config/stack-display.mjs\`
 `;
+  return idiomPrompt;
 }
 
 export const Idiomatic = {

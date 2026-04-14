@@ -107,7 +107,8 @@ function isMaintainerMode() {
   if (!fs.existsSync(packagePath)) return false;
   try {
     const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-    return packageData.name === 'sdg-agents';
+    const isMaintainer = packageData.name === 'sdg-agents';
+    return isMaintainer;
   } catch {
     return false;
   }
