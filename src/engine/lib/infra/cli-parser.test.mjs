@@ -15,7 +15,7 @@ describe('CliParser', () => {
       const actual = parseCliArgs(input);
 
       assert.equal(actual.subcommand, expectedSubcommand);
-      assert.equal(actual.targetDir, expectedTargetDir);
+      assert.equal(actual.targetDirectory, expectedTargetDir);
       assert.equal(actual.flavor, expectedFlavor);
     });
 

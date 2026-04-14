@@ -155,6 +155,7 @@ npx sdg-agents clear     # Remove the .ai/ folder
 - [Engineering Laws (CONSTITUTION)](docs/CONSTITUTION.md) — the principles behind the rules
 - [Roadmap](docs/ROADMAP.md) — planned work
 - [Changelog](CHANGELOG.md) — release history
+- [Credits and Philosophies](docs/REFERENCES.md) — project influences and research credits
 
 ---
 

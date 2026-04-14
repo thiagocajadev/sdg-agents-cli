@@ -68,7 +68,7 @@ function buildMasterInstructions(selections) {
 
       > [!IMPORTANT]
       > This project follows the Universal Engineering Manifesto.
-      > You MUST read and adhere strictly to the 6 Laws defined in \`.ai/instructions/core/staff-dna.md\`.
+      > You MUST read and adhere strictly to the Engineering Laws defined in \`.ai/instructions/core/staff-dna.md\`.
     `;
 
     return manifestoString;

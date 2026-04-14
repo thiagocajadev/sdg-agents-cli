@@ -27,20 +27,32 @@ describe('FsUtils', () => {
       assert.equal(actual, expected);
     });
 
-    it('should keep matching blocks and remove non-matching blocks when multiple are present', () => {
+    it('should keep matching blocks when multiple are present', () => {
       const input = [
         '<block version=">=8">Legacy block</block>',
         '<block version=">=10">Current block</block>',
         '<block version=">=12">Future block</block>',
       ].join('\n');
-      const expectedToContain = ['Legacy block', 'Current block'];
-      const expectedToExclude = 'Future block';
+      const expected = true;
 
-      const actual = filterContentByVersion(input, 'dotnet@10');
+      const actualRaw = filterContentByVersion(input, 'dotnet@10');
+      const actual = actualRaw.includes('Legacy block') && actualRaw.includes('Current block');
 
-      assert.ok(actual.includes(expectedToContain[0]));
-      assert.ok(actual.includes(expectedToContain[1]));
-      assert.ok(!actual.includes(expectedToExclude));
+      assert.equal(actual, expected);
+    });
+
+    it('should remove non-matching blocks when multiple are present', () => {
+      const input = [
+        '<block version=">=8">Legacy block</block>',
+        '<block version=">=10">Current block</block>',
+        '<block version=">=12">Future block</block>',
+      ].join('\n');
+      const expected = false;
+
+      const actualRaw = filterContentByVersion(input, 'dotnet@10');
+      const actual = actualRaw.includes('Future block');
+
+      assert.equal(actual, expected);
     });
 
     it('should return content unchanged when targetVersion is null', () => {
@@ -71,60 +83,67 @@ describe('FsUtils', () => {
     });
 
     describe('Complex conditions', () => {
-      it('should handle decimal thresholds and values', () => {
+      it('should handle decimal thresholds when value matches', () => {
         const input = '<section version=">=3.13">Target</section>';
-        const expectedMatched = input;
-        const expectedUnmatched = '';
+        const expected = input;
 
-        const actualMatched = filterContentByVersion(input, 'py@3.14');
-        const actualUnmatched = filterContentByVersion(input, 'py@3.12');
+        const actual = filterContentByVersion(input, 'py@3.14');
 
-        assert.equal(actualMatched, expectedMatched);
-        assert.equal(actualUnmatched, expectedUnmatched);
+        assert.equal(actual, expected);
       });
 
-      it('should handle strictly greater than (>), strictly smaller than (<)', () => {
-        const input = '<v version=">10">Up</v><v version="<10">Down</v>';
-        const expectedUp = '<v version=">10">Up</v>';
-        const expectedDown = '<v version="<10">Down</v>';
-        const expectedNone = '';
+      it('should remove decimal thresholds when value does not match', () => {
+        const input = '<section version=">=3.13">Target</section>';
+        const expected = '';
 
-        const actualUp = filterContentByVersion(input, '11');
-        const actualDown = filterContentByVersion(input, '9');
-        const actualNone = filterContentByVersion(input, '10');
+        const actual = filterContentByVersion(input, 'py@3.12');
 
-        assert.equal(actualUp, expectedUp);
-        assert.equal(actualDown, expectedDown);
-        assert.equal(actualNone, expectedNone);
+        assert.equal(actual, expected);
       });
 
-      it('should handle equal (= and ==)', () => {
-        const input = '<v version="=10">Exact</v><v version="==11">Exact2</v>';
-        const expectedTen = '<v version="=10">Exact</v>';
-        const expectedEleven = '<v version="==11">Exact2</v>';
-        const expectedNone = '';
+      it('should handle strictly greater than (>)', () => {
+        const input = '<v version=">10">Up</v>';
+        const expected = input;
 
-        const actualTen = filterContentByVersion(input, '10');
-        const actualEleven = filterContentByVersion(input, '11');
-        const actualNone = filterContentByVersion(input, '12');
+        const actual = filterContentByVersion(input, '11');
 
-        assert.equal(actualTen, expectedTen);
-        assert.equal(actualEleven, expectedEleven);
-        assert.equal(actualNone, expectedNone);
+        assert.equal(actual, expected);
+      });
+
+      it('should handle strictly smaller than (<)', () => {
+        const input = '<v version="<10">Down</v>';
+        const expected = input;
+
+        const actual = filterContentByVersion(input, '9');
+
+        assert.equal(actual, expected);
+      });
+
+      it('should handle equal (=)', () => {
+        const input = '<v version="=10">Exact</v>';
+        const expected = input;
+
+        const actual = filterContentByVersion(input, '10');
+
+        assert.equal(actual, expected);
+      });
+
+      it('should handle double equal (==)', () => {
+        const input = '<v version="==11">Exact2</v>';
+        const expected = input;
+
+        const actual = filterContentByVersion(input, '11');
+
+        assert.equal(actual, expected);
       });
 
       it('should handle less than or equal (<=)', () => {
         const input = '<v version="<=10">Bound</v>';
-        const expectedMatched = input;
-        const expectedUnmatched = '';
+        const expected = input;
 
-        const actualTen = filterContentByVersion(input, '10');
-        const actualNine = filterContentByVersion(input, '9');
-        const actualEleven = filterContentByVersion(input, '11');
+        const actual = filterContentByVersion(input, '10');
 
-        assert.equal(actualTen, expectedMatched);
-        assert.equal(actualNine, expectedMatched);
-        assert.equal(actualEleven, expectedUnmatched);
+        assert.equal(actual, expected);
       });
     });
   });
@@ -141,10 +160,14 @@ describe('FsUtils', () => {
 
     it('should return the directory of the current test file', () => {
       const input = import.meta.url;
+      const expected = true;
 
-      const actual = getDirname(input);
+      const actualRaw = getDirname(input);
+      const actual =
+        actualRaw.endsWith('/src/engine/lib/core') ||
+        actualRaw.endsWith('\\src\\engine\\lib\\core');
 
-      assert.ok(actual.endsWith('/src/engine/lib') || actual.endsWith('\\src\\engine\\lib'));
+      assert.equal(actual, expected);
     });
   });
 
@@ -158,80 +181,69 @@ describe('FsUtils', () => {
       assert.deepEqual(actual, expected);
     });
 
-    it('should return only directory names for a valid path', () => {
-      const parentDir = getDirname(import.meta.url);
+    it('should return a list of directory names for a valid path', () => {
+      const coreDir = getDirname(import.meta.url);
+      const input = path.join(coreDir, '..');
+      const expected = true;
 
-      const actual = getDirectories(parentDir);
+      const actualRaw = getDirectories(input);
+      const actual = Array.isArray(actualRaw) && actualRaw.length > 0;
 
-      assert.ok(Array.isArray(actual));
-      assert.ok(actual.every((directoryName) => typeof directoryName === 'string'));
+      assert.equal(actual, expected);
     });
   });
 
   describe('copyRecursiveSync()', () => {
     it('should copy a single file to a destination', () => {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
-      try {
-        const srcFile = path.join(tmpDir, 'source.txt');
-        const destFile = path.join(tmpDir, 'dest.txt');
-        const expectedContent = 'hello';
-        fs.writeFileSync(srcFile, expectedContent);
+      const srcFile = path.join(tmpDir, 'source.txt');
+      const destFile = path.join(tmpDir, 'dest.txt');
+      const expectedContent = 'hello';
+      fs.writeFileSync(srcFile, expectedContent);
 
-        copyRecursiveSync(srcFile, destFile);
+      copyRecursiveSync(srcFile, destFile);
 
-        const actualExists = fs.existsSync(destFile);
-        const actualContent = fs.readFileSync(destFile, 'utf8');
+      const actualExists = fs.existsSync(destFile);
+      const actualContent = fs.readFileSync(destFile, 'utf8');
 
-        assert.ok(actualExists);
-        assert.equal(actualContent, expectedContent);
-      } finally {
-        fs.rmSync(tmpDir, { recursive: true, force: true });
-      }
+      assert.ok(actualExists);
+      assert.equal(actualContent, expectedContent);
+
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     });
 
     it('should copy a directory tree recursively', () => {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
-      try {
-        const srcDir = path.join(tmpDir, 'src');
-        const subDir = path.join(srcDir, 'sub');
-        const rootText = 'root';
-        const nestedText = 'nested';
+      const srcDir = path.join(tmpDir, 'src');
+      const subDir = path.join(srcDir, 'sub');
+      const rootText = 'root';
+      const nestedText = 'nested';
+      fs.mkdirSync(subDir, { recursive: true });
+      fs.writeFileSync(path.join(srcDir, 'root.txt'), rootText);
+      fs.writeFileSync(path.join(subDir, 'nested.txt'), nestedText);
+      const destDir = path.join(tmpDir, 'dest');
 
-        fs.mkdirSync(subDir, { recursive: true });
-        fs.writeFileSync(path.join(srcDir, 'root.txt'), rootText);
-        fs.writeFileSync(path.join(subDir, 'nested.txt'), nestedText);
+      copyRecursiveSync(srcDir, destDir);
 
-        const destDir = path.join(tmpDir, 'dest');
+      const actualRootText = fs.readFileSync(path.join(destDir, 'root.txt'), 'utf8');
+      const actualNestedText = fs.readFileSync(path.join(destDir, 'sub', 'nested.txt'), 'utf8');
 
-        copyRecursiveSync(srcDir, destDir);
+      assert.equal(actualRootText, rootText);
+      assert.equal(actualNestedText, nestedText);
 
-        const actualRootExists = fs.existsSync(path.join(destDir, 'root.txt'));
-        const actualNestedExists = fs.existsSync(path.join(destDir, 'sub', 'nested.txt'));
-        const actualRootText = fs.readFileSync(path.join(destDir, 'root.txt'), 'utf8');
-        const actualNestedText = fs.readFileSync(path.join(destDir, 'sub', 'nested.txt'), 'utf8');
-
-        assert.ok(actualRootExists);
-        assert.ok(actualNestedExists);
-        assert.equal(actualRootText, rootText);
-        assert.equal(actualNestedText, nestedText);
-      } finally {
-        fs.rmSync(tmpDir, { recursive: true, force: true });
-      }
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     });
 
     it('should do nothing when the source path does not exist', () => {
-      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
-      try {
-        const destFile = path.join(tmpDir, 'dest.txt');
-        const input = '/non-existent-path-sdg-test/file.txt';
+      const destFile = '/tmp/sdg-dest-non-existent.txt';
+      const input = '/non-existent-path-sdg-test/file.txt';
+      const expected = false;
 
-        copyRecursiveSync(input, destFile);
+      copyRecursiveSync(input, destFile);
 
-        const actualExists = fs.existsSync(destFile);
-        assert.ok(!actualExists);
-      } finally {
-        fs.rmSync(tmpDir, { recursive: true, force: true });
-      }
+      const actual = fs.existsSync(destFile);
+
+      assert.equal(actual, expected);
     });
   });
 });

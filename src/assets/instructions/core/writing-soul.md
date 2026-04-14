@@ -164,9 +164,3 @@ Also cut: "At its core", "It's worth noting", "At the end of the day", "When it 
 Before sharing work, reflect briefly to ensure content matches intention. Look for familiar patterns that feel like general summaries rather than specific observations. Replace them with active, direct language. Add a unique insight or vary sentence length to make the text feel genuinely yours.
 
 For perennial artifacts, run the Quick Checks above before delivery.
-
----
-
-## Reference and Credits
-
-This standard is built on the collective effort to eliminate statistical slop and restore intentionality to generated text. The anti-patterns section draws from the [stop-slop skill](https://github.com/hardikpandya/stop-slop) by Hardik Pandya, adapted to the pedagogical and conversational context of the SDG ecosystem.

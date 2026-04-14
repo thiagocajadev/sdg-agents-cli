@@ -101,7 +101,7 @@ On every request, classify intent before acting:
 > [!IMPORTANT]
 > Follow the approved plan strictly.
 >
-> 1. **DNA-Check**: Before starting, explicitly list which **6 Laws (staff-dna.md)** apply to the current task and why. Confirm mental alignment.
+> 1. **DNA-GATE & MENTAL RESET [LOCKED]**: Before starting, explicitly list which **Engineering Laws (staff-dna.md)** apply to the current task and why. Confirm mental alignment.
 > 2. **Context Load**: Reads the project's standards and style guide before writing anything (read `engineering-standards.md`, `code-style.md`, and competencies).
 > 3. **Quality Gate**: Reviews every function against the guide's readability rules before moving on.
 >
@@ -129,7 +129,7 @@ On every request, classify intent before acting:
 >
 > 1. **Checklist Verification**: Goes through every item on the Spec's Verification Checklist.
 > 2. **Regression Check**: For `fix:` cycles: confirms the bug is gone and nothing else broke.
-> 3. **Audit Gate (Confirmation)**: Analyzes the modified files against the 6 Laws. The audit is the final confirmation that the **Phase: CODE** quality was maintained.
+> 3. **Audit Gate (Confirmation)**: Analyzes the modified files against the Engineering Laws. The audit is the final confirmation that the **Phase: CODE** quality was maintained.
 > 4. **Lint Fix**: Runs the linter and fixes what it can before wrapping up.
 > 5. **Fix Loop (Circuit Breaker)**: If anything fails (Tests, Lint, or Audit): fall back to Phase CODE to fix, then re-run TEST. Max 3 attempts total. Upon the 3rd failure, STOP the cycle immediately and generate an explicit Failure Report for the developer so you can jointly explore alternatives.
 > 6. **Report**: Reports the result of each checklist item, linting, and audit status before moving on.
