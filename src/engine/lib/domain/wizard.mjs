@@ -75,10 +75,14 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
     };
     const stepResult = await executeWizardStep(step, context);
 
-    if (stepResult.isFailure) return stepResult;
+    if (stepResult.isFailure) {
+      const stepFailure = stepResult;
+      return stepFailure;
+    }
 
     if (stepResult.value.mode === 'quick') {
-      return handleQuickSetup();
+      const quickSetupData = handleQuickSetup();
+      return quickSetupData;
     }
 
     const currentStepIndex = STEP_ORDER.indexOf(step);
@@ -136,7 +140,8 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
       currentSelections.partner = currentSelections.partner || {};
       Object.assign(currentSelections.partner, stepValue.partner);
     }
-    return nextScope;
+    const scopeToApply = nextScope;
+    return scopeToApply;
   }
 }
 
@@ -144,28 +149,50 @@ async function executeWizardStep(step, context) {
   const { mode } = context.selections;
 
   switch (step) {
-    case WIZARD_STEPS.INITIAL:
-      return promptInitialChoice();
-    case WIZARD_STEPS.SCOPE:
-      return mode === 'prompts' ? promptTrackSelection(context) : promptProjectScope();
-    case WIZARD_STEPS.FLAVOR:
-      return promptArchitectureFlavor(context);
-    case WIZARD_STEPS.BACKEND:
-      return promptBackendIdiom(context);
-    case WIZARD_STEPS.FRONTEND:
-      return promptFrontendIdiom(context);
-    case WIZARD_STEPS.VERSIONS:
-      return promptVersionSelections(context);
-    case WIZARD_STEPS.DESIGN:
-      return promptDesignPreset(context);
-    case WIZARD_STEPS.IDE:
-      return promptIdeSelection();
-    case WIZARD_STEPS.BUMP:
-      return promptBumpAutomation(context);
-    case WIZARD_STEPS.PARTNER:
-      return promptPartnerInfo(context);
+    case WIZARD_STEPS.INITIAL: {
+      const stepResult = await promptInitialChoice();
+      return stepResult;
+    }
+    case WIZARD_STEPS.SCOPE: {
+      const scopeResult =
+        mode === 'prompts' ? await promptTrackSelection(context) : await promptProjectScope();
+      return scopeResult;
+    }
+    case WIZARD_STEPS.FLAVOR: {
+      const flavorResult = await promptArchitectureFlavor(context);
+      return flavorResult;
+    }
+    case WIZARD_STEPS.BACKEND: {
+      const backendResult = await promptBackendIdiom(context);
+      return backendResult;
+    }
+    case WIZARD_STEPS.FRONTEND: {
+      const frontendResult = await promptFrontendIdiom(context);
+      return frontendResult;
+    }
+    case WIZARD_STEPS.VERSIONS: {
+      const versionsResult = await promptVersionSelections(context);
+      return versionsResult;
+    }
+    case WIZARD_STEPS.DESIGN: {
+      const designResult = await promptDesignPreset(context);
+      return designResult;
+    }
+    case WIZARD_STEPS.IDE: {
+      const ideResult = await promptIdeSelection();
+      return ideResult;
+    }
+    case WIZARD_STEPS.BUMP: {
+      const bumpResult = await promptBumpAutomation(context);
+      return bumpResult;
+    }
+    case WIZARD_STEPS.PARTNER: {
+      const partnerResult = await promptPartnerInfo(context);
+      return partnerResult;
+    }
     default: {
-      return success({ nextStep: WIZARD_STEPS.DONE });
+      const doneResult = success({ nextStep: WIZARD_STEPS.DONE });
+      return doneResult;
     }
   }
 }
@@ -195,7 +222,8 @@ async function promptInitialChoice() {
     return backResult;
   }
   if (result === 'creatives') {
-    return success({ nextStep: WIZARD_STEPS.DONE, mode: 'creatives' });
+    const creativesResult = success({ nextStep: WIZARD_STEPS.DONE, mode: 'creatives' });
+    return creativesResult;
   }
 
   const initialChoiceResult = success({ nextStep: WIZARD_STEPS.SCOPE, mode: result });
@@ -219,7 +247,8 @@ function handleQuickSetup() {
       role: 'Dev Partner',
     },
   });
-  return quickSetupResult;
+  const quickResult = quickSetupResult;
+  return quickResult;
 }
 
 async function promptTrackSelection(context) {
@@ -233,7 +262,8 @@ async function promptTrackSelection(context) {
       else if (trackFolderKey === '01-new-evolution') label = '2. New Evolution (Greenfield)';
       else if (trackFolderKey === '02-legacy-modernization')
         label = '3. Legacy Modernization (Brownfield)';
-      return { name: label, value: trackFolderKey };
+      const trackChoice = { name: label, value: trackFolderKey };
+      return trackChoice;
     });
 
   const trackChoices = [
@@ -264,7 +294,8 @@ async function promptTrackSelection(context) {
   }
 
   // Final step for Prompts mode
-  return success({ nextStep: WIZARD_STEPS.DONE, track });
+  const promptsDoneResult = success({ nextStep: WIZARD_STEPS.DONE, track });
+  return promptsDoneResult;
 }
 
 async function promptProjectScope() {
@@ -305,7 +336,8 @@ async function promptArchitectureFlavor(context) {
   return flavorResult;
 
   function buildFlavorChoices(flavors) {
-    return flavors
+    const rawChoices = flavors;
+    return rawChoices
       .sort()
       .map((flavorFolderKey) => {
         let label = displayName(flavorFolderKey);
@@ -314,7 +346,8 @@ async function promptArchitectureFlavor(context) {
         else if (flavorFolderKey === 'mvc') label = `2. ${label} (Standard Layers)`;
         else if (flavorFolderKey === 'legacy') label = `3. ${label} (Event-Driven / SSR)`;
         else label = `Sub. ${label}`;
-        return { name: label, value: flavorFolderKey };
+        const flavorChoice = { name: label, value: flavorFolderKey };
+        return flavorChoice;
       })
       .sort((flavorA, flavorB) => {
         const order = { lite: 0, 'vertical-slice': 1, mvc: 2, legacy: 3 };
@@ -488,7 +521,8 @@ async function promptBumpAutomation(context) {
   );
 
   if (!hasJsTs) {
-    return success({ nextStep: WIZARD_STEPS.PARTNER, bump: false });
+    const noAutomationResult = success({ nextStep: WIZARD_STEPS.PARTNER, bump: false });
+    return noAutomationResult;
   }
 
   const result = await safeConfirm({
@@ -507,14 +541,20 @@ async function promptPartnerInfo(_context) {
     maxLength: 50,
   });
 
-  if (name === 'back') return success({ nextStep: WIZARD_STEPS.BUMP });
+  if (name === 'back') {
+    const backResult = success({ nextStep: WIZARD_STEPS.BUMP });
+    return backResult;
+  }
 
   const role = await safeInput({
     message: 'Primary Role? (e.g. Dev founder, Tech Lead, CTO) [Optional]',
     maxLength: 50,
   });
 
-  if (role === 'back') return success({ nextStep: WIZARD_STEPS.PARTNER }); // Re-ask name
+  if (role === 'back') {
+    const backToNameResult = success({ nextStep: WIZARD_STEPS.PARTNER }); // Re-ask name
+    return backToNameResult;
+  }
 
   const partner = {
     name: name || null,
@@ -559,7 +599,8 @@ function validateSelections(selections) {
       `Unknown flavor: "${selections.flavor}". Available: ${availableFlavors.join(', ')}`,
       'INVALID_FLAVOR'
     );
-    return invalidFlavorResult;
+    const flavorFailure = invalidFlavorResult;
+    return flavorFailure;
   }
 
   if (!selections.idioms || selections.idioms.length === 0) {
@@ -569,16 +610,14 @@ function validateSelections(selections) {
 
   for (const idiom of selections.idioms) {
     if (!availableIdioms.includes(idiom)) {
-      const invalidIdiomResult = fail(
-        `Unknown idiom: "${idiom}". Available: ${availableIdioms.join(', ')}`,
-        'INVALID_IDIOM'
-      );
+      const invalidIdiomMessage = `Unknown idiom: "${idiom}". Available: ${availableIdioms.join(', ')}`;
+      const invalidIdiomResult = fail(invalidIdiomMessage, 'INVALID_IDIOM');
       return invalidIdiomResult;
     }
   }
 
-  const validResult = success(selections);
-  return validResult;
+  const setupResult = success(selections);
+  return setupResult;
 }
 
 function autoSelectVersions(selections) {

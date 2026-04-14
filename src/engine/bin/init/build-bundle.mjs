@@ -47,13 +47,19 @@ const packageJson = require('../../../../package.json');
  * Entry point for both interactive (wizard) and non-interactive (flags) modes.
  */
 async function run(targetDirectory = process.cwd(), options = {}) {
+  await orchestrateBuild(targetDirectory, options);
+}
+
+async function orchestrateBuild(targetDirectory, options) {
   printWelcome();
 
   if (options.selections) {
-    return runNonInteractive(targetDirectory, options);
+    const nonInteractiveResult = await runNonInteractive(targetDirectory, options);
+    return nonInteractiveResult;
   }
 
-  return runInteractive(targetDirectory, options);
+  const interactiveResult = await runInteractive(targetDirectory, options);
+  return interactiveResult;
 }
 
 async function runNonInteractive(targetDirectory, options) {
@@ -86,31 +92,42 @@ async function runInteractive(targetDirectory, options) {
     const result = await handleExecutionStep(state, targetDirectory, options);
     if (result.isFailure) {
       if (result.error.code !== 'USER_BACK') {
-        console.log(`\n  ⚠️  ${result.error.message}`);
+        process.stdout.write(`\n  ⚠️  ${result.error.message}\n`);
       }
-      return;
+      const interactionResult = result;
+      return interactionResult;
     }
   }
 }
 
 async function handleExecutionStep(state, targetDirectory, options) {
   switch (state.step) {
-    case 'selections':
-      return handleSelectionPhase(state, targetDirectory);
-    case 'execute':
-      return handleFinalExecutionPhase(state, targetDirectory, options);
-    default:
-      return success();
+    case 'selections': {
+      const selectionStepResult = await handleSelectionPhase(state, targetDirectory);
+      return selectionStepResult;
+    }
+    case 'execute': {
+      const executionStepResult = await handleFinalExecutionPhase(state, targetDirectory, options);
+      return executionStepResult;
+    }
+    default: {
+      const defaultResult = success();
+      return defaultResult;
+    }
   }
 }
 
 async function handleSelectionPhase(state, targetDirectory) {
-  const result = await gatherUserSelections(targetDirectory);
-  if (result.isFailure) return result;
+  const selectionResult = await gatherUserSelections(targetDirectory);
+  if (selectionResult.isFailure) {
+    const selectionFailure = selectionResult;
+    return selectionFailure;
+  }
 
-  state.userSelections = result.value;
+  state.userSelections = selectionResult.value;
   state.step = 'execute';
-  return success();
+  const phaseSuccess = success();
+  return phaseSuccess;
 }
 
 async function handleFinalExecutionPhase(state, targetDirectory, options = {}) {
@@ -118,47 +135,65 @@ async function handleFinalExecutionPhase(state, targetDirectory, options = {}) {
   const selections = state.userSelections;
 
   if (selections.mode === 'quick') {
-    return runQuickMode(state, targetDirectory, { dryRun, noDevGuides });
+    const quickModeResult = await runQuickMode(state, targetDirectory, { dryRun, noDevGuides });
+    return quickModeResult;
   }
 
   if (dryRun) {
     printDryRunPreview(selections, targetDirectory);
     state.step = 'done';
-    return success();
+    const dryRunSuccess = success();
+    return dryRunSuccess;
   }
 
   if (selections.mode === 'prompts') {
-    return runPromptsMode(state, targetDirectory, selections, { skipConfirm });
+    const promptsModeResult = await runPromptsMode(state, targetDirectory, selections, {
+      skipConfirm,
+    });
+    return promptsModeResult;
   }
 
   if (selections.mode === 'creatives') {
-    return runCreativesMode(state, targetDirectory);
+    const creativesModeResult = await runCreativesMode(state, targetDirectory);
+    return creativesModeResult;
   }
 
-  return runAgentsMode(state, targetDirectory, selections, { skipConfirm, noDevGuides });
+  const agentsModeResult = await runAgentsMode(state, targetDirectory, selections, {
+    skipConfirm,
+    noDevGuides,
+  });
+  return agentsModeResult;
 }
 
 async function runQuickMode(state, targetDirectory, { dryRun, noDevGuides = false }) {
-  if (dryRun) return abortForDryRun(state, targetDirectory, printQuickDryRun);
+  if (dryRun) {
+    const dryRunResult = abortForDryRun(state, targetDirectory, printQuickDryRun);
+    return dryRunResult;
+  }
 
   printQuickSetupStart();
   executeQuickPipeline(targetDirectory, state.userSelections, { noDevGuides });
 
   printQuickSuccess(targetDirectory);
   state.step = 'done';
-  return success();
+  const quickSuccessResult = success();
+  return quickSuccessResult;
 }
 
 async function runPromptsMode(state, targetDirectory, selections, { skipConfirm = false } = {}) {
   const confirmed = skipConfirm || (await printBuildSummary(selections));
-  if (!confirmed) return abortExecution(state);
+  if (!confirmed) {
+    const abortResult = abortExecution(state);
+    return abortResult;
+  }
 
   printProjectRoot(targetDirectory);
   executePromptsPipeline(targetDirectory, selections);
 
   printSuccessPrompts(targetDirectory);
   state.step = 'done';
-  return success();
+  const promptsResult = success();
+  return promptsResult;
 }
 
 async function runAgentsMode(
@@ -168,33 +203,39 @@ async function runAgentsMode(
   { skipConfirm = false, noDevGuides = false } = {}
 ) {
   const confirmed = skipConfirm || (await printBuildSummary(selections));
-  if (!confirmed) return abortExecution(state);
+  if (!confirmed) {
+    const abortResult = abortExecution(state);
+    return abortResult;
+  }
 
   printProjectRoot(targetDirectory);
   executeAgentsPipeline(targetDirectory, selections, { noDevGuides });
 
   printSuccessAgents(targetDirectory);
   state.step = 'done';
-  return success();
+  const buildResult = success();
+  return buildResult;
 }
 
 async function runCreativesMode(state, targetDirectory) {
   const { Creatives } = await import('./creatives-bundle.mjs');
-  const result = await Creatives.run(targetDirectory);
+  const creativesResult = await Creatives.run(targetDirectory);
   state.step = 'done';
-  return result;
+  return creativesResult;
 }
 
 function abortForDryRun(state, targetDirectory, printer) {
   printer(targetDirectory);
   state.step = 'done';
-  return success();
+  const dryRunAbortResult = success();
+  return dryRunAbortResult;
 }
 
 function abortExecution(state) {
   printAborted();
   state.step = 'done';
-  return success();
+  const userAbortResult = success();
+  return userAbortResult;
 }
 
 function executeQuickPipeline(targetDirectory, selections, { noDevGuides = false } = {}) {

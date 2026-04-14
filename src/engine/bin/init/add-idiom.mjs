@@ -19,7 +19,7 @@ const TODAY = new Date().toISOString().split('T')[0];
  * Generates a prompt for an AI Agent to create a new idiom ruleset.
  */
 async function run() {
-  return orchestrateIdiomAddition();
+  await orchestrateIdiomAddition();
 }
 
 async function orchestrateIdiomAddition() {
@@ -56,7 +56,8 @@ async function orchestrateIdiomAddition() {
     console.log(
       `\n  Idiom "${idiomFolderKey}" already exists at ${path.relative(SOURCE_ROOT, targetDirectory)}.\n`
     );
-    return success();
+    const alreadyExistsResult = success();
+    return alreadyExistsResult;
   }
 
   let stackVersionsContent, stackDisplayContent, corePrinciples;
@@ -75,7 +76,8 @@ async function orchestrateIdiomAddition() {
     );
   } catch (error) {
     console.error(`\n  Error: could not read required file — ${error.message}\n`);
-    return fail(error.message, 'READ_ERROR');
+    const readError = fail(error.message, 'READ_ERROR');
+    return readError;
   }
 
   const prompt = buildPrompt({
@@ -95,7 +97,8 @@ async function orchestrateIdiomAddition() {
   - src/config/stack-versions.mjs              (update)
   - src/config/stack-display.mjs               (update)\n`);
 
-  return success();
+  const additionSuccess = success();
+  return additionSuccess;
 }
 
 function printWelcome() {

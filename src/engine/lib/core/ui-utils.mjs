@@ -77,18 +77,32 @@ function printQuickDryRun(targetDir) {
 function printDryRunPreview(selections, targetDir) {
   const summary = collectOutputSummary(selections);
 
+  renderPreviewHeader(targetDir);
+  renderPreviewDirectories(summary.directories);
+  renderPreviewInstructionSet();
+  renderPreviewIdeTargets(selections);
+  renderPreviewManifest(selections.mode);
+  renderPreviewFooter();
+}
+
+function renderPreviewHeader(targetDir) {
   console.log('\n  📋 DRY RUN — Preview of files that would be created:');
   console.log('  ' + '─'.repeat(55));
   console.log(`  Project Root: ${targetDir}\n`);
+}
 
+function renderPreviewDirectories(directories) {
   console.log('  Instruction directories:');
-  for (const dir of summary.directories) {
-    console.log(`    📁 ${dir}`);
+  for (const directoryName of directories) {
+    console.log(`    📁 ${directoryName}`);
   }
+}
 
+function renderPreviewInstructionSet() {
   console.log(`    📄 .ai/skill/AGENTS.md`);
+}
 
-  const activeAgents = [...(selections.agents || []), selections.ide].filter(Boolean);
+function renderPreviewIdeTargets(selections) {
   const ideTargets = {
     cursor: '.cursor/rules/sdg-agents.mdc',
     windsurf: '.windsurfrules',
@@ -99,52 +113,75 @@ function printDryRunPreview(selections, targetDir) {
     gemini: 'AI_INSTRUCTIONS.md',
   };
 
-  for (const agent of activeAgents) {
-    if (agent === 'none' || agent === 'antigravity' || agent === 'all') continue;
-    if (ideTargets[agent]) {
-      console.log(`    📄 ${ideTargets[agent]}`);
+  const activeAgents = [...(selections.agents || []), selections.ide].filter(Boolean);
+
+  for (const agentKey of activeAgents) {
+    const isSpecialAgent = agentKey === 'none' || agentKey === 'antigravity' || agentKey === 'all';
+    if (isSpecialAgent) continue;
+
+    const targetPath = ideTargets[agentKey];
+    if (targetPath) {
+      console.log(`    📄 ${targetPath}`);
     }
   }
+}
 
-  if (selections.mode === 'agents') {
+function renderPreviewManifest(mode) {
+  if (mode === 'agents') {
     console.log('    📄 .ai/.sdg-manifest.json');
   }
+}
 
+function renderPreviewFooter() {
   console.log('\n  ' + '─'.repeat(55));
   console.log('  Run without --dry-run to apply.\n');
 }
 
 async function printBuildSummary(selections) {
+  renderSummaryHeader();
+  renderSummaryRows(selections);
+  renderSummaryFooter();
+
+  const isConfirmed = await safeConfirm({ message: '  Proceed?', default: true });
+  return isConfirmed;
+}
+
+function renderSummaryHeader() {
+  console.log('\n  ┌─ Build Summary ──────────────────────────────────────┐');
+}
+
+function renderSummaryRows(selections) {
   const { flavor, idioms, versions, designPreset, mode, track } = selections;
 
-  const flavorLabel = STACK_DISPLAY_NAMES[flavor]?.name ?? flavor;
-  const idiomsLabel = idioms
-    .map((id) => {
-      const name = STACK_DISPLAY_NAMES[id]?.name ?? id;
-      const ver = versions?.[id] ? ` (${versions[id]})` : '';
-      return `${name}${ver}`;
-    })
-    .join(', ');
-
-  console.log('\n  ┌─ Build Summary ──────────────────────────────────────┐');
-
   if (mode === 'prompts') {
-    console.log(
-      '  │  Track:   ' +
-        (track === 'all' ? '00, 01, 02 (Full Training)'.padEnd(43) : track.padEnd(43)) +
-        '│'
-    );
+    const trackLabel = track === 'all' ? '00, 01, 02 (Full Training)'.padEnd(43) : track.padEnd(43);
+    console.log(`  │  Track:   ${trackLabel}│`);
   } else {
+    const flavorLabel = STACK_DISPLAY_NAMES[flavor]?.name ?? flavor;
+    const idiomsLabel = formatIdiomsLabel(idioms, versions);
+
     console.log(`  │  Flavor:  ${flavorLabel.padEnd(43)}│`);
     console.log(`  │  Idioms:  ${idiomsLabel.padEnd(43)}│`);
+
     if (designPreset) {
       console.log(`  │  Preset:  ${designPreset.padEnd(43)}│`);
     }
   }
+}
 
+function formatIdiomsLabel(idioms, versions) {
+  const labels = idioms.map((idiomKey) => {
+    const name = STACK_DISPLAY_NAMES[idiomKey]?.name ?? idiomKey;
+    const versionLabel = versions?.[idiomKey] ? ` (${versions[idiomKey]})` : '';
+    return `${name}${versionLabel}`;
+  });
+
+  const idiomsLabel = labels.join(', ');
+  return idiomsLabel;
+}
+
+function renderSummaryFooter() {
   console.log('  └──────────────────────────────────────────────────────┘');
-
-  return safeConfirm({ message: '  Proceed?', default: true });
 }
 
 function printHeader(version) {

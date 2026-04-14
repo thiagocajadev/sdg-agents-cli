@@ -1,7 +1,7 @@
 function parseCliArgs(argv) {
   const subcommand = argv[0] && !argv[0].startsWith('-') ? argv[0] : null;
 
-  return {
+  const parsedArgs = {
     subcommand,
     // Note: targetDirectory resolution (path.resolve) should be handled by the caller
     // to keep this parser pure and environment-agnostic.
@@ -19,6 +19,9 @@ function parseCliArgs(argv) {
     scope: getArgValue(argv, '--scope'),
     bump: !argv.includes('--no-bump'),
   };
+
+  const finalArgs = parsedArgs;
+  return finalArgs;
 }
 
 function isPositionalArg(arg, index, tokens) {
@@ -33,12 +36,15 @@ function isPositionalArg(arg, index, tokens) {
     '--track',
     '--scope',
   ];
-  return !precedingToken || !flagsThatConsumeNextArg.includes(precedingToken);
+  const isPositional = !precedingToken || !flagsThatConsumeNextArg.includes(precedingToken);
+  return isPositional;
 }
 
 function getArgValue(argv, flag) {
   const flagPosition = argv.indexOf(flag);
-  return flagPosition !== -1 && flagPosition + 1 < argv.length ? argv[flagPosition + 1] : null;
+  const value =
+    flagPosition !== -1 && flagPosition + 1 < argv.length ? argv[flagPosition + 1] : null;
+  return value;
 }
 
 function getArgValues(argv, flag) {
@@ -48,7 +54,8 @@ function getArgValues(argv, flag) {
       values.push(...argv[i + 1].split(','));
     }
   }
-  return values;
+  const argValues = values;
+  return argValues;
 }
 
 function validateInit(args) {
@@ -58,16 +65,24 @@ function validateInit(args) {
   if (args.mode === 'quick') return null;
 
   if (args.mode === 'prompts') {
-    if (!args.track) return '  ⚠️  --track is required for mode "prompts".';
-    return null;
+    if (!args.track) {
+      const missingTrackError = '  ⚠️  --track is required for mode "prompts".';
+      return missingTrackError;
+    }
+    const promptsValid = null;
+    return promptsValid;
   }
 
   if (!args.flavor) {
-    return '  ⚠️  --flavor is required for non-interactive mode.\n  Available: vertical-slice, mvc, lite, legacy';
+    const missingFlavorError =
+      '  ⚠️  --flavor is required for non-interactive mode.\n  Available: vertical-slice, mvc, lite, legacy';
+    return missingFlavorError;
   }
 
   if (args.idioms.length === 0) {
-    return '  ⚠️  At least one --idiom is required for non-interactive mode.\n  Available: javascript, typescript, python, csharp, java, go, rust';
+    const missingIdiomError =
+      '  ⚠️  At least one --idiom is required for non-interactive mode.\n  Available: javascript, typescript, python, csharp, java, go, rust';
+    return missingIdiomError;
   }
 
   return null;

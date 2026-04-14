@@ -17,13 +17,18 @@ async function getLatestVersion() {
     const response = await fetch(REGISTRY_URL, { signal: controller.signal });
     clearTimeout(timeoutId);
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const failureResult = null;
+      return failureResult;
+    }
 
     const data = await response.json();
-    return data.version || null;
+    const latestVersion = data.version || null;
+    return latestVersion;
   } catch {
     clearTimeout(timeoutId);
-    return null;
+    const errorResult = null;
+    return errorResult;
   }
 }
 
@@ -32,8 +37,14 @@ async function getLatestVersion() {
  * Returns true if latest > current.
  */
 function isNewer(current, latest) {
-  if (!current || !latest) return false;
-  if (current === latest) return false;
+  if (!current || !latest) {
+    const missingVersion = false;
+    return missingVersion;
+  }
+  if (current === latest) {
+    const sameVersion = false;
+    return sameVersion;
+  }
 
   const currentParts = current.split('.').map(Number);
   const latestParts = latest.split('.').map(Number);
@@ -42,11 +53,18 @@ function isNewer(current, latest) {
     const currentPart = currentParts[i] || 0;
     const latestPart = latestParts[i] || 0;
 
-    if (latestPart > currentPart) return true;
-    if (latestPart < currentPart) return false;
+    if (latestPart > currentPart) {
+      const isGreater = true;
+      return isGreater;
+    }
+    if (latestPart < currentPart) {
+      const isLesser = false;
+      return isLesser;
+    }
   }
 
-  return false;
+  const isEqual = false;
+  return isEqual;
 }
 
 /**

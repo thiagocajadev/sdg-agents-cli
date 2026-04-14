@@ -12,7 +12,7 @@ const { runIfDirect } = FsUtils;
  * Deletes all generated SDG files and the .ia directory.
  */
 async function run(targetDirectory = process.cwd(), options = {}) {
-  return orchestrateCleanup(targetDirectory, options);
+  await orchestrateCleanup(targetDirectory, options);
 }
 
 async function orchestrateCleanup(targetDirectory, options = {}) {
@@ -48,7 +48,8 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
 
   if (existingItems.length === 0) {
     console.log('\n  ✅ No Spec Driven Guide content found to clear.\n');
-    return success();
+    const noContentResult = success();
+    return noContentResult;
   }
 
   if (dryRun) {
@@ -57,7 +58,8 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
       console.log(`  - ${item.name}`);
     }
     console.log('\n  No files were deleted (dry-run mode).\n');
-    return success();
+    const dryRunResult = success();
+    return dryRunResult;
   }
 
   printWarning();
@@ -70,13 +72,16 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
 
   if (!userConfirmed) {
     console.log('\n  Aborted. No files were deleted.\n');
-    return success();
+    const abortResult = success();
+    return abortResult;
   }
 
   executeCleanup(existingItems);
 
   console.log('\n  ✨ Project cleared successfully!\n');
-  return success();
+  console.log('\n  ✨ Project cleared successfully!\n');
+  const cleanupResult = success();
+  return cleanupResult;
 }
 
 function printWarning() {

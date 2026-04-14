@@ -20,7 +20,7 @@ const PROJECT_ROOT = process.cwd();
 const TODAY = new Date().toISOString().split('T')[0];
 
 async function run() {
-  return orchestrateRulesetSync();
+  await orchestrateRulesetSync();
 }
 
 async function orchestrateRulesetSync() {
@@ -29,20 +29,23 @@ async function orchestrateRulesetSync() {
     console.log(
       '\n  No manifest found (.ai/.sdg-manifest.json). Run "Build Project Context" first.\n'
     );
-    return success();
+    const noManifestResult = success();
+    return noManifestResult;
   }
 
   const targets = resolveTargets(manifest);
   if (targets.length === 0) {
     console.log('\n  No idiom-specific rulesets to sync.\n');
-    return success();
+    const noTargetsResult = success();
+    return noTargetsResult;
   }
 
   const maintainer = isMaintainerMode();
   const prompt = buildPrompt(manifest, targets, maintainer);
   await printPromptUI(prompt, 'Spec Driven Guide — Idiom Sync');
 
-  return success();
+  const syncResult = success();
+  return syncResult;
 }
 
 function resolveTargets(manifest) {
@@ -87,7 +90,8 @@ function resolveTargets(manifest) {
     }
   }
 
-  return targets;
+  const resolvedTargets = targets;
+  return resolvedTargets;
 }
 
 function buildPrompt(_manifest, targets, maintainer) {
@@ -105,7 +109,8 @@ ${content}
         ];
       } catch (error) {
         console.error(`\n  Warning: could not read ${target.filePath} — ${error.message}`);
-        return [];
+        const emptyResult = [];
+        return emptyResult;
       }
     })
     .join('\n');

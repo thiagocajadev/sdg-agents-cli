@@ -1,9 +1,11 @@
 function success(value) {
-  return { isSuccess: true, isFailure: false, value, error: null };
+  const result = { isSuccess: true, isFailure: false, value, error: null };
+  return result;
 }
 
 function fail(message, code) {
-  return { isSuccess: false, isFailure: true, value: null, error: { message, code } };
+  const result = { isSuccess: false, isFailure: true, value: null, error: { message, code } };
+  return result;
 }
 
 export const ResultUtils = {

@@ -17,30 +17,50 @@ export function detectBumpType(commitMessage) {
   const firstLine = commitMessage.split('\n')[0].trim();
   const footer = commitMessage.split('\n').slice(1).join('\n');
 
-  if (/^chore:\s*bump version/i.test(firstLine)) return 'skip';
-  if (/^[a-z]+!:/.test(firstLine)) return 'major';
-  if (/BREAKING CHANGE:/m.test(footer)) return 'major';
-  if (/^feat:/.test(firstLine)) return 'minor';
-  return 'patch';
+  if (/^chore:\s*bump version/i.test(firstLine)) {
+    const skipBump = 'skip';
+    return skipBump;
+  }
+  if (/^[a-z]+!:/.test(firstLine)) {
+    const majorBump = 'major';
+    return majorBump;
+  }
+  if (/BREAKING CHANGE:/m.test(footer)) {
+    const breakerBump = 'major';
+    return breakerBump;
+  }
+  if (/^feat:/.test(firstLine)) {
+    const minorBump = 'minor';
+    return minorBump;
+  }
+  const defaultBump = 'patch';
+  return defaultBump;
 }
 
 export function bumpVersion(current, bumpType) {
   const [major, minor, patch] = current.split('.').map(Number);
   switch (bumpType) {
-    case 'major':
-      return `${major + 1}.0.0`;
-    case 'minor':
-      return `${major}.${minor + 1}.0`;
-    case 'patch':
-      return `${major}.${minor}.${patch + 1}`;
-    default:
-      return current;
+    case 'major': {
+      const majorVersion = `${major + 1}.0.0`;
+      return majorVersion;
+    }
+    case 'minor': {
+      const minorVersion = `${major}.${minor + 1}.0`;
+      return minorVersion;
+    }
+    case 'patch': {
+      const patchVersion = `${major}.${minor}.${patch + 1}`;
+      return patchVersion;
+    }
+    default: {
+      const currentVersion = current;
+      return currentVersion;
+    }
   }
 }
 
 async function run() {
-  const result = await orchestrateAutoBump();
-  return result;
+  await orchestrateAutoBump();
 }
 
 async function orchestrateAutoBump() {
@@ -49,7 +69,8 @@ async function orchestrateAutoBump() {
 
   if (bumpType === 'skip') {
     console.log('  auto-bump: skipped (version commit detected)');
-    return success({ from: null, to: null, bump: 'skip' });
+    const skipResult = success({ from: null, to: null, bump: 'skip' });
+    return skipResult;
   }
 
   const rootPackagePath = PACKAGE_PATHS[0];
@@ -61,7 +82,8 @@ async function orchestrateAutoBump() {
 
   console.log(`  auto-bump: ${rootPackage.version} → ${nextVersion} (${bumpType})`);
   console.log('  auto-bump: files updated. Manual commit required.');
-  return success({ from: rootPackage.version, to: nextVersion, bump: bumpType });
+  const finalResult = success({ from: rootPackage.version, to: nextVersion, bump: bumpType });
+  return finalResult;
 }
 
 function updateChangelog(newVersion) {
@@ -95,7 +117,8 @@ function syncAllPackages(nextVersion) {
 }
 
 function readLastCommitMessage() {
-  return execSync('git log -1 --pretty=%B', { encoding: 'utf8' }).trim();
+  const commitMessage = execSync('git log -1 --pretty=%B', { encoding: 'utf8' }).trim();
+  return commitMessage;
 }
 
 export const AutoBump = {

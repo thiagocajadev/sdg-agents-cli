@@ -9,9 +9,14 @@ const __dirname = getDirname(import.meta.url);
 const INSTRUCTIONS_DIR = path.join(__dirname, '../../..', 'assets', 'instructions');
 
 function hashFile(filePath) {
-  if (!fs.existsSync(filePath)) return null;
+  if (!fs.existsSync(filePath)) {
+    const missingFile = null;
+    return missingFile;
+  }
+
   const content = fs.readFileSync(filePath);
-  return crypto.createHash('sha256').update(content).digest('hex');
+  const hash = crypto.createHash('sha256').update(content).digest('hex');
+  return hash;
 }
 
 function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR) {
@@ -53,17 +58,19 @@ function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR) {
   if (fs.existsSync(workflowsDir)) {
     scanDir(workflowsDir, 'workflows', hashes);
   }
-
   const commandsDir = path.join(instructionsDir, 'commands');
   if (fs.existsSync(commandsDir)) {
     scanDir(commandsDir, 'commands', hashes);
   }
 
-  return hashes;
+  const resultHashes = hashes;
+  return resultHashes;
 }
 
 function scanDir(directory, relativePrefix, hashes) {
-  if (!fs.existsSync(directory)) return;
+  if (!fs.existsSync(directory)) {
+    return;
+  }
 
   const entries = fs.readdirSync(directory, { withFileTypes: true });
   for (const entry of entries) {
@@ -93,27 +100,46 @@ function compareHashes(stored, current) {
     }
   }
 
-  return { changed, unchanged, added };
+  const comparisonResult = { changed, unchanged, added };
+  return comparisonResult;
 }
 
 function daysAgo(isoDate) {
   const ms = Date.now() - new Date(isoDate).getTime();
   const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-  if (days < 0) return 'just now';
-  if (days === 0) return 'today';
-  if (days === 1) return '1 day ago';
-  return `${days} days ago`;
+
+  if (days < 0) {
+    const futureResult = 'just now';
+    return futureResult;
+  }
+  if (days === 0) {
+    const todayResult = 'today';
+    return todayResult;
+  }
+  if (days === 1) {
+    const yesterdayResult = '1 day ago';
+    return yesterdayResult;
+  }
+
+  const daysResult = `${days} days ago`;
+  return daysResult;
 }
 
 function loadManifest(projectRoot) {
   const manifestPath = path.join(projectRoot, '.ai', '.sdg-manifest.json');
 
-  if (!fs.existsSync(manifestPath)) return null;
+  if (!fs.existsSync(manifestPath)) {
+    const missingResult = null;
+    return missingResult;
+  }
 
   try {
-    return JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const content = fs.readFileSync(manifestPath, 'utf8');
+    const manifest = JSON.parse(content);
+    return manifest;
   } catch {
-    return null;
+    const errorResult = null;
+    return errorResult;
   }
 }
 

@@ -21,7 +21,7 @@ const require = createRequire(import.meta.url);
 const packageJson = require('../../../../package.json');
 
 async function run(targetDirectory = process.cwd()) {
-  return orchestrateCreativeInjection(targetDirectory);
+  await orchestrateCreativeInjection(targetDirectory);
 }
 
 async function orchestrateCreativeInjection(targetDirectory) {
@@ -55,7 +55,8 @@ async function orchestrateCreativeInjection(targetDirectory) {
   console.log('\n  ✅ Creative Design Toolkit injected successfully!');
   console.log('  👉 Use the chat to start your Design Thinking session.\n');
 
-  return success();
+  const creativeSuccess = success();
+  return creativeSuccess;
 }
 
 export const Creatives = { run };

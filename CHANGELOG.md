@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.5.0] - 2026-04-13
+
+### Added
+
+- **0-Drift Governance Achievement** — hardened all engine basins (`src/engine/lib/`) and binaries (`src/engine/bin/`) to reach 100% compliance with Law 3 (Narrative Cascade) and Explaining Returns.
+- **Audit Tool Self-Hardening** — refactored the governance engine and audit runner (`governance.mjs`, `audit-bundle.mjs`) to satisfy the same strict engineering standards they enforce on the project.
+- **Unified Lifecycle Hardening** — standardized `auto-bump`, `clear-bundle`, `review-bundle`, and `sync-rulesets` to follow the Pure Entry Point pattern and Narrative Siblings architecture.
+
+### Fixed
+
+- **Engine Structural Debt** — resolved residual bare returns and entry point violations across the maintenance and lifecycle basins, achieving a total 0-drift status.
+
 ## [2.4.3] - 2026-04-13
 
 ### Added

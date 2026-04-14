@@ -9,6 +9,10 @@ const PROJECT_ROOT = process.cwd();
 const { runIfDirect } = FsUtils;
 
 async function run() {
+  await auditEngineGovernance();
+}
+
+async function auditEngineGovernance() {
   const auditResults = orchestrateGovernanceAudit();
   reportSummary(auditResults);
 }
@@ -25,7 +29,8 @@ function orchestrateGovernanceAudit() {
     hygiene: checkHygienePulse(),
   };
 
-  return results;
+  const auditResults = results;
+  return auditResults;
 }
 
 function printHeader() {
@@ -36,7 +41,10 @@ function printHeader() {
 
 function checkChangelogHealth() {
   const changelogPath = path.join(PROJECT_ROOT, 'CHANGELOG.md');
-  if (!fs.existsSync(changelogPath)) return { isFailure: true, reason: 'CHANGELOG.md missing' };
+  if (!fs.existsSync(changelogPath)) {
+    const missingChangelogResult = { isFailure: true, reason: 'CHANGELOG.md missing' };
+    return missingChangelogResult;
+  }
 
   const content = fs.readFileSync(changelogPath, 'utf8');
   const hasUnreleased = /##\s*\[Unreleased\]/i.test(content);
@@ -46,9 +54,14 @@ function checkChangelogHealth() {
   const narrative = unreleasedMatch ? unreleasedMatch[1].replace(/###.*?\n/g, '').trim() : '';
 
   if (hasUnreleased && narrative.length > 5) {
-    return { isFailure: true, reason: 'Pending narrative in [Unreleased]. Run npm run bump.' };
+    const pendingNarrativeIssue = {
+      isFailure: true,
+      reason: 'Pending narrative in [Unreleased]. Run npm run bump.',
+    };
+    return pendingNarrativeIssue;
   }
-  return { isFailure: false };
+  const healthResult = { isFailure: false };
+  return healthResult;
 }
 
 function checkLaw3Compliance() {
@@ -64,11 +77,15 @@ function checkLaw3Compliance() {
   ];
 
   const files = targetDirectories.flatMap((directory) => {
-    if (!fs.existsSync(directory)) return [];
-    return fs
+    if (!fs.existsSync(directory)) {
+      const emptyDirFiles = [];
+      return emptyDirFiles;
+    }
+    const directoryFiles = fs
       .readdirSync(directory)
       .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
       .map((file) => path.join(directory, file));
+    return directoryFiles;
   });
 
   const violations = [];
@@ -85,11 +102,14 @@ function checkLaw3Compliance() {
     }
   }
 
-  return {
+  const law3Result = {
     isFailure: violations.length > 0,
     violations,
     score: violations.length === 0 ? '100%' : `${Math.max(0, 100 - violations.length * 10)}%`,
   };
+
+  const finalLaw3Result = law3Result;
+  return finalLaw3Result;
 }
 
 function checkTestNamedExpectations() {
@@ -123,7 +143,9 @@ function checkTestNamedExpectations() {
       const numberedMatches = content.match(/\b(input|actual|expected)[0-9]+\b/g);
       if (numberedMatches) {
         violations.push(
-          `${testFile}: Detected numbered variables (${Array.from(new Set(numberedMatches)).join(', ')}).`
+          `${testFile}: Detected numbered variables (${Array.from(new Set(numberedMatches)).join(
+            ', '
+          )}).`
         );
       }
 
@@ -136,17 +158,21 @@ function checkTestNamedExpectations() {
     }
   }
 
-  return {
+  const expectationsResult = {
     isFailure: violations.length > 0,
     violations,
     score: violations.length === 0 ? '100%' : `${Math.max(0, 100 - violations.length * 10)}%`,
   };
+
+  const finalExpectationsResult = expectationsResult;
+  return finalExpectationsResult;
 }
 
 function checkSoulPulse() {
   const files = ['README.md', 'docs/README.pt-BR.md', 'docs/ROADMAP.md'];
   const missing = files.filter((file) => !fs.existsSync(path.join(PROJECT_ROOT, file)));
-  return { isFailure: missing.length > 0, missing };
+  const soulPulse = { isFailure: missing.length > 0, missing };
+  return soulPulse;
 }
 
 function checkHygienePulse() {
@@ -174,7 +200,8 @@ function checkHygienePulse() {
   }
 
   results.isFailure = results.lint === 'FAIL' || results.test === 'FAIL';
-  return results;
+  const finalHygieneResults = results;
+  return finalHygieneResults;
 }
 
 function reportSummary(results) {

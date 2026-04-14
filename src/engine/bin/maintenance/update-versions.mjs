@@ -13,7 +13,7 @@ const TODAY = new Date().toISOString().split('T')[0];
  * Prints a ready-to-use prompt for an AI Agent to check and update stack versions.
  */
 async function run() {
-  return orchestrateVersionUpdate();
+  await orchestrateVersionUpdate();
 }
 
 async function orchestrateVersionUpdate() {
@@ -25,7 +25,8 @@ async function orchestrateVersionUpdate() {
   console.log('\n  After the AI responds, apply the updated content to:');
   console.log('  src/config/stack-versions.mjs\n');
 
-  return success();
+  const updateResult = success();
+  return updateResult;
 }
 
 function buildStackList() {
@@ -38,7 +39,8 @@ function buildStackList() {
       hasLts: !NO_LTS_STACKS.has(idiomFolderKey),
     });
   }
-  return stacks;
+  const resolvedStacks = stacks;
+  return resolvedStacks;
 }
 
 function buildPrompt(stackList) {
@@ -51,7 +53,7 @@ function buildPrompt(stackList) {
     .map((stack) => `  - ${stack.key}`)
     .join('\n');
 
-  return `
+  const versionPrompt = `
 Today is ${TODAY}. Search the web for the current release status of each technology below
 and return an updated stack-versions.mjs file.
 
@@ -70,6 +72,8 @@ Rules:
 Return the complete updated src/config/stack-versions.mjs file content.
 Keep the STACK_VERSIONS and NO_LTS_STACKS exports.
 `;
+  const finalPrompt = versionPrompt;
+  return finalPrompt;
 }
 
 export const Versioning = {

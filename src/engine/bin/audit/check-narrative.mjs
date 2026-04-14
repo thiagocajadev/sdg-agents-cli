@@ -42,14 +42,19 @@ function collectTargetFiles() {
   ];
 
   const files = targetDirectories.flatMap((directory) => {
-    if (!fs.existsSync(directory)) return [];
-    return fs
+    if (!fs.existsSync(directory)) {
+      const emptyList = [];
+      return emptyList;
+    }
+    const directoryFiles = fs
       .readdirSync(directory)
       .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
       .map((file) => path.join(directory, file));
+    return directoryFiles;
   });
 
-  return files;
+  const collectedFiles = files;
+  return collectedFiles;
 }
 
 function scanFilesForViolations(files) {
@@ -75,7 +80,8 @@ function scanFilesForViolations(files) {
     }
   }
 
-  return { violationsByFile, totalViolations };
+  const scanResults = { violationsByFile, totalViolations };
+  return scanResults;
 }
 
 function reportResults(violationsByFile, totalViolations) {

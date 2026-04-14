@@ -101,7 +101,8 @@ function buildMasterInstructions(selections) {
         | \`.ai-backlog/learned.md\` | Lessons Learned — success patterns and research |
         | \`.ai-backlog/troubleshoot.md\` | Troubleshooting — RCA logs and failure records |`;
 
-      return routingString;
+      const projectContextRouting = routingString;
+      return projectContextRouting;
     }
 
     function buildContextRoutingHeader() {
@@ -132,7 +133,8 @@ function buildMasterInstructions(selections) {
         | \`.ai/instructions/core/testing-principles.md\` | Testing Principles |
         | \`.ai/instructions/core/observability.md\` | Observability |${agentRolesRow}`;
 
-      return governanceString;
+      const coreGovernanceRouting = governanceString;
+      return coreGovernanceRouting;
     }
 
     function buildArchitecturalContextRouting(flavor) {
@@ -143,7 +145,8 @@ function buildMasterInstructions(selections) {
         | :--- | :------ |
         | \`.ai/instructions/flavor/principles.md\` | Flavor: ${displayName(flavor)} |`;
 
-      return architectureString;
+      const architecturalRouting = architectureString;
+      return architecturalRouting;
     }
 
     function buildTechnicalExecutionRouting(idioms) {
@@ -202,7 +205,8 @@ function buildMasterInstructions(selections) {
         | \`.ai/instructions/core/ui/presets.md\` | Interface Presets |
         | \`.ai/instructions/core/ui/design-thinking.md\` | Visual Contracts (Phase 0) |`;
 
-      return uiuxRoutingBlock;
+      const uiuxRouting = uiuxRoutingBlock;
+      return uiuxRouting;
     }
 
     function buildCreativeToolkitRouting(_selectionsObj) {
@@ -238,7 +242,8 @@ function buildMasterInstructions(selections) {
         `| \`.ai/instructions/creative/guides/social/youtube.md\` | YouTube Banner & Thumbnail rules |`,
       ].join('\n');
 
-      return creativeToolkitBlock;
+      const creativeRouting = creativeToolkitBlock;
+      return creativeRouting;
     }
 
     function buildWorkingCyclesRouting() {
@@ -254,7 +259,8 @@ function buildMasterInstructions(selections) {
         | \`.ai/commands/sdg-audit.md\` | Governance Audit (drift detection & compliance) |
         | \`.ai/commands/sdg-end.md\` | END Phase — close the active cycle (changelog, backlog, commit) |`;
 
-      return workingCyclesString;
+      const workingCyclesRouting = workingCyclesString;
+      return workingCyclesRouting;
     }
   }
 }
@@ -276,7 +282,8 @@ function buildPromptModeStub() {
     > If you want to augment this repository with full AI Governance instructions, run the following command in the terminal:
     > \`npx sdg-agents init\``;
 
-  return stubString;
+  const promptModeStub = stubString;
+  return promptModeStub;
 }
 
 /**
@@ -302,19 +309,24 @@ function writeBacklogFiles(targetDirectory, selections) {
       const deps = { ...packageData.dependencies, ...packageData.devDependencies };
       if (deps['i18next'] || deps['react-i18next']) {
         const localesDir = path.join(projectDirectory, 'src', 'locales');
-        if (fs.existsSync(localesDir) && fs.readdirSync(localesDir).includes('pt-BR'))
-          return 'pt-BR';
+        if (fs.existsSync(localesDir) && fs.readdirSync(localesDir).includes('pt-BR')) {
+          const matchedLang = 'pt-BR';
+          return matchedLang;
+        }
       }
       if (
         packageData.description?.toLowerCase().includes('guia') ||
         packageData.description?.toLowerCase().includes('sistema')
       ) {
-        return 'pt-BR';
+        const matchingDescriptionLang = 'pt-BR';
+        return matchingDescriptionLang;
       }
     } catch {
-      return 'en';
+      const fallbackLang = 'en';
+      return fallbackLang;
     }
-    return 'en';
+    const defaultLang = 'en';
+    return defaultLang;
   }
 
   function writeContextFile(backlogDirectoryPath, projectDirectory, currentSelections) {
@@ -400,7 +412,8 @@ function buildClaudeContent() {
     @.ai/skill/AGENTS.md
   `;
 
-  return claudeContent;
+  const instructionSet = claudeContent;
+  return instructionSet;
 }
 
 /**

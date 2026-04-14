@@ -108,7 +108,8 @@ function collectOutputSummary(selections) {
     if (track) directories.push('.ai/prompts/dev-tracks/');
   }
 
-  return { directories };
+  const summary = { directories };
+  return summary;
 }
 
 function injectCreativeToolkit(targetDirectory) {

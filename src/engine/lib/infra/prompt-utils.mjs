@@ -4,32 +4,45 @@ import { exec } from 'node:child_process';
 import { select, checkbox, confirm, input } from '@inquirer/prompts';
 
 function isExitError(error) {
-  return error.name === 'ExitPromptError' || error.message?.includes('force closed');
+  const isExit = error.name === 'ExitPromptError' || error.message?.includes('force closed');
+  return isExit;
 }
 
 async function safeSelect(options) {
   try {
-    return await select(options);
+    const selection = await select(options);
+    return selection;
   } catch (error) {
-    if (isExitError(error)) return 'back';
+    if (isExitError(error)) {
+      const backSignal = 'back';
+      return backSignal;
+    }
     throw error;
   }
 }
 
 async function safeCheckbox(options) {
   try {
-    return await checkbox(options);
+    const selection = await checkbox(options);
+    return selection;
   } catch (error) {
-    if (isExitError(error)) return ['back'];
+    if (isExitError(error)) {
+      const backList = ['back'];
+      return backList;
+    }
     throw error;
   }
 }
 
 async function safeConfirm(options) {
   try {
-    return await confirm(options);
+    const isConfirmed = await confirm(options);
+    return isConfirmed;
   } catch (error) {
-    if (isExitError(error)) return false;
+    if (isExitError(error)) {
+      const abortSignal = false;
+      return abortSignal;
+    }
     throw error;
   }
 }
@@ -53,7 +66,8 @@ function sanitizeInput(value, maxLength = 200) {
   // Escaping Markdown characters to prevent breaking context.md structure
   sanitized = sanitized.replace(/([\\`*_{}[\]()#+\-.!])/g, '\\$1');
 
-  return sanitized.slice(0, maxLength);
+  const finalSanitizedInput = sanitized.slice(0, maxLength);
+  return finalSanitizedInput;
 }
 
 async function safeInput(options) {
@@ -71,10 +85,14 @@ async function safeInput(options) {
         continue;
       }
 
-      return sanitized;
+      const validSanitizedResponse = sanitized;
+      return validSanitizedResponse;
     }
   } catch (error) {
-    if (isExitError(error)) return 'back';
+    if (isExitError(error)) {
+      const backResult = 'back';
+      return backResult;
+    }
     throw error;
   }
 }
@@ -102,7 +120,7 @@ function savePromptToFile(content) {
 }
 
 async function copyToClipboard(content) {
-  return new Promise((resolve) => {
+  const clipboardPromise = new Promise((resolve) => {
     let command;
 
     switch (process.platform) {
@@ -115,8 +133,10 @@ async function copyToClipboard(content) {
       case 'linux':
         command = 'xclip -selection clipboard || xsel -bi';
         break;
-      default:
-        return resolve(false);
+      default: {
+        const fallbackResult = resolve(false);
+        return fallbackResult;
+      }
     }
 
     const child = exec(command, (error) => {
@@ -137,12 +157,22 @@ async function copyToClipboard(content) {
       resolve(false);
     }
   });
+
+  const finalClipboardPromise = clipboardPromise;
+  return finalClipboardPromise;
 }
 
 async function printPromptUI(content, title = 'AI Prompt Generated') {
+  renderPromptHeader(title, content);
+  const copied = await copyToClipboard(content);
+  renderCopyStatus(copied);
+  renderPersistenceInfo();
+  renderUsageInstructions();
+}
+
+function renderPromptHeader(title, content) {
   const maintainer = isMaintainerMode();
   savePromptToFile(content);
-  const copied = await copyToClipboard(content);
 
   console.log(`\n  ✅ ${title}`);
 
@@ -151,16 +181,22 @@ async function printPromptUI(content, title = 'AI Prompt Generated') {
   }
 
   console.log('  ' + '─'.repeat(60));
+}
 
+function renderCopyStatus(copied) {
   if (copied) {
     console.log('  📋 COPIED TO CLIPBOARD AUTOMATICALLY.');
   } else {
     console.log('  ⚠️  COULD NOT COPY TO CLIPBOARD (Install xclip/xsel on Linux).');
   }
+}
 
+function renderPersistenceInfo() {
   console.log(`  💾 SAVED TO: .ai/last-prompt.md`);
   console.log('  ' + '─'.repeat(60));
+}
 
+function renderUsageInstructions() {
   console.log('\n  🤖 HOW TO USE WITH LOCAL AGENTS (Cursor, Claude Code, Windsurf):');
   console.log('     Tell your agent: "Follow the instructions in .ai/last-prompt.md"');
 

@@ -20,7 +20,7 @@ const PROJECT_ROOT = process.cwd();
  * Orchestrator: Review Entry Point
  */
 async function run() {
-  return orchestrateReview();
+  await orchestrateReview();
 }
 
 async function orchestrateReview() {
@@ -32,7 +32,8 @@ async function orchestrateReview() {
     console.log(
       '\n  No manifest found (.ai/.sdg-manifest.json). Run "Build Project Context" first.\n'
     );
-    return success();
+    const noManifestResult = success();
+    return noManifestResult;
   }
 
   printManifestSummary(manifest);
@@ -48,7 +49,8 @@ async function orchestrateReview() {
 
   if (totalChanges === 0) {
     console.log('  \n  ✅ Your instructions are up to date with the Spec Driven Guide core.\n');
-    return success();
+    const upToDateResult = success();
+    return upToDateResult;
   }
 
   console.log(`\n  ⚠️ ${totalChanges} instruction file(s) have updates available in the core.\n`);
@@ -67,7 +69,9 @@ async function orchestrateReview() {
     console.log('\n  Exiting without changes.\n');
   }
 
-  return success();
+  console.log('\n  Review session complete.\n');
+  const reviewSuccess = success();
+  return reviewSuccess;
 }
 
 function printManifestSummary(manifest) {

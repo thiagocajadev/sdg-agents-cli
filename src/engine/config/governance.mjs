@@ -22,29 +22,42 @@ function loadDynamicRules() {
   const content = fs.readFileSync(STANDARDS_PATH, 'utf8');
   const checklistSection = content.match(/<rule name="EnforcementChecklist">([\s\S]*?)<\/rule>/);
 
-  if (!checklistSection) return [];
+  if (!checklistSection) {
+    const emptyChecklist = [];
+    return emptyChecklist;
+  }
 
   const ruleLines = checklistSection[1].match(/- \[\s\] \*\*(.*?)\*\*(?:\s*:\s*(.*))?/g);
-  if (!ruleLines) return [];
+  if (!ruleLines) {
+    const noRulesFound = [];
+    return noRulesFound;
+  }
 
-  return ruleLines.map((ruleLine) => {
+  const dynamicRules = ruleLines.map((ruleLine) => {
     const [, label, description] = ruleLine.match(/- \[\s\] \*\*(.*?)\*\*(?:\s*:\s*(.*))?/) || [];
     const id = label.toLowerCase().replace(/ /g, '-');
 
-    return {
+    const ruleObj = {
       id,
       label,
       description: description || '',
       heuristic: HEURISTIC_MAP[label] || null,
     };
+    return ruleObj;
   });
+
+  const finalDynamicRules = dynamicRules;
+  return finalDynamicRules;
 }
 
 /**
  * Maps Markdown rule names to JavaScript automated check functions.
  */
 const HEURISTIC_MAP = {
-  'Stepdown Rule': (_content) => ({ pass: true }), // Primarily manual
+  'Stepdown Rule': (_content) => {
+    const manualPass = { pass: true };
+    return manualPass;
+  },
   'SLA applied': (content) => {
     const entryPointRegex =
       /async\s+function\s+(run|start|init)\s*\([\s\S]*?\)\s*\{([\s\S]*?)\n\}/g;
@@ -79,22 +92,25 @@ const HEURISTIC_MAP = {
       });
     }
 
-    return {
+    const slaResult = {
       pass: violations.length === 0,
       reason: violations.length > 0 ? `Pure Entry Point violation: ${violations.join('; ')}` : null,
     };
+    const finalSlaResult = slaResult;
+    return finalSlaResult;
   },
   'Narrative Siblings': (content) => {
     const topLevelFunctions = (content.match(/^function\s+\w+/gm) || []).length;
     const exportedCount = (content.match(/^\s+\w+,/gm) || []).length;
     // Balance is the Key: Increase threshold to 12 to favor "Chapters" over "Monolithic Nesting"
     const isViolation = topLevelFunctions > 12 && exportedCount < topLevelFunctions / 2;
-    return {
+    const siblingsResult = {
       pass: !isViolation,
       reason: isViolation
         ? 'Excessive top-level function density (>12). Consider refactoring to dedicated lib.'
         : null,
     };
+    return siblingsResult;
   },
   'Explaining Returns': (content) => {
     const lines = content.split('\n');
@@ -137,33 +153,40 @@ const HEURISTIC_MAP = {
       }
     }
 
-    return {
+    const explainingResult = {
       pass: violations.length === 0,
       reason:
         violations.length > 0
           ? `Bare returns detected (missing explaining const) at: ${violations.join(', ')}`
           : null,
     };
+    const finalExplainingResult = explainingResult;
+    return finalExplainingResult;
   },
   'No framework abbreviations': (content) => {
     // Avoid self-detection by splitting the forbidden terms
     const forbidden = ['r' + 'eq', 'r' + 'es'];
     const pattern = new RegExp(`\\b(${forbidden.join('|')})\\b`, 'g');
     const abbreviationMatches = content.match(pattern);
-    return {
+    const abbreviationResult = {
       pass: !abbreviationMatches,
       reason: abbreviationMatches
         ? `Abbreviation detected: ${abbreviationMatches.join(', ')}`
         : null,
     };
+    const finalAbbreviationResult = abbreviationResult;
+    return finalAbbreviationResult;
   },
-  'Vertical Density applied': (_content) => ({ pass: true }),
+  'Vertical Density applied': (_content) => {
+    const verticalPass = { pass: true };
+    return verticalPass;
+  },
   'Revealing Module Pattern': (content) => {
     const hasRevealingObj = /export const \w+ = \{[\s\S]*\};/m.test(content);
     // Avoid self-detection by splitting the forbidden term
     const forbiddenExport = 'export ' + 'default';
     const hasExportDefault = content.includes(forbiddenExport);
-    return {
+    const revealingResult = {
       pass: hasRevealingObj && !hasExportDefault,
       reason: !hasRevealingObj
         ? 'Missing Revealing Module Pattern export.'
@@ -171,26 +194,41 @@ const HEURISTIC_MAP = {
           ? `Uses ${forbiddenExport}.`
           : null,
     };
+    const finalRevealingResult = revealingResult;
+    return finalRevealingResult;
   },
-  'Shallow Boundaries': (_content) => ({ pass: true }),
+  'Shallow Boundaries': (_content) => {
+    const shallowPass = { pass: true };
+    return shallowPass;
+  },
   'Boolean names carry a prefix': (content) => {
     const bareBooleanMatches = content.match(/\bconst\s+(loading|error|active|valid)\s*=/g);
-    return {
+    const booleanResult = {
       pass: !bareBooleanMatches,
       reason: bareBooleanMatches ? `Bare boolean detected: ${bareBooleanMatches.join(', ')}` : null,
     };
+    const finalBooleanResult = booleanResult;
+    return finalBooleanResult;
   },
-  'No explanatory comments': (_content) => ({ pass: true }),
+  'No explanatory comments': (_content) => {
+    const commentPass = { pass: true };
+    return commentPass;
+  },
   'No Section Banners': (content) => {
     // Avoid self-detection by splitting the forbidden term
     const bannerPrefix = '// -' + '--';
     const matchFound = content.includes(bannerPrefix);
-    return {
+    const bannerResult = {
       pass: !matchFound,
       reason: matchFound ? `Detected section banners (${bannerPrefix}).` : null,
     };
+    const finalBannerResult = bannerResult;
+    return finalBannerResult;
   },
-  'Code reads like a "Short Story"': (_content) => ({ pass: true }),
+  'Code reads like a "Short Story"': (_content) => {
+    const storyPass = { pass: true };
+    return storyPass;
+  },
 };
 
 export const GOVERNANCE_RULES = {

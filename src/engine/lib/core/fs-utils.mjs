@@ -3,11 +3,17 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 function getDirectories(source) {
-  if (!fs.existsSync(source)) return [];
-  return fs
-    .readdirSync(source, { withFileTypes: true })
+  if (!fs.existsSync(source)) {
+    const emptyList = [];
+    return emptyList;
+  }
+
+  const directoryEntries = fs.readdirSync(source, { withFileTypes: true });
+  const directoryNames = directoryEntries
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name);
+
+  return directoryNames;
 }
 
 function copyRecursiveSync(src, dest, options = {}) {
@@ -29,53 +35,83 @@ function copyRecursiveSync(src, dest, options = {}) {
 }
 
 function filterContentByVersion(content, targetVersion) {
-  function parseVersionNumber(v) {
-    const match = String(v).match(/(\d+(\.\d+)?)/);
-    return match ? parseFloat(match[1]) : null;
+  if (!targetVersion) {
+    const originalContent = content;
+    return originalContent;
   }
-
-  function evaluateVersionCondition(condition, targetNum) {
-    const match = condition.match(/([<>=]+)?\s*(\d+(\.\d+)?)/);
-    if (!match) return true;
-
-    const operator = match[1] || '==';
-    const condNum = parseFloat(match[2]);
-
-    switch (operator) {
-      case '>=':
-        return targetNum >= condNum;
-      case '<=':
-        return targetNum <= condNum;
-      case '>':
-        return targetNum > condNum;
-      case '<':
-        return targetNum < condNum;
-      case '==':
-        return targetNum === condNum;
-      case '=':
-        return targetNum === condNum;
-      default:
-        return true;
-    }
-  }
-
-  if (!targetVersion) return content;
 
   const targetNum = parseVersionNumber(targetVersion);
-  if (targetNum === null) return content;
+  if (targetNum === null) {
+    const unparsedContent = content;
+    return unparsedContent;
+  }
 
   const tagRegex = /<([a-zA-Z0-9-]+)\b[^>]*\bversion="([^"]+)"[^>]*>([\s\S]*?)<\/\1>/g;
 
-  return content.replace(tagRegex, (match, _tagName, condition, _innerContent) => {
-    if (evaluateVersionCondition(condition, targetNum)) {
-      return match;
+  const filtered = content.replace(tagRegex, (match, _tagName, condition, _innerContent) => {
+    const isVisible = evaluateVersionCondition(condition, targetNum);
+    if (isVisible) {
+      const visibleContent = match;
+      return visibleContent;
     }
-    return '';
+    const emptyString = '';
+    return emptyString;
   });
+
+  return filtered;
+}
+
+function parseVersionNumber(versionString) {
+  const match = String(versionString).match(/(\d+(\.\d+)?)/);
+  const versionNum = match ? parseFloat(match[1]) : null;
+  return versionNum;
+}
+
+function evaluateVersionCondition(condition, targetNum) {
+  const match = condition.match(/([<>=]+)?\s*(\d+(\.\d+)?)/);
+  if (!match) {
+    const isValidByDefault = true;
+    return isValidByDefault;
+  }
+
+  const operator = match[1] || '==';
+  const condNum = parseFloat(match[2]);
+
+  switch (operator) {
+    case '>=': {
+      const isGreaterOrEqual = targetNum >= condNum;
+      return isGreaterOrEqual;
+    }
+    case '<=': {
+      const isLesserOrEqual = targetNum <= condNum;
+      return isLesserOrEqual;
+    }
+    case '>': {
+      const isGreater = targetNum > condNum;
+      return isGreater;
+    }
+    case '<': {
+      const isLesser = targetNum < condNum;
+      return isLesser;
+    }
+    case '==': {
+      const isEqual = targetNum === condNum;
+      return isEqual;
+    }
+    case '=': {
+      const isStrictEqual = targetNum === condNum;
+      return isStrictEqual;
+    }
+    default: {
+      const defaultMatch = true;
+      return defaultMatch;
+    }
+  }
 }
 
 function getDirname(importMetaUrl) {
-  return path.dirname(fileURLToPath(importMetaUrl));
+  const dirname = path.dirname(fileURLToPath(importMetaUrl));
+  return dirname;
 }
 
 function runIfDirect(importMetaUrl, fn) {
@@ -102,9 +138,13 @@ function detectIndentation(content) {
   const lines = content.split('\n');
   for (const line of lines) {
     const match = line.match(/^(\s+)/);
-    if (match) return match[1];
+    if (match) {
+      const indentation = match[1];
+      return indentation;
+    }
   }
-  return '  ';
+  const defaultIndentation = '  ';
+  return defaultIndentation;
 }
 
 function writeJsonAtomic(filePath, data, originalContent = null) {
@@ -122,10 +162,13 @@ function writeJsonAtomic(filePath, data, originalContent = null) {
 }
 
 function safeReadJson(filePath) {
-  if (!fs.existsSync(filePath)) return null;
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
   try {
     const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    return parsed;
   } catch {
     return null;
   }

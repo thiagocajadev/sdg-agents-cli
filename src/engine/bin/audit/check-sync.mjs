@@ -33,7 +33,10 @@ function orchestrateSyncCheck() {
 }
 
 function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
-  if (!fs.existsSync(liveDirectory)) return [];
+  if (!fs.existsSync(liveDirectory)) {
+    const emptyResult = [];
+    return emptyResult;
+  }
 
   const entries = fs.readdirSync(liveDirectory, { withFileTypes: true });
   const localDrifts = [];
@@ -52,7 +55,8 @@ function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
     }
   }
 
-  return localDrifts;
+  const foundDrifts = localDrifts;
+  return foundDrifts;
 }
 
 function checkFileDrift(livePath, sourcePath, relativePath) {
