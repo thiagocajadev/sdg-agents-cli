@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.13.0] - 2026-04-15
+
+### Added
+
+- **v3.0 M1.2 — Skill Units (staff-dna + code-style)**: Relocated `staff-dna.md` to `src/assets/skill/staff-dna.md` with updated `.ai/skill/*` cross-references and a Phase-CODE-only load convention note. Merged `code-style.md` + `naming.md` + `engineering-standards.md` into `src/assets/skill/code-style.md` — a unified, top-down skill (Naming → Scansion → Narrative → Tactical) with 15 rules. Deduped `AbstractConfig`, `StaffGradeVCS`, `DefinitionOfDone` (each previously defined twice) and rebuilt the broken `NarrativeSLA` carousel fence from the legacy source. Source files in `src/assets/instructions/core/` preserved (deletion deferred to M3.6 cleanup).
+
+### Fixed
+
 ## [2.12.3] - 2026-04-15
 
 ### Added
