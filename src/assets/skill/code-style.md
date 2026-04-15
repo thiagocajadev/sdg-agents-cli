@@ -4,7 +4,7 @@
 
 > [!NOTE]
 > The unified "write-quality code" skill. Merges naming discipline, visual scansion, narrative anatomy, and tactical clean-code standards into one top-down reference.
-> Load in **Phase CODE** alongside `staff-dna`. For SQL-specific aesthetics, load the SQL Style skill. <!-- TBD: .ai/skill/sql-style.md -->
+> Load in **Phase CODE** alongside `staff-dna`. For SQL-specific aesthetics, load the [SQL Style skill](.ai/skill/sql-style.md).
 
 ---
 
@@ -577,7 +577,7 @@ validateConfig();
 - No TODOs in critical paths.
 - No raw entities leaked in responses — DTO / OutputFilter (Response DTO) applied at every endpoint.
 - Clean Code standards (Narrative Cascade) met.
-- Security Skill rules passed. <!-- TBD: .ai/skill/security.md -->
+- [Security Skill](.ai/skill/security.md) rules passed.
 
 </rule>
 

@@ -6,8 +6,7 @@ import path from 'node:path';
 
 import { RulesetInjector } from './ruleset-injector.mjs';
 
-const { prepareProjectStructure, injectRulesets, injectPrompts, collectOutputSummary } =
-  RulesetInjector;
+const { prepareProjectStructure, injectRulesets, collectOutputSummary } = RulesetInjector;
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
@@ -200,71 +199,20 @@ describe('RulesetInjector', () => {
     });
   });
 
-  describe('injectPrompts()', () => {
-    it('should create .ai/prompts/dev-tracks/ with the selected track', () => {
-      const tmpDir = makeTempDir();
-      const inputTrack = '00-lite-mode';
-      const expectedDir = path.join(tmpDir, '.ai', 'prompts', 'dev-tracks');
-
-      try {
-        injectPrompts(tmpDir, inputTrack);
-
-        assert.ok(fs.existsSync(expectedDir));
-      } finally {
-        cleanup(tmpDir);
-      }
-    });
-
-    it('should replace existing .ai/prompts/ on re-injection', () => {
-      const tmpDir = makeTempDir();
-      const inputTrack = '00-lite-mode';
-      const promptsDir = path.join(tmpDir, '.ai', 'prompts');
-      const staleFile = path.join(promptsDir, 'old-file.txt');
-      const expectedDir = path.join(tmpDir, '.ai', 'prompts', 'dev-tracks');
-
-      try {
-        fs.mkdirSync(promptsDir, { recursive: true });
-        fs.writeFileSync(staleFile, 'stale content');
-
-        injectPrompts(tmpDir, inputTrack);
-
-        assert.ok(!fs.existsSync(staleFile));
-        assert.ok(fs.existsSync(expectedDir));
-      } finally {
-        cleanup(tmpDir);
-      }
-    });
-
-    it('should copy all tracks when track is "all"', () => {
-      const tmpDir = makeTempDir();
-      const inputTrack = 'all';
-      const expectedDir = path.join(tmpDir, '.ai', 'prompts', 'dev-tracks');
-
-      try {
-        injectPrompts(tmpDir, inputTrack);
-
-        assert.ok(fs.existsSync(expectedDir));
-        const actualTracks = fs.readdirSync(expectedDir);
-        assert.ok(actualTracks.length > 1);
-      } finally {
-        cleanup(tmpDir);
-      }
-    });
-  });
-
   describe('collectOutputSummary()', () => {
     it('should list correct directories for agents mode', () => {
       const inputSelections = {
         mode: 'agents',
         flavor: 'lite',
         idioms: ['typescript', 'go'],
-        track: null,
       };
       const expectedDirs = [
         '.ai/instructions/core/',
         '.ai/instructions/flavor/',
         '.ai/instructions/idioms/typescript/',
         '.ai/instructions/idioms/go/',
+        '.ai/instructions/templates/',
+        '.ai/instructions/competencies/',
         '.ai/commands/',
       ];
 
@@ -275,27 +223,13 @@ describe('RulesetInjector', () => {
       });
     });
 
-    it('should list prompt track directory for prompts mode', () => {
-      const inputSelections = {
-        mode: 'prompts',
-        flavor: null,
-        idioms: [],
-        track: '00-lite-mode',
-      };
-      const expectedDir = '.ai/prompts/dev-tracks/';
+    it('should omit flavor directory when flavor is null', () => {
+      const inputSelections = { mode: 'agents', flavor: null, idioms: [] };
 
       const { directories: actual } = collectOutputSummary(inputSelections);
 
-      assert.ok(actual.includes(expectedDir));
-    });
-
-    it('should return empty directories for unknown mode', () => {
-      const inputSelections = { mode: 'unknown', flavor: null, idioms: [], track: null };
-      const expected = [];
-
-      const { directories: actual } = collectOutputSummary(inputSelections);
-
-      assert.deepEqual(actual, expected);
+      assert.ok(!actual.includes('.ai/instructions/flavor/'));
+      assert.ok(actual.includes('.ai/instructions/core/'));
     });
   });
 });

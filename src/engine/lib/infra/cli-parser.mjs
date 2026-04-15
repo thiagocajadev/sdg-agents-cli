@@ -1,13 +1,6 @@
 function parseCliArgs(argv) {
   const subcommand = argv[0] && !argv[0].startsWith('-') ? argv[0] : null;
 
-  const isDeprecatedNoDevGuides = argv.includes('--no-dev-guides');
-  if (isDeprecatedNoDevGuides) {
-    console.log(
-      '  ⚠️  --no-dev-guides is now the default. Flag ignored. Use --dev-guides to include them.'
-    );
-  }
-
   const parsedArgs = {
     subcommand,
     // Note: targetDirectory resolution (path.resolve) should be handled by the caller
@@ -17,7 +10,6 @@ function parseCliArgs(argv) {
     version: argv.includes('--version') || argv.includes('-v'),
     quick: argv.includes('--quick'),
     dryRun: argv.includes('--dry-run'),
-    noDevGuides: !argv.includes('--dev-guides'),
     flavor: getArgValue(argv, '--flavor'),
     idioms: getArgValues(argv, '--idiom'),
     agents: getArgValues(argv, '--agents'),
@@ -63,15 +55,6 @@ function validateInit(args) {
 
   const isNonInteractive = args.mode || args.flavor || args.idioms.length > 0;
   if (!isNonInteractive) return null;
-
-  if (args.mode === 'prompts') {
-    if (!args.track) {
-      const missingTrackError = '  ⚠️  --track is required for mode "prompts".';
-      return missingTrackError;
-    }
-    const promptsValid = null;
-    return promptsValid;
-  }
 
   if (!args.flavor) {
     const missingFlavorError =

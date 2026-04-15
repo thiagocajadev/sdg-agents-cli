@@ -208,7 +208,6 @@ async function handleInitSubcommand(args) {
 
   const buildParams = {
     dryRun: args.dryRun,
-    noDevGuides: args.noDevGuides,
     selections: selectionPayload,
   };
   const buildResult = await SpecDrivenGuide.run(args.targetDirectory, buildParams);
@@ -275,11 +274,6 @@ async function executeMenuAction(menuChoice, args) {
     case 'settings': {
       const settingsResult = await runSettingsMenu(args.targetDirectory);
       return settingsResult;
-    }
-    case 'creatives': {
-      const { Creatives } = await import('./init/creatives-bundle.mjs');
-      const creativesResult = await Creatives.run(args.targetDirectory);
-      return creativesResult;
     }
     default: {
       const idleResult = null;

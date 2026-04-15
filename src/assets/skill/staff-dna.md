@@ -22,7 +22,7 @@
 <rule name="LawOfHardening">
 > [!IMPORTANT]
 > **Total configuration isolation. Zero runtime surprises. Fail fast if the environment is incomplete. Default to deny at every boundary.**
-> [Security Skill](.ai/skill/security.md) <!-- TBD: M1.2 security skill merge (security.md + security-pipeline.md) -->
+> [Security Skill](.ai/skill/security.md)
 </rule>
 
 ## Law 2: The Law of Resilience (Stability)
@@ -30,7 +30,7 @@
 <rule name="LawOfResilience">
 > [!IMPORTANT]
 > **Defensive dominance. Software must withstand both failure and repetition. Idempotency and graceful degradation are non-negotiable.**
-> [Code Style Skill](.ai/skill/code-style.md) <!-- TBD: M1.2 code-style merge (code-style + naming + engineering-standards) -->
+> [Code Style Skill](.ai/skill/code-style.md)
 </rule>
 
 ## Law 3: The Law of the Cascade (Narrative)
@@ -52,7 +52,7 @@
 >
 > *Comments explain "why", never "what". If naming is right, comments disappear.*
 >
-> See `NarrativeCascade` rule → [Code Style Skill](.ai/skill/code-style.md) <!-- TBD: M1.2 code-style merge -->
+> See `NarrativeCascade` rule → [Code Style Skill](.ai/skill/code-style.md)
 </rule>
 
 ## Law 4: The Law of Visual Excellence (Aesthetics)
@@ -60,7 +60,7 @@
 <rule name="LawOfVisualExcellence">
 > [!IMPORTANT]
 > **Premium aesthetics by default. High contrast, modern typography, and meaningful micro-interactions. Maintain the chosen design language with absolute rigor.**
-> [UI/UX Skill](.ai/skill/ui-ux.md) <!-- TBD: M1.2 ui-ux merge (ui/* + writing-soul) -->
+> [UI/UX Skill](.ai/skill/ui-ux.md)
 </rule>
 
 ## Law 5: The Law of Boundaries (Scope Integrity)

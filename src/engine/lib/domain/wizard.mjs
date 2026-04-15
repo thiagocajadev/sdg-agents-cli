@@ -148,21 +148,13 @@ async function promptInitialChoice() {
         name: '2. ⚡ Quick — install with defaults (lite + JS/TS, includes everything)',
         value: 'quick',
       },
-      {
-        name: '3. Creative Toolkit — branding, social media & landing pages',
-        value: 'creatives',
-      },
-      { name: '4. Back', value: 'back' },
+      { name: '3. Back', value: 'back' },
     ],
   });
 
   if (result === 'back') {
     const backResult = fail('', 'USER_BACK');
     return backResult;
-  }
-  if (result === 'creatives') {
-    const creativesResult = success({ nextStep: WIZARD_STEPS.DONE, mode: 'creatives' });
-    return creativesResult;
   }
 
   const initialChoiceResult = success({ nextStep: WIZARD_STEPS.FLAVOR, mode: result });
@@ -438,15 +430,6 @@ function validateSelections(selections) {
     selections.ide = selections.ide || 'none';
     const quickValidResult = success(selections);
     return quickValidResult;
-  }
-
-  if (selections.mode === 'prompts') {
-    if (!selections.track) {
-      const missingTrackResult = fail('--track is required for prompts mode.', 'MISSING_TRACK');
-      return missingTrackResult;
-    }
-    const promptsValidResult = success(selections);
-    return promptsValidResult;
   }
 
   const availableFlavors = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'flavors'));

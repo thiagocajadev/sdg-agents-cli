@@ -9,8 +9,6 @@ const { copyRecursiveSync, filterContentByVersion, getDirname } = FsUtils;
 const __dirname = getDirname(import.meta.url);
 const SOURCE_INSTRUCTIONS = path.join(__dirname, '../../..', 'assets', 'instructions');
 const SOURCE_COMMANDS = path.join(SOURCE_INSTRUCTIONS, 'commands');
-const SOURCE_DEV_GUIDES = path.join(__dirname, '../../..', 'assets', 'dev-guides');
-const SOURCE_DEV_TRACKS = path.join(SOURCE_DEV_GUIDES, 'prompt-tracks');
 const SOURCE_COMPETENCIES = path.join(SOURCE_INSTRUCTIONS, 'competencies');
 
 function prepareProjectStructure(targetDirectory) {
@@ -21,18 +19,13 @@ function prepareProjectStructure(targetDirectory) {
   fs.mkdirSync(commandsDir, { recursive: true });
 }
 
-function injectRulesets(
-  targetDirectory,
-  selections,
-  { noDevGuides = true, noCreative = true } = {}
-) {
+function injectRulesets(targetDirectory, selections) {
   const { flavor, idioms } = selections;
   const projectAiInstructions = path.join(targetDirectory, '.ai', 'instructions');
 
   copyRecursiveSync(
     path.join(SOURCE_INSTRUCTIONS, 'core'),
-    path.join(projectAiInstructions, 'core'),
-    { exclude: ['creative'] }
+    path.join(projectAiInstructions, 'core')
   );
 
   const flavorSrc = path.join(SOURCE_INSTRUCTIONS, 'flavors', flavor);
@@ -54,86 +47,21 @@ function injectRulesets(
   if (fs.existsSync(SOURCE_COMMANDS)) {
     copyRecursiveSync(SOURCE_COMMANDS, path.join(targetDirectory, '.ai', 'commands'));
   }
-
-  if (!noDevGuides) injectDevGuides(targetDirectory);
-  if (!noCreative) injectCreativeToolkit(targetDirectory);
-}
-
-function injectDevGuides(targetDirectory) {
-  if (!fs.existsSync(SOURCE_DEV_GUIDES)) return;
-  copyRecursiveSync(SOURCE_DEV_GUIDES, path.join(targetDirectory, '.ai', 'dev-guides'));
-}
-
-function injectPrompts(targetDirectory, track) {
-  const projectRootPromptsDir = path.join(targetDirectory, '.ai', 'prompts');
-  const devTracksDir = path.join(projectRootPromptsDir, 'dev-tracks');
-
-  if (fs.existsSync(projectRootPromptsDir)) {
-    fs.rmSync(projectRootPromptsDir, { recursive: true, force: true });
-  }
-  fs.mkdirSync(devTracksDir, { recursive: true });
-
-  if (track === 'all') {
-    copyRecursiveSync(SOURCE_DEV_TRACKS, devTracksDir);
-  } else {
-    const trackSrc = path.join(SOURCE_DEV_TRACKS, track);
-    const dest = path.join(devTracksDir, track);
-    if (fs.existsSync(trackSrc)) {
-      copyRecursiveSync(trackSrc, dest);
-    }
-  }
 }
 
 function collectOutputSummary(selections) {
-  const { mode, flavor, idioms, track, devGuides = false } = selections;
+  const { flavor, idioms } = selections;
   const directories = [];
 
-  if (mode === 'agents') {
-    directories.push('.ai/instructions/core/');
-    if (flavor) directories.push('.ai/instructions/flavor/');
-    for (const idiom of idioms) directories.push(`.ai/instructions/idioms/${idiom}/`);
-    directories.push('.ai/instructions/templates/');
-    directories.push('.ai/instructions/competencies/');
-    directories.push('.ai/commands/');
-    if (devGuides) directories.push('.ai/dev-guides/');
-    directories.push('.ai/instructions/creative/');
-    directories.push('.ai/instructions/creative/templates/');
-    directories.push('.ai/instructions/creative/guides/');
-  } else if (mode === 'prompts') {
-    if (track) directories.push('.ai/prompts/dev-tracks/');
-  }
+  directories.push('.ai/instructions/core/');
+  if (flavor) directories.push('.ai/instructions/flavor/');
+  for (const idiom of idioms) directories.push(`.ai/instructions/idioms/${idiom}/`);
+  directories.push('.ai/instructions/templates/');
+  directories.push('.ai/instructions/competencies/');
+  directories.push('.ai/commands/');
 
   const summary = { directories };
   return summary;
-}
-
-function injectCreativeToolkit(targetDirectory) {
-  const sourceCreative = path.join(SOURCE_INSTRUCTIONS, 'core', 'creative');
-  const sourceCreativePrompts = path.join(SOURCE_INSTRUCTIONS, 'templates', 'creatives');
-  const sourceCreativeGuides = path.join(sourceCreativePrompts, 'guides');
-
-  const destRoot = path.join(targetDirectory, '.ai', 'instructions', 'creative');
-
-  const oldPrompts = path.join(targetDirectory, '.ai', 'prompts', 'creatives');
-  const oldGuides = path.join(targetDirectory, '.ai', 'dev-guides', 'creatives');
-  if (fs.existsSync(oldPrompts)) fs.rmSync(oldPrompts, { recursive: true, force: true });
-  if (fs.existsSync(oldGuides)) fs.rmSync(oldGuides, { recursive: true, force: true });
-
-  fs.mkdirSync(destRoot, { recursive: true });
-
-  if (fs.existsSync(sourceCreative)) {
-    copyRecursiveSync(sourceCreative, destRoot);
-  }
-
-  if (fs.existsSync(sourceCreativePrompts)) {
-    copyRecursiveSync(sourceCreativePrompts, path.join(destRoot, 'templates'), {
-      exclude: ['guides'],
-    });
-  }
-
-  if (fs.existsSync(sourceCreativeGuides)) {
-    copyRecursiveSync(sourceCreativeGuides, path.join(destRoot, 'guides'));
-  }
 }
 
 function injectCompetencies(selections, projectAiInstructions) {
@@ -188,8 +116,5 @@ function injectFilteredIdiom(idiomFolderKey, targetVersion, projectAiInstruction
 export const RulesetInjector = {
   prepareProjectStructure,
   injectRulesets,
-  injectDevGuides,
-  injectPrompts,
   collectOutputSummary,
-  injectCreativeToolkit,
 };

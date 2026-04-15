@@ -19,7 +19,7 @@
 - **Integration Tests**: For use cases, repositories, and API endpoints. Hit the real database or service. These catch the bugs that matter most.
 - **E2E Tests**: For critical user flows only (login, checkout, onboarding). Expensive to maintain — keep the count low.
 - **Contract Tests**: For API boundaries between services. Verify that producers and consumers agree on the shape.
-- **Security Tests**: DAST, fuzzing, and exploit simulation are part of the pipeline — not optional. See the Security skill Phase 4 for runtime security validation rules. <!-- TBD: .ai/skill/security.md -->
+- **Security Tests**: DAST, fuzzing, and exploit simulation are part of the pipeline — not optional. See the [Security skill](.ai/skill/security.md) Phase 4 for runtime security validation rules.
 
 #### Guidance
 

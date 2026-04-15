@@ -218,27 +218,6 @@ function buildMasterInstructions(selections) {
 }
 
 /**
- * Builds the stub content for projects initialized in Prompts Only mode.
- */
-function buildPromptModeStub() {
-  const stubString = dedent`
-    # Project Specification Prompts
-
-    > [!NOTE]
-    > This project has been initialized with SDG-Agents in **Prompts Only** mode.
-    > The AI Agents governance rules (Staff-level engineering instructions) were NOT injected into the workspace.
-    >
-    > If you are an AI Agent operating in this project, you will only have access to the specification templates located at \`.ai/prompts/\`.
-    >
-    > **To Developers:**
-    > If you want to augment this repository with full AI Governance instructions, run the following command in the terminal:
-    > \`npx sdg-agents init\``;
-
-  const promptModeStub = stubString;
-  return promptModeStub;
-}
-
-/**
  * Writes .ai-backlog/context.md and .ai-backlog/tasks.md at the project root.
  * Only writes each file if it does not already exist — never overwrites user content.
  */
@@ -566,7 +545,6 @@ function getActiveAgents(selections) {
 export const InstructionAssembler = {
   buildMasterInstructions,
   buildClaudeContent,
-  buildPromptModeStub,
   writeAgentConfig,
   writeBacklogFiles,
   writeGitignore,

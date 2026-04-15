@@ -46,13 +46,6 @@ function printSuccessAgents(targetDir) {
   printActivationGuide();
 }
 
-function printSuccessPrompts(targetDir) {
-  console.log('\n  ✅ Done.');
-  console.log('  ' + '─'.repeat(55));
-  console.log(`  Project: ${targetDir}\n`);
-  console.log('  .ai/prompts/dev-tracks/  — specification templates\n');
-}
-
 function printQuickSuccess(targetDir) {
   console.log('\n  ⚡ Done.');
   console.log('  ' + '─'.repeat(55));
@@ -151,21 +144,16 @@ function renderSummaryHeader() {
 }
 
 function renderSummaryRows(selections) {
-  const { flavor, idioms, versions, designPreset, mode, track } = selections;
+  const { flavor, idioms, versions, designPreset } = selections;
 
-  if (mode === 'prompts') {
-    const trackLabel = track === 'all' ? '00, 01, 02 (Full Training)'.padEnd(43) : track.padEnd(43);
-    console.log(`  │  Track:   ${trackLabel}│`);
-  } else {
-    const flavorLabel = STACK_DISPLAY_NAMES[flavor]?.name ?? flavor;
-    const idiomsLabel = formatIdiomsLabel(idioms, versions);
+  const flavorLabel = STACK_DISPLAY_NAMES[flavor]?.name ?? flavor;
+  const idiomsLabel = formatIdiomsLabel(idioms, versions);
 
-    console.log(`  │  Flavor:  ${flavorLabel.padEnd(43)}│`);
-    console.log(`  │  Idioms:  ${idiomsLabel.padEnd(43)}│`);
+  console.log(`  │  Flavor:  ${flavorLabel.padEnd(43)}│`);
+  console.log(`  │  Idioms:  ${idiomsLabel.padEnd(43)}│`);
 
-    if (designPreset) {
-      console.log(`  │  Preset:  ${designPreset.padEnd(43)}│`);
-    }
+  if (designPreset) {
+    console.log(`  │  Preset:  ${designPreset.padEnd(43)}│`);
   }
 }
 
@@ -228,7 +216,6 @@ function printHelp(version) {
     --quick              Install with defaults (lite + JS/TS) — no prompts
     --flavor <name>      Architecture (vertical-slice, mvc, lite, legacy)
     --idiom <name>       Language idiom — repeatable or comma-separated
-    --dev-guides         Include dev guides and spec templates (off by default)
     --dry-run            Preview without writing files
 
   Examples:
@@ -236,7 +223,6 @@ function printHelp(version) {
     npx sdg-agents init --quick
     npx sdg-agents init --flavor vertical-slice --idiom typescript
     npx sdg-agents init --flavor mvc --idiom typescript,python
-    npx sdg-agents init --flavor lite --idiom go --dev-guides
     npx sdg-agents add
     npx sdg-agents clear
 `);
@@ -250,7 +236,6 @@ export const BundleUI = {
   printProjectRoot,
   printActivationGuide,
   printSuccessAgents,
-  printSuccessPrompts,
   printQuickSuccess,
   printQuickDryRun,
   printDryRunPreview,
