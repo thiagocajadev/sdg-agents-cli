@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.14.0] - 2026-04-15
+
+### Added
+
+- **v3.0 M1.2 — Testing Skill Unit**: Converted `src/assets/instructions/core/testing-principles.md` into `src/assets/skill/testing.md` with the skill-unit header and a Phase-CODE/TEST load convention note. All 10 rules preserved 1:1 (`TestingStrategy`, `TestNamingConvention`, `TestStructure`, `NamedExpectations`, `WhatNotToTest`, `TestDoubles`, `FlakyTestManagement`, `CoverageStrategy`, `TestDataEnvironments`, `LegacyApproach`) with their examples, admonitions, and AI Agent Self-Audit intact. Fixed the broken `security-pipeline.md` cross-reference with an inline `<!-- TBD: .ai/skill/security.md -->` marker (mirrors the pattern used in `code-style.md`). Legacy source preserved for M3.6 round-trip.
+
+### Fixed
+
 ## [2.13.0] - 2026-04-15
 
 ### Added
