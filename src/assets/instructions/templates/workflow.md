@@ -71,7 +71,7 @@ On every request, classify intent before acting:
 > Follow the approved plan strictly.
 >
 > 1. **DNA-GATE & MENTAL RESET [LOCKED]**: Before starting, explicitly list which **Engineering Laws (staff-dna.md)** apply to the current task and why. Confirm mental alignment.
-> 2. **Context Load**: Reads the project's standards and style guide before writing anything (read `engineering-standards.md`, `code-style.md`, and competencies).
+> 2. **Context Load**: Reads the project's standards and style guide before writing anything (read `engineering-standards.md`, `code-style.md`, and competencies). **Core Rules are always exempt from the Impact Map skip rule** — load them regardless of what the map contains.
 > 3. **Quality Gate**: Apply Narrative Gate against every modified function (laws defined in `staff-dna.md`).
 > 4. **Plan Adherence**: Follows the agreed plan. No extra features or refactors outside what was approved.
 > 5. **Blocker Surface**: Raises blockers immediately. Never quietly works around them.

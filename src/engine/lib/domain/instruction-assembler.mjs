@@ -76,7 +76,7 @@ function buildMasterInstructions(selections) {
       2. Read \`.ai-backlog/context.md\` — project brief. If missing, analyze \`package.json\` + \`README.md\` and generate it. Never overwrite existing.
       3. Read \`.ai-backlog/tasks.md\` — check for \`[IN_PROGRESS]\` tasks before accepting new work.
       4. Read \`.ai-backlog/impact-map.md\` — if active (not idle): load only \`## Changed\` + \`## Blast Radius\` files. If missing or idle: proceed normally.
-      5. Resume any \`[IN_PROGRESS]\` task immediately. Announce what was in progress.`;
+      5. If \`[IN_PROGRESS]\` task found: **load \`.ai/instructions/templates/workflow.md\` now** — it contains the Task Recovery and Checkpoint protocol. Announce the active task and resume from where it stopped.`;
 
     return sessionStartString;
   }
@@ -119,14 +119,19 @@ function buildMasterInstructions(selections) {
 
     function buildProjectContextRouting() {
       const routingString = dedent`
-        **Project Context**
+        **Project Context** — read at session start
 
         | File | Purpose |
         | :--- | :------ |
         | \`.ai-backlog/context.md\` | Project Brief — read before anything else |
         | \`.ai-backlog/tasks.md\` | Active tasks and handoff state |
-        | \`.ai-backlog/learned.md\` | Lessons Learned — success patterns and research |
-        | \`.ai-backlog/troubleshoot.md\` | Troubleshooting — RCA logs and failure records |`;
+
+        **Project Context — On Demand**
+
+        | File | When to read |
+        | :--- | :----------- |
+        | \`.ai-backlog/learned.md\` | Debugging, investigating recurring patterns, or onboarding |
+        | \`.ai-backlog/troubleshoot.md\` | Debugging or when hitting a known failure mode |`;
 
       const projectContextRouting = routingString;
       return projectContextRouting;
@@ -161,7 +166,7 @@ function buildMasterInstructions(selections) {
         | \`.ai/instructions/core/testing-principles.md\` | Writing or reviewing tests |
         | \`.ai/instructions/core/security.md\` | Security-sensitive changes |
         | \`.ai/instructions/core/writing-soul.md\` | Docs, UI copy, or user-facing text |
-        | \`.ai/instructions/core/agent-roles.md\` | Multi-agent coordination |`;
+        | \`.ai/instructions/core/observability.md\` | Adding logging, metrics, or tracing |`;
 
       const coreGovernanceRouting = governanceString;
       return coreGovernanceRouting;
@@ -182,20 +187,17 @@ function buildMasterInstructions(selections) {
     }
 
     function buildTechnicalExecutionRouting(idioms) {
-      const { hasBackend, hasFrontend } = computeStackMetrics(idioms);
+      const uniqueIdioms = [...new Set(idioms)];
+      const { hasBackend, hasFrontend } = computeStackMetrics(uniqueIdioms);
 
-      const idiomRows = idioms.map((idiomFolderKey) => {
+      const idiomRows = uniqueIdioms.map((idiomFolderKey) => {
         const label = STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey;
         const tableRow = `| \`.ai/instructions/idioms/${idiomFolderKey}/patterns.md\` | ${label} Idioms & Patterns |`;
         return tableRow;
       });
 
       const backendRows = hasBackend
-        ? [
-            `| \`.ai/instructions/competencies/backend.md\` | BFF + API Strategy |`,
-            `| \`.ai/instructions/core/ci-cd.md\` | CI/CD |`,
-            `| \`.ai/instructions/core/cloud.md\` | Cloud & Containers |`,
-          ]
+        ? [`| \`.ai/instructions/competencies/backend.md\` | BFF + API Strategy |`]
         : [];
 
       const backendOnDemandRows = hasBackend
@@ -203,6 +205,8 @@ function buildMasterInstructions(selections) {
             `| \`.ai/instructions/core/data-access.md\` | Data Access — load when touching DB layer |`,
             `| \`.ai/instructions/core/sql-style.md\` | SQL Style — load when writing queries |`,
             `| \`.ai/instructions/core/api-design.md\` | API Design — load when defining endpoints |`,
+            `| \`.ai/instructions/core/ci-cd.md\` | CI/CD — load when touching pipeline or deployment config |`,
+            `| \`.ai/instructions/core/cloud.md\` | Cloud & Containers — load when touching Dockerfile or cloud config |`,
           ]
         : [];
 

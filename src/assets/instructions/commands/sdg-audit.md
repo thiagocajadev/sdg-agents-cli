@@ -2,6 +2,8 @@
 
 We are initializing a new governance audit: $ARGUMENTS. This command prepares the context for drift detection and compliance checks following the **Working Protocol**.
 
+> **Load now**: `.ai/instructions/templates/workflow.md` — defines Phase SPEC and the Intent Routing table you will follow in this cycle.
+
 ---
 
 ## Phase: SPEC (The Contract) — MODE: PLANNING
