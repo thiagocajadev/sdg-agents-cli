@@ -212,29 +212,6 @@ describe('InstructionAssembler', () => {
       assert.ok(actual.includes(expectedSubstring2));
     });
 
-    it('should include design preset note in uppercase when designPreset is set', () => {
-      const input = {
-        flavor: 'lite',
-        idioms: ['typescript'],
-        versions: {},
-        designPreset: 'bento',
-      };
-      const expectedSubstring = 'BENTO';
-
-      const actual = buildMasterInstructions(input);
-
-      assert.ok(actual.includes(expectedSubstring));
-    });
-
-    it('should not include design preset note when designPreset is null', () => {
-      const input = { flavor: 'lite', idioms: ['go'], versions: {}, designPreset: null };
-      const forbiddenSubstring = 'Initial Design Preset';
-
-      const actual = buildMasterInstructions(input);
-
-      assert.ok(!actual.includes(forbiddenSubstring));
-    });
-
     it('should include an instruction link for each idiom', () => {
       const input = {
         flavor: 'lite',

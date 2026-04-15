@@ -36,24 +36,26 @@ function computeStackMetrics(idioms) {
 }
 
 /**
- * Assembles the lean master instruction content — session start + routing + command center.
- * workflow.md is NOT inlined; it is loaded lazily by command files at cycle start.
+ * Assembles the minimal master instruction content — session start + cycle protocol + skill registry.
+ * Skills are referenced by short path (`.ai/skill/<name>.md`) and loaded on demand by command files.
  */
 function buildMasterInstructions(selections) {
   const manifesto = buildStaffManifesto();
   const dnaGate = buildDnaGateBlock();
   const sessionStart = buildSessionStartBlock();
-  const workflowPointer = buildWorkflowPointer();
+  const cycleProtocol = buildCycleProtocolBlock();
   const agentRolesBlock = buildAgentRolesBlock();
-  const instructionLinks = buildInstructionLinks(selections);
+  const skillRegistry = buildSkillRegistry(selections);
+  const cycleCommands = buildCycleCommandsBlock();
 
   const fullInstructionContent = [
     manifesto,
     dnaGate,
     sessionStart,
-    workflowPointer,
+    cycleProtocol,
     agentRolesBlock,
-    instructionLinks,
+    skillRegistry,
+    cycleCommands,
   ].join('\n\n');
 
   return fullInstructionContent;
@@ -98,7 +100,7 @@ function buildMasterInstructions(selections) {
     return sessionStartString;
   }
 
-  function buildWorkflowPointer() {
+  function buildCycleProtocolBlock() {
     const pointerString = dedent`
       ## Working Protocol
 
@@ -131,226 +133,87 @@ function buildMasterInstructions(selections) {
     return agentRolesString;
   }
 
-  function buildInstructionLinks(currentSelections) {
-    const blocks = [
-      buildContextRoutingHeader(),
-      buildProjectContextRouting(),
-      buildCoreGovernanceRouting(),
-      buildArchitecturalContextRouting(currentSelections.flavor),
-      buildTechnicalExecutionRouting(currentSelections.idioms),
-      buildUIUXDesignRouting(currentSelections),
-      buildCreativeToolkitRouting(currentSelections),
-      buildWorkingCyclesRouting(),
+  function buildSkillRegistry(currentSelections) {
+    const stackIdioms = [...new Set(currentSelections.idioms ?? [])];
+    const { hasBackend, hasFrontend } = computeStackMetrics(stackIdioms);
+    const flavor = currentSelections.flavor;
+
+    const coreSkills = [
+      '- `.ai/skill/staff-dna.md` — Engineering Laws (load in Phase CODE only)',
+      '- `.ai/skill/code-style.md` — Code Style, Naming, Engineering Standards',
+      '- `.ai/skill/testing.md` — Test Principles',
+      '- `.ai/skill/security.md` — Security-sensitive changes',
+      '- `.ai/skill/observability.md` — Logging, metrics, tracing',
     ];
 
-    const finalContextRouting = blocks.filter((block) => block !== null).join('\n\n');
+    const backendSkills = hasBackend
+      ? [
+          '- `.ai/skill/api-design.md` — API Design',
+          '- `.ai/skill/data-access.md` — DB layer',
+          '- `.ai/skill/sql-style.md` — SQL queries',
+          '- `.ai/skill/ci-cd.md` — Pipelines & deploy',
+          '- `.ai/skill/cloud.md` — Cloud & Containers',
+          '- `.ai/instructions/competencies/backend.md` — BFF + API Strategy',
+        ]
+      : [];
 
-    return finalContextRouting;
+    const frontendSkills = hasFrontend
+      ? [
+          '- `.ai/skill/ui-ux.md` — UI/UX design system & writing voice',
+          '- `.ai/instructions/competencies/frontend.md` — Contract-Based UI System',
+        ]
+      : [];
 
-    function buildProjectContextRouting() {
-      const routingString = dedent`
-        **Project Context** — read at session start
+    const idiomLines = stackIdioms.map((idiomFolderKey) => {
+      const label = STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey;
+      return `- \`.ai/instructions/idioms/${idiomFolderKey}/patterns.md\` — ${label} Idioms & Patterns`;
+    });
 
-        | File | Purpose |
-        | :--- | :------ |
-        | \`.ai-backlog/context.md\` | Project Brief — read before anything else |
-        | \`.ai-backlog/tasks.md\` | Active tasks and handoff state |
-
-        **Project Context — On Demand**
-
-        | File | When to read |
-        | :--- | :----------- |
-        | \`.ai-backlog/learned.md\` | Debugging, investigating recurring patterns, or onboarding |
-        | \`.ai-backlog/troubleshoot.md\` | Debugging or when hitting a known failure mode |`;
-
-      const projectContextRouting = routingString;
-      return projectContextRouting;
-    }
-
-    function buildContextRoutingHeader() {
-      const headerString = dedent`
-        ## Project Command Center
-
-        > [!IMPORTANT]
-        > Load only what the current task requires. Start with Project Context, then add stack-specific files as needed. Read these before executing complex tasks — do not assume project structure.`;
-
-      const routingHeader = headerString;
-      return routingHeader;
-    }
-
-    function buildCoreGovernanceRouting() {
-      const governanceString = dedent`
-        **Core Rules** — read before writing any code
-
-        | File | Purpose |
-        | :--- | :------ |
-        | \`.ai/instructions/core/staff-dna.md\` | Engineering Laws — always apply |
-        | \`.ai/instructions/core/engineering-standards.md\` | Standards & Readability |
-        | \`.ai/instructions/core/code-style.md\` | Code Style & Scannability |
-        | \`.ai/instructions/core/naming.md\` | Naming Discipline |
-
-        **On Demand** — load only when the task requires it
-
-        | File | When to read |
-        | :--- | :----------- |
-        | \`.ai/instructions/core/testing-principles.md\` | Writing or reviewing tests |
-        | \`.ai/instructions/core/security.md\` | Security-sensitive changes |
-        | \`.ai/instructions/core/writing-soul.md\` | Docs, UI copy, or user-facing text |
-        | \`.ai/instructions/core/observability.md\` | Adding logging, metrics, or tracing |`;
-
-      const coreGovernanceRouting = governanceString;
-      return coreGovernanceRouting;
-    }
-
-    function buildArchitecturalContextRouting(flavor) {
-      if (!flavor || flavor === 'none') return null;
-
-      const architectureString = dedent`
-        **Architectural Context**
-
-        | File | Purpose |
-        | :--- | :------ |
-        | \`.ai/instructions/flavor/principles.md\` | Flavor: ${displayName(flavor)} |`;
-
-      const architecturalRouting = architectureString;
-      return architecturalRouting;
-    }
-
-    function buildTechnicalExecutionRouting(idioms) {
-      const uniqueIdioms = [...new Set(idioms)];
-      const { hasBackend, hasFrontend } = computeStackMetrics(uniqueIdioms);
-
-      const idiomRows = uniqueIdioms.map((idiomFolderKey) => {
-        const label = STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey;
-        const tableRow = `| \`.ai/instructions/idioms/${idiomFolderKey}/patterns.md\` | ${label} Idioms & Patterns |`;
-        return tableRow;
-      });
-
-      const backendRows = hasBackend
-        ? [`| \`.ai/instructions/competencies/backend.md\` | BFF + API Strategy |`]
+    const flavorLines =
+      flavor && flavor !== 'none'
+        ? [`- \`.ai/instructions/flavor/principles.md\` — Flavor: ${displayName(flavor)}`]
         : [];
 
-      const backendOnDemandRows = hasBackend
-        ? [
-            `| \`.ai/instructions/core/data-access.md\` | Data Access — load when touching DB layer |`,
-            `| \`.ai/instructions/core/sql-style.md\` | SQL Style — load when writing queries |`,
-            `| \`.ai/instructions/core/api-design.md\` | API Design — load when defining endpoints |`,
-            `| \`.ai/instructions/core/ci-cd.md\` | CI/CD — load when touching pipeline or deployment config |`,
-            `| \`.ai/instructions/core/cloud.md\` | Cloud & Containers — load when touching Dockerfile or cloud config |`,
-          ]
-        : [];
+    const sections = [
+      '## Skills — load on demand',
+      '',
+      '> Each skill is self-contained. Load only what the current cycle requires.',
+      '',
+      '**Core**',
+      ...coreSkills,
+    ];
 
-      const frontendRows = hasFrontend
-        ? [`| \`.ai/instructions/competencies/frontend.md\` | Contract-Based UI System |`]
-        : [];
-
-      const allRowsList = [...idiomRows, ...backendRows, ...frontendRows];
-      if (allRowsList.length === 0) return null;
-
-      const allRows = allRowsList.join('\n');
-
-      const onDemandSection =
-        backendOnDemandRows.length > 0
-          ? [
-              ``,
-              `**On Demand — load only when the task requires it**`,
-              ``,
-              `| File | When to load |`,
-              `| :--- | :----------- |`,
-              backendOnDemandRows.join('\n'),
-            ].join('\n')
-          : '';
-
-      const technicalRoutingBlock = [
-        `**Technical Execution**`,
-        ``,
-        `| File | Purpose |`,
-        `| :--- | :------ |`,
-        allRows,
-        onDemandSection,
-      ].join('\n');
-
-      return technicalRoutingBlock;
+    if (backendSkills.length > 0) {
+      sections.push('', '**Backend**', ...backendSkills);
+    }
+    if (frontendSkills.length > 0) {
+      sections.push('', '**Frontend**', ...frontendSkills);
+    }
+    if (idiomLines.length > 0) {
+      sections.push('', '**Stack idioms**', ...idiomLines);
+    }
+    if (flavorLines.length > 0) {
+      sections.push('', '**Architectural flavor**', ...flavorLines);
     }
 
-    function buildUIUXDesignRouting(selectionsObj) {
-      const { idioms } = selectionsObj;
-      const designPreset = selectionsObj.designPreset ?? 'UNIVERSAL';
-      const { hasFrontend } = computeStackMetrics(idioms);
+    const registryBlock = sections.join('\n');
+    return registryBlock;
+  }
 
-      if (!hasFrontend) return null;
+  function buildCycleCommandsBlock() {
+    const cycleCommandsString = dedent`
+      ## Cycle Commands
 
-      const designLabel = designPreset.toUpperCase();
+      Load the matching command file at cycle start and follow its phases strictly.
 
-      const uiuxRoutingBlock = dedent`
-        **UI/UX Design System (Target: ${designLabel})**
+      - \`feat:\` → \`.ai/commands/sdg-feat.md\` — Feature Cycle
+      - \`fix:\` → \`.ai/commands/sdg-fix.md\` — Fix Cycle
+      - \`docs:\` → \`.ai/commands/sdg-docs.md\` — Docs Cycle
+      - \`audit:\` → \`.ai/commands/sdg-audit.md\` — Governance Audit
+      - \`land:\` → \`.ai/commands/sdg-land.md\` — Project Inception
+      - \`end:\` → \`.ai/commands/sdg-end.md\` — Close active cycle`;
 
-        | File | Purpose |
-        | :--- | :------ |
-        | \`.ai/instructions/core/ui/standards.md\` | Visual Standards |
-        | \`.ai/instructions/core/ui/architecture.md\` | Component Architecture |
-        | \`.ai/instructions/core/ui/presets.md\` | Interface Presets |
-        | \`.ai/instructions/core/ui/design-thinking.md\` | Visual Contracts (Phase 0) |`;
-
-      const uiuxRouting = uiuxRoutingBlock;
-      return uiuxRouting;
-    }
-
-    function buildCreativeToolkitRouting(selectionsObj) {
-      if (!selectionsObj.creative) return null;
-
-      const creativeDir = path.join(SOURCE_INSTRUCTIONS, 'core', 'creative');
-      if (!fs.existsSync(creativeDir)) return null;
-
-      const creativeToolkitBlock = [
-        `**Creative Design Toolkit**`,
-        ``,
-        `| File | Purpose |`,
-        `| :--- | :------ |`,
-        `| \`.ai/instructions/creative/branding.md\` | Brand DNA & Visual Identity |`,
-        `| \`.ai/instructions/creative/social-media.md\` | Social Media Hub (IG, TikTok, LI, YT) |`,
-        `| \`.ai/instructions/creative/landing-page.md\` | Landing Page Blueprint |`,
-        ``,
-        `**Creative Templates**`,
-        ``,
-        `| File | Purpose |`,
-        `| :--- | :------ |`,
-        `| \`.ai/instructions/creative/templates/brand-dna.md\` | Brand Identity & Personality Specs |`,
-        `| \`.ai/instructions/creative/templates/logo-spec.md\` | Logo & Iconography technical guide |`,
-        `| \`.ai/instructions/creative/templates/social-media-content.md\` | Social Media post specifications |`,
-        `| \`.ai/instructions/creative/templates/landing-page-blueprint.md\` | Conversion-focused page structure |`,
-        ``,
-        `**Creative Tactic Guides**`,
-        ``,
-        `| File | Purpose |`,
-        `| :--- | :------ |`,
-        `| \`.ai/instructions/creative/guides/prompt-guide.md\` | Pro-level Creative Prompting |`,
-        `| \`.ai/instructions/creative/guides/social/instagram.md\` | Instagram Algorithm & Format Guide |`,
-        `| \`.ai/instructions/creative/guides/social/linkedin.md\` | LinkedIn Engagement & Reach |`,
-        `| \`.ai/instructions/creative/guides/social/tiktok.md\` | TikTok Hook & Retention Strategy |`,
-        `| \`.ai/instructions/creative/guides/social/youtube.md\` | YouTube Banner & Thumbnail rules |`,
-      ].join('\n');
-
-      const creativeRouting = creativeToolkitBlock;
-      return creativeRouting;
-    }
-
-    function buildWorkingCyclesRouting() {
-      const workingCyclesString = dedent`
-        **Working Cycles**
-
-        | File | Purpose |
-        | :--- | :------ |
-        | \`.ai/commands/sdg-land.md\` | Land Cycle (Project Inception & Backlog) |
-        | \`.ai/commands/sdg-feat.md\` | Feature Cycle (Specs & Implementation) |
-        | \`.ai/commands/sdg-fix.md\` | Fix Cycle (Forensics & Regression) |
-        | \`.ai/commands/sdg-docs.md\` | Documentation Cycle (ADRs & Logs) |
-        | \`.ai/commands/sdg-audit.md\` | Governance Audit (drift detection & compliance) |
-        | \`.ai/commands/sdg-end.md\` | END Phase — close the active cycle (changelog, backlog, commit) |`;
-
-      const workingCyclesRouting = workingCyclesString;
-      return workingCyclesRouting;
-    }
+    return cycleCommandsString;
   }
 }
 
