@@ -2,9 +2,7 @@
 
 This command triggers the **Phase: END** defined in the Working Protocol.
 
-> [!IMPORTANT]
-> Follow the canonical **Phase: END** checklist from `.ai/skill/AGENTS.md` (or `workflow.md`).
-> All 7 steps — Task Summary, Changelog, Backlog Sync, Context Update, Lint, Commit, Next Step — are defined there as the Single Source of Truth.
+> **Load now**: `.ai/instructions/templates/workflow.md` — the canonical END checklist is defined there as the Single Source of Truth.
 
 ---
 

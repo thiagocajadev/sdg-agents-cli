@@ -245,7 +245,8 @@ function executeQuickPipeline(targetDirectory, selections, { noDevGuides = true 
   prepareProjectStructure(targetDirectory);
 
   printStep(2, 5, 'Injecting rules...');
-  injectRulesets(targetDirectory, selections, { noDevGuides });
+  const isCreativeEnabled = selections.creative === true;
+  injectRulesets(targetDirectory, selections, { noDevGuides, noCreative: !isCreativeEnabled });
 
   printStep(3, 5, 'Assembling AGENTS.md...');
   const content = buildMasterInstructions(selections);
@@ -279,7 +280,8 @@ function executeAgentsPipeline(targetDirectory, selections, { noDevGuides = true
   prepareProjectStructure(targetDirectory);
 
   printStep(2, 5, 'Injecting rules...');
-  injectRulesets(targetDirectory, selections, { noDevGuides });
+  const isCreativeEnabled = selections.creative === true;
+  injectRulesets(targetDirectory, selections, { noDevGuides, noCreative: !isCreativeEnabled });
 
   printStep(3, 5, 'Assembling AGENTS.md...');
   const content = buildMasterInstructions(selections);

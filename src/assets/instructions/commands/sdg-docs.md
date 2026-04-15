@@ -1,6 +1,8 @@
 # Technical Documentation — Context Preparation
 
-Executing documentation for: $ARGUMENTS. This command prepares the context for the **Docs Cycle**.
+Executing documentation for: $ARGUMENTS.
+
+> **Load now**: `.ai/instructions/templates/workflow.md` — defines all phases (SPEC, END) you will follow in this cycle.
 
 ---
 

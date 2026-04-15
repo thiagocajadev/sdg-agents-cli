@@ -36,31 +36,25 @@ function computeStackMetrics(idioms) {
 }
 
 /**
- * Assembles the full master instruction content from inline laws + workflow + links.
+ * Assembles the lean master instruction content — session start + routing + command center.
+ * workflow.md is NOT inlined; it is loaded lazily by command files at cycle start.
  */
 function buildMasterInstructions(selections) {
-  const templatesDir = path.join(SOURCE_INSTRUCTIONS, 'templates');
-  const workflow = fs.readFileSync(path.join(templatesDir, 'workflow.md'), 'utf8');
-
   const manifesto = buildStaffManifesto();
+  const sessionStart = buildSessionStartBlock();
+  const workflowPointer = buildWorkflowPointer();
+  const agentRolesBlock = buildAgentRolesBlock();
   const instructionLinks = buildInstructionLinks(selections);
 
-  const agentRolesBlock = buildAgentRolesBlock();
-  const agentRolesSeparator = '\n\n';
-
-  const fullInstructionContent = `${manifesto}\n\n${workflow}${agentRolesSeparator}${agentRolesBlock}\n\n${instructionLinks}`;
+  const fullInstructionContent = [
+    manifesto,
+    sessionStart,
+    workflowPointer,
+    agentRolesBlock,
+    instructionLinks,
+  ].join('\n\n');
 
   return fullInstructionContent;
-
-  function buildAgentRolesBlock() {
-    const agentRolesString = dedent`
-      ## Agent Roles
-
-      > [!NOTE]
-      > Read \`.ai/instructions/core/agent-roles.md\` for the Agent Roles and Execution Protocol.`;
-
-    return agentRolesString;
-  }
 
   function buildStaffManifesto() {
     const manifestoString = dedent`
@@ -72,6 +66,39 @@ function buildMasterInstructions(selections) {
     `;
 
     return manifestoString;
+  }
+
+  function buildSessionStartBlock() {
+    const sessionStartString = dedent`
+      ## Session Start
+
+      1. Run \`node -v\` (or primary toolchain) — confirm terminal is alive.
+      2. Read \`.ai-backlog/context.md\` — project brief. If missing, analyze \`package.json\` + \`README.md\` and generate it. Never overwrite existing.
+      3. Read \`.ai-backlog/tasks.md\` — check for \`[IN_PROGRESS]\` tasks before accepting new work.
+      4. Read \`.ai-backlog/impact-map.md\` — if active (not idle): load only \`## Changed\` + \`## Blast Radius\` files. If missing or idle: proceed normally.
+      5. Resume any \`[IN_PROGRESS]\` task immediately. Announce what was in progress.`;
+
+    return sessionStartString;
+  }
+
+  function buildWorkflowPointer() {
+    const pointerString = dedent`
+      ## Working Protocol
+
+      > Load \`.ai/instructions/templates/workflow.md\` when starting any cycle (\`feat:\`, \`fix:\`, \`docs:\`, \`land:\`, \`end:\`).
+      > It defines all phases: SPEC · PLAN · CODE · TEST · END — and the Intent Routing table.`;
+
+    return pointerString;
+  }
+
+  function buildAgentRolesBlock() {
+    const agentRolesString = dedent`
+      ## Agent Roles
+
+      > [!NOTE]
+      > Read \`.ai/instructions/core/agent-roles.md\` for the Agent Roles and Execution Protocol.`;
+
+    return agentRolesString;
   }
 
   function buildInstructionLinks(currentSelections) {
@@ -166,11 +193,16 @@ function buildMasterInstructions(selections) {
       const backendRows = hasBackend
         ? [
             `| \`.ai/instructions/competencies/backend.md\` | BFF + API Strategy |`,
-            `| \`.ai/instructions/core/data-access.md\` | Data Access |`,
-            `| \`.ai/instructions/core/sql-style.md\` | SQL Style |`,
-            `| \`.ai/instructions/core/api-design.md\` | API Design |`,
             `| \`.ai/instructions/core/ci-cd.md\` | CI/CD |`,
             `| \`.ai/instructions/core/cloud.md\` | Cloud & Containers |`,
+          ]
+        : [];
+
+      const backendOnDemandRows = hasBackend
+        ? [
+            `| \`.ai/instructions/core/data-access.md\` | Data Access — load when touching DB layer |`,
+            `| \`.ai/instructions/core/sql-style.md\` | SQL Style — load when writing queries |`,
+            `| \`.ai/instructions/core/api-design.md\` | API Design — load when defining endpoints |`,
           ]
         : [];
 
@@ -183,12 +215,25 @@ function buildMasterInstructions(selections) {
 
       const allRows = allRowsList.join('\n');
 
+      const onDemandSection =
+        backendOnDemandRows.length > 0
+          ? [
+              ``,
+              `**On Demand — load only when the task requires it**`,
+              ``,
+              `| File | When to load |`,
+              `| :--- | :----------- |`,
+              backendOnDemandRows.join('\n'),
+            ].join('\n')
+          : '';
+
       const technicalRoutingBlock = [
         `**Technical Execution**`,
         ``,
         `| File | Purpose |`,
         `| :--- | :------ |`,
         allRows,
+        onDemandSection,
       ].join('\n');
 
       return technicalRoutingBlock;
@@ -217,7 +262,9 @@ function buildMasterInstructions(selections) {
       return uiuxRouting;
     }
 
-    function buildCreativeToolkitRouting(_selectionsObj) {
+    function buildCreativeToolkitRouting(selectionsObj) {
+      if (!selectionsObj.creative) return null;
+
       const creativeDir = path.join(SOURCE_INSTRUCTIONS, 'core', 'creative');
       if (!fs.existsSync(creativeDir)) return null;
 

@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.12.0] - 2026-04-15
+
+### Added
+
+- **Aggressive Context Lazy Loading**: `workflow.md` is no longer inlined in the generated `AGENTS.md`. Session start now loads ~1.000 tokens (manifesto + session-start + pointer + tables) instead of ~4.000. Workflow is deferred until a cycle starts (`feat:`, `fix:`, `docs:`, `end:`), when each command file explicitly instructs loading it.
+- **Self-Contained Command Files**: `sdg-feat.md`, `sdg-fix.md`, `sdg-docs.md`, and `sdg-end.md` each received an explicit `Load now: workflow.md` directive, making every cycle entry point self-sufficient without relying on auto-loaded context.
+- **Session Gate (Hard Stop at END)**: Phase END step 8 replaced "suggest next step" with a mandatory hard stop: write one-line next objective to `context.md ## Now`, then halt the session. Next task starts fresh in a new session.
+- **Creative Toolkit Opt-In**: Creative toolkit injection is now off by default (`noCreative = true`). Consumer projects that don't use creative assets no longer pay ~300 token overhead in AGENTS.md or receive unused creative files.
+- **Backend Domain Files On Demand**: `data-access.md`, `sql-style.md`, and `api-design.md` moved from the always-visible Technical Execution table to an "On Demand" sub-table — load only when the task touches DB layer, queries, or endpoint design.
+
+### Fixed
+
 ## [2.11.0] - 2026-04-15
 
 ### Added

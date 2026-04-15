@@ -29,6 +29,8 @@ On every request, classify intent before acting:
 | `audit:`                  | Read `.ai/commands/sdg-audit.md` → Run `npx sdg-agents audit` → Follow **Audit Cycle** |
 | No prefix, intent unclear | Ask once: "land, feat, fix, docs, or audit?" — then proceed                            |
 
+> **Mid-cycle messages**: classify as Q&A (answer + resume), adjustment (update plan + continue), pivot (re-spec), or out-of-scope (defer). Never interpret as a new cycle while one is active.
+
 ---
 
 ## Phase: SPEC (The Contract) — MODE: PLANNING
@@ -70,20 +72,7 @@ On every request, classify intent before acting:
 >
 > 1. **DNA-GATE & MENTAL RESET [LOCKED]**: Before starting, explicitly list which **Engineering Laws (staff-dna.md)** apply to the current task and why. Confirm mental alignment.
 > 2. **Context Load**: Reads the project's standards and style guide before writing anything (read `engineering-standards.md`, `code-style.md`, and competencies).
-> 3. **Quality Gate**: Reviews every function against the guide's readability rules before moving on.
->
-> _Narrative Gate Checklist:_
->
-> - [ ] **Stepdown Rule** — entry point is topmost; callers above callees in the file
-> - [ ] **SLA** — this function orchestrates OR implements, never both in same body
-> - [ ] **Guard Clauses** — all nested conditionals replaced with early returns
-> - [ ] **Narrative Siblings** — one-off helpers defined as local siblings immediately following their caller
-> - [ ] **Explaining Returns** — return value assigned to a named `const`; no bare returns
-> - [ ] **Boolean Prefix** — `isLoading`, `hasError`, `isActive`; never bare `loading`, `error`
-> - [ ] **Named Expectations** (Tests) — `input`/`actual`/`expected` triad; no magic values in `assert`
-> - [ ] **Boundary Resilience** — error handling (_try/catch_ or _Early Return_) at critical I/O or data points
-> - [ ] **Code as Documentation** — no "what" comments; only `// why:` for non-obvious constraints
->
+> 3. **Quality Gate**: Apply Narrative Gate against every modified function (laws defined in `staff-dna.md`).
 > 4. **Plan Adherence**: Follows the agreed plan. No extra features or refactors outside what was approved.
 > 5. **Blocker Surface**: Raises blockers immediately. Never quietly works around them.
 >    </rule>
@@ -134,7 +123,7 @@ On every request, classify intent before acting:
 >    [!CAUTION]
 >    **STOP IMMEDIATELY.** You are forbidden from running `git commit` autonomously. You must present the proposed commit message to the user and await explicit verbal approval before proceeding.
 >
-> 8. **Next step**: Suggests what comes next: push · deploy · or a new task.
+> 8. **Session Gate [HARD STOP]**: Write one-line next objective to `.ai-backlog/context.md` under `## Now`. Then stop completely: _"Cycle complete. Context exhausted — **open a new session** to continue. Next: [objective]."_ Do not accept new work in this session.
 >
 > [!CAUTION]
 > **SOVEREIGN GATE**: Never bypass human verification for commits. Autonomous commits are a violation of Law 0.
@@ -146,14 +135,6 @@ On every request, classify intent before acting:
 > [!IMPORTANT]
 > `.ai-backlog/tasks.md` is the single source of truth for work state. Any agent, any session, any model can continue from it.
 
-### Session Start
-
-1. **Terminal Sanity Check**: Run `node -v` and `npm -v` (or the project's primary toolchain) to "wake up" the terminal and confirm execution capabilities in the current shell.
-2. Read `.ai-backlog/context.md` — understand the project brief. If missing, analyze `package.json`, `README.md`, entry points and generate it (fields: name, stack, pattern, entry, Decisions, Now, Partner). Never overwrite existing.
-3. Read `.ai-backlog/tasks.md` — check for `[IN_PROGRESS]` tasks before accepting new work.
-4. **Impact Map Check**: Read `.ai-backlog/impact-map.md`. If active (not idle): load only files under `## Changed` and `## Blast Radius`. If missing or idle: proceed normally. If backlog deleted: recreate idle map, then rebuild from `git diff --name-only HEAD` if a cycle is in progress.
-5. If an `[IN_PROGRESS]` task exists: resume it. Announce what was in progress and continue from the checkpoint.
-
 ### Checkpoint (after each atomic task)
 
 - Mark the completed task as `[DONE]` and move it to `## Done`.
@@ -161,37 +142,13 @@ On every request, classify intent before acting:
 
 ### Proactive Handoff (approaching token/context limit)
 
-- When the response is growing long or the next task is complex, **stop proactively**.
-- Write a checkpoint to `.ai-backlog/tasks.md`: current task stays `[IN_PROGRESS]` with a note of exactly where it stopped and what the next step is.
-- Announce: _"Approaching context limit. Saved checkpoint to `.ai-backlog/tasks.md`. Start a new session and the agent will continue from here."_
+- Stop proactively. Write checkpoint to `tasks.md` (current task `[IN_PROGRESS]` + where it stopped + next step).
+- Announce: _"Approaching context limit. Saved checkpoint. Start a new session to continue."_
 
-### Recovery (if tasks.md is lost or missing)
+### Recovery (if tasks.md is lost)
 
-- Read the last 10–20 git commits (`git log --oneline -20`) to reconstruct completed work.
-- Rebuild `tasks.md` from commit history and any remaining in-progress files.
+- Run `git log --oneline -20` to reconstruct. Rebuild `tasks.md` from commit history.
   > </rule>
-
-## Rule: Cycle Continuity (Conversation During Active Cycles)
-
-> <rule name="CycleContinuity">
-> [!NOTE]
-> An active cycle (feat/fix/docs) stays open until END is reached. Mid-cycle messages do not close or restart the cycle.
-
-When a message arrives during an active cycle, classify it before acting:
-
-| Message type                 | Example                                   | Action                                                                        |
-| :--------------------------- | :---------------------------------------- | :---------------------------------------------------------------------------- |
-| **Question / clarification** | "why did you choose this approach?"       | Answer directly, then resume the cycle                                        |
-| **Plan adjustment**          | "skip step 3" / "add a step for X"        | Update the plan, confirm if the change is significant, continue               |
-| **Pivot**                    | "change the approach entirely"            | Return to SPEC, revise, wait for re-approval                                  |
-| **Unrelated request**        | "fix this other thing while you're at it" | Flag it as out-of-scope. Finish the current cycle first, then start a new one |
-
-**State Recovery**: After any conversational interruption, explicitly state your current position before continuing.
-_Example: "Resuming Cycle Feat — Phase: SPEC — Step 3 (Domain & Contracts)."_
-
-**Hard Rule**: Never interpret a conversational message as a new `land:`, `feat:`, or `fix:` while a cycle is active. The cycle closes only at END.
-
-> </rule>
 
 ## Rule: Token Discipline
 

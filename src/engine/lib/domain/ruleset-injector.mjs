@@ -21,7 +21,11 @@ function prepareProjectStructure(targetDirectory) {
   fs.mkdirSync(commandsDir, { recursive: true });
 }
 
-function injectRulesets(targetDirectory, selections, { noDevGuides = true } = {}) {
+function injectRulesets(
+  targetDirectory,
+  selections,
+  { noDevGuides = true, noCreative = true } = {}
+) {
   const { flavor, idioms } = selections;
   const projectAiInstructions = path.join(targetDirectory, '.ai', 'instructions');
 
@@ -52,8 +56,7 @@ function injectRulesets(targetDirectory, selections, { noDevGuides = true } = {}
   }
 
   if (!noDevGuides) injectDevGuides(targetDirectory);
-
-  injectCreativeToolkit(targetDirectory);
+  if (!noCreative) injectCreativeToolkit(targetDirectory);
 }
 
 function injectDevGuides(targetDirectory) {

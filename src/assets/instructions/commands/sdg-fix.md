@@ -1,6 +1,8 @@
 # Incident Correction — Context Preparation
 
-We are correcting a recorded incident: $ARGUMENTS. This command prepares the context for the **Fix Cycle** defined in the **Working Protocol**.
+We are correcting a recorded incident: $ARGUMENTS.
+
+> **Load now**: `.ai/instructions/templates/workflow.md` — defines all phases (SPEC, PLAN, CODE, TEST, END) you will follow in this cycle.
 
 ---
 

@@ -1,6 +1,8 @@
 # Feature Execution — Context Preparation
 
-We are initializing a new feature: $ARGUMENTS. This command prepares the context for the development lifecycle following the **Working Protocol**.
+We are initializing a new feature: $ARGUMENTS.
+
+> **Load now**: `.ai/instructions/templates/workflow.md` — defines all phases (SPEC, PLAN, CODE, TEST, END) you will follow in this cycle.
 
 ---
 
