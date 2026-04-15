@@ -37,7 +37,7 @@ npx sdg-agents
 ```
 
 <p align="left">
-  <kbd><img src="https://raw.githubusercontent.com/thiagocajadev/sgd-agents-cli/main/src/assets/img/sdg-agents-menu-v1.png" alt="Spec Driven Guide CLI in action" /></kbd>
+  <kbd><img src="https://raw.githubusercontent.com/thiagocajadev/sgd-agents-cli/main/src/assets/img/sdg-agents-menu-v2.png" alt="Spec Driven Guide CLI in action" /></kbd>
 </p>
 
 The interactive wizard guides you through selecting an architectural flavor and one or more language idioms. For non-interactive use:

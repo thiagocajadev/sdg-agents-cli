@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.12.2] - 2026-04-15
+
+### Added
+
+### Fixed
+
+- **JavaScript isFrontend Classification**: Corrected `isFrontend` flag for the `javascript` (Vanilla / ESM) idiom from `true` to `false`. ESM/Node stacks no longer trigger the Frontend framework prompt, Design Preset step, or `frontend.md` competency injection — those remain exclusive to `typescript` and other UI-oriented idioms.
+
+## [2.12.1] - 2026-04-15
+
+### Added
+
+### Fixed
+
+- **Token Efficiency & Context Loading Hardening**: Fixed duplicate `javascript/patterns.md` entry in Technical Execution table (assembler deduplicates idioms array). Moved `ci-cd.md` and `cloud.md` from always-visible Technical Execution to On Demand backend section. Replaced `agent-roles.md` On Demand entry with `observability.md` (agent-roles is already loaded via command file footers). Split Project Context into session-start essentials (`context.md`, `tasks.md`) and On Demand (`learned.md`, `troubleshoot.md` with explicit load conditions). Added Task Recovery directive to Session Start step 5 — agents now load `workflow.md` immediately when an `[IN_PROGRESS]` task is found, without waiting for a cycle command. Added `Load now: workflow.md` directive to `sdg-audit.md` (parity with all other command files). Added Core Rules always-exempt clause to Phase CODE step 2 to resolve implicit conflict with Impact Map skip rule.
+
 ## [2.12.0] - 2026-04-15
 
 ### Added

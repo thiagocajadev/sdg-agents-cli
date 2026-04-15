@@ -36,7 +36,7 @@ npx sdg-agents
 ```
 
 <p align="left">
-  <kbd><img src="https://raw.githubusercontent.com/thiagocajadev/sgd-agents-cli/main/src/assets/img/sdg-agents-menu-v1.png" alt="Spec Driven Guide CLI em ação" /></kbd>
+  <kbd><img src="https://raw.githubusercontent.com/thiagocajadev/sgd-agents-cli/main/src/assets/img/sdg-agents-menu-v2.png" alt="Spec Driven Guide CLI em ação" /></kbd>
 </p>
 
 O assistente interativo guia você na escolha do flavor arquitetural e um ou mais idiomas. Para uso não-interativo:

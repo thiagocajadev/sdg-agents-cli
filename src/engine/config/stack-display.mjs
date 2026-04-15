@@ -25,7 +25,7 @@ export const STACK_DISPLAY_NAMES = {
   javascript: {
     name: 'JavaScript (Vanilla / ESM)',
     isBackend: true,
-    isFrontend: true,
+    isFrontend: false,
   },
   kotlin: {
     name: 'Kotlin (Android / Ktor / Spring)',
