@@ -1,7 +1,7 @@
 {
   "name": "sdg-agents",
-  "version": "2.9.2",
-  "description": "Structured working protocol and engineering rules for AI agents. Works with Claude Code, Antigravity, Codex, and others.",
+  "version": "2.10.0",
+  "description": "AI-Native Governance Framework: inject staff-level engineering rules and a structured working protocol into your project for AI agents.",
   "type": "module",
   "main": "./src/engine/bin/index.mjs",
   "bin": {

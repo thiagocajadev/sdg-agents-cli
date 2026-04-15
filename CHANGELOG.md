@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.10.0] - 2026-04-15
+
+### Added
+
+- **CLI Streamlining — Menus, Quick Flag & Smart Defaults**: Simplified the interactive wizard by removing the explicit scope question (scope now inferred from selected idioms), replacing N per-idiom version prompts with a single "Code Style" choice (Latest / Conservative), reducing design presets from 8 to 4, auto-detecting bump from JS/TS idioms, and merging the two partner prompts into one. Added `--quick` CLI flag for zero-prompt installs. Restructured the main menu to 3 items (Build Project · Settings · Exit) with Governance Audit moved inside Settings. Updated `package.json` description for better SEO and value clarity.
+
+### Fixed
+
 ## [2.9.2] - 2026-04-15
 
 ### Added

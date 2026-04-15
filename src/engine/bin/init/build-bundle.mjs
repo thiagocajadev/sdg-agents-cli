@@ -12,7 +12,8 @@ import { ResultUtils } from '../../lib/core/result-utils.mjs';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
 import { BundleUI } from '../../lib/core/ui-utils.mjs';
 
-const { gatherUserSelections, validateSelections, autoSelectVersions } = WizardUtils;
+const { gatherUserSelections, validateSelections, resolveVersionsByCodeStyle, autoDetectBump } =
+  WizardUtils;
 const { prepareProjectStructure, injectRulesets, injectPrompts } = RulesetInjector;
 const {
   buildMasterInstructions,
@@ -71,7 +72,8 @@ async function runNonInteractive(targetDirectory, options) {
     process.exit(1);
   }
 
-  autoSelectVersions(selections);
+  resolveVersionsByCodeStyle(selections);
+  autoDetectBump(selections);
 
   const state = { step: 'execute', userSelections: selections };
   const result = await handleFinalExecutionPhase(state, targetDirectory, {

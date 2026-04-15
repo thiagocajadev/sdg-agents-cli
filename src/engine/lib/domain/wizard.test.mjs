@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { WizardUtils } from './wizard.mjs';
 
-const { validateSelections, autoSelectVersions } = WizardUtils;
+const { validateSelections, resolveVersionsByCodeStyle } = WizardUtils;
 
 describe('WizardUtils (Non-Interactive)', () => {
   describe('validateSelections()', () => {
@@ -93,11 +93,16 @@ describe('WizardUtils (Non-Interactive)', () => {
     });
   });
 
-  describe('autoSelectVersions()', () => {
-    it('should auto-select the latest version for each idiom', () => {
-      const input = { flavor: 'mvc', idioms: ['typescript', 'csharp'], versions: {} };
+  describe('resolveVersionsByCodeStyle()', () => {
+    it('should resolve latest versions for each idiom when codeStyle is latest', () => {
+      const input = {
+        flavor: 'mvc',
+        idioms: ['typescript', 'csharp'],
+        versions: {},
+        codeStyle: 'latest',
+      };
 
-      autoSelectVersions(input);
+      resolveVersionsByCodeStyle(input);
 
       assert.ok(input.versions.typescript);
       assert.ok(input.versions.csharp);
@@ -108,18 +113,28 @@ describe('WizardUtils (Non-Interactive)', () => {
         flavor: 'mvc',
         idioms: ['typescript'],
         versions: { typescript: 'ts@5.9' },
+        codeStyle: 'latest',
       };
       const expected = 'ts@5.9';
 
-      autoSelectVersions(input);
+      resolveVersionsByCodeStyle(input);
 
       assert.equal(input.versions.typescript, expected);
     });
 
-    it('should not throw when versions object is missing and auto-populate from registry', () => {
-      const input = { flavor: 'mvc', idioms: ['typescript'], versions: {} };
+    it('should resolve conservative versions when codeStyle is conservative', () => {
+      const input = { flavor: 'mvc', idioms: ['csharp'], versions: {}, codeStyle: 'conservative' };
 
-      assert.doesNotThrow(() => autoSelectVersions(input));
+      resolveVersionsByCodeStyle(input);
+
+      // why: csharp first entry is LTS (.NET 10), conservative should still resolve a version
+      assert.ok(input.versions.csharp);
+    });
+
+    it('should not throw when versions object is missing and auto-populate from registry', () => {
+      const input = { flavor: 'mvc', idioms: ['typescript'], versions: {}, codeStyle: 'latest' };
+
+      assert.doesNotThrow(() => resolveVersionsByCodeStyle(input));
       assert.ok(input.versions.typescript);
     });
   });

@@ -1,6 +1,5 @@
-import fs from 'node:fs';
 import path from 'node:path';
-import { STACK_VERSIONS } from '../../config/stack-versions.mjs';
+import { selectVersionByStyle } from '../../config/stack-versions.mjs';
 import { STACK_DISPLAY_NAMES } from '../../config/stack-display.mjs';
 import { DisplayUtils } from '../core/display-utils.mjs';
 import { FsUtils } from '../core/fs-utils.mjs';
@@ -10,36 +9,31 @@ import { PromptUtils } from '../infra/prompt-utils.mjs';
 const { displayName } = DisplayUtils;
 const { getDirectories, getDirname } = FsUtils;
 const { success, fail } = ResultUtils;
-const { safeSelect, safeConfirm, safeInput } = PromptUtils;
+const { safeSelect, safeInput } = PromptUtils;
 
 const __dirname = getDirname(import.meta.url);
 const SOURCE_INSTRUCTIONS = path.join(__dirname, '../../..', 'assets', 'instructions');
 
 const WIZARD_STEPS = {
   INITIAL: 'initial',
-  SCOPE: 'scope',
-  TRACK: 'track',
   FLAVOR: 'flavor',
   BACKEND: 'backend',
   FRONTEND: 'frontend',
-  VERSIONS: 'versions',
+  CODE_STYLE: 'codeStyle',
   DESIGN: 'design',
   IDE: 'ide',
-  BUMP: 'bump',
   PARTNER: 'partner',
   DONE: 'done',
 };
 
 const STEP_ORDER = [
   WIZARD_STEPS.INITIAL,
-  WIZARD_STEPS.SCOPE,
   WIZARD_STEPS.FLAVOR,
   WIZARD_STEPS.BACKEND,
   WIZARD_STEPS.FRONTEND,
-  WIZARD_STEPS.VERSIONS,
+  WIZARD_STEPS.CODE_STYLE,
   WIZARD_STEPS.DESIGN,
   WIZARD_STEPS.IDE,
-  WIZARD_STEPS.BUMP,
   WIZARD_STEPS.PARTNER,
   WIZARD_STEPS.DONE,
 ];
@@ -47,30 +41,24 @@ const STEP_ORDER = [
 async function gatherUserSelections(targetDirectory = process.cwd()) {
   const availableFlavors = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'flavors'));
   const availableIdioms = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'idioms'));
-  const availableTracks = getDirectories(
-    path.join(__dirname, '../../..', 'assets', 'dev-guides', 'prompt-tracks')
-  );
 
   let selections = {
     mode: 'agents',
     flavor: 'vertical-slice',
     idioms: [],
     versions: {},
-    track: null,
+    codeStyle: 'latest',
     ide: 'none',
   };
-  let scope = 'fullstack';
   let step = WIZARD_STEPS.INITIAL;
   let historyStack = [];
 
   while (step !== WIZARD_STEPS.DONE) {
     const context = {
-      scope,
       step,
       selections,
       availableFlavors,
       availableIdioms,
-      availableTracks,
       targetDirectory,
     };
     const stepResult = await executeWizardStep(step, context);
@@ -90,76 +78,56 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
     const isGoingBack = nextStepIndex < currentStepIndex;
 
     if (isGoingBack) {
-      if (historyStack.length > 0) {
-        // Pop until we reach the target previous step
-        let lastState;
-        while (
-          historyStack.length > 0 &&
-          STEP_ORDER.indexOf(historyStack[historyStack.length - 1].step) >= nextStepIndex
-        ) {
-          lastState = historyStack.pop();
-        }
-        if (lastState) {
-          step = lastState.step;
-          selections = lastState.selections;
-          scope = lastState.scope;
-        } else {
-          step = WIZARD_STEPS.INITIAL;
-        }
+      let lastState;
+      while (
+        historyStack.length > 0 &&
+        STEP_ORDER.indexOf(historyStack[historyStack.length - 1].step) >= nextStepIndex
+      ) {
+        lastState = historyStack.pop();
+      }
+      if (lastState) {
+        step = lastState.step;
+        selections = lastState.selections;
       } else {
         step = WIZARD_STEPS.INITIAL;
       }
     } else {
       historyStack.push({
         step,
-        scope,
         selections: JSON.parse(JSON.stringify(selections)),
       });
       step = stepResult.value.nextStep;
-      scope = applyStepResult(selections, scope, stepResult.value);
+      applyStepResult(selections, stepResult.value);
     }
   }
 
   const wizardResult = success(selections);
   return wizardResult;
+}
 
-  function applyStepResult(currentSelections, currentScope, stepValue) {
-    const nextScope = stepValue.scope ?? currentScope;
-    if (stepValue.mode) currentSelections.mode = stepValue.mode;
-    if (stepValue.flavor) currentSelections.flavor = stepValue.flavor;
-    if (stepValue.track) currentSelections.track = stepValue.track;
-    if (stepValue.versions) {
-      Object.assign(currentSelections.versions, stepValue.versions);
-      currentSelections.idioms = Array.from(new Set(currentSelections.idioms));
-    }
-    if (stepValue.designPreset) currentSelections.designPreset = stepValue.designPreset;
-    if (stepValue.idiom) currentSelections.idioms.push(stepValue.idiom);
-    if (stepValue.ide) currentSelections.ide = stepValue.ide;
-    if (stepValue.bump !== undefined) currentSelections.bump = stepValue.bump;
-    if (stepValue.partner) {
-      currentSelections.partner = currentSelections.partner || {};
-      Object.assign(currentSelections.partner, stepValue.partner);
-    }
-    const scopeToApply = nextScope;
-    return scopeToApply;
+function applyStepResult(currentSelections, stepValue) {
+  if (stepValue.mode) currentSelections.mode = stepValue.mode;
+  if (stepValue.flavor) currentSelections.flavor = stepValue.flavor;
+  if (stepValue.codeStyle) currentSelections.codeStyle = stepValue.codeStyle;
+  if (stepValue.designPreset) currentSelections.designPreset = stepValue.designPreset;
+  if (stepValue.idiom) currentSelections.idioms.push(stepValue.idiom);
+  if (stepValue.ide) currentSelections.ide = stepValue.ide;
+  if (stepValue.partner) {
+    currentSelections.partner = currentSelections.partner || {};
+    Object.assign(currentSelections.partner, stepValue.partner);
   }
 }
 
 async function executeWizardStep(step, context) {
-  const { mode } = context.selections;
-
   const STEP_HANDLERS = {
     [WIZARD_STEPS.INITIAL]: () => promptInitialChoice(),
-    [WIZARD_STEPS.SCOPE]: () =>
-      mode === 'prompts' ? promptTrackSelection(context) : promptProjectScope(),
     [WIZARD_STEPS.FLAVOR]: () => promptArchitectureFlavor(context),
     [WIZARD_STEPS.BACKEND]: () => promptBackendIdiom(context),
     [WIZARD_STEPS.FRONTEND]: () => promptFrontendIdiom(context),
-    [WIZARD_STEPS.VERSIONS]: () => promptVersionSelections(context),
+    [WIZARD_STEPS.CODE_STYLE]: () => promptCodeStyle(context),
     [WIZARD_STEPS.DESIGN]: () => promptDesignPreset(context),
     [WIZARD_STEPS.IDE]: () => promptIdeSelection(),
-    [WIZARD_STEPS.BUMP]: () => promptBumpAutomation(context),
-    [WIZARD_STEPS.PARTNER]: () => promptPartnerInfo(context),
+    [WIZARD_STEPS.PARTNER]: () => promptPartnerInfo(),
   };
 
   const handler = STEP_HANDLERS[step] ?? (() => success({ nextStep: WIZARD_STEPS.DONE }));
@@ -173,15 +141,15 @@ async function promptInitialChoice() {
     message: 'What would you like to do?',
     choices: [
       {
-        name: '1. Set up this project — install the instruction set and working protocol',
+        name: '1. Full Setup — configure architecture, language and AI agent',
         value: 'agents',
       },
       {
-        name: '2. Quick setup — install with defaults (lite + JS/TS, includes everything)',
+        name: '2. ⚡ Quick — install with defaults (lite + JS/TS, includes everything)',
         value: 'quick',
       },
       {
-        name: '3. Creative Design Toolkit — Branding, Social Media & Landing Pages',
+        name: '3. Creative Toolkit — branding, social media & landing pages',
         value: 'creatives',
       },
       { name: '4. Back', value: 'back' },
@@ -197,7 +165,7 @@ async function promptInitialChoice() {
     return creativesResult;
   }
 
-  const initialChoiceResult = success({ nextStep: WIZARD_STEPS.SCOPE, mode: result });
+  const initialChoiceResult = success({ nextStep: WIZARD_STEPS.FLAVOR, mode: result });
   return initialChoiceResult;
 }
 
@@ -206,12 +174,12 @@ function handleQuickSetup() {
     mode: 'quick',
     flavor: 'lite',
     idioms: ['javascript', 'typescript'],
-    track: '00-lite-mode',
-    designPreset: 'glass',
+    codeStyle: 'latest',
+    designPreset: 'clean',
     ide: 'none',
     versions: {
-      javascript: 'latest',
-      typescript: 'latest',
+      javascript: 'js@2025',
+      typescript: 'ts@6.0',
     },
     partner: {
       name: 'Human Developer',
@@ -222,88 +190,17 @@ function handleQuickSetup() {
   return quickResult;
 }
 
-async function promptTrackSelection(context) {
-  const { availableTracks } = context;
-
-  const sortedTracks = [...availableTracks].sort((trackA, trackB) => trackA.localeCompare(trackB));
-  const trackChoices = [
-    ...sortedTracks.map(toTrackChoice),
-    { name: '4. All Tracks (Best for Full Learning)', value: 'all' },
-  ];
-
-  const track = await safeSelect({
-    message: 'Which specification track best fits your project?',
-    choices: [...trackChoices, { name: '5. Back', value: 'back' }],
-  });
-
-  if (track === 'back') {
-    const backResult = success({ nextStep: WIZARD_STEPS.INITIAL });
-    return backResult;
-  }
-
-  const projectPromptsDir = path.join(context.targetDirectory, '.ai', 'prompts');
-  const isExisting = fs.existsSync(projectPromptsDir);
-
-  if (isExisting) {
-    const proceed = await safeConfirm({
-      message: `The directory ".ai/prompts" already exists. Overwrite?`,
-      default: false,
-    });
-    if (!proceed) {
-      const cancelResult = success({ nextStep: WIZARD_STEPS.SCOPE });
-      return cancelResult;
-    }
-  }
-
-  const promptsDoneResult = success({ nextStep: WIZARD_STEPS.DONE, track });
-  return promptsDoneResult;
-}
-
-function toTrackChoice(trackFolderKey) {
-  const PRESET_LABELS = {
-    '00-lite-mode': '1. Lite Mode (Simple & Agile)',
-    '01-new-evolution': '2. New Evolution (Greenfield)',
-    '02-legacy-modernization': '3. Legacy Modernization (Brownfield)',
-  };
-
-  const defaultLabel = displayName(trackFolderKey);
-  const label = PRESET_LABELS[trackFolderKey] ?? defaultLabel;
-
-  const choice = { name: label, value: trackFolderKey };
-  return choice;
-}
-
-async function promptProjectScope() {
-  const scope = await safeSelect({
-    message: 'What type of project is this for the AI Agents?',
-    choices: [
-      { name: '1. Backend   — server, API, logic, DB (Single Idiom)', value: 'backend' },
-      { name: '2. Frontend  — UI, browser, client-side (Single Idiom)', value: 'frontend' },
-      { name: '3. FullStack — Both combined (Multi-Idiom)', value: 'fullstack' },
-      { name: '4. Back', value: 'back' },
-    ],
-  });
-
-  if (scope === 'back') {
-    const backResult = success({ nextStep: WIZARD_STEPS.INITIAL });
-    return backResult;
-  }
-
-  const scopeResult = success({ nextStep: WIZARD_STEPS.FLAVOR, scope });
-  return scopeResult;
-}
-
 async function promptArchitectureFlavor(context) {
   const { availableFlavors } = context;
   const flavorChoices = buildFlavorChoices(availableFlavors);
 
   const flavor = await safeSelect({
-    message: 'Which architecture flavor should the project follow?',
+    message: 'Which architecture should the project follow?',
     choices: [...flavorChoices, { name: 'Back', value: 'back' }],
   });
 
   if (flavor === 'back') {
-    const backResult = success({ nextStep: WIZARD_STEPS.SCOPE });
+    const backResult = success({ nextStep: WIZARD_STEPS.INITIAL });
     return backResult;
   }
 
@@ -342,51 +239,16 @@ function toFlavorOption(flavorFolderKey) {
 }
 
 async function promptBackendIdiom(context) {
-  const { scope, availableIdioms } = context;
-
-  if (scope === 'frontend') {
-    const skipResult = success({ nextStep: WIZARD_STEPS.FRONTEND });
-    return skipResult;
-  }
+  const { availableIdioms } = context;
 
   const backendIdioms = availableIdioms.filter(
     (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isBackend
   );
   const result = await safeSelect({
-    message: 'Which Backend idiom / language?',
+    message: 'Backend language?',
     choices: [
+      { name: '—  None / Skip', value: 'skip' },
       ...backendIdioms.map((idiomFolderKey) => ({
-        name: STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey,
-        value: idiomFolderKey,
-      })),
-      { name: 'Back', value: 'back' },
-    ],
-  });
-
-  if (result === 'back') {
-    const backResult = success({ nextStep: WIZARD_STEPS.INITIAL });
-    return backResult;
-  }
-
-  const backendIdiomResult = success({ nextStep: WIZARD_STEPS.FRONTEND, idiom: result });
-  return backendIdiomResult;
-}
-
-async function promptFrontendIdiom(context) {
-  const { scope, availableIdioms } = context;
-
-  if (scope === 'backend') {
-    const skipResult = success({ nextStep: WIZARD_STEPS.VERSIONS });
-    return skipResult;
-  }
-
-  const frontendIdioms = availableIdioms.filter(
-    (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isFrontend
-  );
-  const result = await safeSelect({
-    message: 'Which Frontend idiom / framework?',
-    choices: [
-      ...frontendIdioms.map((idiomFolderKey) => ({
         name: STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey,
         value: idiomFolderKey,
       })),
@@ -399,67 +261,66 @@ async function promptFrontendIdiom(context) {
     return backResult;
   }
 
-  const frontendIdiomResult = success({ nextStep: WIZARD_STEPS.VERSIONS, idiom: result });
-  return frontendIdiomResult;
+  const isSkipped = result === 'skip';
+  const backendResult = success({
+    nextStep: WIZARD_STEPS.FRONTEND,
+    idiom: isSkipped ? null : result,
+  });
+  return backendResult;
 }
 
-async function promptVersionSelections(context) {
-  const { selections } = context;
-  const versions = {};
+async function promptFrontendIdiom(context) {
+  const { availableIdioms, selections } = context;
 
-  for (const idiom of selections.idioms) {
-    const available = STACK_VERSIONS.idioms?.[idiom] || [];
-    if (available.length === 0) continue;
-    if (available.length === 1) {
-      versions[idiom] = available[0].value;
-      continue;
-    }
-
-    const result = await safeSelect({
-      message: `Which version of ${displayName(idiom)}?`,
-      choices: [
-        ...available.map((versionOption) => ({
-          name: versionOption.name,
-          value: versionOption.value,
-        })),
-        { name: 'Back', value: 'back' },
-      ],
-    });
-
-    if (result === 'back') {
-      const backResult = success({ nextStep: WIZARD_STEPS.FLAVOR });
-      return backResult;
-    }
-    versions[idiom] = result;
-  }
-
-  const versionsResult = success({ nextStep: WIZARD_STEPS.DESIGN, versions });
-  return versionsResult;
-}
-
-async function promptDesignPreset(context) {
-  const { selections, scope } = context;
-
-  const hasFrontend = selections.idioms.some(
+  const frontendIdioms = availableIdioms.filter(
     (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isFrontend
   );
-  if (scope === 'backend' || !hasFrontend) {
-    const skipResult = success({ nextStep: WIZARD_STEPS.IDE });
+  const result = await safeSelect({
+    message: 'Frontend framework?',
+    choices: [
+      { name: '—  None / Skip', value: 'skip' },
+      ...frontendIdioms.map((idiomFolderKey) => ({
+        name: STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey,
+        value: idiomFolderKey,
+      })),
+      { name: 'Back', value: 'back' },
+    ],
+  });
+
+  if (result === 'back') {
+    const backResult = success({ nextStep: WIZARD_STEPS.BACKEND });
+    return backResult;
+  }
+
+  const isSkipped = result === 'skip';
+  const hasBothSkipped = isSkipped && selections.idioms.length === 0;
+  if (hasBothSkipped) {
+    // why: at least one idiom is required to build a meaningful instruction set
+    const noIdiomResult = success({ nextStep: WIZARD_STEPS.BACKEND, idiom: null });
+    return noIdiomResult;
+  }
+
+  const frontendResult = success({
+    nextStep: WIZARD_STEPS.CODE_STYLE,
+    idiom: isSkipped ? null : result,
+  });
+  return frontendResult;
+}
+
+async function promptCodeStyle(context) {
+  const { selections } = context;
+  const hasNoIdioms = selections.idioms.length === 0;
+  if (hasNoIdioms) {
+    const skipResult = success({ nextStep: WIZARD_STEPS.DESIGN, codeStyle: 'latest' });
     return skipResult;
   }
 
   const result = await safeSelect({
-    message: 'Which initial Design Preset / Skill?',
+    message: 'Code style preference?',
     choices: [
-      { name: '1. Bento (Magazine Grids)', value: 'bento' },
-      { name: '2. Glass (Frosted Translucency)', value: 'glass' },
-      { name: '3. Clean (Modern Minimalist)', value: 'clean' },
-      { name: '4. Mono (Technical Monospaced)', value: 'mono' },
-      { name: '5. Neobrutalism (Bold/High-Contrast)', value: 'neobrutalism' },
-      { name: '6. Paper (Tactile/Editoral)', value: 'paper' },
-      { name: '7. Organic (Soft/Rounded)', value: 'organic' },
-      { name: '8. Other (no specific preset)', value: 'other' },
-      { name: '9. Back', value: 'back' },
+      { name: '1. Latest      — cutting-edge features and syntax', value: 'latest' },
+      { name: '2. Conservative — LTS-safe, widely supported', value: 'conservative' },
+      { name: 'Back', value: 'back' },
     ],
   });
 
@@ -468,18 +329,48 @@ async function promptDesignPreset(context) {
     return backResult;
   }
 
-  if (result === 'other') {
-    const noPresetResult = success({ nextStep: WIZARD_STEPS.IDE });
-    return noPresetResult;
+  const codeStyleResult = success({ nextStep: WIZARD_STEPS.DESIGN, codeStyle: result });
+  return codeStyleResult;
+}
+
+async function promptDesignPreset(context) {
+  const { selections } = context;
+
+  const hasFrontend = selections.idioms.some(
+    (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isFrontend
+  );
+  if (!hasFrontend) {
+    const skipResult = success({ nextStep: WIZARD_STEPS.IDE });
+    return skipResult;
   }
 
-  const presetResult = success({ nextStep: WIZARD_STEPS.IDE, designPreset: result });
+  const result = await safeSelect({
+    message: 'Design preset?',
+    choices: [
+      { name: '1. Clean       — Minimalist, flat, functional', value: 'clean' },
+      { name: '2. Bold        — High-contrast, expressive (Neobrutalism)', value: 'bold' },
+      { name: '3. Atmospheric — Depth and texture (Glass / Organic)', value: 'atmospheric' },
+      { name: '4. None        — No preset', value: 'none' },
+      { name: 'Back', value: 'back' },
+    ],
+  });
+
+  if (result === 'back') {
+    const backResult = success({ nextStep: WIZARD_STEPS.CODE_STYLE });
+    return backResult;
+  }
+
+  const isNone = result === 'none';
+  const presetResult = success({
+    nextStep: WIZARD_STEPS.IDE,
+    designPreset: isNone ? null : result,
+  });
   return presetResult;
 }
 
 async function promptIdeSelection() {
   const result = await safeSelect({
-    message: 'Which Primary IDE / AI Agent should perform Auto-Load?',
+    message: 'Primary IDE / AI agent for auto-load?',
     choices: [
       { name: '1. Claude Code (CLAUDE.md)', value: 'claude' },
       { name: '2. Antigravity / Raw (.ai/skill/AGENTS.md only)', value: 'none' },
@@ -487,8 +378,8 @@ async function promptIdeSelection() {
       { name: '4. Cursor (.cursorrules)', value: 'cursor' },
       { name: '5. Windsurf (.windsurfrules)', value: 'windsurf' },
       { name: '6. Cline / Roo Code (.clinerules)', value: 'roocode' },
-      { name: '7. All — write every config file', value: 'all' },
-      { name: '8. Back', value: 'back' },
+      { name: '7. Multi-agent — write all IDE config files', value: 'all' },
+      { name: 'Back', value: 'back' },
     ],
   });
 
@@ -497,61 +388,43 @@ async function promptIdeSelection() {
     return backResult;
   }
 
-  const ideResult = success({ nextStep: WIZARD_STEPS.BUMP, ide: result });
+  const ideResult = success({ nextStep: WIZARD_STEPS.PARTNER, ide: result });
   return ideResult;
 }
 
-async function promptBumpAutomation(context) {
-  const { selections } = context;
-
-  const hasJavaScriptOrTypeScript = selections.idioms.some(
-    (idiomFolderKey) => idiomFolderKey === 'javascript' || idiomFolderKey === 'typescript'
-  );
-
-  if (!hasJavaScriptOrTypeScript) {
-    const noAutomationResult = success({ nextStep: WIZARD_STEPS.PARTNER, bump: false });
-    return noAutomationResult;
-  }
-
-  const result = await safeConfirm({
-    message: 'Enable automated versioning (Bump & Changelog)?',
-    default: true,
+async function promptPartnerInfo() {
+  const input = await safeInput({
+    message: 'Your name and role? (e.g. "Thiago, Dev Founder") — Enter to skip',
+    maxLength: 80,
   });
 
-  const bumpResult = success({ nextStep: WIZARD_STEPS.PARTNER, bump: result });
-  return bumpResult;
-}
-
-async function promptPartnerInfo(_context) {
-  const name = await safeInput({
-    message: 'Primary Developer Name or Nickname? (e.g. Thiago) [Optional]',
-    minLength: 2,
-    maxLength: 50,
-  });
-
-  if (name === 'back') {
-    const backResult = success({ nextStep: WIZARD_STEPS.BUMP });
+  if (input === 'back') {
+    const backResult = success({ nextStep: WIZARD_STEPS.IDE });
     return backResult;
   }
 
-  const role = await safeInput({
-    message: 'Primary Role? (e.g. Dev founder, Tech Lead, CTO) [Optional]',
-    maxLength: 50,
-  });
+  const partner = parsePartnerInput(input);
+  const partnerResult = success({ nextStep: WIZARD_STEPS.DONE, partner });
+  return partnerResult;
+}
 
-  if (role === 'back') {
-    const backToNameResult = success({ nextStep: WIZARD_STEPS.PARTNER }); // Re-ask name
-    return backToNameResult;
+function parsePartnerInput(input) {
+  const isEmpty = !input || input.trim().length === 0;
+  if (isEmpty) return { name: null, role: null };
+
+  const separatorIndex = input.indexOf(',');
+  const hasComma = separatorIndex !== -1;
+
+  if (!hasComma) {
+    const noCommaPartner = { name: input.trim(), role: null };
+    return noCommaPartner;
   }
 
-  const partner = {
-    name: name || null,
-    role: role || null,
+  const parsedPartner = {
+    name: input.slice(0, separatorIndex).trim() || null,
+    role: input.slice(separatorIndex + 1).trim() || null,
   };
-
-  const partnerData = { nextStep: WIZARD_STEPS.DONE, partner };
-  const partnerResult = success(partnerData);
-  return partnerResult;
+  return parsedPartner;
 }
 
 function validateSelections(selections) {
@@ -560,8 +433,8 @@ function validateSelections(selections) {
     selections.idioms = selections.idioms?.length
       ? selections.idioms
       : ['javascript', 'typescript'];
-    selections.track = selections.track || '00-lite-mode';
-    selections.designPreset = selections.designPreset || 'glass';
+    selections.codeStyle = selections.codeStyle || 'latest';
+    selections.designPreset = selections.designPreset || 'clean';
     selections.ide = selections.ide || 'none';
     const quickValidResult = success(selections);
     return quickValidResult;
@@ -589,8 +462,7 @@ function validateSelections(selections) {
       `Unknown flavor: "${selections.flavor}". Available: ${availableFlavors.join(', ')}`,
       'INVALID_FLAVOR'
     );
-    const flavorFailure = invalidFlavorResult;
-    return flavorFailure;
+    return invalidFlavorResult;
   }
 
   if (!selections.idioms || selections.idioms.length === 0) {
@@ -610,21 +482,41 @@ function validateSelections(selections) {
   return setupResult;
 }
 
-function autoSelectVersions(selections) {
+function resolveVersionsByCodeStyle(selections) {
   if (!selections.versions) selections.versions = {};
+
+  const codeStyle = selections.codeStyle ?? 'latest';
 
   for (const idiom of selections.idioms) {
     if (selections.versions[idiom]) continue;
 
-    const versions = STACK_VERSIONS.idioms?.[idiom] || [];
-    if (versions.length > 0) {
-      selections.versions[idiom] = versions[0].value;
-    }
+    const resolvedVersion = selectVersionByStyle(idiom, codeStyle);
+    if (resolvedVersion) selections.versions[idiom] = resolvedVersion;
   }
+}
+
+function inferScopeFromIdioms(idioms) {
+  const hasBackend = idioms.some((key) => STACK_DISPLAY_NAMES[key]?.isBackend);
+  const hasFrontend = idioms.some((key) => STACK_DISPLAY_NAMES[key]?.isFrontend);
+
+  const isBothSelected = hasBackend && hasFrontend;
+  if (isBothSelected) return 'fullstack';
+
+  const isOnlyFrontend = hasFrontend && !hasBackend;
+  if (isOnlyFrontend) return 'frontend';
+
+  return 'backend';
+}
+
+function autoDetectBump(selections) {
+  const hasJsOrTs = selections.idioms.some((key) => key === 'javascript' || key === 'typescript');
+  selections.bump = hasJsOrTs;
 }
 
 export const WizardUtils = {
   gatherUserSelections,
   validateSelections,
-  autoSelectVersions,
+  resolveVersionsByCodeStyle,
+  inferScopeFromIdioms,
+  autoDetectBump,
 };

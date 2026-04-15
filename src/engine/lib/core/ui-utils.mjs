@@ -208,35 +208,35 @@ function printFooter() {
 function printHelp(version) {
   console.log(`
   sdg-agents v${version}
-  Installs a structured instruction set for AI agents into your project.
+  AI-Native Governance Framework: inject staff-level engineering rules into your project.
 
   Usage:
     npx sdg-agents [command] [options]
 
   Commands:
     init         Install the instruction set (interactive or via flags)
-    review       Compare local rules vs source
-    sync         Update patterns from source
-    update       Refresh the LTS version registry
     add          Add a language idiom to an existing project
     clear        Remove the .ai/ folder
+    audit        Detect drift and law violations
+    review       Compare local rules vs source
 
   Global Options:
     -h, --help       Show this help
     -v, --version    Show version
 
   Init Options:
-    --flavor <name>      Architecture flavor (vertical-slice, mvc, lite, legacy)
+    --quick              Install with defaults (lite + JS/TS) — no prompts
+    --flavor <name>      Architecture (vertical-slice, mvc, lite, legacy)
     --idiom <name>       Language idiom — repeatable or comma-separated
     --no-dev-guides      Skip reference files and spec templates
     --dry-run            Preview without writing files
 
   Examples:
     npx sdg-agents
+    npx sdg-agents init --quick
     npx sdg-agents init --flavor vertical-slice --idiom typescript
     npx sdg-agents init --flavor mvc --idiom typescript,python
     npx sdg-agents init --flavor lite --idiom go --no-dev-guides
-    npx sdg-agents init --flavor mvc --idiom python --dry-run
     npx sdg-agents add
     npx sdg-agents clear
 `);

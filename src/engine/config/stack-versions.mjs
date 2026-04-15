@@ -74,3 +74,21 @@ export const NO_LTS_STACKS = new Set([
   'flutter',
   'scripts',
 ]);
+
+/**
+ * Picks the right version entry for an idiom based on code style preference.
+ * latest      → first entry (most recent features)
+ * conservative → entry with 'LTS' in name, fallback to second entry, fallback to first
+ */
+export function selectVersionByStyle(idiom, codeStyle) {
+  const available = STACK_VERSIONS.idioms?.[idiom] ?? [];
+  const hasNoEntries = available.length === 0;
+  if (hasNoEntries) return null;
+
+  const isLatest = codeStyle === 'latest';
+  if (isLatest) return available[0].value;
+
+  const ltsEntry = available.find((entry) => entry.name.includes('LTS'));
+  const conservativeVersion = ltsEntry?.value ?? available[1]?.value ?? available[0].value;
+  return conservativeVersion;
+}

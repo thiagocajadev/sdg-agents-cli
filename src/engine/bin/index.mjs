@@ -190,17 +190,18 @@ async function handleInitSubcommand(args) {
   }
 
   const { SDG: SpecDrivenGuide } = await import('./init/build-bundle.mjs');
-  const isNonInteractive = args.mode || args.flavor || args.idioms.length > 0;
+  const isQuickMode = args.quick || args.mode === 'quick';
+  const isNonInteractive = isQuickMode || args.mode || args.flavor || args.idioms.length > 0;
 
   const selectionPayload = isNonInteractive
     ? {
-        mode: args.mode || 'agents',
+        mode: isQuickMode ? 'quick' : args.mode || 'agents',
         flavor: args.flavor,
         idioms: args.idioms || [],
         agents: args.agents || [],
         ide: args.ide || 'none',
         track: args.track,
-        scope: args.scope || 'fullstack',
+        codeStyle: 'latest',
         versions: {},
       }
     : null;
@@ -229,18 +230,14 @@ async function startInteractiveMode(args) {
         message: 'What would you like to do?',
         choices: [
           {
-            name: '1. 🏗️  Build Project Context  — Inject Staff-level engineering rules',
+            name: '1. 🏗️  Build Project — Inject staff-level engineering rules',
             value: 'init',
           },
           {
-            name: '2. 🔍 Governance Audit — Detect drift and law violations',
-            value: 'audit',
-          },
-          {
-            name: '3. ⚙️  Settings & Maintenance — Review rules, sync patterns, and dev tools',
+            name: '2. ⚙️  Settings — Audit, update rules, and maintenance',
             value: 'settings',
           },
-          { name: '4. ❌ Exit', value: 'exit' },
+          { name: '3. ❌ Exit', value: 'exit' },
         ],
       });
 
@@ -275,16 +272,6 @@ async function executeMenuAction(menuChoice, args) {
       const initResult = await SpecDrivenGuide.run(args.targetDirectory, { dryRun: args.dryRun });
       return initResult;
     }
-    case 'audit': {
-      const { AuditRunner } = await import('./audit/audit-bundle.mjs');
-      const auditResult = await AuditRunner.run();
-      return auditResult;
-    }
-    case 'narrative': {
-      const { NarrativeChecker } = await import('./audit/check-narrative.mjs');
-      const narrativeResult = await NarrativeChecker.run();
-      return narrativeResult;
-    }
     case 'settings': {
       const settingsResult = await runSettingsMenu(args.targetDirectory);
       return settingsResult;
@@ -303,14 +290,18 @@ async function executeMenuAction(menuChoice, args) {
 
 async function runSettingsMenu(targetDirectory) {
   const settingsChoice = await safeSelect({
-    message: 'Settings & Maintenance:',
+    message: 'Settings:',
     choices: [
       {
-        name: '1. 🔄 Update Instructions — Re-apply latest rules (uses saved config)',
+        name: '1. 🔍 Governance Audit — Detect drift and law violations',
+        value: 'audit',
+      },
+      {
+        name: '2. 🔄 Update Instructions — Re-apply latest rules (uses saved config)',
         value: 'update-instructions',
       },
-      { name: '2. 🗑️  Clear Generated Content — Remove all generated files', value: 'clear' },
-      { name: '3. Back', value: 'back' },
+      { name: '3. 🗑️  Clear Generated Content — Remove all generated files', value: 'clear' },
+      { name: '4. Back', value: 'back' },
     ],
   });
 
@@ -321,6 +312,11 @@ async function runSettingsMenu(targetDirectory) {
   }
 
   switch (settingsChoice) {
+    case 'audit': {
+      const { AuditRunner } = await import('./audit/audit-bundle.mjs');
+      const auditResult = await AuditRunner.run();
+      return auditResult;
+    }
     case 'update-instructions': {
       const updateResult = await performUpdateInstructions(targetDirectory);
       return updateResult;

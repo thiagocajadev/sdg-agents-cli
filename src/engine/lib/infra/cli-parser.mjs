@@ -8,6 +8,7 @@ function parseCliArgs(argv) {
     targetDirectory: argv.slice(subcommand ? 1 : 0).filter(isPositionalArg)[0] || null,
     help: argv.includes('--help') || argv.includes('-h'),
     version: argv.includes('--version') || argv.includes('-v'),
+    quick: argv.includes('--quick'),
     dryRun: argv.includes('--dry-run'),
     noDevGuides: argv.includes('--no-dev-guides'),
     flavor: getArgValue(argv, '--flavor'),
@@ -16,7 +17,6 @@ function parseCliArgs(argv) {
     ide: getArgValue(argv, '--ide') || 'none',
     mode: getArgValue(argv, '--mode'),
     track: getArgValue(argv, '--track'),
-    scope: getArgValue(argv, '--scope'),
     bump: !argv.includes('--no-bump'),
   };
 
@@ -27,15 +27,7 @@ function parseCliArgs(argv) {
 function isPositionalArg(arg, index, tokens) {
   if (arg.startsWith('-')) return false;
   const precedingToken = tokens[index - 1];
-  const flagsThatConsumeNextArg = [
-    '--flavor',
-    '--idiom',
-    '--agents',
-    '--ide',
-    '--mode',
-    '--track',
-    '--scope',
-  ];
+  const flagsThatConsumeNextArg = ['--flavor', '--idiom', '--agents', '--ide', '--mode', '--track'];
   const isPositional = !precedingToken || !flagsThatConsumeNextArg.includes(precedingToken);
   return isPositional;
 }
@@ -59,10 +51,11 @@ function getArgValues(argv, flag) {
 }
 
 function validateInit(args) {
+  const isQuickMode = args.quick || args.mode === 'quick';
+  if (isQuickMode) return null;
+
   const isNonInteractive = args.mode || args.flavor || args.idioms.length > 0;
   if (!isNonInteractive) return null;
-
-  if (args.mode === 'quick') return null;
 
   if (args.mode === 'prompts') {
     if (!args.track) {
