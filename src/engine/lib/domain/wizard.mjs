@@ -505,7 +505,8 @@ function inferScopeFromIdioms(idioms) {
   const isOnlyFrontend = hasFrontend && !hasBackend;
   if (isOnlyFrontend) return 'frontend';
 
-  return 'backend';
+  const defaultScope = 'backend';
+  return defaultScope;
 }
 
 function autoDetectBump(selections) {
