@@ -1,6 +1,6 @@
 {
   "name": "sdg-agents",
-  "version": "2.12.2",
+  "version": "2.12.3",
   "description": "AI-Native Governance Framework: inject staff-level engineering rules and a structured working protocol into your project for AI agents.",
   "type": "module",
   "main": "./src/engine/bin/index.mjs",

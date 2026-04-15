@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [2.12.3] - 2026-04-15
+
+### Added
+
+### Fixed
+
+- **Governance Audit Compliance — Laws & Sovereign Protocol**: Extracted file-scanning utilities (`getMaintainerFiles`, `getMaintainerTestFiles`, `getFilesRecursive`) from `audit-bundle.mjs` into a dedicated `audit-file-scanner.mjs` lib, reducing top-level function density from 15 to 12 (Laws Compliance pass). Added `DNA-GATE & MENTAL RESET [LOCKED]` section to `AGENTS.md` to satisfy the Sovereign Protocol check (audit now at 100%).
+- **Workflow Protocol Enforcement in Source**: Added `buildDnaGateBlock()` to `instruction-assembler.mjs` so all generated `AGENTS.md` files include the DNA-GATE section. Rewrote `buildWorkflowPointer()` to make phase execution mandatory — explicit steps with approval gates, token estimate requirements (`📊`), and a protocol violation warning for skipping phases.
+
 ## [2.12.2] - 2026-04-15
 
 ### Added

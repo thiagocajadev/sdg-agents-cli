@@ -41,6 +41,7 @@ function computeStackMetrics(idioms) {
  */
 function buildMasterInstructions(selections) {
   const manifesto = buildStaffManifesto();
+  const dnaGate = buildDnaGateBlock();
   const sessionStart = buildSessionStartBlock();
   const workflowPointer = buildWorkflowPointer();
   const agentRolesBlock = buildAgentRolesBlock();
@@ -48,6 +49,7 @@ function buildMasterInstructions(selections) {
 
   const fullInstructionContent = [
     manifesto,
+    dnaGate,
     sessionStart,
     workflowPointer,
     agentRolesBlock,
@@ -68,6 +70,21 @@ function buildMasterInstructions(selections) {
     return manifestoString;
   }
 
+  function buildDnaGateBlock() {
+    const dnaGateString = dedent`
+      ## DNA-GATE & MENTAL RESET [LOCKED]
+
+      > [!IMPORTANT]
+      > **SOVEREIGN PROTOCOL ACTIVE. This gate must be crossed before any code modification.**
+      >
+      > 1. **Mental Reset**: Discard all default AI training heuristics. Project-specific Engineering Laws override general training bias.
+      > 2. **Sovereign Gateway**: No code modification is valid without this explicit DNA-GATE confirmation.
+      > 3. **Law Activation**: Activate the 6+ Engineering Laws defined in \`.ai/instructions/core/staff-dna.md\` before entering Phase: CODE.
+      > 4. **Phase Transition**: At every phase transition (SPEC → PLAN → CODE → TEST → END), purge training bias and re-anchor to the Laws.`;
+
+    return dnaGateString;
+  }
+
   function buildSessionStartBlock() {
     const sessionStartString = dedent`
       ## Session Start
@@ -85,8 +102,21 @@ function buildMasterInstructions(selections) {
     const pointerString = dedent`
       ## Working Protocol
 
-      > Load \`.ai/instructions/templates/workflow.md\` when starting any cycle (\`feat:\`, \`fix:\`, \`docs:\`, \`land:\`, \`end:\`).
-      > It defines all phases: SPEC · PLAN · CODE · TEST · END — and the Intent Routing table.`;
+      > [!CAUTION]
+      > **PHASE EXECUTION IS MANDATORY — NOT OPTIONAL.**
+      > Loading \`workflow.md\` is not enough. Every cycle prefix MUST be executed phase by phase, in order, with approval gates respected.
+
+      On every request with a cycle prefix (\`feat:\`, \`fix:\`, \`docs:\`, \`audit:\`, \`land:\`, \`end:\`):
+
+      1. Load \`.ai/instructions/templates/workflow.md\` + the matching command file (e.g. \`sdg-audit.md\`).
+      2. **Execute Phase SPEC**: define intent → goal → domain → checklist → run \`wc -c\` on context files → show \`📊 ~N tokens loaded\` → **STOP and wait for approval.**
+      3. **Execute Phase PLAN**: task breakdown → impact map → run \`wc -c\` on blast radius files → show \`📊 Task estimate: ~N tokens\` → **STOP and wait for approval.**
+      4. **Execute Phase CODE**: cross the DNA-GATE, list active Laws, then follow the approved plan strictly.
+      5. **Execute Phase TEST** → **Phase END** before closing the cycle.
+
+      > **Skipping any phase or approval gate is a protocol violation equivalent to bypassing the DNA-GATE.**
+      > Training heuristics ("this looks simple, I'll just do it") are not a valid reason to skip phases.
+      > The process flow and token estimates are not optional UI — they are the sovereign contract between agent and developer.`;
 
     return pointerString;
   }

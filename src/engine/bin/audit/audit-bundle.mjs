@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { SyncChecker } from './check-sync.mjs';
+import { AuditFileScanner } from './audit-file-scanner.mjs';
 import { NARRATIVE_CHECKLIST } from '../../config/governance.mjs';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
 import { DisplayUtils } from '../../lib/core/display-utils.mjs';
@@ -89,8 +90,8 @@ function checkChangelogHealth() {
 
 function checkLawsCompliance() {
   const files = isMaintainerMode()
-    ? getMaintainerFiles()
-    : getFilesRecursive(
+    ? AuditFileScanner.getMaintainerFiles()
+    : AuditFileScanner.getFilesRecursive(
         path.join(PROJECT_ROOT, 'src'),
         (fileName) => fileName.endsWith('.mjs') && !fileName.endsWith('.test.mjs')
       );
@@ -119,86 +120,10 @@ function checkLawsCompliance() {
   return finalLawsResult;
 }
 
-function getMaintainerFiles() {
-  const targetDirectories = [
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'core'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'domain'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'infra'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'init'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'audit'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'maintenance'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'lifecycle'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'config'),
-  ];
-
-  const sourceFiles = targetDirectories.flatMap((directory) => {
-    if (!fs.existsSync(directory)) {
-      const emptyList = [];
-      return emptyList;
-    }
-    const directoryFiles = fs
-      .readdirSync(directory)
-      .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
-      .map((file) => path.join(directory, file));
-    return directoryFiles;
-  });
-  return sourceFiles;
-}
-
-function getFilesRecursive(baseDir, filterFn) {
-  if (!fs.existsSync(baseDir)) {
-    const emptyList = [];
-    return emptyList;
-  }
-  const files = [];
-
-  function walk(dir) {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory() && entry.name !== 'node_modules' && !entry.name.startsWith('.')) {
-        walk(fullPath);
-      } else if (entry.isFile() && filterFn(entry.name)) {
-        files.push(fullPath);
-      }
-    }
-  }
-
-  walk(baseDir);
-  const collectedFiles = files;
-  return collectedFiles;
-}
-
-function getMaintainerTestFiles() {
-  const targetDirectories = [
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'core'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'domain'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'infra'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'init'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'audit'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'maintenance'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'lifecycle'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'config'),
-  ];
-
-  const testFiles = targetDirectories.flatMap((directory) => {
-    if (!fs.existsSync(directory)) {
-      const emptyList = [];
-      return emptyList;
-    }
-    const directoryTestFiles = fs
-      .readdirSync(directory)
-      .filter((file) => file.endsWith('.test.mjs'))
-      .map((file) => path.join(directory, file));
-    return directoryTestFiles;
-  });
-  return testFiles;
-}
-
 function checkTestNamedExpectations() {
   const testFiles = isMaintainerMode()
-    ? getMaintainerTestFiles()
-    : getFilesRecursive(path.join(PROJECT_ROOT, 'src'), (fileName) =>
+    ? AuditFileScanner.getMaintainerTestFiles()
+    : AuditFileScanner.getFilesRecursive(path.join(PROJECT_ROOT, 'src'), (fileName) =>
         fileName.endsWith('.test.mjs')
       );
 
