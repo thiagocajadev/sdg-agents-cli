@@ -174,6 +174,17 @@ function safeReadJson(filePath) {
   }
 }
 
+function isMaintainerMode() {
+  const projectRoot = process.cwd();
+  const pkgPath = path.join(projectRoot, 'package.json');
+  const pkg = safeReadJson(pkgPath);
+  const assetsPath = path.join(projectRoot, 'src', 'assets', 'instructions');
+  const isSdgAgents = pkg?.name === 'sdg-agents';
+  const hasAssets = fs.existsSync(assetsPath);
+  const maintainerMode = isSdgAgents && hasAssets;
+  return maintainerMode;
+}
+
 export const FsUtils = {
   getDirectories,
   copyRecursiveSync,
@@ -183,4 +194,5 @@ export const FsUtils = {
   detectIndentation,
   writeJsonAtomic,
   safeReadJson,
+  isMaintainerMode,
 };

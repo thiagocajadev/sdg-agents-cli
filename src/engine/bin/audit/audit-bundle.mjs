@@ -9,7 +9,7 @@ import { DisplayUtils } from '../../lib/core/display-utils.mjs';
 const { smartTruncate } = DisplayUtils;
 
 const PROJECT_ROOT = process.cwd();
-const { runIfDirect } = FsUtils;
+const { runIfDirect, isMaintainerMode } = FsUtils;
 
 async function run() {
   await executeGovernanceAudit();
@@ -88,30 +88,12 @@ function checkChangelogHealth() {
 }
 
 function checkLawsCompliance() {
-  const targetDirectories = [
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'core'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'domain'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'infra'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'init'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'audit'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'maintenance'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'lifecycle'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'config'),
-  ];
-
-  const files = targetDirectories.flatMap((directory) => {
-    if (!fs.existsSync(directory)) {
-      const emptyDirFiles = [];
-      return emptyDirFiles;
-    }
-
-    const directoryFiles = fs
-      .readdirSync(directory)
-      .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
-      .map((file) => path.join(directory, file));
-
-    return directoryFiles;
-  });
+  const files = isMaintainerMode()
+    ? getMaintainerFiles()
+    : getFilesRecursive(
+        path.join(PROJECT_ROOT, 'src'),
+        (fileName) => fileName.endsWith('.mjs') && !fileName.endsWith('.test.mjs')
+      );
 
   const violations = [];
   for (const filePath of files) {
@@ -137,49 +119,118 @@ function checkLawsCompliance() {
   return finalLawsResult;
 }
 
-function checkTestNamedExpectations() {
-  const scanDirectories = [
+function getMaintainerFiles() {
+  const targetDirectories = [
     path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'core'),
     path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'domain'),
     path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'infra'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'init'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'audit'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'maintenance'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'lifecycle'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'config'),
   ];
+
+  const sourceFiles = targetDirectories.flatMap((directory) => {
+    if (!fs.existsSync(directory)) {
+      const emptyList = [];
+      return emptyList;
+    }
+    const directoryFiles = fs
+      .readdirSync(directory)
+      .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
+      .map((file) => path.join(directory, file));
+    return directoryFiles;
+  });
+  return sourceFiles;
+}
+
+function getFilesRecursive(baseDir, filterFn) {
+  if (!fs.existsSync(baseDir)) {
+    const emptyList = [];
+    return emptyList;
+  }
+  const files = [];
+
+  function walk(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory() && entry.name !== 'node_modules' && !entry.name.startsWith('.')) {
+        walk(fullPath);
+      } else if (entry.isFile() && filterFn(entry.name)) {
+        files.push(fullPath);
+      }
+    }
+  }
+
+  walk(baseDir);
+  const collectedFiles = files;
+  return collectedFiles;
+}
+
+function getMaintainerTestFiles() {
+  const targetDirectories = [
+    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'core'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'domain'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'infra'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'init'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'audit'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'maintenance'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'lifecycle'),
+    path.join(PROJECT_ROOT, 'src', 'engine', 'config'),
+  ];
+
+  const testFiles = targetDirectories.flatMap((directory) => {
+    if (!fs.existsSync(directory)) {
+      const emptyList = [];
+      return emptyList;
+    }
+    const directoryTestFiles = fs
+      .readdirSync(directory)
+      .filter((file) => file.endsWith('.test.mjs'))
+      .map((file) => path.join(directory, file));
+    return directoryTestFiles;
+  });
+  return testFiles;
+}
+
+function checkTestNamedExpectations() {
+  const testFiles = isMaintainerMode()
+    ? getMaintainerTestFiles()
+    : getFilesRecursive(path.join(PROJECT_ROOT, 'src'), (fileName) =>
+        fileName.endsWith('.test.mjs')
+      );
 
   const violations = [];
 
-  for (const directory of scanDirectories) {
-    if (!fs.existsSync(directory)) continue;
-    const testFiles = fs.readdirSync(directory).filter((file) => file.endsWith('.test.mjs'));
-
-    for (const testFile of testFiles) {
-      const content = fs.readFileSync(path.join(directory, testFile), 'utf8');
-      const slopMatches = content.match(/\/\/\s*(Arrange|Act|Assert)/gi);
-      if (slopMatches) {
-        violations.push(
-          `${testFile}: Detected narrative slop (${slopMatches.join(', ')}). Use Vertical Scansion.`
-        );
-      }
-
-      if (!content.includes('actual') || !content.includes('expected')) {
-        violations.push(
-          `${testFile}: Missing Named Expectations triad (actual/expected variables).`
-        );
-      }
-
-      const numberedMatches = content.match(/\b(input|actual|expected)[0-9]+\b/g);
-      if (numberedMatches) {
-        violations.push(
-          `${testFile}: Detected numbered variables (${Array.from(new Set(numberedMatches)).join(
-            ', '
-          )}).`
-        );
-      }
-
-      const strictMagicMatch = content.match(
-        /assert\.(?:equal|deepEqual|strictEqual)\s*\([^,]+,\s*(?:['"`0-9]|\b(?:null|true|false)\b)/
+  for (const testFile of testFiles) {
+    const content = fs.readFileSync(testFile, 'utf8');
+    const slopMatches = content.match(/\/\/\s*(Arrange|Act|Assert)/gi);
+    if (slopMatches) {
+      violations.push(
+        `${testFile}: Detected narrative slop (${slopMatches.join(', ')}). Use Vertical Scansion.`
       );
-      if (strictMagicMatch) {
-        violations.push(`${testFile}: Detected magic values in assertions. Use named constants.`);
-      }
+    }
+
+    if (!content.includes('actual') || !content.includes('expected')) {
+      violations.push(`${testFile}: Missing Named Expectations triad (actual/expected variables).`);
+    }
+
+    const numberedMatches = content.match(/\b(input|actual|expected)[0-9]+\b/g);
+    if (numberedMatches) {
+      violations.push(
+        `${testFile}: Detected numbered variables (${Array.from(new Set(numberedMatches)).join(
+          ', '
+        )}).`
+      );
+    }
+
+    const strictMagicMatch = content.match(
+      /assert\.(?:equal|deepEqual|strictEqual)\s*\([^,]+,\s*(?:['"`0-9]|\b(?:null|true|false)\b)/
+    );
+    if (strictMagicMatch) {
+      violations.push(`${testFile}: Detected magic values in assertions. Use named constants.`);
     }
   }
 
@@ -254,7 +305,9 @@ function checkBacklogHealth() {
 }
 
 function checkSoulPulse() {
-  const files = ['README.md', 'docs/README.pt-BR.md', 'docs/ROADMAP.md'];
+  const requiredFiles = ['README.md'];
+  const maintainerOnlyFiles = isMaintainerMode() ? ['docs/README.pt-BR.md', 'docs/ROADMAP.md'] : [];
+  const files = [...requiredFiles, ...maintainerOnlyFiles];
   const missing = files.filter((file) => !fs.existsSync(path.join(PROJECT_ROOT, file)));
   const soulPulse = { isFailure: missing.length > 0, missing };
   return soulPulse;

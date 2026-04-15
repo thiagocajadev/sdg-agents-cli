@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
 import { ResultUtils } from '../../lib/core/result-utils.mjs';
 
-const { runIfDirect } = FsUtils;
+const { runIfDirect, isMaintainerMode } = FsUtils;
 const { success, fail } = ResultUtils;
 
 const PROJECT_ROOT = process.cwd();
@@ -15,6 +15,10 @@ const AI_DIR = path.join(PROJECT_ROOT, '.ai', 'instructions');
 const MIRRORED_DIRS = ['core', 'idioms', 'templates', 'competencies'];
 
 function run() {
+  if (!isMaintainerMode()) {
+    const skipResult = success();
+    return skipResult;
+  }
   const syncResult = orchestrateSyncCheck();
   return syncResult;
 }
