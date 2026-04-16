@@ -1,31 +1,25 @@
-# Incident Correction — Context Preparation
+# Incident Correction
 
-We are correcting a recorded incident: $ARGUMENTS.
+Correcting incident: $ARGUMENTS.
 
-> **Load now**: `.ai/instructions/templates/workflow.md` — defines all phases (SPEC, PLAN, CODE, TEST, END) you will follow in this cycle.
+> **Load now**: `.ai/instructions/templates/workflow.md`
 
----
+## Phase: SPEC — MODE: PLANNING
 
-## Phase: SPEC (The Contract) — MODE: PLANNING
+Follow Phase SPEC. Context charges:
 
-Follow the **Phase: SPEC** from the **Working Protocol**. Apply these specific Context Charges:
+- **Intent**: `fix:`
+- **Goal**: Highlight incident and core reason for fix.
+- **Domain & Contracts**:
+  - **RCA**: Identify layer, file, line where contract/logic breaks.
+  - **Observed vs Expected**: Contrast broken behavior with desired outcome.
+  - **Minimal Surface**: Fix targets ONLY the bug. No refactors.
+- **Verification**: Reproduction Case is primary validator.
 
-- **Step 1 (Intent)**: Confirmed as `fix:`.
-- **Step 2 (Goal)**: Highlight the incident and the core reason for the fix.
-- **Step 3 (Domain & Contracts)**:
-  - **Root Cause Analysis (RCA)**: Explicitly identify the layer, file, and line where the contract or logic breaks.
-  - **Observed vs Expected**: Contrast the current broken behavior with the desired outcome.
-  - **Minimal Surface**: Ensure the proposed fix targets ONLY the bug. No refactors allowed.
-- **Step 4 (Verification)**: Ensure the **Reproduction Case** is the primary validator checkpoint.
+## Phase: PLAN — MODE: PLANNING
 
----
+Follow Phase PLAN with mandatory addition:
 
-## Phase: PLAN (The Strategy) — MODE: PLANNING
+- **Regression Test**: Task for Characterization Test that reproduces the bug. Use patterns from `testing.md`.
 
-Follow the **Phase: PLAN** from the **Working Protocol**, with this mandatory addition:
-
-- **Regression Test**: Include a task specifically for a test that reproduces the bug (Characterization Test). Use the patterns from `testing-principles.md`.
-
----
-
-> Read `.ai/instructions/templates/agent-roles.md` for the multi-agent handoff protocol (Planning + Fast roles).
+> Read `.ai/instructions/templates/agent-roles.md` for multi-agent handoff protocol.

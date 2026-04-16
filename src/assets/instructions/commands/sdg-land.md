@@ -1,129 +1,72 @@
 # Land Cycle — Project Inception
 
-We are landing on a project: $ARGUMENTS. This command runs once, at the very beginning — before the first `feat:` — to turn a raw vision into a grounded, sequenced backlog.
+Landing on project: $ARGUMENTS. Runs once before the first `feat:` — turns raw vision into a grounded, sequenced backlog.
 
----
+> **Load now**: `.ai/instructions/templates/workflow.md`
 
-## What this cycle produces
+## Outputs
 
-| Output                                               | Where                    |
-| :--------------------------------------------------- | :----------------------- |
-| `## Vision` section added to `context.md`            | `.ai-backlog/context.md` |
-| Ordered epics decomposed into `feat:` tasks          | `.ai-backlog/tasks.md`   |
-| STOP — explicit approval required before any `feat:` | —                        |
-
----
+- `## Vision` section → `.ai-backlog/context.md`
+- Ordered epics → `.ai-backlog/tasks.md`
+- STOP — explicit approval required before any `feat:`
 
 ## Phase: VISION — MODE: PLANNING
 
-Parse the input prompt. Extract only what was explicitly stated — no assumptions, no embellishments.
+Parse input. Extract only what was explicitly stated:
 
-Identify:
+- **What** is being built
+- **For whom**
+- **Core problem** (one sentence)
+- **Signal**: greenfield (no code) or legacy (existing project)
 
-- **What** is being built (the product or system)
-- **For whom** (the target user or operator)
-- **The core problem** it solves (one sentence)
-- **Signal** — greenfield (no existing code) or legacy (existing project)
+If too vague → ask one clarifying question.
 
-If the prompt is too vague to extract these three points, ask one clarifying question before proceeding.
+## Phase: SURVEY — MODE: PLANNING (legacy only, skip if greenfield)
 
----
-
-## Phase: SURVEY — MODE: PLANNING (legacy only — skip if greenfield)
-
-Read the project silently. Do not announce findings yet.
-
-- Read `package.json`, `README.md`, entry points, top-level folder structure
-- Run `git log --oneline -10` to understand recent activity
-- Identify: stack, main architectural pattern, biggest pain points visible from code
-
-If the project has no code at all, treat it as greenfield.
-
----
+Read silently: `package.json`, `README.md`, entry points, folder structure, `git log --oneline -10`. Identify stack, architecture pattern, pain points.
 
 ## Phase: SCOPE — MODE: PLANNING
 
-Define the MVP boundary. This is the most important step.
+Define MVP boundary:
 
-**Rules:**
+- Constrain vision to realistic first release
+- Explicitly list **out of scope** (name it — vague exclusions don't count)
+- Legacy: diagnosis before new features
+- **Max 7 epics** — merge or defer if more
 
-- Constrain the vision to what is realistic for the first meaningful release
-- Explicitly list what is **out of scope** (name it — vague exclusions don't count)
-- For legacy projects: diagnosis always comes before new features
-- Maximum **7 epics** — if you have more, merge or defer. A 20-item backlog is a liability, not a plan
-
-Present the scope boundary before generating the backlog. If the vision is clearly overambitious, say so directly and propose a realistic MVP cut.
-
----
+Present scope boundary before generating backlog. If overambitious, say so and propose realistic MVP cut.
 
 ## Phase: BACKLOG — MODE: PLANNING
 
-Generate two outputs:
-
 ### 1. Update `context.md`
 
-Add a `## Vision` section. **Never overwrite existing content** — only add or append.
+Add `## Vision` section (never overwrite existing content):
 
 ```md
 ## Vision
 
-**Product:** [what is being built]
-**User:** [for whom]
-**Problem:** [core problem in one sentence]
-**MVP Scope:** [what is in for v1]
-**Out of scope:** [what is explicitly deferred]
+**Product:** [what] · **User:** [whom] · **Problem:** [one sentence]
+**MVP Scope:** [in] · **Out of scope:** [deferred]
 ```
 
-If `context.md` does not exist, create it using the bootstrap template from the Working Protocol before adding `## Vision`.
+### 2. Write `tasks.md`
 
-### 2. Write `tasks.md` backlog
+**Ordering (non-negotiable)**:
 
-Structure the backlog as ordered epics, each decomposed into concrete `feat:` tasks. Every task must be actionable on its own.
+1. Foundation (scaffolding, config, CI)
+2. Data/domain (models, repos, core logic)
+3. Integration (APIs, external services)
+4. Application (use cases, orchestration)
+5. Delivery (UI, CLI, endpoints)
+6. Hardening (auth, errors, observability)
+7. Polish (docs, migration, release)
 
-**Ordering rules (non-negotiable):**
+Legacy: add diagnosis epic at position 0.
 
-1. Foundation first — scaffolding, config, CI
-2. Data/domain layer — models, repositories, core logic
-3. Integration layer — APIs, external services, adapters
-4. Application layer — use cases, orchestration
-5. Delivery layer — UI, CLI, endpoints
-6. Hardening — auth, error handling, observability
-7. Polish — docs, migration, release
-
-**For legacy projects:** add a diagnosis epic at position 0 — read, map, and document before changing anything.
-
-**Format:**
-
-```md
-## Backlog
-
-### Epic 1 — [Name]
-
-- [TODO] feat: [atomic task]
-- [TODO] feat: [atomic task]
-
-### Epic 2 — [Name]
-
-- [TODO] feat: [atomic task]
-- [TODO] feat: [atomic task]
-```
-
-Move the first task of Epic 1 to `## Active` as `[IN_PROGRESS]` only after the developer approves.
-
----
+Format: `### Epic N — [Name]` with `- [TODO] feat: [atomic task]` items.
 
 ## Phase: STOP — MODE: PLANNING
 
-Present a summary of what was produced:
+Present: vision (3 lines), scope (in/out), epic list with task counts. Stop completely. No code. Wait for explicit approval.
 
-- The vision statement (3 lines)
-- The scope boundary (in / out)
-- The full epic list with task count per epic
-
-Then stop completely. Do not begin any `feat:` — do not write any code. Wait for explicit developer approval.
-
-**Hard Rule:** The Land Cycle ends here. The developer decides what comes next.
-
----
-
-> Read `.ai/instructions/templates/agent-roles.md` for the multi-agent handoff protocol (Planning + Fast roles).
+> Read `.ai/instructions/templates/agent-roles.md` for multi-agent handoff protocol.

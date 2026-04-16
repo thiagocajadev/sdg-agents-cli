@@ -1,69 +1,38 @@
-# Vertical Slice Architecture (Agnostic Staff Ruleset)
+# Vertical Slice Architecture
 
-<ruleset name="VerticalSliceArchitecture">
+> Inherits Security, Reliability, NarrativeCascade from staff-dna.md.
 
-> [!IMPORTANT]
-> This architecture MANDATORY follows the [Universal Staff Engineering DNA](../core/staff-dna.md). All rules regarding Security (Hardening), Reliability (Resilience), and Narrative (NarrativeCascade) are inherited from the DNA.
+## Backend Pipeline
 
-## Mandatory Backend Pipeline
-
-### Rule: Backend Pipeline
-
-> <rule name="BackendPipeline">
-> [!NOTE]
-> Every backend feature MUST follow this exact flow. No reordering.
-
-#### Pipeline Flow
-
-```text
+```
 Endpoint/Handler → UseCase → Validator → Domain → Repository → Presenter → Response DTO
 ```
 
-#### Layer Responsibilities
+- **Endpoint/Handler**: HTTP entry. Calls UseCase. No business logic.
+- **UseCase**: Orchestrates flow: Validator → Domain → Repository.
+- **Validator**: Input structure validation. Runs BEFORE Domain.
+- **Domain**: Business rules. No infrastructure dependencies.
+- **Repository**: Persistence only. No business logic.
+- **Presenter**: Maps entity → Response DTO. Filters sensitive data.
+- **Response DTO**: External contract. No logic.
 
-- **Endpoint/Handler:** HTTP entry point. Calls UseCase. NO business logic.
-- **UseCase:** Orchestrates the feature flow. Calls Validator → Domain → Repository.
-- **Validator:** Validates input structure. Runs BEFORE Domain.
-- **Domain:** Business rules. MUST NOT depend on infrastructure.
-- **Repository:** Persistence only. NO business logic.
-- **Presenter:** Maps domain entity → Response DTO. Filters sensitive data.
-- **Response DTO:** External output contract. NO logic.
-  > </rule>
+## Frontend Pipeline
 
-## Mandatory Frontend Pipeline
-
-### Rule: Frontend Pipeline
-
-> <rule name="FrontendPipeline">
-> [!NOTE]
-> Every frontend feature MUST follow this flow when consuming APIs.
-
-#### Pipeline Flow
-
-```text
+```
 UI → ApiClient → Mapper
 ```
 
-#### Layer Responsibilities
+- **ApiClient**: HTTP calls, headers, base URL. No business logic.
+- **Mapper**: Maps API response → UI model (DTO). Isolates UI from API changes.
+- **UI**: Receives mapped data only. Never accesses ApiClient directly.
 
-- **ApiClient:** Low-level HTTP calls. Handles headers, base URL. NO business logic.
-- **Mapper:** Maps raw API response → UI model (DTO). Isolates UI from API changes.
-- **UI:** Receives only mapped data. NEVER accesses ApiClient directly.
-  > </rule>
+## Directory Structure
 
-## Vertical Slice Directory Structure
+Organize by feature (domain), not by technical layer:
 
-### Rule: Directory Structure
-
-> <rule name="DirectoryStructure">
-> [!NOTE]
-> Organize the project by features (Domain), not by technical layers.
-
-#### Structure Example
-
-```text
+```
 /features/{feature-name}/
-  {feature}.handler.ts       ← HTTP entry point
+  {feature}.handler.ts       ← HTTP entry
   {feature}.usecase.ts       ← orchestrator
   {feature}.validator.ts     ← input validation
   {feature}.domain.ts        ← business rules
@@ -72,107 +41,35 @@ UI → ApiClient → Mapper
   {feature}.dto.ts           ← contracts
 ```
 
-> </rule>
+## Domain Layer
 
-## Rule: Domain Layer Implementation
+Two valid styles — choose by complexity:
 
-<rule name="DomainImplementation">
+**Style A — Rich Entity**: Class with invariants. Preferred when entity enforces own state transitions.
+**Style B — Pure Functions**: Types + functions in same file. Preferred for simpler domains or functional stacks.
 
-> [!NOTE]
-> Business rules live exclusively in the Domain layer. Two implementation styles are valid — choose based on complexity.
+Both styles: zero infrastructure dependencies, fully testable without DB/HTTP mocks.
 
-### Style A — Rich Entity (class with invariants)
+**Type ownership**:
 
-Preferred when the entity enforces its own state transitions and invariants.
+- Domain entity (`Order`) → `order.domain.ts` (internal, all fields)
+- Response DTO (`OrderResponse`) → `order.dto.ts` via Presenter (external contract)
+- Input DTO (`CreateOrderRequest`) → `order.dto.ts` or `order.validator.ts`
 
-```typescript
-// order.domain.ts
-export class Order {
-  private constructor(
-    readonly id: string,
-    readonly status: 'pending' | 'shipped' | 'cancelled',
-    readonly items: OrderItem[]
-  ) {}
+Presenter maps entity → Response DTO. Sensitive/internal fields never reach client.
 
-  static create(items: OrderItem[]): Result<Order> {
-    if (items.length === 0) return fail('ORDER_EMPTY');
-    return ok(new Order(uuid(), 'pending', items));
-  }
+## Layer Rules
 
-  cancel(): Result<Order> {
-    if (this.status === 'shipped') return fail('CANNOT_CANCEL_SHIPPED');
-    return ok(new Order(this.id, 'cancelled', this.items));
-  }
-}
-```
+- **Isolation**: Each layer = single responsibility. No mixing.
+- **Data Shielding**: Raw DB entities NEVER returned to client. Presenter is mandatory filter.
+- **Validate Before Domain**: Reject invalid input at Validator (Fail Fast).
+- **Statelessness**: Horizontally scalable, resilient to retries.
+- **Dependency Inversion**: Interfaces/abstractions for testable seams.
 
-### Style B — Pure Functions (types + functions)
+## DO / DO NOT
 
-Preferred for simpler domains or functional-leaning stacks. Properties are defined as types in the same file.
+**DO**: Validate before Domain · Business rules only in Domain · Output through Presenter · Organize by feature slice.
 
-```typescript
-// order.domain.ts
+**DO NOT**: Business logic in Handler · Access Repository from Handler/Domain · Skip Validator · Return DB entities to client.
 
-// Internal domain types (≠ external DTOs)
-export interface Order {
-  id: string;
-  status: 'pending' | 'shipped' | 'cancelled';
-  items: OrderItem[];
-}
-
-// Functions that operate on those types
-export function createOrder(items: OrderItem[]): Result<Order> {
-  if (items.length === 0) return fail('ORDER_EMPTY');
-  return ok({ id: uuid(), status: 'pending', items });
-}
-
-export function cancelOrder(order: Order): Result<Order> {
-  if (order.status === 'shipped') return fail('CANNOT_CANCEL_SHIPPED');
-  return ok({ ...order, status: 'cancelled' });
-}
-```
-
-**Internal types vs external DTOs:**
-
-| Type                             | Owner                                 | File                                   |
-| :------------------------------- | :------------------------------------ | :------------------------------------- |
-| Domain entity (`Order`)          | Internal — real shape with all fields | `order.domain.ts`                      |
-| Response DTO (`OrderResponse`)   | External API contract                 | `order.dto.ts` via Presenter           |
-| Input DTO (`CreateOrderRequest`) | Validated entry contract              | `order.dto.ts` or `order.validator.ts` |
-
-The Presenter maps `Order → OrderResponse` — sensitive or internal fields never reach the client.
-
-**Both styles:** zero infrastructure dependencies, fully testable without DB or HTTP mocks.
-</rule>
-
-## Rule: Layer Isolation & Validation
-
-- **Layer Isolation:** Each layer has a single responsibility. Mixing responsibilities breaks the architecture.
-- **Data Shielding:** Raw database entities MUST NEVER be returned to the client. The Presenter is the mandatory filter.
-- **Validate Before Domain:** Reject invalid input at the Validator before the Domain ever sees it (Fail Fast).
-- **Statelessness:** Design logic to be horizontally scalable and resilient to retries.
-- **Dependency Inversion:** Use Interfaces/Abstractions to create "Seams" for testing.
-
-## Summary: DO and DO NOT
-
-> <rule name="SummaryDoDont">
-
-### ✅ DO
-
-- Validate input BEFORE reaching Domain.
-- Keep business rules exclusively in Domain.
-- Sanitize all output through the Presenter.
-- Organize code by feature slice.
-
-### ❌ DO NOT
-
-- Put business logic in Handler/Endpoint.
-- Access Repository from Handler or Domain directly.
-- Skip the Validator step.
-- Return database entities directly to the client.
-
-> [!WARNING]
-> **Conflict resolution:** DO NOT rules ALWAYS override DO rules.
-> </rule>
-
-</ruleset>
+> DO NOT rules ALWAYS override DO rules.

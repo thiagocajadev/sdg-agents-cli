@@ -1,60 +1,22 @@
-# Technical Documentation — Context Preparation
+# Technical Documentation
 
 Executing documentation for: $ARGUMENTS.
 
-> **Load now**: `.ai/instructions/templates/workflow.md` — defines all phases (SPEC, END) you will follow in this cycle.
+> **Load now**: `.ai/instructions/templates/workflow.md`
 
----
+## Phase: SPEC — MODE: PLANNING
 
-## Phase: SPEC (The Contract) — MODE: PLANNING
+Follow Phase SPEC from Working Protocol. Drafting templates:
 
-Follow the **Phase: SPEC** from the **Working Protocol**, using these templates for the "Drafting" logic:
+**CHANGELOG** (Keep a Changelog): `## [vX.Y.Z] - YYYY-MM-DD` with Added/Changed/Fixed/Removed sections.
 
-### Template A: CHANGELOG (Keep a Changelog)
+**FEAT** (Feature Spec): `# FEAT-[NNN]: [Name]` with Status, Goal, Context, Solution, Verification.
 
-```md
-## [vX.Y.Z] - YYYY-MM-DD
+**ADR** (Architecture Decision Record): `# ADR-[NNN]: [Title]` with Context (Why), Decision (What), Consequences (Impact).
 
-### Added | Changed | Fixed | Removed
+## Phase: END — MODE: PLANNING
 
-- [Brief entries from Unreleased]
-```
+Follow Phase END from Working Protocol. Documentation must mirror code state. Sync backlog and WAIT for authorization before any commit/push.
 
-### Template B: FEAT (Feature Specification)
-
-```md
-# FEAT-[NNN]: [Feature Name]
-
-## Status: Draft | Review | Approved
-
-## Goal / Context / Solution / Verification
-```
-
-### Template C: ADR (Architecture Decision Record)
-
-```md
-# ADR-[NNN]: [Decision Title]
-
-## Context (Why) / Decision (What) / Consequences (Impact)
-```
-
----
-
-## Phase: END (The Delivery) — MODE: PLANNING
-
-Follow the **Phase: END** from the **Working Protocol**. Documentation must be accurate and mirror the code state perfectly. Sync the backlog and **WAIT** for authorization before any `commit`/`push` proposal.
-
----
-
-> [!TIP]
-> **Multi-Agent Optimization (Claude Code only)**
->
-> The Docs Cycle is entirely analytical — there is no CODE phase, so Fast is never invoked. All phases run under the **Planning** role.
->
-> | Phase      | Role         | Why                                                       |
-> | :--------- | :----------- | :-------------------------------------------------------- |
-> | SPEC + END | **Planning** | Document classification, structure review, accuracy check |
->
-> Planning's strength here is accuracy and coherence: cross-referencing code state, CHANGELOG history, and ADR decisions before committing any documentation artifact.
->
-> Read `.ai/instructions/templates/agent-roles.md` for the full protocol.
+> No CODE phase — Fast is never invoked. All phases run under Planning role.
+> Read `.ai/instructions/templates/agent-roles.md` for full protocol.
