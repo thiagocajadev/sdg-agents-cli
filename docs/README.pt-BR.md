@@ -27,6 +27,7 @@ O conjunto de instruções cobre:
 - **Flavors arquiteturais**: regras para o padrão estrutural do projeto (vertical slice, MVC, lite, legacy).
 - **Compatível com qualquer agente**: uma única fonte canônica em `.ai/skills/AGENTS.md` que qualquer agente de IA (Claude Code, Cursor, Windsurf, Copilot, Codex, Gemini, Cline/Roo) pode referenciar. O `CLAUDE.md` é gerado automaticamente na raiz para o Claude Code; outras ferramentas são conectadas com um ponteiro de uma linha (veja "Usando com outras IDEs" abaixo).
 - **Harness Engineering (Memory)**: uma pasta `.ai-backlog/` que persiste contexto e estado de tarefas entre sessões.
+- **Impact Map**: um arquivo volátil de blast-radius (`.ai-backlog/impact-map.md`) criado no Phase PLAN e limpo no Phase END — diz ao agente exatamente quais arquivos carregar no ciclo atual, mantendo o contexto enxuto e focado.
 
 ---
 
@@ -107,8 +108,8 @@ SPEC  →  PLAN  →  CODE  →  TEST  →  END
 
 > Digite `end:` para encerrar o ciclo ativo. O agente executa o checklist completo do END — changelog, sincronização do backlog, proposta de commit. Se o agente perder o fio numa conversa paralela, `end:` também recupera o ciclo.
 
-Para um guia detalhado de cada fase, veja [Guia Spec-Driven](SPEC-DRIVEN-DEV-GUIDE.md).
-Para um diagrama visual dos gates de decisão, veja [Agent Deep-Flow](AGENT-DEEP-FLOW.md).
+Para um guia detalhado de cada fase, veja [Guia Spec-Driven Development](SPEC-DRIVEN-DEV-GUIDE.md).
+Para um diagrama visual dos gates de decisão e loops internos, veja [Agent Deep-Flow](AGENT-DEEP-FLOW.md).
 
 ---
 
@@ -169,6 +170,7 @@ O `sdg-agents` gera uma única fonte canônica em `.ai/skills/AGENTS.md` e um po
 npx sdg-agents review    # Detectar drift entre regras locais e a fonte
 npx sdg-agents sync      # Atualizar rulesets da fonte
 npx sdg-agents update    # Atualizar o registro de versões LTS
+npx sdg-agents audit     # Executar auditoria de governança (violações de leis, drift)
 npx sdg-agents clear     # Remover a pasta .ai/
 ```
 
@@ -182,7 +184,10 @@ npx sdg-agents clear     # Remover a pasta .ai/
 - [Leis de Engenharia (CONSTITUTION)](CONSTITUTION.md) — os princípios por trás das regras
 - [Sistema UI/UX](UI-UX.md) — filosofia de design, hierarquia, escala tonal de superfície, presets e referências externas de pesquisa
 - [Roadmap](ROADMAP.md) — trabalho planejado
+- [Otimização de Tokens](TOKEN-OPTIMIZATION.md) — modelo de custo, processo de compactação e eficiência do roteador
+- [Migração v2 → v3](MIGRATION-v3.md) — breaking changes e guia de migração passo a passo
 - [Changelog](../CHANGELOG.md) — histórico de versões
+- [Créditos e Filosofias](REFERENCES.md) — influências do projeto e créditos de pesquisa
 
 ---
 

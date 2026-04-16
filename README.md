@@ -170,6 +170,7 @@ To add or extend support for a language, paste the idiom skill file into your ag
 npx sdg-agents review    # Detect drift between local rules and source
 npx sdg-agents sync      # Update rulesets from source
 npx sdg-agents update    # Refresh the LTS version registry
+npx sdg-agents audit     # Run governance audit (law violations, drift)
 npx sdg-agents clear     # Remove the .ai/ folder
 ```
 
@@ -184,6 +185,8 @@ npx sdg-agents clear     # Remove the .ai/ folder
 - [UI/UX System](docs/UI-UX.md) — design philosophy, hierarchy, surface tonal scale, presets, and external research references
 - [Roadmap](docs/ROADMAP.md) — planned work
 - [Changelog](CHANGELOG.md) — release history
+- [Token Optimization](docs/TOKEN-OPTIMIZATION.md) — cost model, compaction process, and routing efficiency
+- [Migration v2 → v3](docs/MIGRATION-v3.md) — breaking changes and step-by-step migration guide
 - [Credits and Philosophies](docs/REFERENCES.md) — project influences and research credits
 
 ---

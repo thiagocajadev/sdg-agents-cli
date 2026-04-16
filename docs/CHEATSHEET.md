@@ -93,8 +93,9 @@ Prefix your message to the AI Agent to activate the corresponding governance cyc
 | `feat: <description>` | Feature | New implementation — requires SPEC and PLAN approval before any code.                                                                                |
 | `fix: <description>`  | Fix     | Bug resolution — Root Cause Analysis and regression test mandatory.                                                                                  |
 | `docs: <description>` | Docs    | Technical memory sync — Changelogs, ADRs, Specs.                                                                                                     |
+| `audit: <scope>`      | Audit   | Verify project alignment against rulesets (drift detection).                                                                                         |
 | `end:`                | —       | Close the active cycle — runs the END Phase checklist (changelog, backlog, commit). Also recovers a cycle if the agent loses track mid-conversation. |
-| No prefix             | —       | Agent asks: "land, feat, fix, or docs?" — then proceeds.                                                                                             |
+| No prefix             | —       | Agent asks: "land, feat, fix, docs, or audit?" — then proceeds.                                                                                      |
 
 > `end:` takes no argument. Type it to close the active cycle — the agent runs the full END checklist (changelog, backlog sync, commit proposal). If the agent loses track mid-conversation, `end:` also recovers the cycle.
 
