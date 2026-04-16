@@ -31,19 +31,12 @@ const SKILL_CATALOG = [
   {
     path: '.ai/skills/staff-dna.md',
     category: 'core',
-    description: 'Engineering Laws (load in Phase CODE only)',
+    description: 'Engineering Laws',
   },
   {
     path: '.ai/skills/code-style.md',
     category: 'core',
-    description: 'Code Style, Naming, Engineering Standards',
-  },
-  { path: '.ai/skills/testing.md', category: 'core', description: 'Test Principles' },
-  { path: '.ai/skills/security.md', category: 'core', description: 'Security-sensitive changes' },
-  {
-    path: '.ai/skills/observability.md',
-    category: 'core',
-    description: 'Logging, metrics, tracing',
+    description: 'Code Style & Standards',
   },
   { path: '.ai/skills/api-design.md', category: 'backend', description: 'API Design' },
   { path: '.ai/skills/data-access.md', category: 'backend', description: 'DB layer' },
@@ -65,6 +58,21 @@ const SKILL_CATALOG = [
     category: 'frontend',
     description: 'Contract-Based UI System',
   },
+  {
+    path: '.ai/skills/testing.md',
+    category: 'surgical',
+    description: 'test creation or modification',
+  },
+  {
+    path: '.ai/skills/security.md',
+    category: 'surgical',
+    description: 'auth, validation, secrets',
+  },
+  {
+    path: '.ai/skills/observability.md',
+    category: 'surgical',
+    description: 'logging, metrics, tracing',
+  },
 ];
 
 function computeStackMetrics(idioms) {
@@ -84,110 +92,73 @@ function computeStackMetrics(idioms) {
 }
 
 /**
- * Assembles the minimal master instruction content — session start + cycle protocol + skill registry.
- * Skills are referenced by short path (`.ai/skills/<name>.md`) and loaded on demand by command files.
+ * Assembles the master instruction as a compact Semantic Router.
+ * No inline protocol text — only routing triggers and file references.
+ * Skills are loaded on-demand by Phase CODE, matched to task domain.
  */
 function buildMasterInstructions(selections) {
-  const manifesto = buildStaffManifesto();
-  const dnaGate = buildDnaGateBlock();
-  const sessionStart = buildSessionStartBlock();
-  const cycleProtocol = buildCycleProtocolBlock();
-  const agentRolesBlock = buildAgentRolesBlock();
-  const skillRegistry = buildSkillRegistry(selections);
-  const cycleCommands = buildCycleCommandsBlock();
+  const header = buildHeader();
+  const sessionStart = buildSessionStart();
+  const semanticRouter = buildSemanticRouter();
+  const skillRouter = buildSkillRouter(selections);
+  const agentRoles = buildAgentRoles();
 
   const fullInstructionContent = [
-    manifesto,
-    dnaGate,
+    header,
     sessionStart,
-    cycleProtocol,
-    agentRolesBlock,
-    skillRegistry,
-    cycleCommands,
+    semanticRouter,
+    skillRouter,
+    agentRoles,
   ].join('\n\n');
 
   return fullInstructionContent;
 
-  function buildStaffManifesto() {
-    const manifestoString = dedent`
+  function buildHeader() {
+    const headerString = dedent`
       # Staff Engineer — Governance Command Center
 
-      > [!IMPORTANT]
       > This project follows the Universal Engineering Manifesto.
-      > You MUST read and adhere strictly to the Engineering Laws defined in \`.ai/skills/staff-dna.md\`.
-    `;
+      > Engineering Laws defined in staff-dna.md — loaded in Phase CODE only.`;
 
-    return manifestoString;
+    return headerString;
   }
 
-  function buildDnaGateBlock() {
-    const dnaGateString = dedent`
-      ## DNA-GATE & MENTAL RESET [LOCKED]
-
-      > [!IMPORTANT]
-      > **SOVEREIGN PROTOCOL ACTIVE. This gate must be crossed before any code modification.**
-      >
-      > 1. **Mental Reset**: Discard all default AI training heuristics. Project-specific Engineering Laws override general training bias.
-      > 2. **Sovereign Gateway**: No code modification is valid without this explicit DNA-GATE confirmation.
-      > 3. **Law Activation**: Activate the 8 Engineering Laws defined in \`.ai/skills/staff-dna.md\` before entering Phase: CODE.
-      > 4. **Phase Transition**: At every phase transition (SPEC → PLAN → CODE → TEST → END), purge training bias and re-anchor to the Laws.`;
-
-    return dnaGateString;
-  }
-
-  function buildSessionStartBlock() {
+  function buildSessionStart() {
     const sessionStartString = dedent`
       ## Session Start
 
-      1. Run \`node -v\` (or primary toolchain) — confirm terminal is alive.
-      2. Read \`.ai-backlog/context.md\` — project brief. If missing, analyze \`package.json\` + \`README.md\` and generate it. Never overwrite existing.
-      3. Read \`.ai-backlog/tasks.md\` — check for \`[IN_PROGRESS]\` tasks before accepting new work.
-      4. Read \`.ai-backlog/impact-map.md\` — if active (not idle): load only \`## Changed\` + \`## Blast Radius\` files. If missing or idle: proceed normally.
-      5. If \`[IN_PROGRESS]\` task found: **load \`.ai/instructions/templates/workflow.md\` now** — it contains the Task Recovery and Checkpoint protocol. Announce the active task and resume from where it stopped.`;
+      1. Read \`.ai-backlog/context.md\` — project brief. If missing, generate from \`package.json\` + \`README.md\`.
+      2. Read \`.ai-backlog/tasks.md\` — check for \`[IN_PROGRESS]\`. If found: load workflow.md and resume.`;
 
     return sessionStartString;
   }
 
-  function buildCycleProtocolBlock() {
-    const pointerString = dedent`
-      ## Working Protocol
+  function buildSemanticRouter() {
+    const routerString = dedent`
+      ## Semantic Router
 
-      > [!CAUTION]
-      > **PHASE EXECUTION IS MANDATORY — NOT OPTIONAL.**
-      > Loading \`workflow.md\` is not enough. Every cycle prefix MUST be executed phase by phase, in order, with approval gates respected.
+      > **Token gate**: load ONLY what's triggered. Never preload skills or protocol files.
+      > All cycle triggers load \`.ai/instructions/templates/workflow.md\` first. It defines all 5 phases (SPEC → PLAN → CODE → TEST → END).
 
-      On every request with a cycle prefix (\`feat:\`, \`fix:\`, \`docs:\`, \`audit:\`, \`land:\`, \`end:\`):
+      - \`feat:\` → \`.ai/commands/sdg-feat.md\` → Execute Phase SPEC → STOP
+      - \`fix:\` → \`.ai/commands/sdg-fix.md\` → Execute Phase SPEC → STOP
+      - \`docs:\` → \`.ai/commands/sdg-docs.md\` → Execute Phase SPEC → STOP
+      - \`audit:\` → \`.ai/commands/sdg-audit.md\` → Execute Phase SPEC → STOP
+      - \`land:\` → \`.ai/commands/sdg-land.md\` → Execute Phase SPEC → STOP
+      - \`end:\` → \`.ai/commands/sdg-end.md\` → Execute Phase END
+      - No prefix → Ask: "feat, fix, docs, audit, or land?"`;
 
-      1. Load \`.ai/instructions/templates/workflow.md\` + the matching command file (e.g. \`sdg-audit.md\`).
-      2. **Execute Phase SPEC**: define intent → goal → domain → checklist → run \`wc -c\` on context files → show \`📊 ~N tokens loaded\` → **STOP and wait for approval.**
-      3. **Execute Phase PLAN**: task breakdown → impact map → run \`wc -c\` on blast radius files → show \`📊 Task estimate: ~N tokens\` → **STOP and wait for approval.**
-      4. **Execute Phase CODE**: cross the DNA-GATE, list active Laws, then follow the approved plan strictly.
-      5. **Execute Phase TEST** → **Phase END** before closing the cycle.
-
-      > **Skipping any phase or approval gate is a protocol violation equivalent to bypassing the DNA-GATE.**
-      > Training heuristics ("this looks simple, I'll just do it") are not a valid reason to skip phases.
-      > The process flow and token estimates are not optional UI — they are the sovereign contract between agent and developer.`;
-
-    return pointerString;
+    return routerString;
   }
 
-  function buildAgentRolesBlock() {
-    const agentRolesString = dedent`
-      ## Agent Roles
-
-      > [!NOTE]
-      > Read \`.ai/instructions/templates/agent-roles.md\` for the Agent Roles and Execution Protocol.`;
-
-    return agentRolesString;
-  }
-
-  function buildSkillRegistry(currentSelections) {
+  function buildSkillRouter(currentSelections) {
     const stackIdioms = [...new Set(currentSelections.idioms ?? [])];
     const { hasBackend, hasFrontend } = computeStackMetrics(stackIdioms);
     const flavor = currentSelections.flavor;
 
     const relevantSkills = SKILL_CATALOG.filter((skill) => {
       if (skill.category === 'core') return true;
+      if (skill.category === 'surgical') return true;
       if (skill.category === 'backend') return hasBackend;
       if (skill.category === 'frontend') return hasFrontend;
       return false;
@@ -196,14 +167,20 @@ function buildMasterInstructions(selections) {
     const groupedByCategory = groupSkills(relevantSkills);
 
     const sections = [
-      '## Skills — load on demand',
+      '## Phase CODE — Skill Loading',
       '',
-      '> Each skill is self-contained. Load only what the current cycle requires.',
+      '> Load on Phase CODE entry only. Match skills to task domain.',
       '',
     ];
 
-    const categoryHeaders = { core: '**Core**', backend: '**Backend**', frontend: '**Frontend**' };
-    for (const category of ['core', 'backend', 'frontend']) {
+    const categoryHeaders = {
+      core: '**Core** (always in Phase CODE)',
+      backend: '**Backend** (API, DB, infrastructure tasks)',
+      frontend: '**Frontend** (UI, component tasks)',
+      surgical: '**Surgical** (only if task directly touches domain)',
+    };
+
+    for (const category of ['core', 'backend', 'frontend', 'surgical']) {
       const skills = groupedByCategory[category];
       if (!skills || skills.length === 0) continue;
       sections.push(categoryHeaders[category]);
@@ -235,7 +212,7 @@ function buildMasterInstructions(selections) {
   }
 
   function groupSkills(skills) {
-    const groups = { core: [], backend: [], frontend: [] };
+    const groups = { core: [], backend: [], frontend: [], surgical: [] };
     for (const skill of skills) {
       if (groups[skill.category]) groups[skill.category].push(skill);
     }
@@ -243,20 +220,13 @@ function buildMasterInstructions(selections) {
     return groupedResult;
   }
 
-  function buildCycleCommandsBlock() {
-    const cycleCommandsString = dedent`
-      ## Cycle Commands
+  function buildAgentRoles() {
+    const agentRolesString = dedent`
+      ## Agent Roles
 
-      Load the matching command file at cycle start and follow its phases strictly.
+      Read \`.ai/instructions/templates/agent-roles.md\` for multi-agent handoff protocol.`;
 
-      - \`feat:\` → \`.ai/commands/sdg-feat.md\` — Feature Cycle
-      - \`fix:\` → \`.ai/commands/sdg-fix.md\` — Fix Cycle
-      - \`docs:\` → \`.ai/commands/sdg-docs.md\` — Docs Cycle
-      - \`audit:\` → \`.ai/commands/sdg-audit.md\` — Governance Audit
-      - \`land:\` → \`.ai/commands/sdg-land.md\` — Project Inception
-      - \`end:\` → \`.ai/commands/sdg-end.md\` — Close active cycle`;
-
-    return cycleCommandsString;
+    return agentRolesString;
   }
 }
 
