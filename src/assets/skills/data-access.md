@@ -43,6 +43,14 @@
 - Cache as decorator/interceptor around repository; never mix with business logic
 - Every cache entry must have TTL
 
+## Migrations
+
+- **Naming**: Rails `YYYYMMDDHHMMSS_<verb>_<subject>.sql` — timestamp guarantees order.
+- **Forward-only**: no `down` edits on applied migrations; corrections are new migrations.
+- **One concern per migration**: one table/column/index.
+- **Idempotent guards**: `IF NOT EXISTS` / `IF EXISTS`.
+- **No data backfills** in schema migrations — separate operational script.
+
 ## Data Integrity & Transactions
 
 - FK constraints for referential integrity; `NOT NULL` by default

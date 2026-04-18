@@ -2,13 +2,16 @@
 
 > **BFF (Backend for Frontend) is default.** Endpoints serve UI needs, not generic data.
 
-## 1. Response Envelope
+## 1. Response Envelope (SSOT)
 
-- **Structure**: `{ success, error: { code, message } | null, meta: { action, nextCursor, hasMore, traceId }, data: T }`.
+> Canonical definition. Referenced by `code-style.md` and `api-design.md` — do not redefine elsewhere.
+
+- **Structure**: `{ success: bool, error: { code, message } | null, meta: { action, nextCursor, hasMore, traceId }, data: T }`.
 - **Discriminator**: Consumer branches on `success`.
-- **Meta**: TraceId, RequestId, Pagination only. No business data.
+- **Meta**: `action`, `traceId`, `requestId`, pagination fields only. No business data.
 - **Pagination**: Default Cursor (`nextCursor`, `hasMore`). Offset exception (`page`, `total`).
-- **Errors**: 400 INVALID_INPUT · 401 UNAUTHORIZED · 404 NOT_FOUND · 409 CONFLICT · 500 INTERNAL.
+- **Errors**: 400 INVALID_INPUT · 401 UNAUTHORIZED · 403 FORBIDDEN · 404 NOT_FOUND · 409 CONFLICT · 409 BUSINESS_RULE_VIOLATION · 500 INTERNAL.
+- **Boundary**: Adapter converts `Result<T>` → Envelope at controller edge.
 
 ## 2. Execution Flow
 
@@ -20,6 +23,6 @@
 ## 3. Boundaries & Insulation
 
 - **Typed Layer Results**: Named types for all inter-layer returns. No anonymous objects.
-- **Thin Entry Point**: 1-4 lines delegation. `Result<T> → HttpEnvelope` via Adapter.
+- **One-Line Entry Point**: `run()` / `init()` / `start()` = exactly **1 line of delegation**. `Result<T> → HttpEnvelope` via Adapter.
 - **OutputFilter**: Entities → Response DTOs. Mask PII/password/internal IDs.
 - **Insulation**: Cache as decorator. Repositories hide SQL/NoSQL details.

@@ -19,16 +19,9 @@
 
 ### Config Fail-Fast
 
-- Validate all required env vars on startup; exit with descriptive error if missing
-- No silent defaults for secrets (`DATABASE_URL`, `JWT_SECRET`, API keys)
-- Define and validate config schema at boot (Zod, Pydantic, envy)
-
-### Cloud Observability
-
-- Every service exposes `/health` returning dependency status + uptime
-- Track RED metrics (Rate, Errors, Duration) for every external-facing endpoint
-- Ship structured logs to central sink (CloudWatch, Datadog, GCP Logging); never rely on local disk in cloud
-- See `.ai/skills/observability.md` for logging/tracing implementation
+- Config schema + abstract naming + no `.env.example`: see `security.md` (AbstractEnvNaming SSOT).
+- Ship logs to central sink (CloudWatch, Datadog, GCP Logging); never rely on local disk in cloud.
+- Health + RED + structured logging rules: see `observability.md`.
 
 ## Container Standards
 

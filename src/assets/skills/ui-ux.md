@@ -149,7 +149,7 @@ Cannot fill Palette and Preset → ask before generating code.
 
 ## Part 2 — Component Architecture
 
-> Styling: Tailwind v4 + shadcn/ui. Utility-first CSS.
+> Styling: Tailwind v4 + shadcn/ui. Utility-first CSS. Icons: **Lucide** (`lucide-react`) — single icon library per project.
 
 ### The ViewModel Law
 
@@ -297,6 +297,25 @@ Feedback within 100ms. Animations at 60fps, no layout thrashing. Avoid unnecessa
 Same interaction → same response. Same component → same states everywhere. No per-screen behavior changes.
 
 </rule>
+
+### Structured Components
+
+Decompose multi-stage flows via **steps** / **tabs** / **modals**. >3 concerns without decomposition = layout failure.
+
+- **Steps**: linear progress + position indicator.
+- **Tabs**: peer content; URL-synced for shareable state.
+- **Modals**: close on Esc + backdrop + explicit cancel.
+- **Progression**: user knows where they are + what's next (breadcrumbs/counters/CTA).
+- **Error Prevention**: destructive actions need typed intent or second tap.
+
+### Anti-Patterns (UI/UX)
+
+- **Information overload** → hierarchy + drill-down.
+- **Uncontrolled tables** → paginate + filter at >25 rows.
+- **Visual noise** → respect 60-30-10.
+- **Decorative motion** → remove if not communicating state.
+- **Fixed-layout bias** → fr/auto/tokens over pixels.
+- **Platform bias** → mobile-first + cross-platform primitives.
 
 ---
 

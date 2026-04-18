@@ -30,19 +30,7 @@
 
 <rule name="NarrativeCascade">
 > Code reads like a short story — complete and meaningful narrative.
->
-> - **Stepdown Rule**: Callers at top, file reads top-down headline → details
-> - **Rich Object Flow**: Peer elements receive the same rich object
-> - **Explaining Returns**: Return reflects final task or named result
-> - **SLA**: Orchestrate or implement — never both in same body
-> - **Shallow Boundaries**: Destructure L1/L2, stop deep navigation
-> - **Vertical Density**: Visual grouping with single blank lines
-> - **Revealing Module**: Define first, named export object at end
-> - **Narrative Siblings**: One-off helpers as local non-exported siblings after caller
-> - **Humanized Writing**: Apply UI/UX Writing Soul. Eliminate AI-isms.
->
-> Comments explain "why", never "what". If naming is right, comments disappear.
-> See `NarrativeCascade` → [Code Style Skill](.ai/skills/code-style.md)
+> Full rule set (Stepdown, SLA, Explaining Returns, Narrative Siblings, Revealing Module, Shallow Boundaries, Code-as-Documentation): see [Code Style Skill](.ai/skills/code-style.md) Part 3.
 </rule>
 
 ## Law 5: The Law of Visual Excellence (Aesthetics)
@@ -84,7 +72,7 @@
 ## Technical Directives
 
 1. **Fitness for Purpose**: Best solution fulfills task with maximum efficiency. No over-engineering.
-2. **Code as Truth, Docs as Memory**: Expressive names replace comments. Only "why" comments permitted. Engineering Memory (README, CHANGELOG) updated at phase transitions.
+2. **Code as Truth, Docs as Memory**: Expressive names replace comments. `// why:` permitted **only** for hidden constraints (see `code-style.md`). Engineering Memory (README, CHANGELOG) updated at phase transitions.
 3. **Agent-Led Engineering**: Agent is tech lead for execution. Developer is strategic orchestrator for domain context and authorization.
 4. **Token-Awareness**: Every turn has a cost. Solve with smallest, most relevant context.
 

@@ -9,9 +9,9 @@
 - **Structured Logging**: JSON with consistent fields: `timestamp`, `level`, `message`, `correlationId`, `service`
 - **Correlation IDs**: Every request carries a unique trace ID propagated across all boundaries
 - **Log Levels**: `DEBUG` dev, `INFO` business events, `WARN` degraded, `ERROR` failures requiring attention
-- **Never log secrets**: Redact passwords, tokens, PII, API keys; allowlists over denylists
-- **Health Checks**: Every service exposes `/health` with dependency status + uptime
-- **Metrics**: RED method (Rate, Errors, Duration) for every external-facing endpoint
+- **Never log secrets / PII**: see `security.md` (DataShielding SSOT) — redact via allowlists, not denylists.
+- **Health Checks**: Every service exposes `/health` with dependency status + uptime.
+- **Metrics**: RED method (Rate, Errors, Duration) for every external-facing endpoint.
 
 ## Structured Logging per Stack
 

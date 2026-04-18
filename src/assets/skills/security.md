@@ -8,17 +8,18 @@
 
 ## Part 1 — Tactical AppSec (Secure Coding)
 
-### Rule: The Law of Hardening (AppSec Implementation)
+### Rule: The Law of Hardening (AppSec Implementation) — SSOT
 
 <rule name="OperationalAppSec">
 
 > **Defense in Depth.** Every layer validates its own assumptions.
+> Canonical for: **DataShielding** (PII), **AbstractEnvNaming**, **NoConfigTemplates**. Other skills reference here.
 
 - **Input Sanitization**: Sanitize all external inputs (body, query, headers) via trusted libs (Zod, Joi, Pydantic). Reject early.
 - **Injection Prevention**: 100% parameterized SQL. Escape HTML outputs (XSS). No raw string concat for shell/DB.
-- **Data Shielding (PII)**: Mask sensitive fields in logs/responses. Never return full emails/IDs/phones except authorized admin scopes.
-- **No Config Templates**: Never commit `.env.example` or `.env.*` — discloses infra metadata.
-- **Abstract Env Naming**: Domain-abstract keys (`PAYMENT_SECRET` not `STRIPE_SK`).
+- **Data Shielding (PII)**: Mask sensitive fields in logs/responses. Never log secrets/PII (allowlist-based redaction). Never return full emails/IDs/phones except authorized admin scopes.
+- **No Config Templates**: Never commit `.env.example` or `.env.*` — discloses infra metadata. Setup guide belongs in SPEC.
+- **Abstract Env Naming**: Domain-abstract keys (`PAYMENT_SECRET` not `STRIPE_SK`). Runtime validation at boot (fail-fast).
 - **No Unsafe APIs**: Prohibit `eval()`, `dangerouslySetInnerHTML`, insecure deserialization.
   </rule>
 
@@ -112,10 +113,24 @@ Fail Closed if: untrusted signature or critical CVE.
 - Intrusion → isolate, preserve forensic evidence
 - RCA compulsory for all incidents (timeline, impact, prevention)
 
-**Escalation**: Detect → Triage (P0-P3) → Respond (playbook) → Resolve (fix forward or rollback) → Review (48h retrospective)
-
 **DR**: Encrypted air-gapped backups, defined RTO/RPO, quarterly recovery tests.
 </rule>
+
+---
+
+## Part 3 — Incident Correction Strategy
+
+### Rule: Fix-Forward Preference
+
+`main` always represents the latest working state. Correction flows forward, not back.
+
+- **Flag-based safety**: disable feature via flag — default containment, no code rollback.
+- **Fix Forward**: correct via new PR on `main`. Rollback is not default.
+- **Rollback = exception**: only if system unavailable OR fix-forward beats SLO.
+- **Main consistency**: never leave `main` broken; hotfix PR lands before next merge.
+- **Explicit dependencies**: flags/contracts isolate blast radius between features.
+
+**Escalation**: Detect → Triage (P0-P3) → Respond → Resolve (prefer fix-forward) → Review (48h RCA).
 
 </ruleset>
 

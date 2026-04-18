@@ -61,6 +61,20 @@ ORDER BY
 DELETE FROM Logs WHERE Logs.Id = 123;
 ```
 
+## Query Discipline
+
+- **Early filtering**: `WHERE` before joins; narrow driving table first.
+- **Descriptive aliases**: by domain (`Orders`, `Users`), not letters.
+- **Named parameters**: `@orderId` / `:user_id` — never inline literals.
+- **Explicit `ORDER BY`**: always state the column.
+- **No `SELECT *`**: see `data-access.md`.
+
+## CTE vs Temp Table
+
+- **CTE (`WITH`)**: single-read derivation — prefer for readability.
+- **Temp Table (`#Temp`)**: multi-read reuse, indexed intermediate, perf-critical.
+- **Promote CTE → Temp**: when read >1× or benefits from index.
+
 ## Multi-Row INSERT (Vertical Layout)
 
 INSERT with 4+ fields follows Left-Edge Pattern:

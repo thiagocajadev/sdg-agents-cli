@@ -4,6 +4,15 @@
 
 > Load in **Phase CODE** alongside `staff-dna`. For SQL aesthetics, see `sql-style.md`.
 
+### Rule: Language & Purity
+
+- **English-only source**; user copy follows Writing Soul.
+- **Small Functions**: one responsibility; name needs "and" → split.
+- **Immutability default**: `const`/readonly; mutation crosses boundaries explicitly.
+- **CQS**: function mutates (command) OR reads (query, pure) — never both.
+- **Explicit Dependencies**: inject via params/factory; no hidden globals.
+- **Async I/O**: `async/await`; never block the event loop.
+
 ---
 
 ## Part 1 — Naming Discipline
@@ -97,6 +106,7 @@ Code optimized for vertical reading. Horizontal scrolling is failure.
 - One instruction per line. No chaining multiple operations.
 - Indent parameters, conditions, list items vertically.
 - Single blank lines between logical "paragraphs". No blanks within groups.
+- **≤3 parameters per line**: inline signature only when ≤3 args; otherwise one arg per line vertically.
 
 **Pattern:** Extract multi-condition `if` into a named boolean:
 
@@ -121,7 +131,7 @@ if (canDelete) {
 
 - **Stepdown Rule**: High-level functions at top, helpers at bottom.
 - **Guard Clauses**: Early returns over nested conditionals. Kill "Arrow Antipattern".
-- **Explaining Returns**: Assign to named `const` before returning. Never return anonymous objects/inline ternaries.
+- **Explaining Returns**: named `const` before every return; **no bare `return;`**, no logic/ternary/anonymous object on the return line; returned variable **symmetric with entry intent**.
 - **Narrative Siblings**: One-use helper defined as non-exported sibling after its caller.
 - **Strategy over Switch**: Replace large switch/if-else with Strategy Maps (lookup objects).
 
@@ -148,7 +158,7 @@ Each function body either **orchestrates** (calls named functions) or **implemen
 
 - Top-down file structure: highest-level function first.
 - Any expression at wrong abstraction level → extract to named function.
-- Comments explain "why", never "what". Comment restating code = naming failure.
+- **Code as Documentation**: expressive names replace comments. `// why:` permitted **only** for hidden constraints (invariants, workarounds). No what-comments. Comment restating code = naming failure.
 
 **Pattern:** Orchestrator calls named steps. Each step is a sibling that handles one level.
 
@@ -218,19 +228,15 @@ Mandatory: `no-multi-spaces`, `no-unused-vars`, `prettier`.
 <rule name="ResultPatternAndEnvelope">
 
 - **Result\<T\>**: Domain flow. `ok` (data) or `fail` (error code). Never both.
-- **Envelope**: API contract. `success` (bool), `error` (code/msg|null), `meta` (optional), `data` (payload).
-- **Meta**: Context only (action, traceId, requestId, pagination). No business data.
-- **Boundary Rule**: Adapter converts Result→Envelope at controller edge.
+- **Boundary Rule**: Adapter converts `Result<T>` → HTTP Envelope at controller edge.
+- **Envelope SSOT**: defined in `.ai/instructions/competencies/backend.md` (shape, meta fields, error codes).
 
 </rule>
 
 ### Rule: Abstract Configuration
 
-<rule name="AbstractConfig">
-
-No `.env.example` (information disclosure). Abstract key naming (hide vendor). Runtime validation at boot (fail-fast on missing vars). Setup guide in SPEC, not committed templates.
-
-</rule>
+- **SSOT**: env/secret rules in `security.md` `OperationalAppSec`. Do not redefine.
+- **Builder/Options**: fluent builder (`.useX().withY()`) or options pattern per config domain; secrets resolved once at boundary.
 
 ### Rule: Version Control
 

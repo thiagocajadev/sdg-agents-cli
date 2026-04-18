@@ -62,10 +62,19 @@ npm install --save-dev husky lint-staged && npx husky init
 - Rollback path documented and executable in <5 min
 - Staging must mirror prod (same OS, runtime, config shape)
 
+## Delivery Strategy (Trunk-Based)
+
+- **TBD**: short-lived branches from `main`, merged frequently; long-lived branches banned.
+- **CI**: small PR + review + green checks before merge.
+- **CD**: `main` deploys automatically; no env-gated merges.
+- **Deploy ≠ Release**: code may ship disabled; activation is separate.
+- **Feature Flags**: new functionality off by default; progressive rollout after validation.
+- **Post-deploy validation**: dev/QA validate after deploy, not pre-merge.
+
 ## Release Strategy
 
-- Conventional Commits (`type(scope): message`) for automated changelog
-- Semantic Versioning (MAJOR.MINOR.PATCH)
-- CI publishes on version tags; feature flags for risky changes
+- **Commits + SemVer**: canonical in `code-style.md` StaffGradeVCS.
+- **Versioning**: MAJOR.MINOR.PATCH; CI publishes on tags.
+- **Risk control**: feature flags, not long-lived branches.
 
 </ruleset>
