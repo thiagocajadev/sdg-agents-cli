@@ -2,7 +2,7 @@
 
 Landing on project: $ARGUMENTS. Runs once before the first `feat:` — turns raw vision into a grounded, sequenced backlog.
 
-> **Load now**: `.ai/instructions/templates/workflow.md`
+> **Load now**: `.ai/instructions/templates/workflow.md`, `.ai/skills/writing-soul.md`
 
 ## Outputs
 

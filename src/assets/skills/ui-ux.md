@@ -129,6 +129,56 @@ Register as `--font-display` and `--font-body` in `@theme`. Use `font-display` f
 
 </rule>
 
+### Phase 0.7 — Dark Theme Calibration
+
+<rule name="DarkThemeCalibration">
+
+Dark theme is not color inversion. It is a re-optimized palette for low-light perception.
+
+**Surfaces — use the Zinc elevation scale, never pure black:**
+
+| Token           | Zinc step | OKLCH approx | Role            |
+| :-------------- | :-------- | :----------- | :-------------- |
+| `bg-background` | 950       | L≈15%        | Page base (S0)  |
+| `bg-muted`      | 900       | L≈20%        | Sidebars (S1)   |
+| `bg-card`       | 800       | L≈25%        | Cards (S2)      |
+| `bg-popover`    | 700       | L≈30%        | Modals (S3)     |
+| hover state     | 800→750   | L+5%         | Apply Hover Law |
+
+Zinc 950 (`oklch(15% 0.005 285)`) already avoids pure black — never override with `#000000`.
+
+**Chroma — reduce brand colors for dark backgrounds:**
+
+Apply C×0.80–0.90 to all primary/secondary OKLCH tokens in dark mode. Full chroma from light theme reads as "neon" on dark surfaces. Exception: NEOBRUTALISM preset (intentional high-chroma).
+
+**Text — opacity over zinc foreground tokens:**
+
+| Role      | Opacity on white | Token equivalent           |
+| :-------- | :--------------- | :------------------------- |
+| Primary   | 87% (0.87)       | `text-foreground`          |
+| Secondary | 65% (0.65)       | `text-muted-foreground`    |
+| Disabled  | 45% (0.45)       | `text-muted-foreground/45` |
+
+Avoid opacity below 40% — text disappears against dark zinc surfaces.
+
+**Shadows and overlays:**
+
+- Reduce shadow spread and opacity in dark mode (box-shadow fades into dark bg).
+- Avoid `rgba(0,0,0,0.6)` overlays — they accumulate with dark surfaces and create "black hole" regions. Use `bg-background/70` backdrop instead.
+- Elevation conveys depth via lighter surfaces, not stronger shadows.
+
+**Perceptual calibration (mandatory after applying rules):**
+
+| Symptom        | Fix                                    |
+| :------------- | :------------------------------------- |
+| Feels heavy    | Lighten surfaces one step (L+5%)       |
+| Colors vibrate | Reduce chroma further (C×0.75)         |
+| Looks faded    | Increase foreground contrast (L-delta) |
+
+Perception beats math. Validate visually after applying tokens — adjust manually if WCAG passes but readability fails.
+
+</rule>
+
 ### Design Contract (Required Before Code)
 
 Before writing UI code, declare:
@@ -321,53 +371,6 @@ Decompose multi-stage flows via **steps** / **tabs** / **modals**. >3 concerns w
 
 ## Part 5 — Writing Soul (UI Copy & Perennial Artifacts)
 
-> Applies to all non-code writing: READMEs, guides, changelogs, UI content, commit messages.
-
-### Mouth vs Soul
-
-| Context                   | Mode              | Rule                                                                                   |
-| :------------------------ | :---------------- | :------------------------------------------------------------------------------------- |
-| Chat with dev (default)   | Terse             | Dense. No pedagogy unless dev asks "explain"/"why". See `workflow.md` TokenDiscipline. |
-| Chat (pedagogical opt-in) | Pedagogical       | Technical terms + contextual explanation in parentheses. Calm, inviting.               |
-| Source code               | Project standards | Soul does not govern code. Follow linting/conventions.                                 |
-| Code comments             | Semi-pedagogical  | Explain acronyms for public APIs. No throat-clearing. Stop-Slop applies.               |
-| Perennial artifacts       | Soul + Stop-Slop  | All rules below. Active voice, no banned phrases, no false agency.                     |
-
-### Pedagogical Tone
-
-Default tone: **pedagogical, calm, inviting**. Make complexity accessible.
-
-Technical terms: keep in English + add contextual explanation: `CI/CD (pipeline that automates build, test, deploy on every commit)` not `CI/CD (Continuous Integration/Deployment)`. Explain **what it does**, not the acronym expansion.
-
-### Style Rules
-
-- **Active clarity**: Direct, active verbs. Break complex ideas into clear clauses. Avoid "-ing" chains.
-- **Visual serenity**: Sentence case headings. No em dashes. Bold for technical emphasis only. Emojis only for semantic signaling.
-- **Professional peerage**: No promotional adjectives. Calm peer-level tone. State facts directly.
-- **Personality**: Mix brief observations with detailed explanations. Acknowledge engineering complexity.
-
-### Anti-Patterns (Stop-Slop)
-
-Remove before delivering any artifact:
-
-**Banned openers:** "Here's the thing:", "The uncomfortable truth is", "Let me be clear", "Let me walk you through...", "In this section, we'll..."
-
-**Banned emphasis:** "Full stop.", "This matters because", "Make no mistake", "Let that sink in."
-
-**Banned jargon:** navigate→handle, unpack→explain, deep dive→analysis, game-changer→significant, moving forward→next, circle back→revisit, landscape→situation.
-
-**Kill all adverbs** in delivery artifacts: really, just, literally, genuinely, simply, actually, deeply, truly, fundamentally, inherently, importantly, crucially.
-
-**Structural anti-patterns:**
-
-- Binary contrasts ("Not X. Because Y.") → state Y directly
-- False agency ("The decision emerges") → name the actor
-- Passive voice → find subject, make them act
-- Vague declaratives ("The implications are significant") → name the specific thing
-- Dramatic fragmentation ("[Noun]. That's it.") → complete sentences
-
-### Quick Checks (Before Delivering Artifacts)
-
-Adverbs? Kill. Passive voice? Find actor. Inanimate doing human verb? Name person. Throat-clearing opener? Cut. Binary contrast? State Y. Three same-length sentences? Break one. Em-dash? Remove. Vague declarative? Name the thing.
+> Load `.ai/skills/writing-soul.md` for all non-code writing: UI copy, READMEs, changelogs, guides, commit messages.
 
 </ruleset>

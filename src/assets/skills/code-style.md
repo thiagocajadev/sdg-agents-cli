@@ -105,19 +105,83 @@ Code optimized for vertical reading. Horizontal scrolling is failure.
 
 - One instruction per line. No chaining multiple operations.
 - Indent parameters, conditions, list items vertically.
-- Single blank lines between logical "paragraphs". No blanks within groups.
+- **Paragraphs of Intent**: group lines by semantic step — 0 blank lines within a group, exactly 1 blank line between groups. Never 2+ consecutive blank lines.
+- A wall of tight code with no paragraph breaks = scansion failure. A file with double blank lines = noise failure. Both are equal violations.
 - **≤3 parameters per line**: inline signature only when ≤3 args; otherwise one arg per line vertically.
+- Each block must be scannable in one pass — if it requires backtracking, extract or regroup.
 
 **Pattern:** Extract multi-condition `if` into a named boolean:
 
 ```typescript
-// named boolean → vertical scansion
 const canDelete = user.isActive && user.hasRole('ADMIN') && user.permissions.includes('DELETE');
 
 if (canDelete) {
   deleteRecord(id);
 }
 ```
+
+</rule>
+
+### Rule: String Density
+
+<rule name="StringDensity">
+
+Long inline strings (Tailwind class lists, template literals, query strings) degrade scansion. Split by semantic concern.
+
+**Tailwind class strings — split by group, not by token:**
+
+```tsx
+// bad — monolithic wall
+<div className="flex flex-col gap-4 p-6 rounded-xl border border-border/40 bg-card text-foreground text-sm font-medium hover:bg-card/80 transition-colors disabled:opacity-50 disabled:pointer-events-none" />;
+
+// good — one group per concern
+const base = 'flex flex-col gap-4 p-6';
+const surface = 'rounded-xl border border-border/40 bg-card';
+const typography = 'text-foreground text-sm font-medium';
+const states =
+  'hover:bg-card/80 transition-colors disabled:opacity-50 disabled:pointer-events-none';
+
+<div className={[base, surface, typography, states].join(' ')} />;
+```
+
+**`cva` — composition layer, not string storage:**
+
+```tsx
+// bad — cva as a dump for one giant string
+const button = cva(
+  'flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90'
+);
+
+// good — cva as semantic composition
+const button = cva(
+  [
+    'flex items-center justify-center',
+    'rounded-lg px-4 py-2',
+    'text-sm font-medium transition-colors',
+    'focus-visible:outline-none focus-visible:ring-2',
+    'disabled:pointer-events-none disabled:opacity-50',
+  ],
+  {
+    variants: {
+      variant: {
+        primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        ghost: 'bg-transparent hover:bg-muted',
+      },
+      size: {
+        sm: 'h-8 px-3 text-xs',
+        md: 'h-10 px-4',
+      },
+    },
+  }
+);
+```
+
+**Rules:**
+
+- Each group represents exactly one concern: layout, surface, typography, state, interaction.
+- Never split into single-token lines — that is over-fragmentation, not clarity.
+- Prefer `cva` for components with variants. Prefer named `const` array + `.join(' ')` for one-off compositions.
+- Raw class strings >5 tokens inline = violation. Extract before committing.
 
 </rule>
 
@@ -272,7 +336,8 @@ Code follows conventions. Tests: happy path + edge case + expected failure. Stru
 - [ ] **Guard Clauses** — early returns over nested conditionals; zero arrow antipattern
 - [ ] **Expressive Booleans** — `is`/`has`/`can`/`should`/`did`/`needs`/`supports`/`allows` prefix on every boolean
 - [ ] **No SDG Taboos** — no `handle/do/run/get`-for-compute verbs, no `data/info/obj/item/thing` nouns, no `req`/`res`/`ctx` abbreviations
-- [ ] **Paragraphs of Intent (Visual Density)** — a blank line separates logical groups; NO blank lines within a group. Related lines stay adjacent, unrelated lines are pushed apart. A wall of tight code is a recitation failure.
+- [ ] **Paragraphs of Intent (Visual Density)** — a blank line separates logical groups; NO blank lines within a group; never 2+ consecutive blank lines. Code wall = failure. Double blank lines = failure.
+- [ ] **String Density** — no inline class strings >5 Tailwind tokens; split by semantic concern (layout / surface / typography / state); `cva` used as composition layer, not string dump
 - [ ] **Vertical Signature** — ≤3 parameters inline; 4+ breaks to one-per-line
 - [ ] **No Explanatory Comments** — `// why:` only for hidden constraints; no what-comments
 - [ ] **No Section Banners** — no `// --- Section ---` dividers
@@ -299,7 +364,7 @@ Binary pass/fail — no partial credit:
 - [ ] Narrative Siblings: one-use helpers as local siblings
 - [ ] Explaining Returns: named `const` above every `return`
 - [ ] No framework abbreviations (`req`→`request`, `res`→`response`)
-- [ ] Vertical Density: grouped by "Paragraphs of Intent"
+- [ ] Vertical Density: exactly 1 blank between groups, 0 within, never 2+
 - [ ] Revealing Module Pattern: named export at footer
 - [ ] Shallow Boundaries: max 3 levels (prefer 2)
 - [ ] Destructuring inside function body, not in parameters

@@ -1,6 +1,6 @@
 # Phase: END (The Delivery)
 
-> **Load now**: `.ai/instructions/templates/workflow.md` — canonical END checklist is the Single Source of Truth.
+> **Load now**: `.ai/instructions/templates/workflow.md`, `.ai/skills/writing-soul.md` — canonical END checklist is the Single Source of Truth.
 
 ## Explicit `end:` — Additional Context
 
