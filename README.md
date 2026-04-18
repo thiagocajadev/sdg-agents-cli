@@ -28,6 +28,7 @@ The instruction set covers:
 - **Any-agent compatible**: a single canonical `.ai/skills/AGENTS.md` that any AI agent (Claude Code, Cursor, Windsurf, Copilot, Codex, Gemini, Cline/Roo) can reference. `CLAUDE.md` is auto-generated at the repo root for Claude Code; other tools are wired up by a one-line pointer (see "Using with other IDEs" below).
 - **Harness Engineering (Memory)**: a `.ai/backlog/` folder that persists context and task state across sessions.
 - **Impact Map**: a volatile blast-radius file (`.ai/backlog/impact-map.md`) created at Phase PLAN and cleared at Phase END — tells the agent exactly which files to load for the current cycle, keeping context lean and focused.
+- **Inert tooling catalog**: `sdg-agents init` copies a pre-made bundle into `.ai/tooling/` — `prune-backlog.mjs` (trims backlog Done entries), `bump-version.mjs` (semver-only bump), and husky hook templates (pre-commit gate + commit-msg prefix check). Nothing is wired by default: no `package.json` edit, no `.husky/` created, no devDep installed. Activate on demand with agent assistance or manually.
 
 ---
 
@@ -72,6 +73,7 @@ your-project/
 │   │   └── ... (api-design, data-access, observability, ci-cd, cloud, sql-style, ui-ux)
 │   ├── instructions/            ← Flavors, idioms, competencies, templates
 │   ├── commands/                ← Cycle commands (feat/fix/docs/audit/land/end)
+│   ├── tooling/                 ← Inert tooling bundle (scripts + husky hooks — activate on demand)
 │   └── backlog/                 ← Harness Engineering (Memory) — gitignored, local working state
 │       └── ...                  ← (See docs/reference/PROJECT-STRUCTURE.md for details)
 ```
@@ -167,6 +169,7 @@ To add or extend support for a language, paste the idiom skill file into your ag
 ## Maintenance
 
 ```bash
+npx sdg-agents gate      # Run SDG gate review against staged diff (language-agnostic pre-commit)
 npx sdg-agents review    # Detect drift between local rules and source
 npx sdg-agents sync      # Update rulesets from source
 npx sdg-agents update    # Refresh the LTS version registry

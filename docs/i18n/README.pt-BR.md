@@ -28,6 +28,7 @@ O conjunto de instruções cobre:
 - **Compatível com qualquer agente**: uma única fonte canônica em `.ai/skills/AGENTS.md` que qualquer agente de IA (Claude Code, Cursor, Windsurf, Copilot, Codex, Gemini, Cline/Roo) pode referenciar. O `CLAUDE.md` é gerado automaticamente na raiz para o Claude Code; outras ferramentas são conectadas com um ponteiro de uma linha (veja "Usando com outras IDEs" abaixo).
 - **Harness Engineering (Memory)**: uma pasta `.ai/backlog/` que persiste contexto e estado de tarefas entre sessões.
 - **Impact Map**: um arquivo volátil de blast-radius (`.ai/backlog/impact-map.md`) criado no Phase PLAN e limpo no Phase END — diz ao agente exatamente quais arquivos carregar no ciclo atual, mantendo o contexto enxuto e focado.
+- **Catálogo de tooling inerte**: `sdg-agents init` copia um bundle pré-pronto em `.ai/tooling/` — `prune-backlog.mjs` (enxuga entradas Done do backlog), `bump-version.mjs` (bump só de versão, sem side-effects), e templates de hooks husky (gate pré-commit + validação de prefixo commit-msg). Nada é ativado por padrão: nenhum `package.json` editado, nenhum `.husky/` criado, nenhuma devDep instalada. Ative sob demanda com o agente ou manualmente.
 
 ---
 
@@ -72,6 +73,7 @@ seu-projeto/
 │   │   └── ... (api-design, data-access, observability, ci-cd, cloud, sql-style, ui-ux)
 │   ├── instructions/            ← Flavors, idiomas, competências, templates
 │   ├── commands/                ← Comandos de ciclo (feat/fix/docs/audit/land/end)
+│   ├── tooling/                 ← Bundle de tooling inerte (scripts + hooks husky — ative sob demanda)
 │   └── backlog/                 ← Harness Engineering (Memory) — gitignored, estado local de trabalho
 │       └── ...                  ← (Veja docs/reference/PROJECT-STRUCTURE.md para detalhes)
 ```
@@ -167,6 +169,7 @@ O `sdg-agents` gera uma única fonte canônica em `.ai/skills/AGENTS.md` e um po
 ## Manutenção
 
 ```bash
+npx sdg-agents gate      # Executar revisão SDG gate contra o diff staged (pre-commit agnóstico de linguagem)
 npx sdg-agents review    # Detectar drift entre regras locais e a fonte
 npx sdg-agents sync      # Atualizar rulesets da fonte
 npx sdg-agents update    # Atualizar o registro de versões LTS
