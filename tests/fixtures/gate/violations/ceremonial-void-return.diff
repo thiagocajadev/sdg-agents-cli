@@ -1,0 +1,9 @@
+diff --git a/src/engine/bin/print.mjs b/src/engine/bin/print.mjs
+index a1b2c3d..e4f5g6h 100644
+--- a/src/engine/bin/print.mjs
++++ b/src/engine/bin/print.mjs
+@@ -1,4 +1,8 @@
++function printUsage() {
++  const usageResult = console.log(message);
++  return usageResult;
++}

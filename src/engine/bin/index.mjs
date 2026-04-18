@@ -61,13 +61,11 @@ function parseCommandLineArguments() {
 }
 
 function displayHelp(version) {
-  const helpOutput = BundleUI.printHelp(version);
-  return helpOutput;
+  BundleUI.printHelp(version);
 }
 
 function displayVersion(version) {
-  const versionOutput = console.log(version);
-  return versionOutput;
+  console.log(version);
 }
 
 function prepareExecutionContext(args) {
@@ -118,18 +116,19 @@ async function applyAutomaticSync(targetDirectory) {
 
   if (!manifest) {
     const missingMsg = '  ⚠️  Cannot auto-sync: No manifest found. Run "init" once.\n';
-    const missingManifestResult = console.log(missingMsg);
-    return missingManifestResult;
+    console.log(missingMsg);
+    return;
   }
 
   try {
     await SpecDrivenGuide.run(targetDirectory, { selections: manifest.selections });
     const successMsg = '\n  ✅ Core instructions synchronized. Agent rules are up-to-date.\n';
-    const successResult = console.log(successMsg + '─'.repeat(50) + '\n');
-    return successResult;
+    const divider = '─'.repeat(50) + '\n';
+    const successOutput = successMsg + divider;
+    console.log(successOutput);
   } catch (error) {
-    const failureResult = console.log(`\n  ⚠️  Automatic sync failed: ${error.message}\n`);
-    return failureResult;
+    const failureOutput = `\n  ⚠️  Automatic sync failed: ${error.message}\n`;
+    console.log(failureOutput);
   }
 }
 
@@ -176,8 +175,8 @@ async function dispatchSubcommand(args) {
     }
     default: {
       const unknownMsg = `\n  Unknown command: "${args.subcommand}". Run with --help for usage.\n`;
-      const unknownResult = console.log(unknownMsg);
-      return unknownResult;
+      console.log(unknownMsg);
+      return;
     }
   }
 }
@@ -186,8 +185,9 @@ async function processInitSubcommand(args) {
   const validationError = validateInit(args);
   const hasValidationError = !!validationError;
   if (hasValidationError) {
-    const errorResult = console.log(`\n${validationError}\n`);
-    return errorResult;
+    const errorOutput = `\n${validationError}\n`;
+    console.log(errorOutput);
+    return;
   }
 
   const { SDG: SpecDrivenGuide } = await import('./init/build-bundle.mjs');
@@ -249,8 +249,7 @@ async function startInteractiveMode(args) {
     reportExitError(error);
   }
 
-  const footerResult = BundleUI.printFooter();
-  return footerResult;
+  BundleUI.printFooter();
 }
 
 function reportExitError(error) {
@@ -333,8 +332,10 @@ async function applyUpdateInstructions(targetDirectory) {
 
   if (!manifest) {
     const noManifestMsg = '\n  ⚠️  No saved config found (.ai/.sdg-manifest.json).\n';
-    const noManifestResult = console.log(noManifestMsg + '  Run init first.\n');
-    return noManifestResult;
+    const runHint = '  Run init first.\n';
+    const noManifestOutput = noManifestMsg + runHint;
+    console.log(noManifestOutput);
+    return;
   }
 
   const { flavor, idioms } = manifest.selections;
@@ -344,11 +345,9 @@ async function applyUpdateInstructions(targetDirectory) {
 
   try {
     await SpecDrivenGuide.run(targetDirectory, { selections: manifest.selections });
-    const successResult = null;
-    return successResult;
   } catch (error) {
-    const failureResult = console.log(`\n  ❌ Update failed: ${error.message}\n`);
-    return failureResult;
+    const failureOutput = `\n  ❌ Update failed: ${error.message}\n`;
+    console.log(failureOutput);
   }
 }
 

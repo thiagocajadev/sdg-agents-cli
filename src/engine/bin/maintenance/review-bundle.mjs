@@ -54,7 +54,8 @@ async function orchestrateReview() {
     return upToDateResult;
   }
 
-  console.log(`\n  ⚠️ ${totalChanges} instruction file(s) have updates available in the core.\n`);
+  const updatesAvailableLine = `\n  ⚠️ ${totalChanges} instruction file(s) have updates available in the core.\n`;
+  console.log(updatesAvailableLine);
 
   const action = await select({
     message: 'What would you like to do?',
@@ -120,7 +121,8 @@ async function syncWithCore(manifest) {
     process.env.SPEC_CONTEXT_SELECTIONS = JSON.stringify(selections);
     await SDG.run(PROJECT_ROOT);
   } catch (error) {
-    console.log(`\n  Sync failed: ${error.message}\n`);
+    const syncFailedLine = `\n  Sync failed: ${error.message}\n`;
+    console.log(syncFailedLine);
   } finally {
     delete process.env.SPEC_CONTEXT_SELECTIONS;
   }

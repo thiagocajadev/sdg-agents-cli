@@ -45,14 +45,16 @@ async function processCheckMode() {
 
   const hasParseError = !!result.parseError;
   if (hasParseError) {
-    console.error(`  ⚠️  SDG Gate: ${result.parseError}. Skipping review.`);
+    const parseErrorLine = `  ⚠️  SDG Gate: ${result.parseError}. Skipping review.`;
+    console.error(parseErrorLine);
     process.exit(0);
   }
 
   const hasBlockViolations = !result.canCommit;
   if (hasBlockViolations) {
     const report = GateChecker.formatViolationReport(result.blockViolations);
-    console.error(`\n  ❌ SDG Gate — Commit blocked\n\n${report}\n`);
+    const blockOutput = `\n  ❌ SDG Gate — Commit blocked\n\n${report}\n`;
+    console.error(blockOutput);
     process.exit(1);
   }
 
@@ -60,7 +62,8 @@ async function processCheckMode() {
   if (hasWarnViolations) {
     const warnViolations = result.violations.filter((violation) => violation.tier === 'WARN');
     const report = GateChecker.formatViolationReport(warnViolations);
-    console.error(`\n  ⚠️  SDG Gate — Warnings (not blocking)\n\n${report}\n`);
+    const warnOutput = `\n  ⚠️  SDG Gate — Warnings (not blocking)\n\n${report}\n`;
+    console.error(warnOutput);
   }
 
   const passResult = null;
@@ -92,8 +95,7 @@ function printUsage() {
     '',
   ].join('\n');
 
-  const usageResult = console.log(message);
-  return usageResult;
+  console.log(message);
 }
 
 export const GateRunner = { dispatch: dispatchGate };

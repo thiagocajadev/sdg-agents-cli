@@ -57,5 +57,27 @@ describe('RulesLoader', () => {
       assert.ok(ruleFound);
       assert.equal(rule.tier, expectedTier);
     });
+
+    it('should carry void-terminator exemption in explaining-returns description', () => {
+      const expectedFragment = 'void-terminator';
+
+      const actual = RulesLoader.loadRules();
+      const rule = actual.block.find((r) => r.id === 'explaining-returns');
+
+      const hasExemption = rule.description.includes(expectedFragment);
+      assert.ok(hasExemption);
+    });
+
+    it('should include ceremonial-void-return as a WARN rule', () => {
+      const expectedId = 'ceremonial-void-return';
+      const expectedTier = 'WARN';
+
+      const actual = RulesLoader.loadRules();
+      const rule = actual.warn.find((r) => r.id === expectedId);
+
+      const ruleFound = rule !== undefined;
+      assert.ok(ruleFound);
+      assert.equal(rule.tier, expectedTier);
+    });
   });
 });

@@ -104,7 +104,8 @@ function buildPrompt(_manifest, targets, maintainer) {
         const sectionContent = [renderTargetSection(target, content)];
         return sectionContent;
       } catch (error) {
-        console.error(`\n  Warning: could not read ${target.filePath} — ${error.message}`);
+        const warningLine = `\n  Warning: could not read ${target.filePath} — ${error.message}`;
+        console.error(warningLine);
         const emptyResult = [];
         return emptyResult;
       }

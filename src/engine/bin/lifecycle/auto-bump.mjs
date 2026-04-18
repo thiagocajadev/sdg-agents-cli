@@ -55,20 +55,25 @@ async function orchestrateAutoBump() {
 
   if (bumpType === 'skip') {
     console.log('  auto-bump: skipped (version commit detected)');
-    const skipResult = success({ from: null, to: null, bump: 'skip' });
+    const skipPayload = { from: null, to: null, bump: 'skip' };
+    const skipResult = success(skipPayload);
     return skipResult;
   }
 
   const rootPackagePath = PACKAGE_PATHS[0];
-  const rootPackage = JSON.parse(fs.readFileSync(rootPackagePath, 'utf8'));
+  const rawRootContent = fs.readFileSync(rootPackagePath, 'utf8');
+  const rootPackage = JSON.parse(rawRootContent);
   const nextVersion = bumpVersion(rootPackage.version, bumpType);
 
   updateChangelog(nextVersion);
   syncAllPackages(nextVersion);
 
-  console.log(`  auto-bump: ${rootPackage.version} → ${nextVersion} (${bumpType})`);
+  const bumpLine = `  auto-bump: ${rootPackage.version} → ${nextVersion} (${bumpType})`;
+  console.log(bumpLine);
   console.log('  auto-bump: files updated. Manual commit required.');
-  const finalResult = success({ from: rootPackage.version, to: nextVersion, bump: bumpType });
+
+  const finalPayload = { from: rootPackage.version, to: nextVersion, bump: bumpType };
+  const finalResult = success(finalPayload);
   return finalResult;
 }
 
@@ -94,11 +99,15 @@ function updateChangelog(newVersion) {
 }
 
 function syncAllPackages(nextVersion) {
-  const validPaths = PACKAGE_PATHS.filter((packagePath) => fs.existsSync(packagePath));
+  const validPaths = PACKAGE_PATHS.filter(fs.existsSync);
+
   for (const packagePath of validPaths) {
-    const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+    const rawContent = fs.readFileSync(packagePath, 'utf8');
+    const packageData = JSON.parse(rawContent);
     packageData.version = nextVersion;
-    fs.writeFileSync(packagePath, JSON.stringify(packageData, null, 2) + '\n');
+
+    const serialized = JSON.stringify(packageData, null, 2) + '\n';
+    fs.writeFileSync(packagePath, serialized);
   }
 }
 

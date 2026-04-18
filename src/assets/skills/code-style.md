@@ -195,7 +195,7 @@ const button = cva(
 
 - **Stepdown Rule**: High-level functions at top, helpers at bottom.
 - **Guard Clauses**: Early returns over nested conditionals. Kill "Arrow Antipattern".
-- **Explaining Returns**: named `const` before every return; **no bare `return;`**, no logic/ternary/anonymous object on the return line; returned variable **symmetric with entry intent**.
+- **Explaining Returns**: named `const` before every **meaningful** return; no logic/ternary/anonymous object on the return line; returned variable **symmetric with entry intent**. Exemption: void-terminator form — a function whose last statement is a side-effect call returning `undefined` (e.g. `console.log(msg);`) ends with that bare statement and an implicit return. Wrapping void calls into `const X = sideEffect(); return X;` is **ceremonial** and forbidden.
 - **Narrative Siblings**: One-use helper defined as non-exported sibling after its caller.
 - **Strategy over Switch**: Replace large switch/if-else with Strategy Maps (lookup objects).
 
@@ -261,7 +261,7 @@ function buildOrderSummary(order) {
 - **Data vs Presentation**: Compute pure data, then format. Never fuse.
 - **Shallow Boundaries**: Max 3 levels property traversal. Slice into named `const`.
 - **No God Modules**: Name by domain + operation.
-- **Explaining Returns**: Named `const` before every `return`.
+- **Explaining Returns**: Named `const` before every meaningful `return`. Void-terminator exemption — a single side-effect call (e.g. `console.log(msg);`) is the canonical form; never wrap it into `const X = sideEffect(); return X;`.
 
 #### Interface Design
 
@@ -331,7 +331,7 @@ Code follows conventions. Tests: happy path + edge case + expected failure. Stru
 - [ ] **Mental Reset recorded** — agent has named which training defaults are being suspended
 - [ ] **Stepdown Rule** — orchestrator at top, helpers below
 - [ ] **SLA** — every function either orchestrates OR implements, never both
-- [ ] **Explaining Returns** — named `const` above every `return`, no bare `return;`, no logic/ternary on return line
+- [ ] **Explaining Returns** — named `const` above every meaningful `return`, no logic/ternary on return line; void-terminator form (bare `console.log(msg);` etc.) is exempt and never ceremonialized
 - [ ] **Small Functions** — one responsibility; any "and" in the name splits the function
 - [ ] **Guard Clauses** — early returns over nested conditionals; zero arrow antipattern
 - [ ] **Expressive Booleans** — `is`/`has`/`can`/`should`/`did`/`needs`/`supports`/`allows` prefix on every boolean
@@ -362,7 +362,7 @@ Binary pass/fail — no partial credit:
 - [ ] Stepdown Rule: entry point first after imports/constants
 - [ ] SLA: every function orchestrates OR implements
 - [ ] Narrative Siblings: one-use helpers as local siblings
-- [ ] Explaining Returns: named `const` above every `return`
+- [ ] Explaining Returns: named `const` above every meaningful `return`; void-terminator form exempt (no `const X = console.log(...); return X;`)
 - [ ] No framework abbreviations (`req`→`request`, `res`→`response`)
 - [ ] Vertical Density: exactly 1 blank between groups, 0 within, never 2+
 - [ ] Revealing Module Pattern: named export at footer

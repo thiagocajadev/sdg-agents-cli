@@ -62,5 +62,15 @@ describe('GatePrompt', () => {
       const containsExclusion = actual.includes(expectedFragment);
       assert.ok(containsExclusion);
     });
+
+    it('should include ceremonial-void-return rule id in the prompt', () => {
+      const input = 'diff --git a/foo.mjs b/foo.mjs';
+      const expectedRuleId = 'ceremonial-void-return';
+
+      const actual = GatePrompt.buildPrompt(input);
+
+      const containsRule = actual.includes(expectedRuleId);
+      assert.ok(containsRule);
+    });
   });
 });

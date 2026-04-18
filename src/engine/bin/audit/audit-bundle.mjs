@@ -324,7 +324,8 @@ function reportSummary(results) {
   if (totalFailures === 0) {
     console.log('\n  ✅ PROJECT COMPLIANT. Governance at 100%.\n');
   } else {
-    console.log(`\n  ⚠️  PROJECT DRIFT: ${totalFailures} governance gaps found.\n`);
+    const driftLine = `\n  ⚠️  PROJECT DRIFT: ${totalFailures} governance gaps found.\n`;
+    console.log(driftLine);
   }
 }
 

@@ -65,7 +65,8 @@ async function buildNonInteractive(targetDirectory, options) {
 
   const validationResult = validateSelections(selections);
   if (validationResult.isFailure) {
-    console.log(`\n  ⚠️  ${validationResult.error.message}`);
+    const validationWarning = `\n  ⚠️  ${validationResult.error.message}`;
+    console.log(validationWarning);
     process.exit(1);
   }
 
@@ -78,7 +79,8 @@ async function buildNonInteractive(targetDirectory, options) {
     skipConfirm: true,
   });
   if (result.isFailure) {
-    console.log(`\n  ⚠️  ${result.error.message}`);
+    const failureWarning = `\n  ⚠️  ${result.error.message}`;
+    console.log(failureWarning);
     process.exit(1);
   }
 }
@@ -90,7 +92,8 @@ async function buildInteractive(targetDirectory, options) {
     const result = await processExecutionStep(state, targetDirectory, options);
     if (result.isFailure) {
       if (result.error.code !== 'USER_BACK') {
-        process.stdout.write(`\n  ⚠️  ${result.error.message}\n`);
+        const errorNotice = `\n  ⚠️  ${result.error.message}\n`;
+        process.stdout.write(errorNotice);
       }
       const interactionResult = result;
       return interactionResult;

@@ -75,7 +75,8 @@ async function orchestratePrune() {
   }
 
   fs.writeFileSync(TASKS_PATH, pruned);
-  console.log(`  prune-backlog: dropped ${removed} entries (kept last ${DEFAULT_KEEP_COUNT})`);
+  const prunedReport = `  prune-backlog: dropped ${removed} entries (kept last ${DEFAULT_KEEP_COUNT})`;
+  console.log(prunedReport);
   const finalResult = success({ removed, skipped: false });
   return finalResult;
 }

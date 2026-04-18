@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [3.6.2] - 2026-04-18
+
+### Added
+
+### Fixed
+
+- **`ceremonial-void-return` detector + `explaining-returns` void-terminator exemption**: Audit sweep surfaced 11 `const X = console.log(...); return X;` wraps across `src/engine/bin/**` where the rule was being satisfied mechanically while destroying its intent. `explaining-returns` now carries an explicit carve-out — functions whose last statement is a void side-effect call (`console.*`, `process.stdout.write`, `BundleUI.print*`) use the bare statement and an implicit return. A new WARN rule `ceremonial-void-return` catches the anti-pattern against regression, scoped strictly to leaf sites where the RHS is a known void-returning primitive (orchestrators using the canonical `const X = call(); return X;` Pure Entry Point form are exempt by design).
+- **`named-const-before-call` tightened with enumeration + printer-function carve-out**: rule description now explicitly lists the five computed forms that must be extracted before any callsite — function/method calls, ternaries, template-literals with interpolation, `+` concatenations, and anonymous object literals used as configuration. Plain string/number/boolean literals and direct function references (`fs.existsSync`) remain exempt as ceremony-free positional arguments. Added printer-function carve-out: when a function's body is one `console.*` / `process.stdout.write` call and its name already carries the intent (`printX`, `logX`, `warnX`), the function name serves as the semantic const — the template stays inline to avoid semantic duplication.
+- **14 composition-real callsites extracted into named consts**: `src/engine/bin/lifecycle/auto-bump.mjs` (3 sites — `syncAllPackages` restructured with clean input/output phases; `JSON.stringify(...) + '\n'` hoisted; `filter(fs.existsSync)` replaces arrow wrapper), `src/engine/bin/maintenance/gate-bundle.mjs` (3 sites — parse-error, block-violation, warn-violation outputs), `src/engine/bin/maintenance/sync-rulesets.mjs` (1 site), `src/engine/bin/maintenance/review-bundle.mjs` (2 sites), `src/engine/bin/audit/audit-bundle.mjs` (1 site), `src/engine/bin/lifecycle/prune-backlog.mjs` (1 site), `src/engine/bin/init/build-bundle.mjs` (3 sites). Pure presentation printers (`ui-utils.mjs`, `printManifestSummary`, `printComparisonReport`) remain untouched per carve-out. 157/157 tests green (+3 new assertions for `ceremonial-void-return` in prompt + loader), audit 100% compliant.
+
 ## [3.6.1] - 2026-04-18
 
 ### Added
