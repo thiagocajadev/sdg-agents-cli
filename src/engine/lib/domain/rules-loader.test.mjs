@@ -79,5 +79,29 @@ describe('RulesLoader', () => {
       assert.ok(ruleFound);
       assert.equal(rule.tier, expectedTier);
     });
+
+    it('should enumerate binary-comparison and unary-negation forms in named-const-before-call', () => {
+      const expectedBinaryFragment = 'binary-comparison';
+      const expectedNegationFragment = 'unary-negation';
+
+      const actual = RulesLoader.loadRules();
+      const rule = actual.block.find((r) => r.id === 'named-const-before-call');
+
+      const hasBinaryForm = rule.description.includes(expectedBinaryFragment);
+      const hasNegationForm = rule.description.includes(expectedNegationFragment);
+
+      assert.ok(hasBinaryForm);
+      assert.ok(hasNegationForm);
+    });
+
+    it('should carry test-framework title exemption in named-const-before-call', () => {
+      const expectedFragment = 'Test-framework title exemption';
+
+      const actual = RulesLoader.loadRules();
+      const rule = actual.block.find((r) => r.id === 'named-const-before-call');
+
+      const hasExemption = rule.description.includes(expectedFragment);
+      assert.ok(hasExemption);
+    });
   });
 });

@@ -1,0 +1,9 @@
+diff --git a/src/foo.test.mjs b/src/foo.test.mjs
+index a1b2c3d..e4f5g6h 100644
+--- a/src/foo.test.mjs
++++ b/src/foo.test.mjs
+@@ -1,6 +1,10 @@
++      const actualBytes = Buffer.byteLength(actual, 'utf8');
++      assert.ok(actualBytes < 2700, `Output is ${actualBytes} bytes`);
++      assert.ok(!actual.includes(pattern), `Pattern leaked: ${pattern}`);
++      assert.ok(h2Matches.length <= 5, `Too many sections`);

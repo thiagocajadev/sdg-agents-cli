@@ -274,8 +274,10 @@ describe('InstructionAssembler', () => {
 
       const actual = buildMasterInstructions(input);
       const actualBytes = Buffer.byteLength(actual, 'utf8');
+      const isUnderSmallBudget = actualBytes < 2700;
+      const sizeFailureMessage = `Output is ${actualBytes} bytes, expected < 2700`;
 
-      assert.ok(actualBytes < 2700, `Output is ${actualBytes} bytes, expected < 2700`);
+      assert.ok(isUnderSmallBudget, sizeFailureMessage);
     });
   });
 
@@ -289,13 +291,15 @@ describe('InstructionAssembler', () => {
     it(`should stay under ${TOKEN_BUDGET_BYTES} bytes (worst-case fullstack output)`, () => {
       const actual = buildMasterInstructions(WORST_CASE_INPUT);
       const actualBytes = Buffer.byteLength(actual, 'utf8');
-
-      assert.ok(
-        actualBytes <= TOKEN_BUDGET_BYTES,
+      const isWithinTokenBudget = actualBytes <= TOKEN_BUDGET_BYTES;
+      const approxActualTokens = Math.round(actualBytes / 4);
+      const approxBudgetTokens = Math.round(TOKEN_BUDGET_BYTES / 4);
+      const tokenLeakMessage =
         `Token leak detected: ${actualBytes} bytes (budget: ${TOKEN_BUDGET_BYTES}). ` +
-          `Approx ${Math.round(actualBytes / 4)} tokens vs budget ${Math.round(TOKEN_BUDGET_BYTES / 4)}. ` +
-          'Move verbose content to an on-demand file instead of embedding in AGENTS.md.'
-      );
+        `Approx ${approxActualTokens} tokens vs budget ${approxBudgetTokens}. ` +
+        'Move verbose content to an on-demand file instead of embedding in AGENTS.md.';
+
+      assert.ok(isWithinTokenBudget, tokenLeakMessage);
     });
 
     it('should not duplicate any file path reference', () => {
@@ -307,12 +311,10 @@ describe('InstructionAssembler', () => {
         (filePath, index) => pathMatches.indexOf(filePath) !== index
       );
 
-      assert.deepEqual(
-        duplicates,
-        [],
-        `Duplicated file references waste tokens: ${duplicates.join(', ')}`
-      );
+      const duplicatesMessage = `Duplicated file references waste tokens: ${duplicates.join(', ')}`;
+      const expectedDuplicates = [];
 
+      assert.deepEqual(duplicates, expectedDuplicates, duplicatesMessage);
       assert.equal(pathMatches.length, uniquePaths.size);
     });
 
@@ -331,10 +333,10 @@ describe('InstructionAssembler', () => {
       ];
 
       for (const { pattern, reason } of forbiddenPatterns) {
-        assert.ok(
-          !actual.includes(pattern),
-          `Verbose pattern leaked into AGENTS.md: "${pattern}". ${reason}.`
-        );
+        const isPatternAbsent = !actual.includes(pattern);
+        const leakMessage = `Verbose pattern leaked into AGENTS.md: "${pattern}". ${reason}.`;
+
+        assert.ok(isPatternAbsent, leakMessage);
       }
     });
 
@@ -348,14 +350,16 @@ describe('InstructionAssembler', () => {
         '## Agent Roles',
       ];
 
-      assert.ok(
-        h2Matches.length <= 5,
-        `Section bloat: found ${h2Matches.length} H2 sections (max 5). Sections: ${h2Matches.join(', ')}`
-      );
+      const isWithinH2Limit = h2Matches.length <= 5;
+      const sectionBloatMessage = `Section bloat: found ${h2Matches.length} H2 sections (max 5). Sections: ${h2Matches.join(', ')}`;
+
+      assert.ok(isWithinH2Limit, sectionBloatMessage);
 
       for (const section of expectedSections) {
         const sectionFound = h2Matches.some((heading) => heading.startsWith(section));
-        assert.ok(sectionFound, `Missing required section: ${section}`);
+        const missingSectionMessage = `Missing required section: ${section}`;
+
+        assert.ok(sectionFound, missingSectionMessage);
       }
     });
   });

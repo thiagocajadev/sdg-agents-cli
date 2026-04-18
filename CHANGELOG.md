@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [3.7.0] - 2026-04-18
+
+### Added
+
+### Fixed
+
+- **Full test-suite scan + inline-assertion-literals sanitization**: systematic audit of all 16 colocated `*.test.mjs` files against the 10 SDG rules surfaced 6 BLOCK violations clustered in [instruction-assembler.test.mjs](src/engine/lib/domain/instruction-assembler.test.mjs) — template-literals with interpolation passed directly as the message argument to `assert.ok` / `assert.deepEqual` (lines 278, 293-298, 310-314, 334-337, 351-354, 358). Extracted each interpolated message into a named const before the call (`sizeFailureMessage`, `tokenLeakMessage`, `duplicatesMessage`, `leakMessage`, `sectionBloatMessage`, `missingSectionMessage`). Bonus pass — extracted the assertion subjects that the rule description was silent about: `actualBytes < 2700` → `isUnderSmallBudget`, `actualBytes <= TOKEN_BUDGET_BYTES` → `isWithinTokenBudget`, `!actual.includes(pattern)` → `isPatternAbsent`, `h2Matches.length <= 5` → `isWithinH2Limit`. Remaining 15 test files clean — grep for taboo-verb prefixed methods, standalone taboo-nouns, and boolean-without-prefix returned zero hits.
+
+- **`named-const-before-call` detector gap closed — forms (f) and (g) enumerated**: expanded [sdg-rules.json](src/assets/rules/sdg-rules.json) rule description to explicitly cover (f) binary-comparison expressions (`<`, `<=`, `>`, `>=`, `===`, `!==`, `==`, `!=`) passed as boolean subjects, and (g) unary-negation of a call or property access (`!fn(x)`, `!arr.includes(x)`) passed as boolean subjects — the patterns surfaced 6 live sites in the inline-assertion-literals sweep above. Added Test-framework title exemption clause (positional template-literal titles in consagrated APIs like `it(\`...\`)`/`describe(\`...\`)`are test-name composition, not process-narrative — do not extract; carve-out honors existing`feedback_printer_carveout.md`principle). Added requirement that extracted boolean consts must honor`boolean-prefix`(is/has/can/should/did/needs/supports/allows). Updated`exampleViolation`+`exampleFix`to show binary-comparison and unary-negation extractions. New fixture [named-const-before-call.diff](tests/fixtures/gate/violations/named-const-before-call.diff) covers the 3 patterns; 2 new loader assertions verify the rule description carries`binary-comparison`+`unary-negation`fragments and the test-framework title exemption; 2 new`GatePrompt` assertions wire the fixture (diff content propagates) and verify the rule id is injected into the gate prompt. 161/161 tests green, audit 100%, lint pass.
+
 ## [3.6.3] - 2026-04-18
 
 ### Added

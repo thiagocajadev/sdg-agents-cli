@@ -72,5 +72,28 @@ describe('GatePrompt', () => {
       const containsRule = actual.includes(expectedRuleId);
       assert.ok(containsRule);
     });
+
+    it('should include named-const-before-call diff content in the prompt', () => {
+      const input = readFileSync(
+        path.join(fixturesDir, 'violations/named-const-before-call.diff'),
+        'utf8'
+      );
+      const expectedFragment = 'assert.ok(actualBytes < 2700';
+
+      const actual = GatePrompt.buildPrompt(input);
+
+      const containsDiff = actual.includes(expectedFragment);
+      assert.ok(containsDiff);
+    });
+
+    it('should include named-const-before-call rule id in the prompt', () => {
+      const input = 'diff --git a/foo.mjs b/foo.mjs';
+      const expectedRuleId = 'named-const-before-call';
+
+      const actual = GatePrompt.buildPrompt(input);
+
+      const containsRule = actual.includes(expectedRuleId);
+      assert.ok(containsRule);
+    });
   });
 });
