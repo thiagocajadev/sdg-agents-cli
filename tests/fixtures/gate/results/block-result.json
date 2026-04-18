@@ -1,0 +1,13 @@
+{
+  "canCommit": false,
+  "violations": [
+    {
+      "file": "src/orders/order.service.cs",
+      "line": 13,
+      "rule": "explaining-returns",
+      "tier": "BLOCK",
+      "snippet": "return Result<Order>.Ok(order);",
+      "fix": "var createdOrder = Result<Order>.Ok(order);\nreturn createdOrder;"
+    }
+  ]
+}

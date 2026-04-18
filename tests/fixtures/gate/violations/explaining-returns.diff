@@ -1,0 +1,10 @@
+diff --git a/src/orders/order.service.cs b/src/orders/order.service.cs
+index a1b2c3d..e4f5g6h 100644
+--- a/src/orders/order.service.cs
++++ b/src/orders/order.service.cs
+@@ -10,6 +10,10 @@ public class OrderService
++    public Result<Order> Create(Guid customerId)
++    {
++        var order = new Order { Id = customerId };
++        return Result<Order>.Ok(order);
++    }

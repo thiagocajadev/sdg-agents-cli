@@ -15,6 +15,8 @@ function parseCliArgs(argv) {
     mode: getArgValue(argv, '--mode'),
     track: getArgValue(argv, '--track'),
     bump: !argv.includes('--no-bump'),
+    prompt: argv.includes('--prompt'),
+    check: argv.includes('--check'),
   };
 
   const finalArgs = parsedArgs;

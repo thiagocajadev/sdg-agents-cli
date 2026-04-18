@@ -1,0 +1,13 @@
+{
+  "canCommit": true,
+  "violations": [
+    {
+      "file": "src/orders/order.service.cs",
+      "line": 20,
+      "rule": "sla-violation",
+      "tier": "WARN",
+      "snippet": "function processOrder(order) { validateOrder(order); const total = order.items.reduce(...); }",
+      "fix": "function processOrder(order) { validateOrder(order); const total = computeOrderTotal(order); }"
+    }
+  ]
+}

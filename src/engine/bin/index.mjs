@@ -169,6 +169,11 @@ async function executeSubcommand(args) {
       const narrativeResult = await NarrativeChecker.run();
       return narrativeResult;
     }
+    case 'gate': {
+      const { GateRunner } = await import('./maintenance/gate-bundle.mjs');
+      const gateResult = await GateRunner.run(args);
+      return gateResult;
+    }
     default: {
       const unknownMsg = `\n  Unknown command: "${args.subcommand}". Run with --help for usage.\n`;
       const unknownResult = console.log(unknownMsg);

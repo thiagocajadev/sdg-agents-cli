@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "exclude": [
+    "**/*.generated.*",
+    "**/migrations/**",
+    "**/*.g.*",
+    "**/node_modules/**",
+    "**/*.min.*"
+  ],
+  "rules": [
+    {
+      "id": "explaining-returns",
+      "tier": "BLOCK",
+      "description": "Named const before every return. No call expression, ternary, or anonymous object on the return line itself.",
+      "exampleViolation": "return Result.Ok(order);",
+      "exampleFix": "const createdOrder = Result.Ok(order);\nreturn createdOrder;"
+    },
+    {
+      "id": "taboo-verbs",
+      "tier": "BLOCK",
+      "description": "Function and method names must not use banned verbs: handle, do, run, execute, perform. Exception: 'handle' is allowed only for DOM event handlers (e.g., handleClick, handleSubmit).",
+      "banned": ["handle", "do", "run", "execute", "perform"],
+      "exampleViolation": "function handleOrderCreation() {}",
+      "exampleFix": "function processOrderCreation() {}"
+    },
+    {
+      "id": "boolean-prefix",
+      "tier": "BLOCK",
+      "description": "All boolean variables must carry a semantic prefix: is, has, can, should, did, needs, supports, allows.",
+      "requiredPrefixes": ["is", "has", "can", "should", "did", "needs", "supports", "allows"],
+      "exampleViolation": "const active = user.status === 'active';",
+      "exampleFix": "const isActive = user.status === 'active';"
+    },
+    {
+      "id": "inline-assertion-literals",
+      "tier": "BLOCK",
+      "description": "No magic strings, template literals, or anonymous objects passed directly as assertion arguments. Extract into named consts first.",
+      "exampleViolation": "assert.equal(actual, 0, `Orphans: ${list.join(', ')}`);",
+      "exampleFix": "const failureMessage = `Orphans: ${list.join(', ')}`;\nassert.equal(actual, 0, failureMessage);"
+    },
+    {
+      "id": "named-const-before-call",
+      "tier": "BLOCK",
+      "description": "No computed expression (function call, method call, ternary) passed directly as an argument to any function call. Extract into a named const first. Applies to assertions, throw, console.log, and all callsites.",
+      "exampleViolation": "assert.ok(Array.isArray(actual.block));\nassert.ok(actual.block.every(r => r.tier === 'BLOCK'));",
+      "exampleFix": "const isBlockArray = Array.isArray(actual.block);\nconst hasOnlyBlockRules = actual.block.every(r => r.tier === 'BLOCK');\nassert.ok(isBlockArray);\nassert.ok(hasOnlyBlockRules);"
+    },
+    {
+      "id": "taboo-nouns",
+      "tier": "BLOCK",
+      "description": "Variable and parameter names must not use banned nouns: data, info, obj, item, thing, res, req, ctx, cb, fn, val, tmp, arr.",
+      "banned": [
+        "data",
+        "info",
+        "obj",
+        "item",
+        "thing",
+        "res",
+        "req",
+        "ctx",
+        "cb",
+        "fn",
+        "val",
+        "tmp",
+        "arr"
+      ],
+      "exampleViolation": "function saveData(obj) {}",
+      "exampleFix": "function saveOrder(order) {}"
+    },
+    {
+      "id": "sla-violation",
+      "tier": "WARN",
+      "description": "A function should either orchestrate (call named functions) or implement (compute/transform) — not both. Functions that mix levels of abstraction violate the Single Level of Abstraction rule.",
+      "exampleViolation": "function processOrder(order) { validateOrder(order); const total = order.items.reduce((sum, i) => sum + i.price, 0); }",
+      "exampleFix": "function processOrder(order) { validateOrder(order); const total = computeOrderTotal(order); }"
+    },
+    {
+      "id": "arrow-antipattern",
+      "tier": "WARN",
+      "description": "Deeply nested conditionals (3+ levels) instead of guard clauses. Prefer early returns to reduce nesting.",
+      "exampleViolation": "if (a) { if (b) { if (c) { doWork(); } } }",
+      "exampleFix": "if (!a) return;\nif (!b) return;\nif (!c) return;\ndoWork();"
+    },
+    {
+      "id": "visual-density",
+      "tier": "WARN",
+      "description": "Logically distinct groups of statements must be separated by exactly one blank line. Zero blank lines within a group. Never two or more consecutive blank lines. Groups are defined by semantic intent, not by statement type.",
+      "exampleViolation": "assert.ok(isArray(actual.block));\nassert.ok(isArray(actual.warn));\nassert.ok(actual.block.every(r => r.tier === 'BLOCK'));",
+      "exampleFix": "assert.ok(isArray(actual.block));\nassert.ok(isArray(actual.warn));\n\nassert.ok(actual.block.every(r => r.tier === 'BLOCK'));"
+    }
+  ]
+}
