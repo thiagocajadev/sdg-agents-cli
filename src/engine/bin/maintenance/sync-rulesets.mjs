@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import dedent from 'dedent';
 import { PromptUtils } from '../../lib/infra/prompt-utils.mjs';
 import { ManifestUtils } from '../../lib/domain/manifest-utils.mjs';
 import { DisplayUtils } from '../../lib/core/display-utils.mjs';
@@ -100,14 +101,7 @@ function buildPrompt(_manifest, targets, maintainer) {
     .flatMap((target) => {
       try {
         const content = fs.readFileSync(target.filePath, 'utf8');
-        const sectionContent = [
-          `
-## ${target.label} (Current Version: ${target.version ?? 'any'}) — ${path.basename(target.filePath)}
-
-<current_content>
-${content}
-</current_content>`,
-        ];
+        const sectionContent = [renderTargetSection(target, content)];
         return sectionContent;
       } catch (error) {
         console.error(`\n  Warning: could not read ${target.filePath} — ${error.message}`);
@@ -117,37 +111,58 @@ ${content}
     })
     .join('\n');
 
-  const syncPrompt = `
-Today is ${TODAY}.
-
-Search the official release notes and "What's New" docs for the technologies and UI/UX standards below.
-Compare against each current markdown file and identify what needs updating.
-
-For each file, return:
-1. A list of changes found, classified as:
-   - BREAKING: syntax/API/Pattern change that would make the AI generate wrong/deprecated code or outdated UI
-   - NEW CONVENTION: new recommended pattern, accessible syntax, or design trend introduced recently
-
-2. The complete updated markdown content with the changes applied.
-
-${
-  maintainer
-    ? `NOTE: You are in MAINTAINER MODE. Please return the updated rules for the core library paths:
-- src/assets/instructions/idioms/<idiom>/patterns.md
-- src/assets/skills/ui-ux.md`
-    : ''
+  const maintainerNote = maintainer ? renderMaintainerNote() : '';
+  const syncPrompt = renderSyncPrompt(sections, maintainerNote);
+  return syncPrompt;
 }
 
-Rules:
-- Only report changes found in official sources or established UI/UX standards (MDN, WCAG, Framework blogs) — do not invent.
-- For BREAKING changes: remove deprecated patterns, replace with new ones.
-- For NEW CONVENTION: integrate into the relevant existing section without adding new sections.
-- Preserve the existing file structure, tone, and formatting.
-- If nothing needs updating, say so and return the file unchanged.
-${sections}
-`;
+function renderTargetSection(target, content) {
+  const versionLabel = target.version ?? 'any';
+  const fileName = path.basename(target.filePath);
+  const sectionText = dedent`
 
-  return syncPrompt;
+    ## ${target.label} (Current Version: ${versionLabel}) — ${fileName}
+
+    <current_content>
+    ${content}
+    </current_content>`;
+  return sectionText;
+}
+
+function renderMaintainerNote() {
+  const noteText = dedent`
+    NOTE: You are in MAINTAINER MODE. Please return the updated rules for the core library paths:
+    - src/assets/instructions/idioms/<idiom>/patterns.md
+    - src/assets/skills/ui-ux.md`;
+  return noteText;
+}
+
+function renderSyncPrompt(sections, maintainerNote) {
+  const promptText = dedent`
+
+    Today is ${TODAY}.
+
+    Search the official release notes and "What's New" docs for the technologies and UI/UX standards below.
+    Compare against each current markdown file and identify what needs updating.
+
+    For each file, return:
+    1. A list of changes found, classified as:
+       - BREAKING: syntax/API/Pattern change that would make the AI generate wrong/deprecated code or outdated UI
+       - NEW CONVENTION: new recommended pattern, accessible syntax, or design trend introduced recently
+
+    2. The complete updated markdown content with the changes applied.
+
+    ${maintainerNote}
+
+    Rules:
+    - Only report changes found in official sources or established UI/UX standards (MDN, WCAG, Framework blogs) — do not invent.
+    - For BREAKING changes: remove deprecated patterns, replace with new ones.
+    - For NEW CONVENTION: integrate into the relevant existing section without adding new sections.
+    - Preserve the existing file structure, tone, and formatting.
+    - If nothing needs updating, say so and return the file unchanged.
+    ${sections}
+  `;
+  return promptText;
 }
 
 export const Syncer = {

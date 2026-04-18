@@ -195,12 +195,7 @@ function checkSovereignCompliance() {
     violations.push('staff-dna.md: File missing from .ai/');
   }
 
-  if (fs.existsSync(agentsPath)) {
-    const agentsContent = fs.readFileSync(agentsPath, 'utf8');
-    if (!agentsContent.includes('DNA-GATE & MENTAL RESET [LOCKED]')) {
-      violations.push('AGENTS.md: Missing DNA-GATE [LOCKED] mandatory protocol');
-    }
-  } else {
+  if (!fs.existsSync(agentsPath)) {
     violations.push('AGENTS.md: File missing from .ai/');
   }
 

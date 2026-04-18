@@ -19,31 +19,34 @@ describe('Cleaner.findBacklogsAtRisk()', () => {
   });
 
   it('should return empty when items list has no .ai entry', () => {
-    const items = [{ name: '.sdg-prompts', fullPath: path.join(tempDir, '.sdg-prompts') }];
+    const input = [{ name: '.sdg-prompts', fullPath: path.join(tempDir, '.sdg-prompts') }];
+    const expected = [];
 
-    const actual = findBacklogsAtRisk(items);
+    const actual = findBacklogsAtRisk(input);
 
-    assert.deepEqual(actual, []);
+    assert.deepEqual(actual, expected);
   });
 
   it('should return empty when .ai/backlog/ does not exist', () => {
     const aiDir = path.join(tempDir, 'case-no-backlog', '.ai');
     fs.mkdirSync(aiDir, { recursive: true });
-    const items = [{ name: '.ai', fullPath: aiDir }];
+    const input = [{ name: '.ai', fullPath: aiDir }];
+    const expected = [];
 
-    const actual = findBacklogsAtRisk(items);
+    const actual = findBacklogsAtRisk(input);
 
-    assert.deepEqual(actual, []);
+    assert.deepEqual(actual, expected);
   });
 
   it('should return empty when .ai/backlog/ exists but is empty', () => {
     const aiDir = path.join(tempDir, 'case-empty-backlog', '.ai');
     fs.mkdirSync(path.join(aiDir, 'backlog'), { recursive: true });
-    const items = [{ name: '.ai', fullPath: aiDir }];
+    const input = [{ name: '.ai', fullPath: aiDir }];
+    const expected = [];
 
-    const actual = findBacklogsAtRisk(items);
+    const actual = findBacklogsAtRisk(input);
 
-    assert.deepEqual(actual, []);
+    assert.deepEqual(actual, expected);
   });
 
   it('should return backlog path when .ai/backlog/ has content', () => {
@@ -51,11 +54,12 @@ describe('Cleaner.findBacklogsAtRisk()', () => {
     const backlogDir = path.join(aiDir, 'backlog');
     fs.mkdirSync(backlogDir, { recursive: true });
     fs.writeFileSync(path.join(backlogDir, 'tasks.md'), '# Active\n');
-    const items = [{ name: '.ai', fullPath: aiDir }];
+    const input = [{ name: '.ai', fullPath: aiDir }];
+    const expected = [backlogDir];
 
-    const actual = findBacklogsAtRisk(items);
+    const actual = findBacklogsAtRisk(input);
 
-    assert.deepEqual(actual, [backlogDir]);
+    assert.deepEqual(actual, expected);
   });
 
   it('should detect populated backlog inside monorepo packages', () => {
@@ -63,10 +67,11 @@ describe('Cleaner.findBacklogsAtRisk()', () => {
     const monoBacklog = path.join(monoAiDir, 'backlog');
     fs.mkdirSync(monoBacklog, { recursive: true });
     fs.writeFileSync(path.join(monoBacklog, 'learned.md'), 'lesson');
-    const items = [{ name: 'packages/foo/.ai', fullPath: monoAiDir }];
+    const input = [{ name: 'packages/foo/.ai', fullPath: monoAiDir }];
+    const expected = [monoBacklog];
 
-    const actual = findBacklogsAtRisk(items);
+    const actual = findBacklogsAtRisk(input);
 
-    assert.deepEqual(actual, [monoBacklog]);
+    assert.deepEqual(actual, expected);
   });
 });
