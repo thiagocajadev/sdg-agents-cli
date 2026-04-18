@@ -8,9 +8,9 @@ import { FsUtils } from '../../lib/core/fs-utils.mjs';
  */
 
 const PROJECT_ROOT = process.cwd();
-const { runIfDirect } = FsUtils;
+const { bootstrapIfDirect } = FsUtils;
 
-async function run() {
+async function checkNarrative() {
   await orchestrateNarrativeAudit();
 }
 
@@ -106,6 +106,6 @@ function reportResults(violationsByFile, totalViolations) {
   console.log('─'.repeat(50) + '\n');
 }
 
-export const NarrativeChecker = { run };
+export const NarrativeChecker = { check: checkNarrative };
 
-runIfDirect(import.meta.url, run);
+bootstrapIfDirect(import.meta.url, checkNarrative);

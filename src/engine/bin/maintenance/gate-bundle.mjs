@@ -2,19 +2,19 @@ import { GatePrompt } from '../../lib/domain/gate-prompt.mjs';
 import { GateChecker } from '../../lib/domain/gate-checker.mjs';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
 
-const { runIfDirect } = FsUtils;
+const { bootstrapIfDirect } = FsUtils;
 
-async function run(args) {
+async function dispatchGate(args) {
   const isPromptMode = args?.prompt === true;
   const isCheckMode = args?.check === true;
 
   if (isPromptMode) {
-    const promptResult = await runPromptMode();
+    const promptResult = await processPromptMode();
     return promptResult;
   }
 
   if (isCheckMode) {
-    const checkResult = await runCheckMode();
+    const checkResult = await processCheckMode();
     return checkResult;
   }
 
@@ -22,7 +22,7 @@ async function run(args) {
   return usageResult;
 }
 
-async function runPromptMode() {
+async function processPromptMode() {
   const diff = await readStdin();
 
   const isEmpty = diff.trim().length === 0;
@@ -38,7 +38,7 @@ async function runPromptMode() {
   return promptResult;
 }
 
-async function runCheckMode() {
+async function processCheckMode() {
   const jsonInput = await readStdin();
 
   const result = GateChecker.checkResult(jsonInput);
@@ -58,7 +58,7 @@ async function runCheckMode() {
 
   const hasWarnViolations = result.violations.length > result.blockViolations.length;
   if (hasWarnViolations) {
-    const warnViolations = result.violations.filter((v) => v.tier === 'WARN');
+    const warnViolations = result.violations.filter((violation) => violation.tier === 'WARN');
     const report = GateChecker.formatViolationReport(warnViolations);
     console.error(`\n  ⚠️  SDG Gate — Warnings (not blocking)\n\n${report}\n`);
   }
@@ -96,6 +96,6 @@ function printUsage() {
   return usageResult;
 }
 
-export const GateRunner = { run };
+export const GateRunner = { dispatch: dispatchGate };
 
-runIfDirect(import.meta.url, () => run({}));
+bootstrapIfDirect(import.meta.url, () => dispatchGate({}));

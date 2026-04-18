@@ -5,13 +5,13 @@ import { ResultUtils } from '../../lib/core/result-utils.mjs';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
 
 const { success } = ResultUtils;
-const { runIfDirect } = FsUtils;
+const { bootstrapIfDirect } = FsUtils;
 
 /**
  * Spec Driven Guide — Reset/Clear Utility
  * Deletes all generated SDG files and the .ia directory.
  */
-async function run(targetDirectory = process.cwd(), options = {}) {
+async function clearProject(targetDirectory = process.cwd(), options = {}) {
   await orchestrateCleanup(targetDirectory, options);
 }
 
@@ -25,10 +25,10 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
   let existingItems = [];
 
   // Check current directory
-  for (const item of itemsToRemove) {
-    const fullPath = path.join(targetDirectory, item);
+  for (const itemName of itemsToRemove) {
+    const fullPath = path.join(targetDirectory, itemName);
     if (fs.existsSync(fullPath)) {
-      existingItems.push({ name: item, fullPath });
+      existingItems.push({ name: itemName, fullPath });
     }
   }
 
@@ -37,10 +37,10 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
   if (fs.existsSync(packagesDir)) {
     const subPackages = fs.readdirSync(packagesDir);
     for (const packageFolderName of subPackages) {
-      for (const item of itemsToRemove) {
-        const fullPath = path.join(packagesDir, packageFolderName, item);
+      for (const itemName of itemsToRemove) {
+        const fullPath = path.join(packagesDir, packageFolderName, itemName);
         if (fs.existsSync(fullPath)) {
-          existingItems.push({ name: `packages/${packageFolderName}/${item}`, fullPath });
+          existingItems.push({ name: `packages/${packageFolderName}/${itemName}`, fullPath });
         }
       }
     }
@@ -54,8 +54,8 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
 
   if (dryRun) {
     console.log('\n  [DRY RUN] The following items would be removed:');
-    for (const item of existingItems) {
-      console.log(`  - ${item.name}`);
+    for (const entry of existingItems) {
+      console.log(`  - ${entry.name}`);
     }
     console.log('\n  No files were deleted (dry-run mode).\n');
     const dryRunResult = success();
@@ -83,7 +83,7 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
     return abortResult;
   }
 
-  executeCleanup(existingItems);
+  applyCleanup(existingItems);
 
   console.log('\n  ✨ Project cleared successfully!\n');
   console.log('\n  ✨ Project cleared successfully!\n');
@@ -102,8 +102,8 @@ function printWarning() {
 
 function printItemsToRemove(items) {
   console.log('\n  The following items will be REMOVED:');
-  for (const item of items) {
-    console.log(`  - ${item.name}`);
+  for (const entry of items) {
+    console.log(`  - ${entry.name}`);
   }
 }
 
@@ -128,11 +128,11 @@ async function confirmBacklogDeletion(items) {
   return backlogConfirmed;
 }
 
-function executeCleanup(items) {
+function applyCleanup(items) {
   console.log('\n  Cleaning up...');
 
-  for (const item of items) {
-    const { name, fullPath } = item;
+  for (const entry of items) {
+    const { name, fullPath } = entry;
     try {
       if (fs.statSync(fullPath).isDirectory()) {
         fs.rmSync(fullPath, { recursive: true, force: true });
@@ -148,8 +148,8 @@ function executeCleanup(items) {
 
 function findBacklogsAtRisk(items) {
   const backlogPaths = items
-    .filter((item) => item.name === '.ai' || item.name.endsWith('/.ai'))
-    .map((aiItem) => path.join(aiItem.fullPath, 'backlog'));
+    .filter((entry) => entry.name === '.ai' || entry.name.endsWith('/.ai'))
+    .map((aiEntry) => path.join(aiEntry.fullPath, 'backlog'));
 
   const populatedBacklogs = backlogPaths.filter((backlogPath) => {
     if (!fs.existsSync(backlogPath)) return false;
@@ -161,8 +161,8 @@ function findBacklogsAtRisk(items) {
 }
 
 export const Cleaner = {
-  run,
+  clear: clearProject,
   findBacklogsAtRisk,
 };
 
-runIfDirect(import.meta.url, run);
+bootstrapIfDirect(import.meta.url, clearProject);

@@ -7,7 +7,7 @@ import { ResultUtils } from '../../lib/core/result-utils.mjs';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
 
 const { success } = ResultUtils;
-const { runIfDirect } = FsUtils;
+const { bootstrapIfDirect } = FsUtils;
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../');
 const PACKAGE_PATHS = [path.join(ROOT_DIR, 'package.json')];
@@ -45,7 +45,7 @@ export function bumpVersion(current, bumpType) {
   return nextVersion;
 }
 
-async function run() {
+async function dispatchBump() {
   await orchestrateAutoBump();
 }
 
@@ -108,9 +108,8 @@ function readLastCommitMessage() {
 }
 
 export const AutoBump = {
-  run,
   detectBumpType,
   bumpVersion,
 };
 
-runIfDirect(import.meta.url, run);
+bootstrapIfDirect(import.meta.url, dispatchBump);

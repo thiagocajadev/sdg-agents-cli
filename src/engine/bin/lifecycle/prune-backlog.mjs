@@ -6,7 +6,7 @@ import { ResultUtils } from '../../lib/core/result-utils.mjs';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
 
 const { success } = ResultUtils;
-const { runIfDirect } = FsUtils;
+const { bootstrapIfDirect } = FsUtils;
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../');
 const TASKS_PATH = path.join(ROOT_DIR, '.ai', 'backlog', 'tasks.md');
@@ -54,7 +54,7 @@ export function pruneBacklog(content, keepCount = DEFAULT_KEEP_COUNT) {
   return prunedResult;
 }
 
-async function run() {
+async function dispatchPrune() {
   await orchestratePrune();
 }
 
@@ -81,8 +81,7 @@ async function orchestratePrune() {
 }
 
 export const PruneBacklog = {
-  run,
   pruneBacklog,
 };
 
-runIfDirect(import.meta.url, run);
+bootstrapIfDirect(import.meta.url, dispatchPrune);

@@ -5,14 +5,14 @@ import { FsUtils } from '../../lib/core/fs-utils.mjs';
 
 const { printPromptUI } = PromptUtils;
 const { success } = ResultUtils;
-const { runIfDirect } = FsUtils;
+const { bootstrapIfDirect } = FsUtils;
 
 const TODAY = new Date().toISOString().split('T')[0];
 
 /**
  * Prints a ready-to-use prompt for an AI Agent to check and update stack versions.
  */
-async function run() {
+async function updateVersions() {
   await orchestrateVersionUpdate();
 }
 
@@ -77,7 +77,7 @@ Keep the STACK_VERSIONS and NO_LTS_STACKS exports.
 }
 
 export const Versioning = {
-  run,
+  update: updateVersions,
 };
 
-runIfDirect(import.meta.url, run);
+bootstrapIfDirect(import.meta.url, updateVersions);

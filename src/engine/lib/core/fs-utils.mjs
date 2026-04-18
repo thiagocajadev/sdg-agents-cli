@@ -114,13 +114,13 @@ function getDirname(importMetaUrl) {
   return dirname;
 }
 
-function runIfDirect(importMetaUrl, fn) {
+function bootstrapIfDirect(importMetaUrl, entryFunction) {
   const currentFile = fileURLToPath(importMetaUrl);
   if (!process.argv[1]) return;
 
   const entryFile = fs.realpathSync(path.resolve(process.argv[1]));
   if (currentFile === entryFile) {
-    const result = fn();
+    const result = entryFunction();
     if (result && typeof result.catch === 'function') {
       result.catch((error) => {
         if (error.name === 'ExitPromptError') {
@@ -166,8 +166,8 @@ function safeReadJson(filePath) {
     return null;
   }
   try {
-    const data = fs.readFileSync(filePath, 'utf8');
-    const parsed = JSON.parse(data);
+    const jsonText = fs.readFileSync(filePath, 'utf8');
+    const parsed = JSON.parse(jsonText);
     return parsed;
   } catch {
     return null;
@@ -190,7 +190,7 @@ export const FsUtils = {
   copyRecursiveSync,
   filterContentByVersion,
   getDirname,
-  runIfDirect,
+  bootstrapIfDirect,
   detectIndentation,
   writeJsonAtomic,
   safeReadJson,

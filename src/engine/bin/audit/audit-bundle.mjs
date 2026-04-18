@@ -14,13 +14,13 @@ const PACKAGE_JSON_PATH = path.join(PROJECT_ROOT, 'package.json');
 const PROJECT_VERSION = fs.existsSync(PACKAGE_JSON_PATH)
   ? (JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')).version ?? 'unknown')
   : 'unknown';
-const { runIfDirect, isMaintainerMode } = FsUtils;
+const { bootstrapIfDirect, isMaintainerMode } = FsUtils;
 
-async function run() {
-  await executeGovernanceAudit();
+async function auditGovernance() {
+  await dispatchGovernanceAudit();
 }
 
-async function executeGovernanceAudit() {
+async function dispatchGovernanceAudit() {
   const auditResults = orchestrateGovernanceAudit();
   reportSummary(auditResults);
 }
@@ -29,7 +29,7 @@ function orchestrateGovernanceAudit() {
   printHeader();
 
   const results = {
-    drift: SyncChecker.run(),
+    drift: SyncChecker.check(),
     narrative: checkChangelogHealth(),
     laws: checkLawsCompliance(),
     tests: checkTestNamedExpectations(),
@@ -277,29 +277,38 @@ function reportSummary(results) {
   console.log('  AUDIT SUMMARY');
   console.log('─'.repeat(50));
 
-  printResult('Instruction Sync', !results.drift.isFailure);
-  printResult('Narrative (Changelog)', !results.narrative.isFailure, results.narrative.reason);
-  printResult(
-    'Laws Compliance',
-    !results.laws.isFailure,
-    results.laws.isFailure
-      ? `found ${results.laws.violations.length} violations:\n      - ` +
-          results.laws.violations.join('\n      - ')
-      : null
-  );
-  printResult('Test Expectations', !results.tests.isFailure, results.tests.violations[0]);
-  printResult(
-    'Writing Soul',
-    !results.soul.isFailure,
-    results.soul.missing.length ? `Missing: ${results.soul.missing.join(', ')}` : null
-  );
-  printResult(
-    'Code Hygiene',
-    !results.hygiene.isFailure,
-    `Lint: ${results.hygiene.lint} | Tests: ${results.hygiene.test}`
-  );
-  printResult('Backlog Health', !results.backlog.isFailure, results.backlog.message);
-  printResult('Sovereign Protocol', !results.sovereign.isFailure, results.sovereign.message);
+  const isDriftOk = !results.drift.isFailure;
+  printResult('Instruction Sync', isDriftOk);
+
+  const isNarrativeOk = !results.narrative.isFailure;
+  printResult('Narrative (Changelog)', isNarrativeOk, results.narrative.reason);
+
+  const isLawsOk = !results.laws.isFailure;
+  const lawsReason = isLawsOk
+    ? null
+    : `found ${results.laws.violations.length} violations:\n      - ` +
+      results.laws.violations.join('\n      - ');
+  printResult('Laws Compliance', isLawsOk, lawsReason);
+
+  const isTestsOk = !results.tests.isFailure;
+  const firstTestViolation = results.tests.violations[0];
+  printResult('Test Expectations', isTestsOk, firstTestViolation);
+
+  const isSoulOk = !results.soul.isFailure;
+  const soulReason = results.soul.missing.length
+    ? `Missing: ${results.soul.missing.join(', ')}`
+    : null;
+  printResult('Writing Soul', isSoulOk, soulReason);
+
+  const isHygieneOk = !results.hygiene.isFailure;
+  const hygieneReason = `Lint: ${results.hygiene.lint} | Tests: ${results.hygiene.test}`;
+  printResult('Code Hygiene', isHygieneOk, hygieneReason);
+
+  const isBacklogOk = !results.backlog.isFailure;
+  printResult('Backlog Health', isBacklogOk, results.backlog.message);
+
+  const isSovereignOk = !results.sovereign.isFailure;
+  printResult('Sovereign Protocol', isSovereignOk, results.sovereign.message);
 
   const totalFailures = [
     results.drift,
@@ -319,17 +328,20 @@ function reportSummary(results) {
   }
 }
 
-function printResult(label, success, reason) {
-  const icon = success ? '✅' : '❌';
-  const truncatedReason = smartTruncate(reason, 10, 5); // Conservative truncation for UI
-  console.log(`  ${icon} ${label.padEnd(25)} ${reason ? `— ${truncatedReason}` : ''}`);
+function printResult(label, isPassed, reason) {
+  const icon = isPassed ? '✅' : '❌';
+  const truncatedReason = smartTruncate(reason, 10, 5);
+  const paddedLabel = label.padEnd(25);
+  const suffix = reason ? `— ${truncatedReason}` : '';
+  const line = `  ${icon} ${paddedLabel} ${suffix}`;
+  console.log(line);
 }
 
-export const AuditRunner = { run };
+export const AuditRunner = { audit: auditGovernance };
 
-runIfDirect(import.meta.url, () => run().catch(handleAuditError));
+bootstrapIfDirect(import.meta.url, () => auditGovernance().catch(reportAuditError));
 
-function handleAuditError(error) {
+function reportAuditError(error) {
   console.error('Audit failed:', error);
   process.exit(1);
 }

@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [3.6.1] - 2026-04-18
+
+### Added
+
+### Fixed
+
+- **Gate dogfooding violations eliminated across `src/engine/bin/**` and shared utils**: renamed taboo-verb function/method names (`run`→ domain verb per module,`handle*`/`perform*`/`execute*`→`apply*`/`process*`/`dispatch*`/`report\*`); renamed `runIfDirect`→`bootstrapIfDirect` across 13 importers; replaced taboo-nouns (`data`→`jsonText`/`registryPayload`, `fn`→`entryFunction`, `item`→`entry`/`itemName`, `v`→`violation`); extracted template literals and `!result.isFailure`negations into named consts at`printResult`and`console.log`callsites. Residuals accepted:`SpecDrivenGuide.run()`public API (breaking-change parked for major bump) and top-level`run()`in`index.mjs` (entry-point convention). 154/154 tests green, audit 100% compliant.
+
 ## [3.6.0] - 2026-04-18
 
 ### Added

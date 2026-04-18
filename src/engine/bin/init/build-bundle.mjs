@@ -24,7 +24,7 @@ const {
   writeAutomationScripts,
 } = InstructionAssembler;
 const { success } = ResultUtils;
-const { runIfDirect } = FsUtils;
+const { bootstrapIfDirect } = FsUtils;
 const {
   printWelcome,
   printStep,
@@ -52,15 +52,15 @@ async function orchestrateBuild(targetDirectory, options) {
   printWelcome();
 
   if (options.selections) {
-    const nonInteractiveResult = await runNonInteractive(targetDirectory, options);
+    const nonInteractiveResult = await buildNonInteractive(targetDirectory, options);
     return nonInteractiveResult;
   }
 
-  const interactiveResult = await runInteractive(targetDirectory, options);
+  const interactiveResult = await buildInteractive(targetDirectory, options);
   return interactiveResult;
 }
 
-async function runNonInteractive(targetDirectory, options) {
+async function buildNonInteractive(targetDirectory, options) {
   const { dryRun = false, selections } = options;
 
   const validationResult = validateSelections(selections);
@@ -73,7 +73,7 @@ async function runNonInteractive(targetDirectory, options) {
   autoDetectBump(selections);
 
   const state = { step: 'execute', userSelections: selections };
-  const result = await handleFinalExecutionPhase(state, targetDirectory, {
+  const result = await finalizeExecutionPhase(state, targetDirectory, {
     dryRun,
     skipConfirm: true,
   });
@@ -83,11 +83,11 @@ async function runNonInteractive(targetDirectory, options) {
   }
 }
 
-async function runInteractive(targetDirectory, options) {
+async function buildInteractive(targetDirectory, options) {
   const state = { step: 'selections', userSelections: null };
 
   while (state.step !== 'done') {
-    const result = await handleExecutionStep(state, targetDirectory, options);
+    const result = await processExecutionStep(state, targetDirectory, options);
     if (result.isFailure) {
       if (result.error.code !== 'USER_BACK') {
         process.stdout.write(`\n  ⚠️  ${result.error.message}\n`);
@@ -98,14 +98,14 @@ async function runInteractive(targetDirectory, options) {
   }
 }
 
-async function handleExecutionStep(state, targetDirectory, options) {
+async function processExecutionStep(state, targetDirectory, options) {
   switch (state.step) {
     case 'selections': {
-      const selectionStepResult = await handleSelectionPhase(state, targetDirectory);
+      const selectionStepResult = await processSelectionPhase(state, targetDirectory);
       return selectionStepResult;
     }
     case 'execute': {
-      const executionStepResult = await handleFinalExecutionPhase(state, targetDirectory, options);
+      const executionStepResult = await finalizeExecutionPhase(state, targetDirectory, options);
       return executionStepResult;
     }
     default: {
@@ -115,7 +115,7 @@ async function handleExecutionStep(state, targetDirectory, options) {
   }
 }
 
-async function handleSelectionPhase(state, targetDirectory) {
+async function processSelectionPhase(state, targetDirectory) {
   const selectionResult = await gatherUserSelections(targetDirectory);
   if (selectionResult.isFailure) {
     const selectionFailure = selectionResult;
@@ -128,12 +128,12 @@ async function handleSelectionPhase(state, targetDirectory) {
   return phaseSuccess;
 }
 
-async function handleFinalExecutionPhase(state, targetDirectory, options = {}) {
+async function finalizeExecutionPhase(state, targetDirectory, options = {}) {
   const { dryRun = false, skipConfirm = false } = options;
   const selections = state.userSelections;
 
   if (selections.mode === 'quick') {
-    const quickModeResult = await runQuickMode(state, targetDirectory, { dryRun });
+    const quickModeResult = await buildQuickMode(state, targetDirectory, { dryRun });
     return quickModeResult;
   }
 
@@ -144,20 +144,20 @@ async function handleFinalExecutionPhase(state, targetDirectory, options = {}) {
     return dryRunSuccess;
   }
 
-  const agentsModeResult = await runAgentsMode(state, targetDirectory, selections, {
+  const agentsModeResult = await buildAgentsMode(state, targetDirectory, selections, {
     skipConfirm,
   });
   return agentsModeResult;
 }
 
-async function runQuickMode(state, targetDirectory, { dryRun }) {
+async function buildQuickMode(state, targetDirectory, { dryRun }) {
   if (dryRun) {
     const dryRunResult = abortForDryRun(state, targetDirectory, printQuickDryRun);
     return dryRunResult;
   }
 
   printQuickSetupStart();
-  executeQuickPipeline(targetDirectory, state.userSelections);
+  applyQuickPipeline(targetDirectory, state.userSelections);
 
   printQuickSuccess(targetDirectory);
   state.step = 'done';
@@ -165,7 +165,7 @@ async function runQuickMode(state, targetDirectory, { dryRun }) {
   return quickSuccessResult;
 }
 
-async function runAgentsMode(state, targetDirectory, selections, { skipConfirm = false } = {}) {
+async function buildAgentsMode(state, targetDirectory, selections, { skipConfirm = false } = {}) {
   const confirmed = skipConfirm || (await printBuildSummary(selections));
   if (!confirmed) {
     const abortResult = abortExecution(state);
@@ -173,7 +173,7 @@ async function runAgentsMode(state, targetDirectory, selections, { skipConfirm =
   }
 
   printProjectRoot(targetDirectory);
-  executeAgentsPipeline(targetDirectory, selections);
+  applyAgentsPipeline(targetDirectory, selections);
 
   printSuccessAgents(targetDirectory);
   state.step = 'done';
@@ -195,7 +195,7 @@ function abortExecution(state) {
   return userAbortResult;
 }
 
-function executeQuickPipeline(targetDirectory, selections) {
+function applyQuickPipeline(targetDirectory, selections) {
   printStep(1, 5, 'Preparing .ai/ structure...');
   prepareProjectStructure(targetDirectory);
 
@@ -215,7 +215,7 @@ function executeQuickPipeline(targetDirectory, selections) {
   writeManifest(targetDirectory, selections, packageJson.version);
 }
 
-function executeAgentsPipeline(targetDirectory, selections) {
+function applyAgentsPipeline(targetDirectory, selections) {
   printStep(1, 5, 'Preparing .ai/ structure...');
   prepareProjectStructure(targetDirectory);
 
@@ -239,7 +239,7 @@ export const SDG = {
   run,
 };
 
-runIfDirect(import.meta.url, launchFromCli);
+bootstrapIfDirect(import.meta.url, launchFromCli);
 
 function launchFromCli() {
   const targetDirectory = process.argv[2] ?? process.cwd();

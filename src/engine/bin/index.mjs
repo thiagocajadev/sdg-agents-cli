@@ -14,7 +14,7 @@ import { CliParser } from '../lib/infra/cli-parser.mjs';
 import { BundleUI } from '../lib/core/ui-utils.mjs';
 import { VersionUtils } from '../lib/domain/version-utils.mjs';
 
-const { runIfDirect } = FsUtils;
+const { bootstrapIfDirect } = FsUtils;
 const { safeSelect } = PromptUtils;
 const { parseCliArgs, validateInit } = CliParser;
 
@@ -43,10 +43,10 @@ async function orchestrateCommandLineLifecycle() {
   }
 
   const executionContext = prepareExecutionContext(cliArgs);
-  await handleMaintenanceSync(executionContext);
+  await applyMaintenanceSync(executionContext);
 
   if (executionContext.subcommand) {
-    const subcommandResult = await executeSubcommand(executionContext);
+    const subcommandResult = await dispatchSubcommand(executionContext);
     return subcommandResult;
   }
 
@@ -76,7 +76,7 @@ function prepareExecutionContext(args) {
   return context;
 }
 
-async function handleMaintenanceSync(args) {
+async function applyMaintenanceSync(args) {
   const isCommandRequest = args.subcommand || args.help || args.version;
   if (isCommandRequest) {
     const skipResult = null;
@@ -96,11 +96,11 @@ async function ensureMaintainerSync(targetDirectory) {
   }
 
   const { SyncChecker } = await import('./audit/check-sync.mjs');
-  const syncResult = SyncChecker.run();
+  const syncResult = SyncChecker.check();
 
   const isDriftDetected = syncResult.isFailure;
   if (isDriftDetected) {
-    const resolutionResult = await performAutomaticSync(targetDirectory);
+    const resolutionResult = await applyAutomaticSync(targetDirectory);
     return resolutionResult;
   }
 
@@ -108,7 +108,7 @@ async function ensureMaintainerSync(targetDirectory) {
   return healthyResult;
 }
 
-async function performAutomaticSync(targetDirectory) {
+async function applyAutomaticSync(targetDirectory) {
   console.log('\n  🛠️  MAINTAINER MODE: Drift detected in core instructions.');
   console.log('  🔄 Automatic sync in progress...\n');
 
@@ -133,45 +133,45 @@ async function performAutomaticSync(targetDirectory) {
   }
 }
 
-async function executeSubcommand(args) {
+async function dispatchSubcommand(args) {
   switch (args.subcommand) {
     case 'init': {
-      const initResult = await handleInitSubcommand(args);
+      const initResult = await processInitSubcommand(args);
       return initResult;
     }
     case 'review': {
       const { Reviewer } = await import('./maintenance/review-bundle.mjs');
-      const reviewResult = await Reviewer.run();
+      const reviewResult = await Reviewer.review();
       return reviewResult;
     }
     case 'sync': {
       const { Syncer } = await import('./maintenance/sync-rulesets.mjs');
-      const syncResult = await Syncer.run();
+      const syncResult = await Syncer.sync();
       return syncResult;
     }
     case 'update': {
       const { Versioning } = await import('./maintenance/update-versions.mjs');
-      const updateResult = await Versioning.run();
+      const updateResult = await Versioning.update();
       return updateResult;
     }
     case 'clear': {
       const { Cleaner } = await import('./maintenance/clear-bundle.mjs');
-      const clearResult = await Cleaner.run(args.targetDirectory);
+      const clearResult = await Cleaner.clear(args.targetDirectory);
       return clearResult;
     }
     case 'audit': {
       const { AuditRunner } = await import('./audit/audit-bundle.mjs');
-      const auditResult = await AuditRunner.run();
+      const auditResult = await AuditRunner.audit();
       return auditResult;
     }
     case 'narrative': {
       const { NarrativeChecker } = await import('./audit/check-narrative.mjs');
-      const narrativeResult = await NarrativeChecker.run();
+      const narrativeResult = await NarrativeChecker.check();
       return narrativeResult;
     }
     case 'gate': {
       const { GateRunner } = await import('./maintenance/gate-bundle.mjs');
-      const gateResult = await GateRunner.run(args);
+      const gateResult = await GateRunner.dispatch(args);
       return gateResult;
     }
     default: {
@@ -182,7 +182,7 @@ async function executeSubcommand(args) {
   }
 }
 
-async function handleInitSubcommand(args) {
+async function processInitSubcommand(args) {
   const validationError = validateInit(args);
   const hasValidationError = !!validationError;
   if (hasValidationError) {
@@ -242,18 +242,18 @@ async function startInteractiveMode(args) {
       const isExit = menuChoice === 'exit' || menuChoice === 'back';
       if (isExit) break;
 
-      await executeMenuAction(menuChoice, args);
+      await dispatchMenuAction(menuChoice, args);
       console.log('\n' + '─'.repeat(50) + '\n');
     }
   } catch (error) {
-    handleExitError(error);
+    reportExitError(error);
   }
 
   const footerResult = BundleUI.printFooter();
   return footerResult;
 }
 
-function handleExitError(error) {
+function reportExitError(error) {
   const isForceClosed = error.message?.includes('force closed') || error.name === 'ExitPromptError';
   if (isForceClosed) {
     console.log('\n\n  👋 Goodbye! See you soon engineer.');
@@ -263,7 +263,7 @@ function handleExitError(error) {
   process.exit(1);
 }
 
-async function executeMenuAction(menuChoice, args) {
+async function dispatchMenuAction(menuChoice, args) {
   switch (menuChoice) {
     case 'init': {
       const { SDG: SpecDrivenGuide } = await import('./init/build-bundle.mjs');
@@ -271,7 +271,7 @@ async function executeMenuAction(menuChoice, args) {
       return initResult;
     }
     case 'settings': {
-      const settingsResult = await runSettingsMenu(args.targetDirectory);
+      const settingsResult = await openSettingsMenu(args.targetDirectory);
       return settingsResult;
     }
     default: {
@@ -281,7 +281,7 @@ async function executeMenuAction(menuChoice, args) {
   }
 }
 
-async function runSettingsMenu(targetDirectory) {
+async function openSettingsMenu(targetDirectory) {
   const settingsChoice = await safeSelect({
     message: 'Settings:',
     choices: [
@@ -307,16 +307,16 @@ async function runSettingsMenu(targetDirectory) {
   switch (settingsChoice) {
     case 'audit': {
       const { AuditRunner } = await import('./audit/audit-bundle.mjs');
-      const auditResult = await AuditRunner.run();
+      const auditResult = await AuditRunner.audit();
       return auditResult;
     }
     case 'update-instructions': {
-      const updateResult = await performUpdateInstructions(targetDirectory);
+      const updateResult = await applyUpdateInstructions(targetDirectory);
       return updateResult;
     }
     case 'clear': {
       const { Cleaner } = await import('./maintenance/clear-bundle.mjs');
-      const clearResult = await Cleaner.run(targetDirectory);
+      const clearResult = await Cleaner.clear(targetDirectory);
       return clearResult;
     }
     default: {
@@ -326,7 +326,7 @@ async function runSettingsMenu(targetDirectory) {
   }
 }
 
-async function performUpdateInstructions(targetDirectory) {
+async function applyUpdateInstructions(targetDirectory) {
   const { ManifestUtils } = await import('../lib/domain/manifest-utils.mjs');
   const { SDG: SpecDrivenGuide } = await import('./init/build-bundle.mjs');
   const manifest = ManifestUtils.loadManifest(targetDirectory);
@@ -338,7 +338,9 @@ async function performUpdateInstructions(targetDirectory) {
   }
 
   const { flavor, idioms } = manifest.selections;
-  console.log(`\n  Re-applying latest rules — Flavor: ${flavor} | Idioms: ${idioms.join(', ')}\n`);
+  const idiomsLabel = idioms.join(', ');
+  const updateHeader = `\n  Re-applying latest rules — Flavor: ${flavor} | Idioms: ${idiomsLabel}\n`;
+  console.log(updateHeader);
 
   try {
     await SpecDrivenGuide.run(targetDirectory, { selections: manifest.selections });
@@ -352,5 +354,4 @@ async function performUpdateInstructions(targetDirectory) {
 
 export const CLI = { run };
 
-runIfDirect(import.meta.url, run);
-// dummy change
+bootstrapIfDirect(import.meta.url, run);

@@ -11,7 +11,7 @@ const { printPromptUI, isMaintainerMode } = PromptUtils;
 const { loadManifest } = ManifestUtils;
 const { displayName } = DisplayUtils;
 const { success } = ResultUtils;
-const { getDirname, runIfDirect } = FsUtils;
+const { getDirname, bootstrapIfDirect } = FsUtils;
 
 const __dirname = getDirname(import.meta.url);
 const SOURCE_ROOT = path.join(__dirname, '../../..');
@@ -20,7 +20,7 @@ const SOURCE_INSTRUCTIONS = path.join(SOURCE_ROOT, 'assets', 'instructions');
 const PROJECT_ROOT = process.cwd();
 const TODAY = new Date().toISOString().split('T')[0];
 
-async function run() {
+async function syncRulesets() {
   const syncResult = await orchestrateRulesetSync();
   return syncResult;
 }
@@ -166,7 +166,7 @@ function renderSyncPrompt(sections, maintainerNote) {
 }
 
 export const Syncer = {
-  run,
+  sync: syncRulesets,
 };
 
-runIfDirect(import.meta.url, run);
+bootstrapIfDirect(import.meta.url, syncRulesets);

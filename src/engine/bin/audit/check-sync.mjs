@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
 import { ResultUtils } from '../../lib/core/result-utils.mjs';
 
-const { runIfDirect, isMaintainerMode } = FsUtils;
+const { bootstrapIfDirect, isMaintainerMode } = FsUtils;
 const { success, fail } = ResultUtils;
 
 const PROJECT_ROOT = process.cwd();
@@ -14,7 +14,7 @@ const AI_DIR = path.join(PROJECT_ROOT, '.ai', 'instructions');
 
 const MIRRORED_DIRS = ['core', 'idioms', 'templates', 'competencies'];
 
-function run() {
+function checkDrift() {
   const syncCheckOutcome = orchestrateSyncCheck();
   return syncCheckOutcome;
 }
@@ -31,8 +31,8 @@ function orchestrateSyncCheck() {
     driftedFiles.push(...directoryDrifts);
   }
 
-  const runResult = reportResult(driftedFiles);
-  return runResult;
+  const driftReport = reportResult(driftedFiles);
+  return driftReport;
 }
 
 function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
@@ -103,9 +103,9 @@ function reportResult(drifts) {
   return driftFailure;
 }
 
-export const SyncChecker = { run };
+export const SyncChecker = { check: checkDrift };
 
-runIfDirect(import.meta.url, async () => {
-  const result = run();
+bootstrapIfDirect(import.meta.url, async () => {
+  const result = checkDrift();
   if (result.isFailure) process.exit(1);
 });

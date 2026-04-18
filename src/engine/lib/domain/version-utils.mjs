@@ -22,8 +22,8 @@ async function getLatestVersion() {
       return failureResult;
     }
 
-    const data = await response.json();
-    const latestVersion = data.version || null;
+    const registryPayload = await response.json();
+    const latestVersion = registryPayload.version || null;
     return latestVersion;
   } catch {
     clearTimeout(timeoutId);

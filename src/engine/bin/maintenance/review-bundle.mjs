@@ -8,7 +8,7 @@ import { FsUtils } from '../../lib/core/fs-utils.mjs';
 const { computeHashes, compareHashes, daysAgo, loadManifest } = ManifestUtils;
 const { displayName } = DisplayUtils;
 const { success } = ResultUtils;
-const { getDirname, runIfDirect } = FsUtils;
+const { getDirname, bootstrapIfDirect } = FsUtils;
 
 const __dirname = getDirname(import.meta.url);
 const SOURCE_ROOT = path.join(__dirname, '../../..');
@@ -19,7 +19,7 @@ const PROJECT_ROOT = process.cwd();
 /**
  * Orchestrator: Review Entry Point
  */
-async function run() {
+async function reviewBundle() {
   const reviewResult = await orchestrateReview();
   return reviewResult;
 }
@@ -127,7 +127,7 @@ async function syncWithCore(manifest) {
 }
 
 export const Reviewer = {
-  run,
+  review: reviewBundle,
 };
 
-runIfDirect(import.meta.url, run);
+bootstrapIfDirect(import.meta.url, reviewBundle);
