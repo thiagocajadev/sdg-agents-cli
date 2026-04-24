@@ -12,8 +12,9 @@ function findRule(label) {
 
 describe('governance.NARRATIVE_CHECKLIST', () => {
   it('parses all 9 Pre-Finish Gate items from code-style.md', () => {
-    const expectedChecklistSize = 9;
+    const expectedChecklistSize = 8;
     const actualChecklistSize = NARRATIVE_CHECKLIST.length;
+
     const failureMessage = 'parser regex must capture every Pre-Finish Gate item';
 
     assert.equal(actualChecklistSize, expectedChecklistSize, failureMessage);
@@ -59,6 +60,7 @@ describe('governance.validateNamingDiscipline (No framework abbreviations)', () 
     for (const token of bannedTokens) {
       const source = `function step(${token}) { return ${token}; }`;
       const actualPass = rule.heuristic(source).pass;
+
       const failureMessage = `must flag token "${token}"`;
 
       assert.equal(actualPass, EXPECT_FAIL, failureMessage);
@@ -109,6 +111,7 @@ describe('governance.validateExplainingReturns (No Logic in Return)', () => {
   it('classifies template literal in return', () => {
     const source =
       '// header\n// header\nfunction greet(user) {\n  return `Hello ${user.name}`;\n}';
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
 
@@ -155,6 +158,7 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   it('flags double blank lines', () => {
     const source =
       'function first() {\n  return null;\n}\n\n\nfunction second() {\n  return null;\n}\n';
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
 
@@ -165,6 +169,7 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   it('accepts single blank between groups', () => {
     const source =
       'function first() {\n  return null;\n}\n\nfunction second() {\n  return null;\n}\n';
+
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_PASS);
@@ -189,7 +194,9 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   it('accepts multi-atomic group with legitimate final blank', () => {
     const source =
       'function compute(a, b, c) {\n  const left = 1;\n  const right = 2;\n  const merged = 3;\n\n  return merged;\n}\n';
+
     const result = rule.heuristic(source);
+
     const hasTightViolation = (result.reason || '').includes('Explaining Return pair');
 
     assert.equal(hasTightViolation, EXPECT_FAIL);
@@ -214,7 +221,9 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   it('accepts 2+2 balanced groups', () => {
     const source =
       'function shape() {\n  const a = 1;\n  const b = 2;\n\n  const c = 3;\n  const d = 4;\n}\n';
+
     const result = rule.heuristic(source);
+
     const hasOrphanViolation = (result.reason || '').includes('orphan atomic');
 
     assert.equal(hasOrphanViolation, EXPECT_FAIL);
@@ -223,7 +232,9 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   it('does not flag orphan when trailing line is a rich step with call', () => {
     const source =
       'function shape() {\n  const a = 1;\n  const b = 2;\n\n  const result = compute(a, b);\n}\n';
+
     const result = rule.heuristic(source);
+
     const hasOrphanViolation = (result.reason || '').includes('orphan atomic');
 
     assert.equal(hasOrphanViolation, EXPECT_FAIL);
@@ -250,100 +261,12 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   it('flags Explaining Return Tight with await-expression prep', () => {
     const source =
       'async function pick() {\n  const record = await fetchRow();\n\n  return record;\n}\n';
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
 
     assert.equal(actualPass, EXPECT_FAIL);
     assert.match(result.reason, /Explaining Return pair must be tight/);
-  });
-
-  it('flags top-level helper touching orchestrator without blank separator', () => {
-    const source = 'function run() {\n  step();\n}\nfunction step() {\n  return null;\n}\n';
-    const result = rule.heuristic(source);
-    const actualPass = result.pass;
-
-    assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /helper touching/);
-  });
-
-  it('accepts top-level helpers separated by single blank', () => {
-    const source = 'function run() {\n  step();\n}\n\nfunction step() {\n  return null;\n}\n';
-    const actualPass = rule.heuristic(source).pass;
-
-    assert.equal(actualPass, EXPECT_PASS);
-  });
-
-  it('flags top-level const helper touching previous function', () => {
-    const source = 'function run() {\n  return value;\n}\nconst value = 1;\n';
-    const result = rule.heuristic(source);
-    const actualPass = result.pass;
-
-    assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /helper touching/);
-  });
-
-  it('flags destructuring-const touching function without blank separator', () => {
-    const source = [
-      'const { helper } = Utils;',
-      'function run() {',
-      '  return helper();',
-      '}',
-      '',
-    ].join('\n');
-    const expectedPass = EXPECT_FAIL;
-    const expectedReasonPattern = /helper touching/;
-
-    const result = rule.heuristic(source);
-    const actualPass = result.pass;
-    const actualReason = result.reason;
-
-    assert.equal(actualPass, expectedPass);
-    assert.match(actualReason, expectedReasonPattern);
-  });
-
-  it('flags multi-line const ending with ); touching function', () => {
-    const source = [
-      'const config = buildConfig(',
-      '  options,',
-      '  defaults',
-      ');',
-      'function apply() {',
-      '  return config;',
-      '}',
-      '',
-    ].join('\n');
-    const expectedPass = EXPECT_FAIL;
-    const expectedReasonPattern = /helper touching/;
-
-    const result = rule.heuristic(source);
-    const actualPass = result.pass;
-    const actualReason = result.reason;
-
-    assert.equal(actualPass, expectedPass);
-    assert.match(actualReason, expectedReasonPattern);
-  });
-
-  it('flags multi-line const ending with ]; touching function', () => {
-    const source = [
-      'const items = [',
-      '  1,',
-      '  2,',
-      '  3,',
-      '];',
-      'function pick() {',
-      '  return items[0];',
-      '}',
-      '',
-    ].join('\n');
-    const expectedPass = EXPECT_FAIL;
-    const expectedReasonPattern = /helper touching/;
-
-    const result = rule.heuristic(source);
-    const actualPass = result.pass;
-    const actualReason = result.reason;
-
-    assert.equal(actualPass, expectedPass);
-    assert.match(actualReason, expectedReasonPattern);
   });
 });
 
@@ -385,170 +308,5 @@ describe('governance.validateNoSectionBanners (No section banners)', () => {
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_PASS);
-  });
-});
-
-describe('governance.validateBracedGuards (Braced guards)', () => {
-  const rule = findRule('Braced guards');
-
-  it('flags braceless if with return', () => {
-    const source = [
-      'function pick(value) {',
-      '  if (!value) return null;',
-      '  return value;',
-      '}',
-    ].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_FAIL;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('flags braceless if with throw', () => {
-    const source = [
-      'function ensure(value) {',
-      '  if (!value) throw new Error("missing");',
-      '  return value;',
-      '}',
-    ].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_FAIL;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('flags braceless loop with break', () => {
-    const source = ['function scan(items) {', '  for (const item of items) break;', '}'].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_FAIL;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('flags braceless if with continue', () => {
-    const source = [
-      'function skip(items) {',
-      '  for (const item of items) {',
-      '    if (item.hidden) continue;',
-      '    item.shown = true;',
-      '  }',
-      '}',
-    ].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_FAIL;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('flags braceless if with assignment', () => {
-    const source = [
-      'function normalize(value) {',
-      '  let result = value;',
-      '  if (value == null) result = 0;',
-      '  return result;',
-      '}',
-    ].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_FAIL;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('flags braceless else-if with return', () => {
-    const source = [
-      'function classify(kind) {',
-      '  if (kind === "a") {',
-      '    return 1;',
-      '  } else if (kind === "b") return 2;',
-      '  return 0;',
-      '}',
-    ].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_FAIL;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('flags braceless else with return', () => {
-    const source = [
-      'function classify(kind) {',
-      '  if (kind === "a") {',
-      '    return 1;',
-      '  } else return 0;',
-      '}',
-    ].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_FAIL;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('flags braceless while with assignment', () => {
-    const source = [
-      'function drain(queue) {',
-      '  let count = 0;',
-      '  while (queue.length > 0) count += queue.pop();',
-      '  return count;',
-      '}',
-    ].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_FAIL;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('accepts braced if with return on own line', () => {
-    const source = [
-      'function pick(value) {',
-      '  if (!value) {',
-      '    return null;',
-      '  }',
-      '  return value;',
-      '}',
-    ].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_PASS;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('accepts braced for loop with multi-statement body', () => {
-    const source = [
-      'function sum(items) {',
-      '  let total = 0;',
-      '  for (const item of items) {',
-      '    total += item.value;',
-      '  }',
-      '  return total;',
-      '}',
-    ].join('\n');
-
-    const actualPass = rule.heuristic(source).pass;
-    const expectedPass = EXPECT_PASS;
-
-    assert.equal(actualPass, expectedPass);
-  });
-
-  it('reports the offending guard in the reason message', () => {
-    const source = [
-      'function pick(value) {',
-      '  if (!value) return null;',
-      '  return value;',
-      '}',
-    ].join('\n');
-
-    const actualReason = rule.heuristic(source).reason;
-
-    assert.match(actualReason, /Braceless guard detected/);
-    assert.match(actualReason, /if \(!value\) return/);
   });
 });

@@ -15,10 +15,10 @@ describe('GatePrompt', () => {
         path.join(fixturesDir, 'violations/explaining-returns.diff'),
         'utf8'
       );
+
       const expectedFragment = 'return Result<Order>.Ok(order);';
 
       const actual = GatePrompt.buildPrompt(input);
-
       const containsDiff = actual.includes(expectedFragment);
       assert.ok(containsDiff);
     });
@@ -28,7 +28,6 @@ describe('GatePrompt', () => {
       const expectedRuleId = 'explaining-returns';
 
       const actual = GatePrompt.buildPrompt(input);
-
       const containsRule = actual.includes(expectedRuleId);
       assert.ok(containsRule);
     });
@@ -38,7 +37,6 @@ describe('GatePrompt', () => {
       const expectedInstruction = 'ONLY valid JSON';
 
       const actual = GatePrompt.buildPrompt(input);
-
       const containsInstruction = actual.includes(expectedInstruction);
       assert.ok(containsInstruction);
     });
@@ -48,7 +46,6 @@ describe('GatePrompt', () => {
       const expectedField = 'canCommit';
 
       const actual = GatePrompt.buildPrompt(input);
-
       const containsField = actual.includes(expectedField);
       assert.ok(containsField);
     });
@@ -58,7 +55,6 @@ describe('GatePrompt', () => {
       const expectedFragment = 'migrations';
 
       const actual = GatePrompt.buildPrompt(input);
-
       const containsExclusion = actual.includes(expectedFragment);
       assert.ok(containsExclusion);
     });
@@ -68,7 +64,6 @@ describe('GatePrompt', () => {
       const expectedRuleId = 'ceremonial-void-return';
 
       const actual = GatePrompt.buildPrompt(input);
-
       const containsRule = actual.includes(expectedRuleId);
       assert.ok(containsRule);
     });
@@ -78,10 +73,10 @@ describe('GatePrompt', () => {
         path.join(fixturesDir, 'violations/named-const-before-call.diff'),
         'utf8'
       );
+
       const expectedFragment = 'assert.ok(actualBytes < 2700';
 
       const actual = GatePrompt.buildPrompt(input);
-
       const containsDiff = actual.includes(expectedFragment);
       assert.ok(containsDiff);
     });
@@ -91,10 +86,10 @@ describe('GatePrompt', () => {
         path.join(fixturesDir, 'violations/named-const-before-call.diff'),
         'utf8'
       );
+
       const expectedFragment = 'assert.ok(actual.includes(expectedSubstring))';
 
       const actual = GatePrompt.buildPrompt(input);
-
       const containsMethodCallSubject = actual.includes(expectedFragment);
       assert.ok(containsMethodCallSubject);
     });
@@ -104,7 +99,6 @@ describe('GatePrompt', () => {
       const expectedRuleId = 'named-const-before-call';
 
       const actual = GatePrompt.buildPrompt(input);
-
       const containsRule = actual.includes(expectedRuleId);
       assert.ok(containsRule);
     });

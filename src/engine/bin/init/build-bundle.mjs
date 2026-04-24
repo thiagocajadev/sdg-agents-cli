@@ -80,6 +80,7 @@ async function buildNonInteractive(targetDirectory, options) {
     isDryRun,
     skipConfirm: true,
   });
+
   if (result.isFailure) {
     const failureWarning = `\n  ⚠️  ${result.error.message}`;
     console.log(failureWarning);
@@ -97,6 +98,7 @@ async function buildInteractive(targetDirectory, options) {
         const errorNotice = `\n  ⚠️  ${result.error.message}\n`;
         process.stdout.write(errorNotice);
       }
+
       const interactionResult = result;
       return interactionResult;
     }
@@ -129,6 +131,7 @@ async function processSelectionPhase(state, targetDirectory) {
 
   state.userSelections = selectionResult.value;
   state.step = 'execute';
+
   const phaseSuccess = success();
   return phaseSuccess;
 }
@@ -145,6 +148,7 @@ async function finalizeExecutionPhase(state, targetDirectory, options = {}) {
   if (isDryRun) {
     printDryRunPreview(selections, targetDirectory);
     state.step = 'done';
+
     const dryRunSuccess = success();
     return dryRunSuccess;
   }
@@ -152,6 +156,7 @@ async function finalizeExecutionPhase(state, targetDirectory, options = {}) {
   const agentsModeResult = await buildAgentsMode(state, targetDirectory, selections, {
     skipConfirm,
   });
+
   return agentsModeResult;
 }
 
@@ -166,6 +171,7 @@ async function buildQuickMode(state, targetDirectory, { isDryRun }) {
 
   printQuickSuccess(targetDirectory);
   state.step = 'done';
+
   const quickSuccessResult = success();
   return quickSuccessResult;
 }
@@ -182,6 +188,7 @@ async function buildAgentsMode(state, targetDirectory, selections, { skipConfirm
 
   printSuccessAgents(targetDirectory);
   state.step = 'done';
+
   const buildResult = success();
   return buildResult;
 }
@@ -189,6 +196,7 @@ async function buildAgentsMode(state, targetDirectory, selections, { skipConfirm
 function abortForDryRun(state, targetDirectory, printer) {
   printer(targetDirectory);
   state.step = 'done';
+
   const dryRunAbortResult = success();
   return dryRunAbortResult;
 }
@@ -196,6 +204,7 @@ function abortForDryRun(state, targetDirectory, printer) {
 function abortExecution(state) {
   printAborted();
   state.step = 'done';
+
   const userAbortResult = success();
   return userAbortResult;
 }
@@ -253,6 +262,7 @@ bootstrapIfDirect(import.meta.url, launchFromCli);
 function launchFromCli() {
   const targetDirectory = process.argv[2] ?? process.cwd();
   const isDryRun = process.argv.includes('--dry-run');
+
   const buildResult = run(path.resolve(targetDirectory), { isDryRun });
   return buildResult;
 }

@@ -5,8 +5,8 @@ import { FsUtils } from '../../lib/core/fs-utils.mjs';
 const { bootstrapIfDirect } = FsUtils;
 
 async function dispatchGate(args) {
-  const isPromptMode = args?.prompt === true;
-  const isCheckMode = args?.check === true;
+  const isPromptMode = args?.prompt;
+  const isCheckMode = args?.check;
 
   if (isPromptMode) {
     const promptResult = await processPromptMode();
@@ -61,6 +61,7 @@ async function processCheckMode() {
   if (hasWarnViolations) {
     const warnViolations = result.violations.filter((violation) => violation.tier === 'WARN');
     const report = GateChecker.formatViolationReport(warnViolations);
+
     const warnOutput = `\n  ⚠️  SDG Gate — Warnings (not blocking)\n\n${report}\n`;
     console.error(warnOutput);
   }

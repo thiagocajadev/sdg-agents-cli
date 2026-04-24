@@ -24,6 +24,7 @@ function parseJson(rawInput) {
   try {
     const stripped = stripFences(rawInput.trim());
     const value = JSON.parse(stripped);
+
     const successResult = { isSuccess: true, value };
     return successResult;
   } catch {
@@ -37,6 +38,7 @@ function stripFences(text) {
   if (!isFenced) {
     return text;
   }
+
   const stripped = text.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
   return stripped;
 }

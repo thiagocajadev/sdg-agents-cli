@@ -73,6 +73,7 @@ function injectCompetencies(projectAiInstructions) {
   if (!fileSystem.existsSync(deliverySrc)) {
     return;
   }
+
   fileSystem.copyFileSync(deliverySrc, path.join(competenciesDir, 'delivery.md'));
 }
 

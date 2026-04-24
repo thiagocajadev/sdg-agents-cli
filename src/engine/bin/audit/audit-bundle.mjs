@@ -60,6 +60,7 @@ function checkChangelogHealth() {
   const unreleasedMatch = content.match(
     /##\s*\[Unreleased\].*?\n([\s\S]*?)(?=\n##\s|(?:\n){0,1}$)/i
   );
+
   const narrative = unreleasedMatch ? unreleasedMatch[1].replace(/###.*?\n/g, '').trim() : '';
 
   // 1. Block if narrative exists but wasn't promoted
@@ -68,6 +69,7 @@ function checkChangelogHealth() {
       isFailure: true,
       reason: 'Pending narrative in [Unreleased]. Run npm run bump.',
     };
+
     return pendingNarrativeIssue;
   }
 
@@ -88,6 +90,7 @@ function checkChangelogHealth() {
       isFailure: true,
       reason: 'Staged changes detected but [Unreleased] is empty. Document your work!',
     };
+
     return missingNarrativeIssue;
   }
 
@@ -112,6 +115,7 @@ function checkCodeStyleCompliance() {
       if (!rule.heuristic) {
         continue;
       }
+
       const result = rule.heuristic(content);
       if (!result.pass) {
         violations.push(`${fileName}: ${result.reason}`);
@@ -163,6 +167,7 @@ function checkTestNamedExpectations() {
     const hasStrictMagicMatch = content.match(
       /assert\.(?:equal|deepEqual|strictEqual)\s*\([^,]+,\s*(?:['"`0-9]|\b(?:null|true|false)\b)/
     );
+
     if (hasStrictMagicMatch) {
       violations.push(`${testFile}: Detected magic values in assertions. Use named constants.`);
     }
@@ -200,6 +205,7 @@ function checkBacklogHealth() {
       ? `Detected context bloat in: ${largeFiles.join(', ')}. Run 'context-reset'.`
       : 'Healthy (no bloat)',
   };
+
   return backlogHealthResult;
 }
 
@@ -208,6 +214,7 @@ function checkSoulPulse() {
   const maintainerOnlyFiles = isMaintainerMode()
     ? ['docs/i18n/README.pt-BR.md', 'docs/ROADMAP.md']
     : [];
+
   const files = [...requiredFiles, ...maintainerOnlyFiles];
   const missing = files.filter((file) => !fileSystem.existsSync(path.join(PROJECT_ROOT, file)));
   const soulPulse = { isFailure: missing.length > 0, missing };
@@ -222,6 +229,7 @@ function checkHygienePulse() {
       shell: false,
       encoding: 'utf8',
     });
+
     results.lint = lint.status === 0 ? 'PASS' : 'FAIL';
   } catch {
     results.lint = 'UNAVAILABLE';
@@ -233,12 +241,14 @@ function checkHygienePulse() {
       shell: false,
       encoding: 'utf8',
     });
+
     results.test = test.status === 0 ? 'PASS' : 'FAIL';
   } catch {
     results.test = 'UNAVAILABLE';
   }
 
   results.isFailure = results.lint === 'FAIL' || results.test === 'FAIL';
+
   const finalHygieneResults = results;
   return finalHygieneResults;
 }
@@ -255,10 +265,12 @@ function reportSummary(results) {
   printResult('Narrative (Changelog)', isNarrativeOk, results.narrative.reason);
 
   const isCodeStyleOk = !results.codeStyle.isFailure;
+
   const codeStyleReason = isCodeStyleOk
     ? null
     : `found ${results.codeStyle.violations.length} violations:\n      - ` +
       results.codeStyle.violations.join('\n      - ');
+
   printResult('Code Style Compliance', isCodeStyleOk, codeStyleReason);
 
   const isTestsOk = !results.tests.isFailure;
@@ -266,9 +278,11 @@ function reportSummary(results) {
   printResult('Test Expectations', isTestsOk, firstTestViolation);
 
   const isSoulOk = !results.soul.isFailure;
+
   const soulReason = results.soul.missing.length
     ? `Missing: ${results.soul.missing.join(', ')}`
     : null;
+
   printResult('Writing Soul', isSoulOk, soulReason);
 
   const isHygieneOk = !results.hygiene.isFailure;

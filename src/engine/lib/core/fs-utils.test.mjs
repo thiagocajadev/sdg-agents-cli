@@ -23,6 +23,7 @@ describe('FsUtils', () => {
       const expected = true;
 
       const actualRaw = getDirname(input);
+
       const actual =
         actualRaw.endsWith('/src/engine/lib/core') ||
         actualRaw.endsWith('\\src\\engine\\lib\\core');
@@ -86,6 +87,7 @@ describe('FsUtils', () => {
       copyRecursiveSync(srcDir, destDir);
 
       const actualRootText = fileSystem.readFileSync(path.join(destDir, 'root.txt'), 'utf8');
+
       const actualNestedText = fileSystem.readFileSync(
         path.join(destDir, 'sub', 'nested.txt'),
         'utf8'

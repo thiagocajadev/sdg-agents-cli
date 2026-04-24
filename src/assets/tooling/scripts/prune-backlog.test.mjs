@@ -28,6 +28,7 @@ function runScript(projectDir, args = []) {
     cwd: projectDir,
     encoding: 'utf8',
   });
+
   return stdout;
 }
 
@@ -40,6 +41,7 @@ function buildTasksWithDone(entryCount) {
     { length: entryCount },
     (_, index) => `- [DONE] entry ${entryCount - index} description text`
   ).join('\n');
+
   const content = `# Tasks\n\n## Active\n\n- _(idle)_\n\n## Done\n\n${doneEntries}\n`;
   return content;
 }

@@ -52,7 +52,6 @@ describe('RulesLoader', () => {
 
       const actual = RulesLoader.loadRules();
       const rule = actual.block.find((r) => r.id === expectedId);
-
       const ruleFound = rule !== undefined;
       assert.ok(ruleFound);
       assert.equal(rule.tier, expectedTier);
@@ -62,8 +61,8 @@ describe('RulesLoader', () => {
       const expectedFragment = 'void-terminator';
 
       const actual = RulesLoader.loadRules();
-      const rule = actual.block.find((r) => r.id === 'explaining-returns');
 
+      const rule = actual.block.find((r) => r.id === 'explaining-returns');
       const hasExemption = rule.description.includes(expectedFragment);
       assert.ok(hasExemption);
     });
@@ -74,7 +73,6 @@ describe('RulesLoader', () => {
 
       const actual = RulesLoader.loadRules();
       const rule = actual.warn.find((r) => r.id === expectedId);
-
       const ruleFound = rule !== undefined;
       assert.ok(ruleFound);
       assert.equal(rule.tier, expectedTier);
@@ -98,8 +96,8 @@ describe('RulesLoader', () => {
       const expectedFragment = 'Test-framework title exemption';
 
       const actual = RulesLoader.loadRules();
-      const rule = actual.block.find((r) => r.id === 'named-const-before-call');
 
+      const rule = actual.block.find((r) => r.id === 'named-const-before-call');
       const hasExemption = rule.description.includes(expectedFragment);
       assert.ok(hasExemption);
     });
@@ -108,8 +106,8 @@ describe('RulesLoader', () => {
       const expectedFragment = 'assert.ok(actual.includes(expected))';
 
       const actual = RulesLoader.loadRules();
-      const rule = actual.block.find((r) => r.id === 'named-const-before-call');
 
+      const rule = actual.block.find((r) => r.id === 'named-const-before-call');
       const hasMethodCallPriming = rule.description.includes(expectedFragment);
       assert.ok(hasMethodCallPriming);
     });

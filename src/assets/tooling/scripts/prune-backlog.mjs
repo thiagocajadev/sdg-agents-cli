@@ -12,7 +12,7 @@ function run() {
   const tasksPath = resolveTasksPath();
 
   const existsResult = ensureTasksFileExists(tasksPath);
-  if (existsResult === false) {
+  if (!existsResult) {
     return;
   }
 
@@ -57,6 +57,7 @@ function ensureTasksFileExists(tasksPath) {
   if (fileSystem.existsSync(tasksPath)) {
     return true;
   }
+
   console.error(`❌ Not found: ${tasksPath}`);
   process.exit(1);
 }
@@ -92,6 +93,7 @@ function pruneDoneSection(content, keepCount) {
     ...prunedBlock,
     ...lines.slice(doneEndIndex),
   ];
+
   const nextContent = nextLines.join('\n');
 
   const prunedOutcome = { unchanged: false, totalEntries, nextContent };
@@ -106,6 +108,7 @@ function collectEntryIndices(doneBlock) {
       indices.push(index);
     }
   }
+
   return indices;
 }
 

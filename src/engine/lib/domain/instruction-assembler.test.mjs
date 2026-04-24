@@ -227,6 +227,7 @@ describe('InstructionAssembler', () => {
     it(`should stay under ${TOKEN_BUDGET_BYTES} bytes`, () => {
       const actual = buildMasterInstructions(WORST_CASE_INPUT);
       const actualBytes = Buffer.byteLength(actual, 'utf8');
+
       const isWithinTokenBudget = actualBytes <= TOKEN_BUDGET_BYTES;
       const tokenLeakMessage = `Token leak detected: ${actualBytes} bytes (budget: ${TOKEN_BUDGET_BYTES}).`;
 
@@ -236,6 +237,7 @@ describe('InstructionAssembler', () => {
     it('should not duplicate any file path reference', () => {
       const actual = buildMasterInstructions(WORST_CASE_INPUT);
       const pathMatches = actual.match(/`\.ai\/[^`]+\.md`/g) || [];
+
       const uniquePaths = new Set(pathMatches);
 
       assert.equal(pathMatches.length, uniquePaths.size);
@@ -295,6 +297,7 @@ describe('InstructionAssembler', () => {
         for (const hookName of hookNames) {
           const hookPath = path.join(tmpDir, '.ai', 'tooling', 'husky', hookName);
           const stats = fileSystem.statSync(hookPath);
+
           const actualPermissionBits = stats.mode & 0o111;
           const isExecutable = (actualPermissionBits & expectedPermissionMask) !== 0;
           assert.ok(isExecutable, `Hook not executable: ${hookName}`);

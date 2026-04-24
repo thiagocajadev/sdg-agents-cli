@@ -21,6 +21,7 @@ const SECTION_BANNER_PATTERN = /^\s*(\/\/|#|--)\s*[-=]{3,}/gm;
 function validateSlaCompliance(content) {
   const entryPointRegex =
     /(?:async\s+)?function\s+(run|start|init)\s*\([\s\S]*?\)\s*\{([\s\S]*?)\n\}/g;
+
   const violations = [];
   let regexMatch;
 
@@ -58,6 +59,7 @@ function validateSlaCompliance(content) {
     pass: violations.length === 0,
     reason: violations.length > 0 ? `Pure Entry Point violation: ${violations.join('; ')}` : null,
   };
+
   return slaResult;
 }
 
@@ -69,6 +71,7 @@ function detectEntryPointShapeViolation(entryPointName, bodyLines) {
       const ternaryViolation = `${entryPointName}() has ternary on body — extract to 'const X = ...; return X;'`;
       return ternaryViolation;
     }
+
     return null;
   }
 
@@ -86,8 +89,10 @@ function isCanonicalDelegationShape(bodyLines) {
   if (!constMatch) {
     return false;
   }
+
   const constName = constMatch[1];
   const expectedReturn = `return ${constName};`;
+
   const isMatching = secondLine === expectedReturn || secondLine === `return ${constName}`;
   return isMatching;
 }
@@ -105,6 +110,7 @@ function validateNarrativeSiblings(content) {
       ? 'Excessive top-level function density (>12). Consider refactoring to dedicated lib.'
       : null,
   };
+
   return siblingsResult;
 }
 
@@ -143,6 +149,7 @@ function validateExplainingReturns(content) {
     pass: violations.length === 0,
     reason: violations.length > 0 ? `Laws Compliance violation: ${violations.join('; ')}` : null,
   };
+
   return explainingResult;
 }
 
@@ -170,6 +177,7 @@ function scanForSymbolExplainer(sourceLines, returnLineIndex, symbol) {
 
     const isIndented =
       sourceLines[currentPos].startsWith('  ') || sourceLines[currentPos].startsWith('\t');
+
     if (isIndented && !lineText.includes('const ')) {
       continue;
     }
@@ -178,6 +186,7 @@ function scanForSymbolExplainer(sourceLines, returnLineIndex, symbol) {
       break;
     }
   }
+
   return false;
 }
 
@@ -221,6 +230,7 @@ function validateNamingDiscipline(content) {
     `\\b(${BANNED_ABBREVIATIONS.join('|')})\\b\\s*(?=[,)=:.])`,
     'g'
   );
+
   const abbreviationMatches = cleanContent.match(abbreviationPattern) || [];
   const normalized = abbreviationMatches.map((match) => match.trim());
 
@@ -229,6 +239,7 @@ function validateNamingDiscipline(content) {
     reason:
       normalized.length > 0 ? `Banned abbreviations detected: ${normalized.join(', ')}` : null,
   };
+
   return namingResult;
 }
 
@@ -237,19 +248,18 @@ function validateVerticalDensity(content) {
   const doubleBlankViolations = scanDoubleBlankLines(lines);
   const tightReturnViolations = scanExplainingReturnTight(lines);
   const orphanAtomicViolations = scanOrphanAtomic(lines);
-  const helperTouchingViolations = scanHelperTouching(lines);
 
   const violations = [
     ...doubleBlankViolations,
     ...tightReturnViolations,
     ...orphanAtomicViolations,
-    ...helperTouchingViolations,
   ];
 
   const densityResult = {
     pass: violations.length === 0,
     reason: violations.length > 0 ? `Vertical Density violation: ${violations.join('; ')}` : null,
   };
+
   return densityResult;
 }
 
@@ -305,6 +315,7 @@ function scanOrphanAtomic(lines) {
       isSimpleLiteralAtomic(pairSecond) &&
       isSimpleLiteralAtomic(pairFirst) &&
       isIsolatedBelow(nextLine);
+
     if (!hasOrphanShape) {
       continue;
     }
@@ -320,52 +331,16 @@ function scanOrphanAtomic(lines) {
   return violations;
 }
 
-function scanHelperTouching(lines) {
-  const violations = [];
-  const blockClosePattern = /^(\}|\};)\s*$/;
-  const multiLineCloserPattern = /^[)\]`]\s*;?\s*$/;
-  const anyDeclarationStartPattern =
-    /^(export\s+)?(async\s+function|function|class|const|let|var)\s/;
-  const singleLineConstPattern =
-    /^(export\s+)?(const|let|var)\s+(\w+|\{[^}]*\}|\[[^\]]*\])\s*(:[^=]*)?=.*;\s*$/;
-  const functionOrClassStartPattern = /^(export\s+)?(async\s+function|function|class)\s/;
-
-  for (let index = 0; index < lines.length - 1; index++) {
-    const currentLine = lines[index];
-    const nextLine = lines[index + 1];
-
-    const isBlockClose = blockClosePattern.test(currentLine);
-    const afterBlockTouching = isBlockClose && anyDeclarationStartPattern.test(nextLine);
-
-    const isSingleLineConst = singleLineConstPattern.test(currentLine);
-    const constToFunctionTouching = isSingleLineConst && functionOrClassStartPattern.test(nextLine);
-
-    const isMultiLineCloser = multiLineCloserPattern.test(currentLine);
-    const afterMultiLineCloserTouching =
-      isMultiLineCloser && functionOrClassStartPattern.test(nextLine);
-
-    const isTouchingViolation =
-      afterBlockTouching || constToFunctionTouching || afterMultiLineCloserTouching;
-    if (!isTouchingViolation) {
-      continue;
-    }
-
-    violations.push(
-      `line ${index + 2} (helper touching previous declaration — needs blank separator)`
-    );
-  }
-
-  return violations;
-}
-
 function isAtomicDeclaration(line) {
   if (typeof line !== 'string') {
     return false;
   }
+
   const hasValidShape = ATOMIC_DECLARATION_PATTERN.test(line);
   if (!hasValidShape) {
     return false;
   }
+
   const hasTrailingBrace = /\{\s*$/.test(line);
   const isAtomic = !hasTrailingBrace;
   return isAtomic;
@@ -375,6 +350,7 @@ function isSimpleLiteralAtomic(line) {
   if (!isAtomicDeclaration(line)) {
     return false;
   }
+
   const rhs = line.split('=').slice(1).join('=');
   const hasAwait = /\bawait\b/.test(rhs);
   const hasCall = rhs.includes('(');
@@ -387,14 +363,17 @@ function isDeclarationBoundary(line) {
   if (line === undefined || line === null) {
     return true;
   }
+
   const trimmed = line.trim();
   if (trimmed === '') {
     return true;
   }
+
   const isBlockOpen = /\{\s*$/.test(line);
   if (isBlockOpen) {
     return true;
   }
+
   const isArrowBlock = /=>\s*\{?\s*$/.test(line);
   return isArrowBlock;
 }
@@ -403,10 +382,12 @@ function isIsolatedBelow(nextLine) {
   if (nextLine === undefined) {
     return true;
   }
+
   const trimmed = nextLine.trim();
   if (trimmed === '') {
     return true;
   }
+
   const isBlockClose = /^\s*}/.test(nextLine);
   return isBlockClose;
 }
@@ -425,6 +406,7 @@ function validateRevealingModulePattern(content) {
         ? `Uses ${forbiddenDefaultExport}.`
         : null,
   };
+
   return revealingResult;
 }
 
@@ -435,6 +417,7 @@ function validateBooleanPrefixes(content) {
     pass: !bareBooleanMatches,
     reason: bareBooleanMatches ? `Bare boolean detected: ${bareBooleanMatches.join(', ')}` : null,
   };
+
   return booleanResult;
 }
 
@@ -447,56 +430,8 @@ function validateNoSectionBanners(content) {
     reason:
       uniqueBanners.length > 0 ? `Section banner detected: ${uniqueBanners.join(', ')}` : null,
   };
+
   return bannerResult;
-}
-
-const CONTROL_PREFIX_PATTERN = /^\s*(?:\}\s*)?(?:else\s+if|else|for|while|if)\b/;
-const MULTILINE_OPENER_ENDINGS = new Set(['(', ',', '&', '|', '?', '{']);
-const BARE_ELSE_PATTERN = /^\s*\}?\s*else\s*$/;
-
-function validateBracedGuards(content) {
-  const lines = content.split('\n');
-  const bracelessHits = [];
-
-  for (const rawLine of lines) {
-    const isControlStart = CONTROL_PREFIX_PATTERN.test(rawLine);
-    if (!isControlStart) {
-      continue;
-    }
-
-    const withoutComment = rawLine.replace(/\/\/.*$/, '').trimEnd();
-    if (withoutComment === '') {
-      continue;
-    }
-
-    const lastChar = withoutComment.slice(-1);
-    if (MULTILINE_OPENER_ENDINGS.has(lastChar)) {
-      continue;
-    }
-
-    const endsWithCloseParen = lastChar === ')';
-    if (endsWithCloseParen) {
-      continue;
-    }
-
-    const isBareElseContinuation = BARE_ELSE_PATTERN.test(withoutComment);
-    if (isBareElseContinuation) {
-      continue;
-    }
-
-    bracelessHits.push(withoutComment.trim());
-  }
-
-  const uniqueHits = [...new Set(bracelessHits)];
-
-  const bracedGuardResult = {
-    pass: uniqueHits.length === 0,
-    reason:
-      uniqueHits.length > 0
-        ? `Braceless guard detected (wrap body in { }): ${uniqueHits.slice(0, 3).join(' | ')}`
-        : null,
-  };
-  return bracedGuardResult;
 }
 
 export const NarrativeHeuristics = {
@@ -508,5 +443,4 @@ export const NarrativeHeuristics = {
   validateRevealingModulePattern,
   validateBooleanPrefixes,
   validateNoSectionBanners,
-  validateBracedGuards,
 };

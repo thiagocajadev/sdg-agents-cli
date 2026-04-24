@@ -36,8 +36,8 @@ describe('Skill Content — Governance Layer', () => {
     it('should expose a PreCodeChecklist rule before PreFinishGate', () => {
       const input = readAsset(CODE_STYLE);
       const preCodeIndex = input.indexOf('<rule name="PreCodeChecklist">');
-      const preFinishIndex = input.indexOf('<rule name="PreFinishGate">');
 
+      const preFinishIndex = input.indexOf('<rule name="PreFinishGate">');
       const actual = preCodeIndex !== -1 && preCodeIndex < preFinishIndex;
 
       assert.ok(actual, 'PreCodeChecklist must exist and precede PreFinishGate');
@@ -107,6 +107,7 @@ describe('Skill Content — Governance Layer', () => {
 
       const isStackBetweenScopeAndBacklog =
         scopeIndex !== -1 && stackIndex > scopeIndex && stackIndex < backlogIndex;
+
       assert.ok(isStackBetweenScopeAndBacklog, 'Phase STACK must sit between SCOPE and BACKLOG');
     });
 

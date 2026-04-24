@@ -26,7 +26,6 @@ export function detectBumpType(commitMessage) {
 
   const matchedRule = BUMP_RULES.find((rule) => rule.test());
   const bumpType = matchedRule?.value ?? 'patch';
-
   return bumpType;
 }
 
@@ -41,7 +40,6 @@ export function bumpVersion(current, bumpType) {
 
   const calculate = BUMP_STRATEGIES[bumpType] ?? (() => current);
   const nextVersion = calculate();
-
   return nextVersion;
 }
 

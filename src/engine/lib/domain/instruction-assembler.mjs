@@ -148,10 +148,12 @@ function buildMasterInstructions(selections) {
       if (!skills || skills.length === 0) {
         continue;
       }
+
       sections.push(categoryHeaders[category]);
       for (const skill of skills) {
         sections.push(`- \`${skill.path}\` — ${skill.description}`);
       }
+
       sections.push('');
     }
 
@@ -174,6 +176,7 @@ function buildMasterInstructions(selections) {
         groups[skill.category].push(skill);
       }
     }
+
     const groupedResult = groups;
     return groupedResult;
   }
@@ -222,6 +225,7 @@ function writeBacklogFiles(targetDirectory, selections) {
           return matchedLang;
         }
       }
+
       if (
         packageData.description?.toLowerCase().includes('guia') ||
         packageData.description?.toLowerCase().includes('sistema')
@@ -233,6 +237,7 @@ function writeBacklogFiles(targetDirectory, selections) {
       const fallbackLang = 'en';
       return fallbackLang;
     }
+
     const defaultLang = 'en';
     return defaultLang;
   }
@@ -283,10 +288,12 @@ function writeBacklogFiles(targetDirectory, selections) {
     if (fileSystem.existsSync(stackPath)) {
       return;
     }
+
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'stack.md');
     if (!fileSystem.existsSync(templatePath)) {
       return;
     }
+
     fileSystem.copyFileSync(templatePath, stackPath);
   }
 
@@ -295,6 +302,7 @@ function writeBacklogFiles(targetDirectory, selections) {
     if (fileSystem.existsSync(tasksPath)) {
       return;
     }
+
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'tasks.md');
     fileSystem.copyFileSync(templatePath, tasksPath);
   }
@@ -304,6 +312,7 @@ function writeBacklogFiles(targetDirectory, selections) {
     if (fileSystem.existsSync(learnedPath)) {
       return;
     }
+
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'learned.md');
     fileSystem.copyFileSync(templatePath, learnedPath);
   }
@@ -313,6 +322,7 @@ function writeBacklogFiles(targetDirectory, selections) {
     if (fileSystem.existsSync(troubleshootPath)) {
       return;
     }
+
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'troubleshoot.md');
     fileSystem.copyFileSync(templatePath, troubleshootPath);
   }
@@ -359,6 +369,7 @@ function writeAgentConfig(targetDirectory, content) {
   const existingClaude = fileSystem.existsSync(claudePath)
     ? fileSystem.readFileSync(claudePath, 'utf8')
     : null;
+
   if (existingClaude !== claudeContent) {
     fileSystem.writeFileSync(claudePath, claudeContent);
   }
@@ -394,8 +405,10 @@ function writeGitignore(targetDirectory) {
       const emptyBlock = null;
       return emptyBlock;
     }
+
     const alreadyHasHeader = existingContent.includes(block.header);
     const lines = alreadyHasHeader ? missingEntries : [block.header, ...missingEntries];
+
     const blockContent = lines.join('\n');
     return blockContent;
   }).filter(Boolean);
@@ -423,6 +436,7 @@ function writeManifest(targetDirectory, selections, packageVersion) {
   fileSystem.mkdirSync(aiDirectory, { recursive: true });
 
   const manifestPath = path.join(aiDirectory, '.sdg-manifest.json');
+
   const originalContent = fileSystem.existsSync(manifestPath)
     ? fileSystem.readFileSync(manifestPath, 'utf8')
     : null;
@@ -435,7 +449,7 @@ function writeManifest(targetDirectory, selections, packageVersion) {
  * Idempotent: skips if scripts/bump.mjs exists or if selections.bump is false.
  */
 function writeAutomationScripts(targetDirectory, selections) {
-  if (selections.bump === false) {
+  if (!selections.bump) {
     return;
   }
 
@@ -459,6 +473,7 @@ function writeAutomationScripts(targetDirectory, selections) {
   if (!fileSystem.existsSync(bumpScriptPath)) {
     fileSystem.mkdirSync(scriptsDir, { recursive: true });
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'bump.mjs');
+
     const templateContent = fileSystem.readFileSync(templatePath, 'utf8');
     fileSystem.writeFileSync(bumpScriptPath, templateContent);
   }
@@ -466,6 +481,7 @@ function writeAutomationScripts(targetDirectory, selections) {
   if (!packageData.scripts) {
     packageData.scripts = {};
   }
+
   if (!packageData.scripts.bump) {
     packageData.scripts.bump = 'node scripts/bump.mjs';
     writeJsonAtomic(packagePath, packageData, fileSystem.readFileSync(packagePath, 'utf8'));
@@ -497,6 +513,7 @@ function writeAutomationScripts(targetDirectory, selections) {
 
         ${bumpCmd}
       `;
+
       fileSystem.writeFileSync(prePushPath, prePushContent, { mode: 0o755 });
     }
   }
@@ -534,6 +551,7 @@ function removeGeneratedInstructions(targetDirectory) {
   if (!fileSystem.existsSync(generatedInstructionsDir)) {
     return;
   }
+
   fileSystem.rmSync(generatedInstructionsDir, { recursive: true, force: true });
 }
 

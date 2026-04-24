@@ -9,6 +9,7 @@ const buildBacklog = (doneEntries, trailingSection = '') => {
   const entries = doneEntries
     .map((label, index) => `- [DONE] ${label} entry ${index + 1}`)
     .join('\n');
+
   const trailer = trailingSection ? `\n\n${trailingSection}\n` : '\n';
   return header + entries + trailer;
 };
@@ -29,7 +30,6 @@ describe('PruneBacklog.pruneBacklog()', () => {
   it('should no-op when Done already within threshold', () => {
     const input = buildBacklog(['alpha', 'beta']);
     const expectedRemoved = 0;
-
     const actual = pruneBacklog(input, 3);
 
     assert.equal(actual.removed, expectedRemoved);
@@ -39,7 +39,6 @@ describe('PruneBacklog.pruneBacklog()', () => {
   it('should no-op when Done section is absent', () => {
     const input = '# Tasks\n\n## Active\n\n- pending\n\n## Backlog\n\n- later\n';
     const expectedRemoved = 0;
-
     const actual = pruneBacklog(input, 3);
 
     assert.equal(actual.removed, expectedRemoved);
@@ -52,8 +51,8 @@ describe('PruneBacklog.pruneBacklog()', () => {
       Array.from({ length: 5 }, (_unused, index) => `cycle-${index}`),
       trailingSection
     );
-    const expectedRemoved = 2;
 
+    const expectedRemoved = 2;
     const actual = pruneBacklog(input, 3);
 
     assert.equal(actual.removed, expectedRemoved);
@@ -77,13 +76,13 @@ describe('PruneBacklog.pruneBacklog()', () => {
   it('should leave exactly one blank line between Done header and first entry', () => {
     const input = buildBacklog(Array.from({ length: 6 }, (_unused, index) => `cycle-${index}`));
     const expectedSeparator = '## Done\n\n- [DONE]';
-
     const actual = pruneBacklog(input, 3);
 
     assert.ok(
       actual.pruned.includes(expectedSeparator),
       `Expected clean separator; got:\n${actual.pruned}`
     );
+
     assert.ok(
       !actual.pruned.includes('## Done\n\n\n'),
       'Must not leave double blank line after Done header'

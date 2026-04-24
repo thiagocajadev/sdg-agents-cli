@@ -27,6 +27,7 @@ async function getLatestVersion() {
     return latestVersion;
   } catch {
     clearTimeout(timeoutId);
+
     const errorResult = null;
     return errorResult;
   }
@@ -41,6 +42,7 @@ function isNewer(current, latest) {
     const isMissingVersion = false;
     return isMissingVersion;
   }
+
   if (current === latest) {
     const isSameVersion = false;
     return isSameVersion;
@@ -57,6 +59,7 @@ function isNewer(current, latest) {
       const isGreater = true;
       return isGreater;
     }
+
     if (latestPart < currentPart) {
       const isLesser = false;
       return isLesser;

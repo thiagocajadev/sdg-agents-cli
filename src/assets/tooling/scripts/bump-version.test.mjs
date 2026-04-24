@@ -23,6 +23,7 @@ function runScript(projectDir, args = []) {
     cwd: projectDir,
     encoding: 'utf8',
   });
+
   return stdout;
 }
 
@@ -83,6 +84,7 @@ describe('bump-version.mjs', () => {
   it('should preserve package.json fields other than version', () => {
     const projectDir = fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-bump-test-'));
     const packagePath = path.join(projectDir, 'package.json');
+
     const originalPackage = {
       name: 'test-project',
       version: '1.0.0',
@@ -90,6 +92,7 @@ describe('bump-version.mjs', () => {
       scripts: { test: 'echo ok' },
       dependencies: { foo: '^1.0.0' },
     };
+
     fileSystem.writeFileSync(packagePath, `${JSON.stringify(originalPackage, null, 2)}\n`);
 
     try {

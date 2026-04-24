@@ -33,6 +33,7 @@ async function orchestrateReview() {
     console.log(
       '\n  No manifest found (.ai/.sdg-manifest.json). Run "Build Project Context" first.\n'
     );
+
     const noManifestResult = success();
     return noManifestResult;
   }
@@ -50,6 +51,7 @@ async function orchestrateReview() {
 
   if (totalChanges === 0) {
     console.log('  \n  ✅ Your instructions are up to date with the Spec Driven Guide core.\n');
+
     const upToDateResult = success();
     return upToDateResult;
   }
@@ -72,6 +74,7 @@ async function orchestrateReview() {
   }
 
   console.log('\n  Review session complete.\n');
+
   const reviewSuccess = success();
   return reviewSuccess;
 }
@@ -79,7 +82,6 @@ async function orchestrateReview() {
 function printManifestSummary(manifest) {
   const { selections, generatedAt, sdgAgentVersion } = manifest;
   const { flavor } = selections;
-
   const flavorLabel = displayName(flavor);
 
   console.log(`  Current Flavor: ${flavorLabel}`);

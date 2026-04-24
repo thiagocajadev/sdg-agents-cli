@@ -32,6 +32,7 @@ function copyRecursiveSync(src, dest, options = {}) {
     if (!fileSystem.existsSync(dest)) {
       fileSystem.mkdirSync(dest, { recursive: true });
     }
+
     for (const childItemName of fileSystem.readdirSync(src)) {
       copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName), options);
     }
@@ -60,6 +61,7 @@ function bootstrapIfDirect(importMetaUrl, entryFunction) {
           console.log('\n\n  Aborted.\n');
           process.exit(0);
         }
+
         console.error(error);
         process.exit(1);
       });
@@ -76,6 +78,7 @@ function detectIndentation(content) {
       return indentation;
     }
   }
+
   const defaultIndentation = '  ';
   return defaultIndentation;
 }
@@ -100,6 +103,7 @@ function safeReadJson(filePath) {
   if (!fileSystem.existsSync(filePath)) {
     return null;
   }
+
   try {
     const jsonText = fileSystem.readFileSync(filePath, 'utf8');
     const parsed = JSON.parse(jsonText);

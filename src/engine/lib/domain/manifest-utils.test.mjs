@@ -11,7 +11,6 @@ describe('ManifestUtils', () => {
       const current = { 'core/code-style.md': 'abc123', 'core/security.md': 'def456' };
       const expectedUnchanged = ['core/code-style.md', 'core/security.md'];
       const expectedEmpty = [];
-
       const actual = compareHashes(stored, current);
 
       assert.deepEqual(actual.unchanged, expectedUnchanged);
@@ -24,7 +23,6 @@ describe('ManifestUtils', () => {
       const current = { 'core/code-style.md': 'xyz789' };
       const expectedChanged = ['core/code-style.md'];
       const expectedEmpty = [];
-
       const actual = compareHashes(stored, current);
 
       assert.deepEqual(actual.changed, expectedChanged);
@@ -36,7 +34,6 @@ describe('ManifestUtils', () => {
       const current = { 'core/code-style.md': 'abc123', 'core/new-file.md': 'new456' };
       const expectedAdded = ['core/new-file.md'];
       const expectedUnchanged = ['core/code-style.md'];
-
       const actual = compareHashes(stored, current);
 
       assert.deepEqual(actual.added, expectedAdded);
@@ -49,16 +46,17 @@ describe('ManifestUtils', () => {
         'core/b.md': 'hash2',
         'core/c.md': 'hash3',
       };
+
       const current = {
         'core/a.md': 'hash1', // unchanged
         'core/b.md': 'hash2_updated', // changed
         'core/c.md': 'hash3', // unchanged
         'core/d.md': 'hash4', // added
       };
+
       const expectedUnchanged = ['core/a.md', 'core/c.md'];
       const expectedChanged = ['core/b.md'];
       const expectedAdded = ['core/d.md'];
-
       const actual = compareHashes(stored, current);
 
       assert.deepEqual(actual.unchanged, expectedUnchanged);
@@ -71,7 +69,6 @@ describe('ManifestUtils', () => {
       const current = { 'core/a.md': 'hash1', 'core/b.md': 'hash2' };
       const expectedAdded = ['core/a.md', 'core/b.md'];
       const expectedEmpty = [];
-
       const actual = compareHashes(stored, current);
 
       assert.deepEqual(actual.added, expectedAdded);
@@ -83,7 +80,6 @@ describe('ManifestUtils', () => {
       const stored = { 'core/a.md': 'hash1' };
       const current = {};
       const expectedEmpty = [];
-
       const actual = compareHashes(stored, current);
 
       // Files in stored but not in current are simply not reported

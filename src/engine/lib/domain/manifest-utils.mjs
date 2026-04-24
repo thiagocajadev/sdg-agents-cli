@@ -100,10 +100,12 @@ function daysAgo(isoDate) {
     const futureResult = 'just now';
     return futureResult;
   }
+
   if (days === 0) {
     const todayResult = 'today';
     return todayResult;
   }
+
   if (days === 1) {
     const yesterdayResult = '1 day ago';
     return yesterdayResult;

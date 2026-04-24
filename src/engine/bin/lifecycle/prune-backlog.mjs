@@ -37,6 +37,7 @@ export function pruneBacklog(content, keepCount = DEFAULT_KEEP_COUNT) {
     if (!isEntry) {
       continue;
     }
+
     if (keptEntries.length < keepCount) {
       keptEntries.push(line);
     } else {
@@ -51,8 +52,8 @@ export function pruneBacklog(content, keepCount = DEFAULT_KEEP_COUNT) {
 
   const rebuiltDoneBody = `\n\n${keptEntries.join('\n')}\n`;
   const pruned = content.slice(0, doneStart) + rebuiltDoneBody + content.slice(doneEnd);
-  const prunedResult = { pruned, removed: droppedCount };
 
+  const prunedResult = { pruned, removed: droppedCount };
   return prunedResult;
 }
 
@@ -63,6 +64,7 @@ async function dispatchPrune() {
 async function orchestratePrune() {
   if (!fileSystem.existsSync(TASKS_PATH)) {
     console.log('  prune-backlog: skipped (tasks.md not found)');
+
     const skippedResult = success({ removed: 0, skipped: true });
     return skippedResult;
   }
@@ -72,6 +74,7 @@ async function orchestratePrune() {
 
   if (removed === 0) {
     console.log('  prune-backlog: no-op (Done already within threshold)');
+
     const noopResult = success({ removed: 0, skipped: false });
     return noopResult;
   }
@@ -79,6 +82,7 @@ async function orchestratePrune() {
   fileSystem.writeFileSync(TASKS_PATH, pruned);
   const prunedReport = `  prune-backlog: dropped ${removed} entries (kept last ${DEFAULT_KEEP_COUNT})`;
   console.log(prunedReport);
+
   const finalResult = success({ removed, skipped: false });
   return finalResult;
 }

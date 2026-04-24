@@ -43,6 +43,50 @@ Validates conventional-commit prefix:
 
 ## Activation recipes
 
+### Activate ESLint rules
+
+Requires ESLint v9+ with flat config (`eslint.config.mjs`).
+
+1. Install ESLint and Prettier (if not already present):
+
+```
+npm install --save-dev eslint @eslint/js prettier eslint-plugin-prettier eslint-config-prettier
+```
+
+2. Import `sdgEslintConfig` from the snippet and add it **after** `prettierRecommended` in your flat config:
+
+```js
+import js from '@eslint/js';
+import prettierRecommended from 'eslint-plugin-prettier/recommended';
+import { sdgEslintConfig } from '.ai/tooling/eslint-config/snippet.mjs';
+
+export default [js.configs.recommended, prettierRecommended, sdgEslintConfig];
+```
+
+3. Copy `.ai/tooling/eslint-config/.prettierrc` to your project root (or merge with your existing config).
+
+4. Wire auto-fix on save in VSCode (`.vscode/settings.json`):
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
+}
+```
+
+**Rules included:**
+
+| Rule                              | Coverage                                                               |
+| :-------------------------------- | :--------------------------------------------------------------------- |
+| `curly: all`                      | Every `if`/`else`/`for`/`while` body must use `{ }`                    |
+| `local/semantic-spacing`          | Blank line required after multiline statement in non-trivial functions |
+| `local/no-boolean-comparison`     | `value === true/false` → `value` / `!value`                            |
+| `padding-line-between-statements` | Blank line required before/after top-level function declarations       |
+
+Or ask your agent: "wire the SDG ESLint rules into my eslint.config.mjs."
+
 ### Activate husky hooks
 
 ```

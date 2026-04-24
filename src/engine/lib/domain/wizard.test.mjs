@@ -19,7 +19,6 @@ describe('WizardUtils (Non-Interactive)', () => {
       const input = {};
       const expectedFailure = true;
       const expectedCode = 'MISSING_FLAVOR';
-
       const actual = validateSelections(input);
 
       assert.equal(actual.isFailure, expectedFailure);
@@ -31,7 +30,6 @@ describe('WizardUtils (Non-Interactive)', () => {
       const expectedFailure = true;
       const expectedCode = 'INVALID_FLAVOR';
       const expectedInMessage = 'nonexistent';
-
       const actual = validateSelections(input);
 
       assert.equal(actual.isFailure, expectedFailure);
@@ -44,7 +42,6 @@ describe('WizardUtils (Non-Interactive)', () => {
       const input = { mode: 'quick' };
       const expectedSuccess = true;
       const expectedFlavor = 'lite';
-
       const actual = validateSelections(input);
 
       assert.equal(actual.isSuccess, expectedSuccess);

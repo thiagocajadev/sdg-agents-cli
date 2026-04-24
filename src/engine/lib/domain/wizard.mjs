@@ -33,6 +33,7 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
     mode: 'agents',
     flavor: 'vertical-slice',
   };
+
   let step = WIZARD_STEPS.INITIAL;
   let historyStack = [];
 
@@ -62,6 +63,7 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
       ) {
         lastState = historyStack.pop();
       }
+
       if (lastState) {
         step = lastState.step;
         selections = lastState.selections;
@@ -73,6 +75,7 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
         step,
         selections: JSON.parse(JSON.stringify(selections)),
       });
+
       step = stepResult.value.nextStep;
       applyStepResult(selections, stepResult.value);
     }
@@ -86,9 +89,11 @@ function applyStepResult(currentSelections, stepValue) {
   if (stepValue.mode) {
     currentSelections.mode = stepValue.mode;
   }
+
   if (stepValue.flavor) {
     currentSelections.flavor = stepValue.flavor;
   }
+
   if (stepValue.partner) {
     currentSelections.partner = currentSelections.partner || {};
     Object.assign(currentSelections.partner, stepValue.partner);
@@ -104,7 +109,6 @@ async function dispatchWizardStep(step, context) {
 
   const handler = STEP_HANDLERS[step] ?? (() => success({ nextStep: WIZARD_STEPS.DONE }));
   const stepResult = await handler();
-
   return stepResult;
 }
 
@@ -142,6 +146,7 @@ function buildQuickSetup() {
       role: 'Dev Partner',
     },
   });
+
   const quickResult = quickSetupResult;
   return quickResult;
 }
@@ -171,6 +176,7 @@ function buildFlavorChoices(flavors) {
   const prioritizedChoices = choices.sort((choiceA, choiceB) => {
     const rankA = RANK_ORDER[choiceA.value] ?? 99;
     const rankB = RANK_ORDER[choiceB.value] ?? 99;
+
     const rankDiff = rankA - rankB;
     return rankDiff;
   });
@@ -229,12 +235,14 @@ function parsePartnerInput(input) {
     name: input.slice(0, separatorIndex).trim() || null,
     role: input.slice(separatorIndex + 1).trim() || null,
   };
+
   return parsedPartner;
 }
 
 function validateSelections(selections) {
   if (selections.mode === 'quick') {
     selections.flavor = selections.flavor || 'lite';
+
     const quickValidResult = success(selections);
     return quickValidResult;
   }

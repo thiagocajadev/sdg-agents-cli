@@ -25,8 +25,10 @@ function isPositionalArg(arg, index, tokens) {
   if (arg.startsWith('-')) {
     return false;
   }
+
   const precedingToken = tokens[index - 1];
   const flagsThatConsumeNextArg = ['--flavor', '--mode', '--track'];
+
   const isPositional = !precedingToken || !flagsThatConsumeNextArg.includes(precedingToken);
   return isPositional;
 }
@@ -35,6 +37,7 @@ function getArgValue(argv, flag) {
   const flagPosition = argv.indexOf(flag);
   const value =
     flagPosition !== -1 && flagPosition + 1 < argv.length ? argv[flagPosition + 1] : null;
+
   return value;
 }
 
@@ -52,6 +55,7 @@ function validateInit(args) {
   if (!args.flavor) {
     const missingFlavorError =
       '  ⚠️  --flavor is required for non-interactive mode.\n  Available: vertical-slice, mvc, lite, legacy';
+
     return missingFlavorError;
   }
 

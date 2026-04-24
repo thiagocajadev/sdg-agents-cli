@@ -18,6 +18,7 @@ async function orchestrateNarrativeAudit() {
   printHeader();
 
   const files = collectTargetFiles();
+
   const { violationsByFile, totalViolations } = scanFilesForViolations(files);
 
   reportResults(violationsByFile, totalViolations);
@@ -46,10 +47,12 @@ function collectTargetFiles() {
       const emptyList = [];
       return emptyList;
     }
+
     const directoryFiles = fileSystem
       .readdirSync(directory)
       .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
       .map((file) => path.join(directory, file));
+
     return directoryFiles;
   });
 
@@ -70,6 +73,7 @@ function scanFilesForViolations(files) {
       if (!rule.heuristic) {
         continue;
       }
+
       const result = rule.heuristic(content);
       if (!result.pass) {
         fileViolations.push({ label: rule.label, reason: result.reason });
@@ -99,6 +103,7 @@ function reportResults(violationsByFile, totalViolations) {
     for (const violation of violationsByFile[filePath]) {
       console.log(`     — ${violation.label}: ${violation.reason}`);
     }
+
     console.log('');
   }
 

@@ -157,6 +157,7 @@ describe('RulesetInjector', () => {
     it('should NOT include any idioms/ subdirectory', () => {
       const { directories: actual } = collectOutputSummary();
       const hasIdiomsEntry = actual.some((directory) => directory.includes('idioms'));
+
       const expectedAbsent = false;
       assert.equal(hasIdiomsEntry, expectedAbsent);
     });

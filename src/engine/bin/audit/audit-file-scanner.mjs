@@ -20,11 +20,13 @@ function getMaintainerFiles() {
       const noSourceFiles = [];
       return noSourceFiles;
     }
+
     return fileSystem
       .readdirSync(directory)
       .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
       .map((file) => path.join(directory, file));
   });
+
   return sourceFiles;
 }
 
@@ -34,11 +36,13 @@ function getMaintainerTestFiles() {
       const noTestFiles = [];
       return noTestFiles;
     }
+
     return fileSystem
       .readdirSync(directory)
       .filter((file) => file.endsWith('.test.mjs'))
       .map((file) => path.join(directory, file));
   });
+
   return testFiles;
 }
 
@@ -47,6 +51,7 @@ function getFilesRecursive(baseDir, filterFn) {
     const noRecursiveFiles = [];
     return noRecursiveFiles;
   }
+
   const files = [];
 
   function walk(dir) {
@@ -62,6 +67,7 @@ function getFilesRecursive(baseDir, filterFn) {
   }
 
   walk(baseDir);
+
   const collectedFiles = files;
   return collectedFiles;
 }

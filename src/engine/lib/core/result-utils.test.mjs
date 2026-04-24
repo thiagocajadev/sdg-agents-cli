@@ -12,7 +12,6 @@ describe('ResultUtils', () => {
       const expectedSuccess = true;
       const expectedFailure = false;
       const expectedNull = null;
-
       const actual = success(input);
 
       assert.equal(actual.isSuccess, expectedSuccess);
@@ -26,7 +25,6 @@ describe('ResultUtils', () => {
       const expectedSuccess = true;
       const expectedFailure = false;
       const expectedNull = null;
-
       const actual = success();
 
       assert.equal(actual.isSuccess, expectedSuccess);
@@ -48,7 +46,6 @@ describe('ResultUtils', () => {
       const input = null;
       const expectedValue = null;
       const expectedSuccess = true;
-
       const actual = success(input);
 
       assert.equal(actual.isSuccess, expectedSuccess);
@@ -64,10 +61,10 @@ describe('ResultUtils', () => {
         message: inputMessage,
         code: inputCode,
       };
+
       const expectedSuccess = false;
       const expectedFailure = true;
       const expectedNull = null;
-
       const actual = fail(inputMessage, inputCode);
 
       assert.equal(actual.isSuccess, expectedSuccess);

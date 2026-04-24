@@ -71,8 +71,8 @@ describe('AutoBump', () => {
     it('should increment patch', () => {
       const inputVersion = '0.12.1';
       const inputType = 'patch';
-      const expected = '0.12.2';
 
+      const expected = '0.12.2';
       const actual = bumpVersion(inputVersion, inputType);
 
       assert.equal(actual, expected);
@@ -81,8 +81,8 @@ describe('AutoBump', () => {
     it('should increment minor and reset patch', () => {
       const inputVersion = '0.12.1';
       const inputType = 'minor';
-      const expected = '0.13.0';
 
+      const expected = '0.13.0';
       const actual = bumpVersion(inputVersion, inputType);
 
       assert.equal(actual, expected);
@@ -91,8 +91,8 @@ describe('AutoBump', () => {
     it('should increment major and reset minor + patch', () => {
       const inputVersion = '0.12.1';
       const inputType = 'major';
-      const expected = '1.0.0';
 
+      const expected = '1.0.0';
       const actual = bumpVersion(inputVersion, inputType);
 
       assert.equal(actual, expected);

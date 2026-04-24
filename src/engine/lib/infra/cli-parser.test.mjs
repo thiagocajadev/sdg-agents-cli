@@ -11,7 +11,6 @@ describe('CliParser', () => {
       const expectedSubcommand = 'init';
       const expectedTargetDir = 'my-project';
       const expectedFlavor = 'lite';
-
       const actual = parseCliArgs(input);
 
       assert.equal(actual.subcommand, expectedSubcommand);
@@ -23,7 +22,6 @@ describe('CliParser', () => {
       const input = ['init', '--flavor', 'mvc', 'my-project'];
       const expectedTargetDir = 'my-project';
       const expectedFlavor = 'mvc';
-
       const actual = parseCliArgs(input);
 
       assert.equal(actual.targetDirectory, expectedTargetDir);
@@ -34,7 +32,6 @@ describe('CliParser', () => {
       const input = ['--help'];
       const expectedSubcommand = null;
       const expectedHelp = true;
-
       const actual = parseCliArgs(input);
 
       assert.equal(actual.subcommand, expectedSubcommand);

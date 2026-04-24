@@ -196,6 +196,7 @@ async function processInitSubcommand(args) {
     isDryRun: args.isDryRun,
     selections: selectionPayload,
   };
+
   const buildResult = await SpecDrivenGuide.run(args.targetDirectory, buildParams);
   return buildResult;
 }
@@ -247,6 +248,7 @@ function reportExitError(error) {
     console.log('\n\n  👋 Goodbye! See you soon engineer.');
     process.exit(0);
   }
+
   console.error('\n  ❌ Error:', error.message);
   process.exit(1);
 }
@@ -258,6 +260,7 @@ async function dispatchMenuAction(menuChoice, args) {
       const initResult = await SpecDrivenGuide.run(args.targetDirectory, {
         isDryRun: args.isDryRun,
       });
+
       return initResult;
     }
     case 'settings': {

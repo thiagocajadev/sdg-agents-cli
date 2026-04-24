@@ -36,10 +36,10 @@
 
 - **Early return** — exit early on failure; no `else` after `return`. Max 2 indent levels.
 - **Control flow** — match tool to shape: guards for failure exits • lookup table for value mapping (`const MAP = {...}; return MAP[key] ?? default`) • `switch` for action dispatch (side-effects) • `Map` for non-string / dynamic keys • ternary only for 2-value assignment • `===` / `!==` always (never `==`). Each function orchestrates OR implements (SLA) — never both.
-  - **Braced guards** — every `if` / `else if` / `else` / `for` / `while` body wrapped in `{ }`, body on its own line. Applies to any single-instruction body: `return`, `throw`, `break`, `continue`, assignment. Rationale: forces a blank line between adjacent guards, prevents wall-of-`if`-return. Braceless one-liners like `if (x) return y;` pile up visually and defeat **Low visual density — Paragraphs of Intent**.
+  - **Braced guards** — every `if` / `else if` / `else` / `for` / `while` body wrapped in `{ }`, body on its own line. Applies to any single-instruction body: `return`, `throw`, `break`, `continue`, assignment. Enforced by `curly: all` ESLint rule (auto-fix on save).
     - ❌ `if (isEmpty) return null;`
     - ✅ `if (isEmpty) {\n  return null;\n}`
-- **Low visual density** — **Paragraphs of Intent**: 1 blank line between logical groups, 0 within a group, never 2+ consecutive. Wall of tight code and double-blank noise are equal violations.
+- **Low visual density** — **Paragraphs of Intent**: 1 blank line between logical groups, 0 within a group, never 2+ consecutive. Wall of tight code and double-blank noise are equal violations. Blank lines after multiline statements and between top-level function declarations are enforced by ESLint (auto-fix on save).
 - **Expressive names** — names reveal domain intent, not storage or implementation detail.
   - Banned verbs: `handle`, `do`, `run`, `execute`, `perform`; `get` for computations (use `compute` / `calculate` / `derive`).
   - Banned nouns: `data`, `info`, `obj`, `item`, `thing`, `helpers`, `utils`, `common`, `shared`, `misc`.
@@ -103,10 +103,23 @@
 - [ ] **Revealing Module Pattern**: named export at footer.
 - [ ] **Vertical Density**: 1 blank between groups, 0 within, never 2+.
 - [ ] **Boolean prefix**: `is` / `has` / `can` / `should` / `did` / `needs` / `supports` / `allows`.
-- [ ] **Braced guards**: every `if` / `else` / `for` / `while` body in `{ }` with body on its own line — no `if (x) return y;` one-liners.
 - [ ] **No framework abbreviations**: `req` / `res` / `ctx` forbidden; plus SDG taboos (banned verbs / nouns / abbrs).
 - [ ] **No section banners**: no `// --- Section ---` dividers.
 
 </rule>
+
+## Linter-enforced (ESLint auto-fix on save)
+
+> These rules run before the agent sees the code. No gate check needed.
+
+| Rule                              | Coverage                                                            |
+| :-------------------------------- | :------------------------------------------------------------------ |
+| `curly: all`                      | Every `if`/`else`/`for`/`while` body wrapped in `{ }`               |
+| `local/semantic-spacing`          | Blank line after multiline statement in non-trivial function bodies |
+| `local/no-boolean-comparison`     | `value === true/false` → `value` / `!value`                         |
+| `padding-line-between-statements` | Blank line before/after top-level function declarations             |
+| `prettier`                        | Formatting, indentation, quotes, semicolons                         |
+
+Activation recipe: `.ai/tooling/eslint-config/snippet.mjs` + `.ai/tooling/README.md`.
 
 </ruleset>

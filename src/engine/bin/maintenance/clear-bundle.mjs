@@ -48,6 +48,7 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
 
   if (existingItems.length === 0) {
     console.log('\n  ✅ No Spec Driven Guide content found to clear.\n');
+
     const noContentResult = success();
     return noContentResult;
   }
@@ -57,7 +58,9 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
     for (const entry of existingItems) {
       console.log(`  - ${entry.name}`);
     }
+
     console.log('\n  No files were deleted (dry-run mode).\n');
+
     const dryRunResult = success();
     return dryRunResult;
   }
@@ -72,6 +75,7 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
 
   if (!userConfirmed) {
     console.log('\n  Aborted. No files were deleted.\n');
+
     const abortResult = success();
     return abortResult;
   }
@@ -79,6 +83,7 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
   const backlogConfirmed = await confirmBacklogDeletion(existingItems);
   if (!backlogConfirmed) {
     console.log('\n  Aborted. No files were deleted.\n');
+
     const abortResult = success();
     return abortResult;
   }
@@ -86,6 +91,7 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
   applyCleanup(existingItems);
 
   console.log('\n  ✨ Project cleared successfully!\n');
+
   const cleanupResult = success();
   return cleanupResult;
 }
@@ -126,6 +132,7 @@ async function confirmBacklogDeletion(items) {
     message: '\n  Delete local backlog anyway?',
     default: false,
   });
+
   return backlogConfirmed;
 }
 
@@ -140,6 +147,7 @@ function applyCleanup(items) {
       } else {
         fileSystem.unlinkSync(fullPath);
       }
+
       console.log(`  [OK] Removed ${name}`);
     } catch (error) {
       console.log(`  [FAIL] Could not remove ${name}: ${error.message}`);
@@ -156,6 +164,7 @@ function findBacklogsAtRisk(items) {
     if (!fileSystem.existsSync(backlogPath)) {
       return false;
     }
+
     const isPopulated = fileSystem.readdirSync(backlogPath).length > 0;
     return isPopulated;
   });

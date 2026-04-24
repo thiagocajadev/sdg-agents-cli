@@ -18,6 +18,7 @@ async function safeSelect(options) {
       const backSignal = 'back';
       return backSignal;
     }
+
     throw error;
   }
 }
@@ -31,6 +32,7 @@ async function safeCheckbox(options) {
       const backList = ['back'];
       return backList;
     }
+
     throw error;
   }
 }
@@ -44,6 +46,7 @@ async function safeConfirm(options) {
       const isAborted = false;
       return isAborted;
     }
+
     throw error;
   }
 }
@@ -100,6 +103,7 @@ async function safeInput(options) {
       const backResult = 'back';
       return backResult;
     }
+
     throw error;
   }
 }
@@ -113,6 +117,7 @@ function isMaintainerMode() {
   if (!fileSystem.existsSync(packagePath)) {
     return false;
   }
+
   try {
     const packageData = JSON.parse(fileSystem.readFileSync(packagePath, 'utf8'));
     const isMaintainer = packageData.name === 'sdg-agents';
@@ -126,6 +131,7 @@ function savePromptToFile(content) {
   if (!fileSystem.existsSync(AI_DIR)) {
     fileSystem.mkdirSync(AI_DIR, { recursive: true });
   }
+
   fileSystem.writeFileSync(PROMPT_FILE, content, 'utf8');
 }
 
@@ -156,6 +162,7 @@ async function copyToClipboard(content) {
       child.stdin.on('error', () => {
         resolve(false);
       });
+
       child.stdin.write(content);
       child.stdin.end();
     } else {

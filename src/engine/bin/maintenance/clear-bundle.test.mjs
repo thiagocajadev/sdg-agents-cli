@@ -32,7 +32,6 @@ describe('Cleaner.findBacklogsAtRisk()', () => {
     fileSystem.mkdirSync(aiDir, { recursive: true });
     const input = [{ name: '.ai', fullPath: aiDir }];
     const expected = [];
-
     const actual = findBacklogsAtRisk(input);
 
     assert.deepEqual(actual, expected);
@@ -43,7 +42,6 @@ describe('Cleaner.findBacklogsAtRisk()', () => {
     fileSystem.mkdirSync(path.join(aiDir, 'backlog'), { recursive: true });
     const input = [{ name: '.ai', fullPath: aiDir }];
     const expected = [];
-
     const actual = findBacklogsAtRisk(input);
 
     assert.deepEqual(actual, expected);
@@ -56,7 +54,6 @@ describe('Cleaner.findBacklogsAtRisk()', () => {
     fileSystem.writeFileSync(path.join(backlogDir, 'tasks.md'), '# Active\n');
     const input = [{ name: '.ai', fullPath: aiDir }];
     const expected = [backlogDir];
-
     const actual = findBacklogsAtRisk(input);
 
     assert.deepEqual(actual, expected);
@@ -69,7 +66,6 @@ describe('Cleaner.findBacklogsAtRisk()', () => {
     fileSystem.writeFileSync(path.join(monoBacklog, 'learned.md'), 'lesson');
     const input = [{ name: 'packages/foo/.ai', fullPath: monoAiDir }];
     const expected = [monoBacklog];
-
     const actual = findBacklogsAtRisk(input);
 
     assert.deepEqual(actual, expected);
