@@ -102,5 +102,29 @@ describe('GatePrompt', () => {
       const containsRule = actual.includes(expectedRuleId);
       assert.ok(containsRule);
     });
+
+    it('should include pre-filter signals section when diff has preflight match', () => {
+      const input = '+assert.ok(actual.includes(expectedSubstring));';
+      const expectedSection = '## Pre-filter Signals';
+
+      const actual = GatePrompt.buildPrompt(input);
+      const containsSection = actual.includes(expectedSection);
+      assert.ok(containsSection);
+    });
+
+    it('should not include pre-filter signals section for clean diff', () => {
+      const input = [
+        '+const hasExpected = actual.includes(expected);',
+        '+assert.ok(hasExpected);',
+      ].join('\n');
+
+      const unexpectedSection = '## Pre-filter Signals';
+
+      const actual = GatePrompt.buildPrompt(input);
+      const containsSection = actual.includes(unexpectedSection);
+      const isSectionAbsent = !containsSection;
+
+      assert.ok(isSectionAbsent);
+    });
   });
 });

@@ -263,9 +263,10 @@ function writeBacklogFiles(targetDirectory, selections) {
     }
 
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'context.md');
+    const projectName = path.basename(projectDirectory);
     let contextContent = fileSystem.readFileSync(templatePath, 'utf8');
     contextContent = contextContent
-      .replace('{{PROJECT_NAME}}', path.basename(projectDirectory))
+      .replace('{{PROJECT_NAME}}', projectName)
       .replace('{{STACK}}', 'declared in .ai/backlog/stack.md (run `land:` to populate)')
       .replace('{{PARTNER}}', partnerInfo);
 

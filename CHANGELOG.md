@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.4.0] - 2026-04-24
+
+### Added
+
+- **`gate-preflight` — deterministic regex pre-filter for gate detection**: new [`gate-preflight.mjs`](src/engine/lib/domain/gate-preflight.mjs) module (`GatePreflight.runPreflight(diff)`) scans the staged diff for high-signal patterns before the LLM call. Phase 1 covers form (a) — method-call-as-subject inside `assert.*()` calls (`assert.ok`, `equal`, `notEqual`, `deepEqual`, `strictEqual`, `throws`, `rejects`) — near-zero FP because `assert.*` is a consagrated API. Matches surface as a `## Pre-filter Signals` section injected into the gate prompt immediately before the diff; clean diffs produce no section. Architecture is hint-mode (signal boost to the LLM), not standalone BLOCK — avoids duplicating LLM semantics in regex code while raising the LLM's attention to already-detected violation sites. [`gate-prompt.mjs`](src/engine/lib/domain/gate-prompt.mjs) updated: imports `GatePreflight`, calls `runPreflight(diff)`, conditionally injects the signals section. 4 new tests in [`gate-preflight.test.mjs`](src/engine/lib/domain/gate-preflight.test.mjs) (positive match, clean diff, multi-method, snippet+line shape) + 2 new integration tests in [`gate-prompt.test.mjs`](src/engine/lib/domain/gate-prompt.test.mjs) (section present on match, section absent on clean diff). 225/225 tests green, lint 0 errors.
+
+### Fixed
+
 ## [5.3.2] - 2026-04-24
 
 ### Fixed

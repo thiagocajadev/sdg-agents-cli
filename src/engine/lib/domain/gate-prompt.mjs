@@ -1,12 +1,15 @@
 import { RulesLoader } from './rules-loader.mjs';
+import { GatePreflight } from './gate-preflight.mjs';
 
 function buildPrompt(diff) {
   const rules = RulesLoader.loadRules();
   const rulesSection = formatRulesSection(rules);
   const responseSchema = buildResponseSchema();
   const exclusionsNote = formatExclusionsNote(rules.exclude);
+  const preflightMatches = GatePreflight.runPreflight(diff);
+  const preflightSection = buildPreflightSection(preflightMatches);
 
-  const prompt = [
+  const promptParts = [
     'You are a code reviewer enforcing SDG (Spec Driven Guide) engineering rules.',
     '',
     'Review the git diff below. Respond with ONLY valid JSON — no markdown, no explanation.',
@@ -20,12 +23,29 @@ function buildPrompt(diff) {
     '',
     '`canCommit` MUST be false if ANY BLOCK violation is found.',
     'For each violation include the exact snippet and a corrected `fix`.',
-    '',
-    'Diff:',
-    diff,
-  ].join('\n');
+  ];
 
+  if (preflightSection) {
+    promptParts.push('', preflightSection);
+  }
+
+  promptParts.push('', 'Diff:', diff);
+
+  const prompt = promptParts.join('\n');
   return prompt;
+}
+
+function buildPreflightSection(matches) {
+  if (matches.length === 0) {
+    return null;
+  }
+
+  const lines = matches.map(
+    (match) => `- [${match.rule}] line ${match.line}: \`${match.snippet}\``
+  );
+
+  const signalsSection = ['## Pre-filter Signals', ...lines].join('\n');
+  return signalsSection;
 }
 
 function formatRulesSection(rules) {
