@@ -23,11 +23,11 @@ Prioritize integration over unit for orchestration layers. Unit test domain logi
 
 - **Format:** `[MethodUnderTest]_[Scenario]_[ExpectedResult]`
 - Always in English. Focus on behavior, not implementation.
-- JS/TS: prefer natural-language in `describe/it` blocks:
+- JS/TS: prefer natural-language in `describe/it` blocks. No `should` prefix — it adds no information.
 
 ```javascript
 describe('ValidateCredentials', () => {
-  it('should return unauthorized when password is invalid', async () => { ... })
+  it('returns unauthorized when password is invalid', async () => { ... })
 })
 ```
 
@@ -48,21 +48,33 @@ describe('ValidateCredentials', () => {
 
 <rule name="NamedExpectations">
 
-> **Non-Negotiable**: No magic strings/literals in assertions. Every `it` block follows the triad: `input` → `actual` → `expected`.
+> **Non-Negotiable**: No magic strings/literals in assertions. Phases: arrange → act (`actual`) → assert (`expected` + `assert.*`). Named on both sides. Enforced by `local/no-inline-assert` ESLint rule.
+
+`actual` and `expected` are grouped together before the assert, separated from it by a blank line. When derivation is needed (`actualPrice = actual.price`), the main call stays alone and the derived value groups with `expected`.
 
 ```javascript
-it('should remove H1 heading', () => {
+it('removes H1 heading', () => {
   const input = '# Title\nBody';
-  const expected = 'Body';
 
   const actual = sanitize(input);
+  const expected = 'Body';
 
   assert.strictEqual(actual, expected);
+});
+
+it('applies 10% discount', () => {
+  const order = { price: 100, discountPct: 10 };
+
+  const actual = applyDiscount(order);
+
+  const actualPrice = actual.price;
+  const expected = 90;
+
+  assert.strictEqual(actualPrice, expected);
 });
 ```
 
 - Descriptive names only (no `input1`, `input2`)
-- If result needs formatting: `actualRaw` (direct return) → `actual` (refined for assertion)
   </rule>
 
 ## Rule: What NOT to Test

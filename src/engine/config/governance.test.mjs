@@ -11,7 +11,7 @@ function findRule(label) {
 }
 
 describe('governance.NARRATIVE_CHECKLIST', () => {
-  it('parses all 9 Pre-Finish Gate items from code-style.md', () => {
+  it('parses all 8 Pre-Finish Gate items from code-style.md', () => {
     const expectedChecklistSize = 8;
     const actualChecklistSize = NARRATIVE_CHECKLIST.length;
 
@@ -47,12 +47,16 @@ describe('governance.validateNamingDiscipline (No framework abbreviations)', () 
 
   it('flags banned abbreviations as function parameters', () => {
     const source = 'function handler(req, res) { const context = {}; }';
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReqPattern = /req/;
+    const expectedResPattern = /res/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /req/);
-    assert.match(result.reason, /res/);
+    assert.match(actualReason, expectedReqPattern);
+    assert.match(actualReason, expectedResPattern);
   });
 
   it('flags the full 12-token banned set', () => {
@@ -89,7 +93,7 @@ describe('governance.validateNamingDiscipline (No framework abbreviations)', () 
   });
 
   it('does not match banned tokens inside comments', () => {
-    const source = '// req is fine here\nconst payload = request.body;';
+    const source = ['// req is fine here', 'const payload = request.body;'].join('\n');
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_PASS);
@@ -100,52 +104,86 @@ describe('governance.validateExplainingReturns (No Logic in Return)', () => {
   const rule = findRule('Explaining Returns');
 
   it('classifies ternary in return', () => {
-    const source = '// header\n// header\nfunction pick(flag) {\n  return flag ? "yes" : "no";\n}';
+    const source = [
+      '// header',
+      '// header',
+      'function pick(flag) {',
+      '  return flag ? "yes" : "no";',
+      '}',
+    ].join('\n');
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /Ternary in return/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /Ternary in return/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('classifies template literal in return', () => {
-    const source =
-      '// header\n// header\nfunction greet(user) {\n  return `Hello ${user.name}`;\n}';
+    const source = [
+      '// header',
+      '// header',
+      'function greet(user) {',
+      '  return `Hello ${user.name}`;',
+      '}',
+    ].join('\n');
 
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /Template literal in return/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /Template literal in return/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('classifies arithmetic in return', () => {
-    const source = '// header\n// header\nfunction sum(a, b) {\n  return a + b;\n}';
+    const source = ['// header', '// header', 'function sum(a, b) {', '  return a + b;', '}'].join(
+      '\n'
+    );
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /Arithmetic in return/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /Arithmetic in return/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('classifies constructor in return', () => {
-    const source = '// header\n// header\nfunction build(name) {\n  return new User(name);\n}';
+    const source = [
+      '// header',
+      '// header',
+      'function build(name) {',
+      '  return new User(name);',
+      '}',
+    ].join('\n');
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /Constructor in return/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /Constructor in return/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('accepts named const before return', () => {
-    const source = 'function sum(a, b) {\n  const total = a + b;\n  return total;\n}';
+    const source = ['function sum(a, b) {', '  const total = a + b;', '  return total;', '}'].join(
+      '\n'
+    );
+
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_PASS);
   });
 
   it('accepts void-terminator (bare side-effect call)', () => {
-    const source = 'function log(message) {\n  console.log(message);\n}';
+    const source = ['function log(message) {', '  console.log(message);', '}'].join('\n');
+
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_PASS);
@@ -156,19 +194,38 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   const rule = findRule('Vertical Density');
 
   it('flags double blank lines', () => {
-    const source =
-      'function first() {\n  return null;\n}\n\n\nfunction second() {\n  return null;\n}\n';
+    const source = [
+      'function first() {',
+      '  return null;',
+      '}',
+      '',
+      '',
+      'function second() {',
+      '  return null;',
+      '}',
+      '',
+    ].join('\n');
 
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /double blank line/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /double blank line/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('accepts single blank between groups', () => {
-    const source =
-      'function first() {\n  return null;\n}\n\nfunction second() {\n  return null;\n}\n';
+    const source = [
+      'function first() {',
+      '  return null;',
+      '}',
+      '',
+      'function second() {',
+      '  return null;',
+      '}',
+      '',
+    ].join('\n');
 
     const actualPass = rule.heuristic(source).pass;
 
@@ -176,24 +233,45 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   });
 
   it('flags blank between atomic prep and return (Explaining Return Tight)', () => {
-    const source = 'function compute(a, b) {\n  const sum = 1;\n\n  return sum;\n}\n';
+    const source = [
+      'function compute(a, b) {',
+      '  const sum = 1;',
+      '',
+      '  return sum;',
+      '}',
+      '',
+    ].join('\n');
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /Explaining Return pair must be tight/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /Explaining Return pair must be tight/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('accepts tight Explaining Return pair', () => {
-    const source = 'function compute(a, b) {\n  const sum = 1;\n  return sum;\n}\n';
+    const source = ['function compute(a, b) {', '  const sum = 1;', '  return sum;', '}', ''].join(
+      '\n'
+    );
+
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_PASS);
   });
 
   it('accepts multi-atomic group with legitimate final blank', () => {
-    const source =
-      'function compute(a, b, c) {\n  const left = 1;\n  const right = 2;\n  const merged = 3;\n\n  return merged;\n}\n';
+    const source = [
+      'function compute(a, b, c) {',
+      '  const left = 1;',
+      '  const right = 2;',
+      '  const merged = 3;',
+      '',
+      '  return merged;',
+      '}',
+      '',
+    ].join('\n');
 
     const result = rule.heuristic(source);
 
@@ -203,24 +281,51 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   });
 
   it('flags orphan atomic after tight pair', () => {
-    const source = 'function shape() {\n  const a = 1;\n  const b = 2;\n\n  const c = 3;\n}\n';
+    const source = [
+      'function shape() {',
+      '  const a = 1;',
+      '  const b = 2;',
+      '',
+      '  const c = 3;',
+      '}',
+      '',
+    ].join('\n');
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /orphan atomic/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /orphan atomic/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('accepts tight trio of atomics', () => {
-    const source = 'function shape() {\n  const a = 1;\n  const b = 2;\n  const c = 3;\n}\n';
+    const source = [
+      'function shape() {',
+      '  const a = 1;',
+      '  const b = 2;',
+      '  const c = 3;',
+      '}',
+      '',
+    ].join('\n');
+
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_PASS);
   });
 
   it('accepts 2+2 balanced groups', () => {
-    const source =
-      'function shape() {\n  const a = 1;\n  const b = 2;\n\n  const c = 3;\n  const d = 4;\n}\n';
+    const source = [
+      'function shape() {',
+      '  const a = 1;',
+      '  const b = 2;',
+      '',
+      '  const c = 3;',
+      '  const d = 4;',
+      '}',
+      '',
+    ].join('\n');
 
     const result = rule.heuristic(source);
 
@@ -230,8 +335,15 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   });
 
   it('does not flag orphan when trailing line is a rich step with call', () => {
-    const source =
-      'function shape() {\n  const a = 1;\n  const b = 2;\n\n  const result = compute(a, b);\n}\n';
+    const source = [
+      'function shape() {',
+      '  const a = 1;',
+      '  const b = 2;',
+      '',
+      '  const result = compute(a, b);',
+      '}',
+      '',
+    ].join('\n');
 
     const result = rule.heuristic(source);
 
@@ -241,32 +353,60 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
   });
 
   it('flags Explaining Return Tight with call-expression prep', () => {
-    const source = 'function pick() {\n  const today = computeToday();\n\n  return today;\n}\n';
+    const source = [
+      'function pick() {',
+      '  const today = computeToday();',
+      '',
+      '  return today;',
+      '}',
+      '',
+    ].join('\n');
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /Explaining Return pair must be tight/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /Explaining Return pair must be tight/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('flags Explaining Return Tight with property-access prep', () => {
-    const source = 'function pick() {\n  const name = user.displayName;\n\n  return name;\n}\n';
+    const source = [
+      'function pick() {',
+      '  const name = user.displayName;',
+      '',
+      '  return name;',
+      '}',
+      '',
+    ].join('\n');
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /Explaining Return pair must be tight/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /Explaining Return pair must be tight/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('flags Explaining Return Tight with await-expression prep', () => {
-    const source =
-      'async function pick() {\n  const record = await fetchRow();\n\n  return record;\n}\n';
+    const source = [
+      'async function pick() {',
+      '  const record = await fetchRow();',
+      '',
+      '  return record;',
+      '}',
+      '',
+    ].join('\n');
 
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /Explaining Return pair must be tight/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /Explaining Return pair must be tight/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 });
 
@@ -274,37 +414,44 @@ describe('governance.validateNoSectionBanners (No section banners)', () => {
   const rule = findRule('No section banners');
 
   it('flags dash banner', () => {
-    const source = '// ---------- Helpers ----------\nfunction helper() {}';
+    const source = ['// ---------- Helpers ----------', 'function helper() {}'].join('\n');
+
     const result = rule.heuristic(source);
     const actualPass = result.pass;
+    const actualReason = result.reason;
+    const expectedReasonPattern = /Section banner detected/;
 
     assert.equal(actualPass, EXPECT_FAIL);
-    assert.match(result.reason, /Section banner detected/);
+    assert.match(actualReason, expectedReasonPattern);
   });
 
   it('flags equals banner', () => {
-    const source = '// ======= Section =======\nfunction helper() {}';
+    const source = ['// ======= Section =======', 'function helper() {}'].join('\n');
+
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_FAIL);
   });
 
   it('flags hash banner (python/shell style)', () => {
-    const source = '# ===== Section =====\ndef helper(): pass';
+    const source = ['# ===== Section =====', 'def helper(): pass'].join('\n');
+
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_FAIL);
   });
 
   it('flags sql-style banner', () => {
-    const source = '-- ----- Section -----\nSELECT 1;';
+    const source = ['-- ----- Section -----', 'SELECT 1;'].join('\n');
+
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_FAIL);
   });
 
   it('accepts clean source without banners', () => {
-    const source = 'function helper() {}\n\nfunction privateOne() {}\n';
+    const source = ['function helper() {}', '', 'function privateOne() {}', ''].join('\n');
+
     const actualPass = rule.heuristic(source).pass;
 
     assert.equal(actualPass, EXPECT_PASS);

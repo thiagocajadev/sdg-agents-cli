@@ -11,6 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.3.1] - 2026-04-24
+
+### Added
+
+- **`local/no-inline-assert` ESLint rule**: new custom rule shipped to [`src/assets/tooling/eslint-rules/no-inline-assert.mjs`](src/assets/tooling/eslint-rules/no-inline-assert.mjs) enforcing that every argument to `assert.*()` calls is a named `Identifier` — no inline literals, property accesses, call expressions, or regex literals. Scoped to test files (`*.test.[mc]?[jt]sx?`). Carve-outs: `ArrowFunctionExpression`/`FunctionExpression` as first arg of `throws`/`doesNotThrow`/`rejects`/`doesNotReject`; string or template literal as the message parameter (method-aware: `ok`/`ifError` trigger at 2+ args, all others at 3+ args). Rule wired into [`eslint-config/snippet.mjs`](src/assets/tooling/eslint-config/snippet.mjs) and into [`eslint.config.mjs`](eslint.config.mjs) via a `files:` override scoped to `governance.test.mjs` (full sweep of remaining 13 test files deferred to next cycle). 9 test cases in [`no-inline-assert.test.mjs`](src/assets/tooling/eslint-rules/no-inline-assert.test.mjs) using `RuleTester` + `describe/it` pattern. **Ternary style rules** added globally to `eslint.config.mjs` and `snippet.mjs`: `no-nested-ternary: error`, `operator-linebreak: after` (with `?`/`:` before override), `multiline-ternary: always-multiline`.
+
+### Fixed
+
+- **`governance.test.mjs` — full style conformance**: all `\n`-stuffed multi-line string fixtures converted to per-line array-join (`['line1', 'line2', ''].join('\n')`); all `assert.match(result.reason, /pattern/)` and `assert.equal(result.pass, ...)` calls refactored to extract `const actualReason`/`const actualPass`/`const expectedReasonPattern` before the assert. `no-inline-assert` now passes with zero violations. Test count stable at 219/219 green.
+- **`narrative-heuristics.mjs` — nested ternary removed**: `validateRevealingModulePattern` converted its `reason` nested ternary to an `if/else if` block assigning to `let revealingReason`, eliminating the `no-nested-ternary` lint error.
+- **`testing.md` — AAA pattern corrected**: `NamedExpectations` rule rewritten with the correct grouping: `actual` and `expected` share a group (no blank between them), separated from the `assert.*` call by one blank line. Derivation carve-out documented (`actualPrice = actual.price` groups with `expected`, main call stays alone). `TestNamingConvention`: added `No \`should\` prefix` note.
+
+### Added
+
+### Fixed
+
 ## [5.3.0] - 2026-04-24
 
 ### Added

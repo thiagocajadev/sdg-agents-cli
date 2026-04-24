@@ -398,13 +398,16 @@ function validateRevealingModulePattern(content) {
   const forbiddenDefaultExport = 'export ' + 'default';
   const hasExportDefault = content.includes(forbiddenDefaultExport);
 
+  let revealingReason = null;
+  if (!hasRevealingObject) {
+    revealingReason = 'Missing Revealing Module Pattern export.';
+  } else if (hasExportDefault) {
+    revealingReason = `Uses ${forbiddenDefaultExport}.`;
+  }
+
   const revealingResult = {
     pass: hasRevealingObject && !hasExportDefault,
-    reason: !hasRevealingObject
-      ? 'Missing Revealing Module Pattern export.'
-      : hasExportDefault
-        ? `Uses ${forbiddenDefaultExport}.`
-        : null,
+    reason: revealingReason,
   };
 
   return revealingResult;
