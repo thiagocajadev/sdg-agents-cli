@@ -281,6 +281,70 @@ describe('governance.validateVerticalDensity (Vertical Density)', () => {
     assert.equal(actualPass, EXPECT_FAIL);
     assert.match(result.reason, /helper touching/);
   });
+
+  it('flags destructuring-const touching function without blank separator', () => {
+    const source = [
+      'const { helper } = Utils;',
+      'function run() {',
+      '  return helper();',
+      '}',
+      '',
+    ].join('\n');
+    const expectedPass = EXPECT_FAIL;
+    const expectedReasonPattern = /helper touching/;
+
+    const result = rule.heuristic(source);
+    const actualPass = result.pass;
+    const actualReason = result.reason;
+
+    assert.equal(actualPass, expectedPass);
+    assert.match(actualReason, expectedReasonPattern);
+  });
+
+  it('flags multi-line const ending with ); touching function', () => {
+    const source = [
+      'const config = buildConfig(',
+      '  options,',
+      '  defaults',
+      ');',
+      'function apply() {',
+      '  return config;',
+      '}',
+      '',
+    ].join('\n');
+    const expectedPass = EXPECT_FAIL;
+    const expectedReasonPattern = /helper touching/;
+
+    const result = rule.heuristic(source);
+    const actualPass = result.pass;
+    const actualReason = result.reason;
+
+    assert.equal(actualPass, expectedPass);
+    assert.match(actualReason, expectedReasonPattern);
+  });
+
+  it('flags multi-line const ending with ]; touching function', () => {
+    const source = [
+      'const items = [',
+      '  1,',
+      '  2,',
+      '  3,',
+      '];',
+      'function pick() {',
+      '  return items[0];',
+      '}',
+      '',
+    ].join('\n');
+    const expectedPass = EXPECT_FAIL;
+    const expectedReasonPattern = /helper touching/;
+
+    const result = rule.heuristic(source);
+    const actualPass = result.pass;
+    const actualReason = result.reason;
+
+    assert.equal(actualPass, expectedPass);
+    assert.match(actualReason, expectedReasonPattern);
+  });
 });
 
 describe('governance.validateNoSectionBanners (No section banners)', () => {

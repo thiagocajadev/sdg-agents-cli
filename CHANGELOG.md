@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.1.2] - 2026-04-24
+
+### Added
+
+### Fixed
+
+- **Visual-density — const-touching-function convergence (scanner tightening + new test-style beachhead)**: tightened `scanHelperTouching` in [`narrative-heuristics.mjs`](src/engine/config/heuristics/narrative-heuristics.mjs) against two shapes the first-pass (v5.1.1) scanner missed — (a) **destructuring-const LHS**: widened `singleLineConstPattern` from `\w+` to `(\w+|\{[^}]*\}|\[[^\]]*\])` so `const { helper } = Utils;` counts as a single-line declaration end (previously regex-skipped, so `const { helper } = Utils;\nfunction run()` passed silently); (b) **multi-line const closers**: new `multiLineCloserPattern` recognizes column-0 `)`, `]`, `` ` `` (optionally `;`-terminated) as a declaration boundary, so `const config = buildConfig(\n  ...\n);\nfunction apply()` is now flagged (previously `blockClosePattern` only accepted `}` / `};`). Three characterization tests added to [`governance.test.mjs`](src/engine/config/governance.test.mjs) under `validateVerticalDensity` covering destructuring-const → function, `);`-closer → function, `];`-closer → function — all three fail before the tightening and pass after. Real-world sweep at cycle start showed **zero** offenders for the new shapes (repo already cleaned manually in v5.1.1); scope is therefore defensive (future-regression guard), not source sweep. Mid-cycle feedback from user turned the 3 new tests into a **beachhead** for the scoped `fix: test source-string style` backlog item — written directly in the canonical form (per-line `[...].join('\n')` source fixture, vertical-scansion AAA with blank-line phase separation, semantic-assert with both `actualX` / `expectedX` named on each `assert.*`) instead of the `\n`-stuffed inline style of the surrounding 14 tests. Intermediate attempt with `// Arrange` / `// Act` / `// Assert` comments tripped the project's own `narrative slop` detector in [`audit-bundle.mjs:141`](src/engine/bin/audit/audit-bundle.mjs#L141) which treats those labels as narrative slop — resolved by using Vertical Scansion (blank-line separation) instead. Intermediate attempt with raw backtick template literals broke visual indentation (forced fixture content to column 0 inside indented `it()` body) — resolved by switching to per-line array-join. Detector expansion stays inside `scanHelperTouching`; `blockClosePattern` kept untouched, new pattern is purely additive. 196/196 tests green (193 + 3 new), audit 100%, lint pass, drift 0.
+
 ## [5.1.1] - 2026-04-24
 
 ### Added

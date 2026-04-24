@@ -290,21 +290,29 @@ function scanOrphanAtomic(lines) {
 function scanHelperTouching(lines) {
   const violations = [];
   const blockClosePattern = /^(\}|\};)\s*$/;
+  const multiLineCloserPattern = /^[)\]`]\s*;?\s*$/;
   const anyDeclarationStartPattern =
     /^(export\s+)?(async\s+function|function|class|const|let|var)\s/;
-  const singleLineConstPattern = /^(export\s+)?(const|let|var)\s+\w+\s*(:[^=]*)?=.*;\s*$/;
+  const singleLineConstPattern =
+    /^(export\s+)?(const|let|var)\s+(\w+|\{[^}]*\}|\[[^\]]*\])\s*(:[^=]*)?=.*;\s*$/;
   const functionOrClassStartPattern = /^(export\s+)?(async\s+function|function|class)\s/;
 
   for (let index = 0; index < lines.length - 1; index++) {
     const currentLine = lines[index];
     const nextLine = lines[index + 1];
+
     const isBlockClose = blockClosePattern.test(currentLine);
     const afterBlockTouching = isBlockClose && anyDeclarationStartPattern.test(nextLine);
 
     const isSingleLineConst = singleLineConstPattern.test(currentLine);
     const constToFunctionTouching = isSingleLineConst && functionOrClassStartPattern.test(nextLine);
 
-    const isTouchingViolation = afterBlockTouching || constToFunctionTouching;
+    const isMultiLineCloser = multiLineCloserPattern.test(currentLine);
+    const afterMultiLineCloserTouching =
+      isMultiLineCloser && functionOrClassStartPattern.test(nextLine);
+
+    const isTouchingViolation =
+      afterBlockTouching || constToFunctionTouching || afterMultiLineCloserTouching;
     if (!isTouchingViolation) continue;
 
     violations.push(
