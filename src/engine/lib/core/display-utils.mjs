@@ -1,10 +1,8 @@
-import { STACK_DISPLAY_NAMES } from '../../config/stack-display.mjs';
-
 /**
- * Returns a human-readable display name for a given stack key.
+ * Returns a human-readable display name for a given flavor key.
  * Single source of truth — imported by all bin scripts.
  */
-function displayName(stackKey) {
+function displayName(flavorKey) {
   const PRESET_DISPLAY_NAMES = {
     none: '(none)',
     lite: 'Lite',
@@ -13,9 +11,8 @@ function displayName(stackKey) {
     legacy: 'Legacy Pipeline',
   };
 
-  const key = stackKey || 'none';
-  const fallbackName = STACK_DISPLAY_NAMES[key]?.name ?? key;
-  const resolvedName = PRESET_DISPLAY_NAMES[key] ?? fallbackName;
+  const key = flavorKey || 'none';
+  const resolvedName = PRESET_DISPLAY_NAMES[key] ?? key;
 
   const displayNameResult = resolvedName;
   return displayNameResult;

@@ -27,7 +27,7 @@ Dev → Planning: SPEC+PLAN → [approval] → spawn Fast: CODE+TEST → return 
 
 **Delegation**: [M]/[L] tasks → always spawn Fast. [S] tasks → Planning executes directly (overhead exceeds benefit).
 
-**Handoff payload**: Approved SPEC + approved PLAN + context refs (standards, style, idioms) + deliverable request (tasks completed, Narrative Gate results, test logs, lint status).
+**Handoff payload**: Approved SPEC + approved PLAN + context refs (standards, style, `.ai/backlog/stack.md`) + deliverable request (tasks completed, Narrative Gate results, test logs, lint status).
 
 **Review gate** (before reporting to Dev):
 

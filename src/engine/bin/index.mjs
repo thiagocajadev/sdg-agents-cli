@@ -143,16 +143,6 @@ async function dispatchSubcommand(args) {
       const reviewResult = await Reviewer.review();
       return reviewResult;
     }
-    case 'sync': {
-      const { Syncer } = await import('./maintenance/sync-rulesets.mjs');
-      const syncResult = await Syncer.sync();
-      return syncResult;
-    }
-    case 'update': {
-      const { Versioning } = await import('./maintenance/update-versions.mjs');
-      const updateResult = await Versioning.update();
-      return updateResult;
-    }
     case 'clear': {
       const { Cleaner } = await import('./maintenance/clear-bundle.mjs');
       const clearResult = await Cleaner.clear(args.targetDirectory);
@@ -192,16 +182,13 @@ async function processInitSubcommand(args) {
 
   const { SDG: SpecDrivenGuide } = await import('./init/build-bundle.mjs');
   const isQuickMode = args.quick || args.mode === 'quick';
-  const isNonInteractive = isQuickMode || args.mode || args.flavor || args.idioms.length > 0;
+  const isNonInteractive = isQuickMode || args.mode || args.flavor;
 
   const selectionPayload = isNonInteractive
     ? {
         mode: isQuickMode ? 'quick' : args.mode || 'agents',
         flavor: args.flavor,
-        idioms: args.idioms || [],
         track: args.track,
-        codeStyle: 'latest',
-        versions: {},
       }
     : null;
 
@@ -340,9 +327,8 @@ async function applyUpdateInstructions(targetDirectory) {
     return;
   }
 
-  const { flavor, idioms } = manifest.selections;
-  const idiomsLabel = idioms.join(', ');
-  const updateHeader = `\n  Re-applying latest rules — Flavor: ${flavor} | Idioms: ${idiomsLabel}\n`;
+  const { flavor } = manifest.selections;
+  const updateHeader = `\n  Re-applying latest rules — Flavor: ${flavor}\n`;
   console.log(updateHeader);
 
   try {

@@ -9,6 +9,9 @@ const ASSETS = path.join(__dirname, '..', '..', '..', 'assets');
 
 const WORKFLOW = path.join(ASSETS, 'instructions', 'templates', 'workflow.md');
 const CODE_STYLE = path.join(ASSETS, 'skills', 'code-style.md');
+const LAND_COMMAND = path.join(ASSETS, 'instructions', 'commands', 'sdg-land.md');
+const STACK_TEMPLATE = path.join(ASSETS, 'instructions', 'templates', 'backlog', 'stack.md');
+const DELIVERY_COMPETENCY = path.join(ASSETS, 'instructions', 'competencies', 'delivery.md');
 
 function readAsset(assetPath) {
   const content = fs.readFileSync(assetPath, 'utf8');
@@ -92,6 +95,74 @@ describe('Skill Content — Governance Layer', () => {
         [],
         'code-style must not reference removed governance ceremony'
       );
+    });
+  });
+
+  describe('sdg-land.md — Phase STACK shape', () => {
+    it('should include a Phase: STACK heading between SCOPE and BACKLOG', () => {
+      const input = readAsset(LAND_COMMAND);
+      const scopeIndex = input.indexOf('## Phase: SCOPE');
+      const stackIndex = input.indexOf('## Phase: STACK');
+      const backlogIndex = input.indexOf('## Phase: BACKLOG');
+
+      const isStackBetweenScopeAndBacklog =
+        scopeIndex !== -1 && stackIndex > scopeIndex && stackIndex < backlogIndex;
+      assert.ok(isStackBetweenScopeAndBacklog, 'Phase STACK must sit between SCOPE and BACKLOG');
+    });
+
+    it('should reference the canonical WebFetch allow-list sources', () => {
+      const input = readAsset(LAND_COMMAND);
+      const expectedSources = [
+        'nodejs.org/api/',
+        'react.dev',
+        'typescriptlang.org',
+        'docs.python.org',
+        'go.dev/doc',
+        'doc.rust-lang.org',
+      ];
+
+      const actualMissing = expectedSources.filter((fragment) => !input.includes(fragment));
+
+      assert.deepEqual(actualMissing, [], 'Phase STACK must expose the doc-source allow-list');
+    });
+
+    it('should direct the output to .ai/backlog/stack.md', () => {
+      const input = readAsset(LAND_COMMAND);
+      const hasStackOutputRef = input.includes('.ai/backlog/stack.md');
+      assert.ok(hasStackOutputRef);
+    });
+  });
+
+  describe('stack.md seed template', () => {
+    it('should expose the four canonical role headers', () => {
+      const input = readAsset(STACK_TEMPLATE);
+      const expectedHeaders = ['### Backend', '### Frontend', '### Data', '### Scripts'];
+
+      const actualMissing = expectedHeaders.filter((fragment) => !input.includes(fragment));
+
+      assert.deepEqual(actualMissing, [], 'stack.md seed must declare all four role headers');
+    });
+
+    it('should guide the developer to run land:', () => {
+      const input = readAsset(STACK_TEMPLATE);
+      const hasLandHint = input.includes('run `land:`');
+      assert.ok(hasLandHint, 'seed must tell the dev to populate via land:');
+    });
+  });
+
+  describe('competencies/delivery.md — fused contract', () => {
+    it('should contain both Backend and Frontend discriminated sections', () => {
+      const input = readAsset(DELIVERY_COMPETENCY);
+      const expectedFragments = [
+        '## Backend (load if the task is server-side)',
+        '## Frontend (load if the task is UI)',
+        'Response Envelope',
+        'Design System',
+      ];
+
+      const actualMissing = expectedFragments.filter((fragment) => !input.includes(fragment));
+
+      assert.deepEqual(actualMissing, [], 'delivery.md must contain both discriminated sections');
     });
   });
 

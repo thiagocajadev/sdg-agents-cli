@@ -34,81 +34,6 @@ function copyRecursiveSync(src, dest, options = {}) {
   }
 }
 
-function filterContentByVersion(content, targetVersion) {
-  if (!targetVersion) {
-    const originalContent = content;
-    return originalContent;
-  }
-
-  const targetNum = parseVersionNumber(targetVersion);
-  if (targetNum === null) {
-    const unparsedContent = content;
-    return unparsedContent;
-  }
-
-  const tagRegex = /<([a-zA-Z0-9-]+)\b[^>]*\bversion="([^"]+)"[^>]*>([\s\S]*?)<\/\1>/g;
-
-  const filtered = content.replace(tagRegex, (match, _tagName, condition, _innerContent) => {
-    const isVisible = evaluateVersionCondition(condition, targetNum);
-    if (isVisible) {
-      const visibleContent = match;
-      return visibleContent;
-    }
-    const emptyString = '';
-    return emptyString;
-  });
-
-  return filtered;
-}
-
-function parseVersionNumber(versionString) {
-  const match = String(versionString).match(/(\d+(\.\d+)?)/);
-  const versionNum = match ? parseFloat(match[1]) : null;
-  return versionNum;
-}
-
-function evaluateVersionCondition(condition, targetNum) {
-  const match = condition.match(/([<>=]+)?\s*(\d+(\.\d+)?)/);
-  if (!match) {
-    const isValidByDefault = true;
-    return isValidByDefault;
-  }
-
-  const operator = match[1] || '==';
-  const condNum = parseFloat(match[2]);
-
-  switch (operator) {
-    case '>=': {
-      const isGreaterOrEqual = targetNum >= condNum;
-      return isGreaterOrEqual;
-    }
-    case '<=': {
-      const isLesserOrEqual = targetNum <= condNum;
-      return isLesserOrEqual;
-    }
-    case '>': {
-      const isGreater = targetNum > condNum;
-      return isGreater;
-    }
-    case '<': {
-      const isLesser = targetNum < condNum;
-      return isLesser;
-    }
-    case '==': {
-      const isEqual = targetNum === condNum;
-      return isEqual;
-    }
-    case '=': {
-      const isStrictEqual = targetNum === condNum;
-      return isStrictEqual;
-    }
-    default: {
-      const isDefaultMatch = true;
-      return isDefaultMatch;
-    }
-  }
-}
-
 function getDirname(importMetaUrl) {
   const dirname = path.dirname(fileURLToPath(importMetaUrl));
   return dirname;
@@ -188,7 +113,6 @@ function isMaintainerMode() {
 export const FsUtils = {
   getDirectories,
   copyRecursiveSync,
-  filterContentByVersion,
   getDirname,
   bootstrapIfDirect,
   detectIndentation,

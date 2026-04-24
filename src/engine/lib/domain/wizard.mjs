@@ -1,6 +1,4 @@
 import path from 'node:path';
-import { selectVersionByStyle } from '../../config/stack-versions.mjs';
-import { STACK_DISPLAY_NAMES } from '../../config/stack-display.mjs';
 import { DisplayUtils } from '../core/display-utils.mjs';
 import { FsUtils } from '../core/fs-utils.mjs';
 import { ResultUtils } from '../core/result-utils.mjs';
@@ -17,9 +15,6 @@ const SOURCE_INSTRUCTIONS = path.join(__dirname, '../../..', 'assets', 'instruct
 const WIZARD_STEPS = {
   INITIAL: 'initial',
   FLAVOR: 'flavor',
-  BACKEND: 'backend',
-  FRONTEND: 'frontend',
-  CODE_STYLE: 'codeStyle',
   PARTNER: 'partner',
   DONE: 'done',
 };
@@ -27,35 +22,22 @@ const WIZARD_STEPS = {
 const STEP_ORDER = [
   WIZARD_STEPS.INITIAL,
   WIZARD_STEPS.FLAVOR,
-  WIZARD_STEPS.BACKEND,
-  WIZARD_STEPS.FRONTEND,
-  WIZARD_STEPS.CODE_STYLE,
   WIZARD_STEPS.PARTNER,
   WIZARD_STEPS.DONE,
 ];
 
 async function gatherUserSelections(targetDirectory = process.cwd()) {
   const availableFlavors = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'flavors'));
-  const availableIdioms = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'idioms'));
 
   let selections = {
     mode: 'agents',
     flavor: 'vertical-slice',
-    idioms: [],
-    versions: {},
-    codeStyle: 'latest',
   };
   let step = WIZARD_STEPS.INITIAL;
   let historyStack = [];
 
   while (step !== WIZARD_STEPS.DONE) {
-    const context = {
-      step,
-      selections,
-      availableFlavors,
-      availableIdioms,
-      targetDirectory,
-    };
+    const context = { step, selections, availableFlavors, targetDirectory };
     const stepResult = await dispatchWizardStep(step, context);
 
     if (stepResult.isFailure) {
@@ -103,8 +85,6 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
 function applyStepResult(currentSelections, stepValue) {
   if (stepValue.mode) currentSelections.mode = stepValue.mode;
   if (stepValue.flavor) currentSelections.flavor = stepValue.flavor;
-  if (stepValue.codeStyle) currentSelections.codeStyle = stepValue.codeStyle;
-  if (stepValue.idiom) currentSelections.idioms.push(stepValue.idiom);
   if (stepValue.partner) {
     currentSelections.partner = currentSelections.partner || {};
     Object.assign(currentSelections.partner, stepValue.partner);
@@ -115,9 +95,6 @@ async function dispatchWizardStep(step, context) {
   const STEP_HANDLERS = {
     [WIZARD_STEPS.INITIAL]: () => promptInitialChoice(),
     [WIZARD_STEPS.FLAVOR]: () => promptArchitectureFlavor(context),
-    [WIZARD_STEPS.BACKEND]: () => promptBackendIdiom(context),
-    [WIZARD_STEPS.FRONTEND]: () => promptFrontendIdiom(context),
-    [WIZARD_STEPS.CODE_STYLE]: () => promptCodeStyle(context),
     [WIZARD_STEPS.PARTNER]: () => promptPartnerInfo(),
   };
 
@@ -132,11 +109,11 @@ async function promptInitialChoice() {
     message: 'What would you like to do?',
     choices: [
       {
-        name: '1. Full Setup — configure architecture and language',
+        name: '1. Full Setup — configure architecture flavor and partner info',
         value: 'agents',
       },
       {
-        name: '2. ⚡ Quick — install with defaults (lite + JS/TS, includes everything)',
+        name: '2. ⚡ Quick — install with defaults (lite flavor, placeholder stack.md)',
         value: 'quick',
       },
       { name: '3. Back', value: 'back' },
@@ -156,12 +133,6 @@ function buildQuickSetup() {
   const quickSetupResult = success({
     mode: 'quick',
     flavor: 'lite',
-    idioms: ['javascript', 'typescript'],
-    codeStyle: 'latest',
-    versions: {
-      javascript: 'js@2025',
-      typescript: 'ts@6.0',
-    },
     partner: {
       name: 'Human Developer',
       role: 'Dev Partner',
@@ -185,7 +156,7 @@ async function promptArchitectureFlavor(context) {
     return backResult;
   }
 
-  const flavorResult = success({ nextStep: WIZARD_STEPS.BACKEND, flavor });
+  const flavorResult = success({ nextStep: WIZARD_STEPS.PARTNER, flavor });
   return flavorResult;
 }
 
@@ -219,101 +190,6 @@ function toFlavorOption(flavorFolderKey) {
   return choice;
 }
 
-async function promptBackendIdiom(context) {
-  const { availableIdioms } = context;
-
-  const backendIdioms = availableIdioms.filter(
-    (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isBackend
-  );
-  const result = await safeSelect({
-    message: 'Backend language?',
-    choices: [
-      { name: '—  None / Skip', value: 'skip' },
-      ...backendIdioms.map((idiomFolderKey) => ({
-        name: STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey,
-        value: idiomFolderKey,
-      })),
-      { name: 'Back', value: 'back' },
-    ],
-  });
-
-  if (result === 'back') {
-    const backResult = success({ nextStep: WIZARD_STEPS.FLAVOR });
-    return backResult;
-  }
-
-  const isSkipped = result === 'skip';
-  const backendResult = success({
-    nextStep: WIZARD_STEPS.FRONTEND,
-    idiom: isSkipped ? null : result,
-  });
-  return backendResult;
-}
-
-async function promptFrontendIdiom(context) {
-  const { availableIdioms, selections } = context;
-
-  const frontendIdioms = availableIdioms.filter(
-    (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isFrontend
-  );
-  const result = await safeSelect({
-    message: 'Frontend framework?',
-    choices: [
-      { name: '—  None / Skip', value: 'skip' },
-      ...frontendIdioms.map((idiomFolderKey) => ({
-        name: STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey,
-        value: idiomFolderKey,
-      })),
-      { name: 'Back', value: 'back' },
-    ],
-  });
-
-  if (result === 'back') {
-    const backResult = success({ nextStep: WIZARD_STEPS.BACKEND });
-    return backResult;
-  }
-
-  const isSkipped = result === 'skip';
-  const hasBothSkipped = isSkipped && selections.idioms.length === 0;
-  if (hasBothSkipped) {
-    // why: at least one idiom is required to build a meaningful instruction set
-    const noIdiomResult = success({ nextStep: WIZARD_STEPS.BACKEND, idiom: null });
-    return noIdiomResult;
-  }
-
-  const frontendResult = success({
-    nextStep: WIZARD_STEPS.CODE_STYLE,
-    idiom: isSkipped ? null : result,
-  });
-  return frontendResult;
-}
-
-async function promptCodeStyle(context) {
-  const { selections } = context;
-  const hasNoIdioms = selections.idioms.length === 0;
-  if (hasNoIdioms) {
-    const skipResult = success({ nextStep: WIZARD_STEPS.PARTNER, codeStyle: 'latest' });
-    return skipResult;
-  }
-
-  const result = await safeSelect({
-    message: 'Code style preference?',
-    choices: [
-      { name: '1. Latest      — cutting-edge features and syntax', value: 'latest' },
-      { name: '2. Conservative — LTS-safe, widely supported', value: 'conservative' },
-      { name: 'Back', value: 'back' },
-    ],
-  });
-
-  if (result === 'back') {
-    const backResult = success({ nextStep: WIZARD_STEPS.FRONTEND });
-    return backResult;
-  }
-
-  const codeStyleResult = success({ nextStep: WIZARD_STEPS.PARTNER, codeStyle: result });
-  return codeStyleResult;
-}
-
 async function promptPartnerInfo() {
   const input = await safeInput({
     message: 'Your name and role? (e.g. "Thiago, Dev Founder") — Enter to skip',
@@ -321,7 +197,7 @@ async function promptPartnerInfo() {
   });
 
   if (input === 'back') {
-    const backResult = success({ nextStep: WIZARD_STEPS.CODE_STYLE });
+    const backResult = success({ nextStep: WIZARD_STEPS.FLAVOR });
     return backResult;
   }
 
@@ -352,16 +228,11 @@ function parsePartnerInput(input) {
 function validateSelections(selections) {
   if (selections.mode === 'quick') {
     selections.flavor = selections.flavor || 'lite';
-    selections.idioms = selections.idioms?.length
-      ? selections.idioms
-      : ['javascript', 'typescript'];
-    selections.codeStyle = selections.codeStyle || 'latest';
     const quickValidResult = success(selections);
     return quickValidResult;
   }
 
   const availableFlavors = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'flavors'));
-  const availableIdioms = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'idioms'));
 
   if (!selections.flavor) {
     const missingFlavorResult = fail('--flavor is required.', 'MISSING_FLAVOR');
@@ -374,59 +245,11 @@ function validateSelections(selections) {
     return invalidFlavorResult;
   }
 
-  if (!selections.idioms || selections.idioms.length === 0) {
-    const missingIdiomResult = fail('At least one --idiom is required.', 'MISSING_IDIOM');
-    return missingIdiomResult;
-  }
-
-  for (const idiom of selections.idioms) {
-    if (!availableIdioms.includes(idiom)) {
-      const invalidIdiomMessage = `Unknown idiom: "${idiom}". Available: ${availableIdioms.join(', ')}`;
-      const invalidIdiomResult = fail(invalidIdiomMessage, 'INVALID_IDIOM');
-      return invalidIdiomResult;
-    }
-  }
-
   const setupResult = success(selections);
   return setupResult;
-}
-
-function resolveVersionsByCodeStyle(selections) {
-  if (!selections.versions) selections.versions = {};
-
-  const codeStyle = selections.codeStyle ?? 'latest';
-
-  for (const idiom of selections.idioms) {
-    if (selections.versions[idiom]) continue;
-
-    const resolvedVersion = selectVersionByStyle(idiom, codeStyle);
-    if (resolvedVersion) selections.versions[idiom] = resolvedVersion;
-  }
-}
-
-function inferScopeFromIdioms(idioms) {
-  const hasBackend = idioms.some((key) => STACK_DISPLAY_NAMES[key]?.isBackend);
-  const hasFrontend = idioms.some((key) => STACK_DISPLAY_NAMES[key]?.isFrontend);
-
-  const isBothSelected = hasBackend && hasFrontend;
-  if (isBothSelected) return 'fullstack';
-
-  const isOnlyFrontend = hasFrontend && !hasBackend;
-  if (isOnlyFrontend) return 'frontend';
-
-  const defaultScope = 'backend';
-  return defaultScope;
-}
-
-function autoDetectBump(selections) {
-  const hasJsOrTs = selections.idioms.some((key) => key === 'javascript' || key === 'typescript');
-  selections.bump = hasJsOrTs;
 }
 
 export const WizardUtils = {
   gatherUserSelections,
   validateSelections,
-  resolveVersionsByCodeStyle,
-  inferScopeFromIdioms,
-  autoDetectBump,
 };

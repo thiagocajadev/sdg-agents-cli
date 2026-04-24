@@ -7,7 +7,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import dedent from 'dedent';
 
-import { STACK_DISPLAY_NAMES } from '../../config/stack-display.mjs';
 import { DisplayUtils } from '../core/display-utils.mjs';
 import { ManifestUtils } from './manifest-utils.mjs';
 import { FsUtils } from '../core/fs-utils.mjs';
@@ -21,11 +20,9 @@ const SOURCE_INSTRUCTIONS = path.join(__dirname, '../../..', 'assets', 'instruct
 
 /**
  * Canonical skill catalog — single source of truth for AGENTS.md rendering.
- * Order matches the desired Skill Registry output. Categories gate inclusion:
- * - core: always loaded
- * - backend: included when selection has at least one backend idiom
- * - frontend: included when selection has at least one frontend idiom
- * Competencies stay here because they ride alongside the stack gate.
+ * All skills are always listed; the agent self-filters per task domain via the
+ * category header ("Backend", "Frontend", "Surgical"). Stack specificity now
+ * lives in `.ai/backlog/stack.md`, declared by the developer during `land:`.
  */
 const SKILL_CATALOG = [
   {
@@ -33,25 +30,20 @@ const SKILL_CATALOG = [
     category: 'core',
     description: 'Code Style & Standards',
   },
+  {
+    path: '.ai/instructions/competencies/delivery.md',
+    category: 'delivery',
+    description: 'BFF envelope + Frontend contract execution',
+  },
   { path: '.ai/skills/api-design.md', category: 'backend', description: 'API Design' },
   { path: '.ai/skills/data-access.md', category: 'backend', description: 'DB layer' },
   { path: '.ai/skills/sql-style.md', category: 'backend', description: 'SQL queries' },
   { path: '.ai/skills/ci-cd.md', category: 'backend', description: 'Pipelines & deploy' },
   { path: '.ai/skills/cloud.md', category: 'backend', description: 'Cloud & Containers' },
   {
-    path: '.ai/instructions/competencies/backend.md',
-    category: 'backend',
-    description: 'BFF + API Strategy',
-  },
-  {
     path: '.ai/skills/ui-ux.md',
     category: 'frontend',
     description: 'UI/UX design system & writing voice',
-  },
-  {
-    path: '.ai/instructions/competencies/frontend.md',
-    category: 'frontend',
-    description: 'Contract-Based UI System',
   },
   {
     path: '.ai/skills/testing.md',
@@ -69,22 +61,6 @@ const SKILL_CATALOG = [
     description: 'logging, metrics, tracing',
   },
 ];
-
-function computeStackMetrics(idioms) {
-  const hasBackend = idioms.some(
-    (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isBackend
-  );
-  const hasFrontend = idioms.some(
-    (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isFrontend
-  );
-
-  const metrics = {
-    hasBackend,
-    hasFrontend,
-  };
-
-  return metrics;
-}
 
 /**
  * Assembles the master instruction as a compact Semantic Router.
@@ -123,7 +99,8 @@ function buildMasterInstructions(selections) {
       ## Session Start
 
       1. Read \`.ai/backlog/context.md\` — project brief. If missing, generate from \`package.json\` + \`README.md\`.
-      2. Read \`.ai/backlog/tasks.md\` — check for \`[IN_PROGRESS]\`. If found: load workflow.md and resume.`;
+      2. Read \`.ai/backlog/stack.md\` — developer-curated stack declarations.
+      3. Read \`.ai/backlog/tasks.md\` — check for \`[IN_PROGRESS]\`. If found: load workflow.md and resume.`;
 
     return sessionStartString;
   }
@@ -147,35 +124,26 @@ function buildMasterInstructions(selections) {
   }
 
   function buildSkillRouter(currentSelections) {
-    const stackIdioms = [...new Set(currentSelections.idioms ?? [])];
-    const { hasBackend, hasFrontend } = computeStackMetrics(stackIdioms);
     const flavor = currentSelections.flavor;
 
-    const relevantSkills = SKILL_CATALOG.filter((skill) => {
-      if (skill.category === 'core') return true;
-      if (skill.category === 'surgical') return true;
-      if (skill.category === 'backend') return hasBackend;
-      if (skill.category === 'frontend') return hasFrontend;
-      return false;
-    });
-
-    const groupedByCategory = groupSkills(relevantSkills);
+    const groupedByCategory = groupSkills(SKILL_CATALOG);
 
     const sections = [
       '## Phase CODE — Skill Loading',
       '',
-      '> Load on Phase CODE entry only. Match skills to task domain.',
+      '> Load on Phase CODE entry only. Match skills to task domain. Stack context lives in `stack.md`, already loaded at Session Start.',
       '',
     ];
 
     const categoryHeaders = {
       core: '**Core** (always in Phase CODE)',
+      delivery: '**Delivery** (BFF + UI contract execution)',
       backend: '**Backend** (API, DB, infrastructure tasks)',
       frontend: '**Frontend** (UI, component tasks)',
       surgical: '**Surgical** (only if task directly touches domain)',
     };
 
-    for (const category of ['core', 'backend', 'frontend', 'surgical']) {
+    for (const category of ['core', 'delivery', 'backend', 'frontend', 'surgical']) {
       const skills = groupedByCategory[category];
       if (!skills || skills.length === 0) continue;
       sections.push(categoryHeaders[category]);
@@ -183,15 +151,6 @@ function buildMasterInstructions(selections) {
         sections.push(`- \`${skill.path}\` — ${skill.description}`);
       }
       sections.push('');
-    }
-
-    const idiomLines = stackIdioms.map((idiomFolderKey) => {
-      const idiomLabel = STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey;
-      const idiomLine = `- \`.ai/instructions/idioms/${idiomFolderKey}/patterns.md\` — ${idiomLabel} Idioms & Patterns`;
-      return idiomLine;
-    });
-    if (idiomLines.length > 0) {
-      sections.push('**Stack idioms**', ...idiomLines, '');
     }
 
     if (flavor && flavor !== 'none') {
@@ -207,7 +166,7 @@ function buildMasterInstructions(selections) {
   }
 
   function groupSkills(skills) {
-    const groups = { core: [], backend: [], frontend: [], surgical: [] };
+    const groups = { core: [], delivery: [], backend: [], frontend: [], surgical: [] };
     for (const skill of skills) {
       if (groups[skill.category]) groups[skill.category].push(skill);
     }
@@ -226,7 +185,7 @@ function buildMasterInstructions(selections) {
 }
 
 /**
- * Writes .ai/backlog/context.md and .ai/backlog/tasks.md at the project root.
+ * Writes `.ai/backlog/{context,stack,tasks,learned,troubleshoot}.md` at the project root.
  * Only writes each file if it does not already exist — never overwrites user content.
  */
 function writeBacklogFiles(targetDirectory, selections) {
@@ -234,6 +193,7 @@ function writeBacklogFiles(targetDirectory, selections) {
   fs.mkdirSync(backlogDirectory, { recursive: true });
 
   writeContextFile(backlogDirectory, targetDirectory, selections);
+  writeStackFile(backlogDirectory);
   writeTasksFile(backlogDirectory);
   writeLearnedFile(backlogDirectory);
   writeTroubleshootFile(backlogDirectory);
@@ -244,7 +204,6 @@ function writeBacklogFiles(targetDirectory, selections) {
 
     try {
       const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-      // Basic detection via common Portuguese strings or i18n configs
       const deps = { ...packageData.dependencies, ...packageData.devDependencies };
       if (deps['i18next'] || deps['react-i18next']) {
         const localesDir = path.join(projectDirectory, 'src', 'locales');
@@ -285,19 +244,14 @@ function writeBacklogFiles(targetDirectory, selections) {
 
     if (fs.existsSync(contextPath)) {
       injectPartnerSection(contextPath, partnerInfo);
-      const injectedResult = undefined;
-      return injectedResult;
+      return;
     }
-
-    const stackLine = (currentSelections.idioms ?? [])
-      .map((idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.name ?? idiomFolderKey)
-      .join(', ');
 
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'context.md');
     let contextContent = fs.readFileSync(templatePath, 'utf8');
     contextContent = contextContent
       .replace('{{PROJECT_NAME}}', path.basename(projectDirectory))
-      .replace('{{STACK}}', stackLine)
+      .replace('{{STACK}}', 'declared in .ai/backlog/stack.md (run `land:` to populate)')
       .replace('{{PARTNER}}', partnerInfo);
 
     fs.writeFileSync(contextPath, contextContent);
@@ -310,6 +264,14 @@ function writeBacklogFiles(targetDirectory, selections) {
     const separator = existingContent.endsWith('\n') ? '' : '\n';
     const injection = `\n## Partner\n\n${partnerInfo}\n`;
     fs.appendFileSync(contextPath, `${separator}${injection}`);
+  }
+
+  function writeStackFile(backlogDirectoryPath) {
+    const stackPath = path.join(backlogDirectoryPath, 'stack.md');
+    if (fs.existsSync(stackPath)) return;
+    const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'stack.md');
+    if (!fs.existsSync(templatePath)) return;
+    fs.copyFileSync(templatePath, stackPath);
   }
 
   function writeTasksFile(backlogDirectoryPath) {
@@ -452,7 +414,6 @@ function writeAutomationScripts(targetDirectory, selections) {
   const scriptsDir = path.join(targetDirectory, 'scripts');
   const bumpScriptPath = path.join(scriptsDir, 'bump.mjs');
 
-  // 1. Check for existing bump script in package.json to avoid collision
   const packagePath = path.join(targetDirectory, 'package.json');
   const packageData = safeReadJson(packagePath);
   if (!packageData) return;
@@ -462,11 +423,9 @@ function writeAutomationScripts(targetDirectory, selections) {
     (packageData.scripts.bump || packageData.scripts.release || packageData.scripts.version);
 
   if (hasExistingBump && !fs.existsSync(bumpScriptPath)) {
-    // If they have a script but not our file, we respect their script
     return;
   }
 
-  // 2. Write bump.mjs template
   if (!fs.existsSync(bumpScriptPath)) {
     fs.mkdirSync(scriptsDir, { recursive: true });
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'bump.mjs');
@@ -474,14 +433,12 @@ function writeAutomationScripts(targetDirectory, selections) {
     fs.writeFileSync(bumpScriptPath, templateContent);
   }
 
-  // 3. Update package.json scripts
   if (!packageData.scripts) packageData.scripts = {};
   if (!packageData.scripts.bump) {
     packageData.scripts.bump = 'node scripts/bump.mjs';
     writeJsonAtomic(packagePath, packageData, fs.readFileSync(packagePath, 'utf8'));
   }
 
-  // 4. Configure Husky if .husky exists
   const huskyDirectory = path.join(targetDirectory, '.husky');
   if (fs.existsSync(huskyDirectory)) {
     const prePushPath = path.join(huskyDirectory, 'pre-push');
@@ -530,6 +487,18 @@ function writeToolingAssets(targetDirectory) {
   }
 }
 
+/**
+ * Removes the generated `.ai/instructions/` tree so the next regen rebuilds it from
+ * the current `src/assets/instructions/` SSOT. Prevents stale files (like legacy
+ * `idioms/`, `competencies/backend.md`, `competencies/frontend.md`) from surviving.
+ * Scoped to `.ai/instructions/` — never touches `.ai/backlog/` (developer state).
+ */
+function removeGeneratedInstructions(targetDirectory) {
+  const generatedInstructionsDir = path.join(targetDirectory, '.ai', 'instructions');
+  if (!fs.existsSync(generatedInstructionsDir)) return;
+  fs.rmSync(generatedInstructionsDir, { recursive: true, force: true });
+}
+
 export const InstructionAssembler = {
   buildMasterInstructions,
   buildClaudeContent,
@@ -539,4 +508,5 @@ export const InstructionAssembler = {
   writeManifest,
   writeAutomationScripts,
   writeToolingAssets,
+  removeGeneratedInstructions,
 };

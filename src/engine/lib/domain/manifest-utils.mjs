@@ -22,7 +22,7 @@ function hashFile(filePath) {
 }
 
 function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR, skillsDir = SKILLS_DIR) {
-  const { flavor, idioms } = selections;
+  const { flavor } = selections;
   const hashes = {};
 
   if (fs.existsSync(skillsDir)) {
@@ -36,15 +36,6 @@ function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR, skillsDir
     }
   }
 
-  if (idioms && Array.isArray(idioms)) {
-    for (const idiomFolderKey of idioms) {
-      const idiomDir = path.join(instructionsDir, 'idioms', idiomFolderKey);
-      if (fs.existsSync(idiomDir)) {
-        scanDir(idiomDir, `idioms/${idiomFolderKey}`, hashes);
-      }
-    }
-  }
-
   const templatesDir = path.join(instructionsDir, 'templates');
   if (fs.existsSync(templatesDir)) {
     scanDir(templatesDir, 'templates', hashes);
@@ -55,10 +46,6 @@ function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR, skillsDir
     scanDir(competenciesDir, 'competencies', hashes);
   }
 
-  const workflowsDir = path.join(instructionsDir, 'workflows');
-  if (fs.existsSync(workflowsDir)) {
-    scanDir(workflowsDir, 'workflows', hashes);
-  }
   const commandsDir = path.join(instructionsDir, 'commands');
   if (fs.existsSync(commandsDir)) {
     scanDir(commandsDir, 'commands', hashes);

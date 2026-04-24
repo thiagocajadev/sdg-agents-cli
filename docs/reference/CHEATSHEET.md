@@ -7,18 +7,20 @@
 The fastest paths from zero to a governed project:
 
 ```bash
-# Interactive wizard — guides you through flavor and idiom selection
+# Interactive wizard — walks you through architectural flavor + partner info
 npx sdg-agents
 
-# Non-interactive: TypeScript + Vertical Slice (most common)
-npx sdg-agents init --flavor vertical-slice --idiom typescript
+# Zero-prompt install (lite flavor + stack.md placeholder)
+npx sdg-agents init --quick
 
-# Non-interactive: full-stack with multiple idioms
-npx sdg-agents init --flavor vertical-slice --idiom typescript,javascript
+# Non-interactive: vertical-slice (most common)
+npx sdg-agents init --flavor vertical-slice
 
 # Preview what would be written without touching the filesystem
-npx sdg-agents init --flavor mvc --idiom python --dry-run
+npx sdg-agents init --flavor mvc --dry-run
 ```
+
+After install, open the agent chat and run `land: <one-line vision>`. The agent elicits the stack, writes `.ai/backlog/stack.md`, and seeds the backlog.
 
 ---
 
@@ -34,50 +36,51 @@ Select the flavor that matches your project's data flow and structure:
 | `legacy`         | Refactor-safe bridge patterns           | Migrating existing codebases   |
 
 ```bash
-npx sdg-agents init --flavor vertical-slice --idiom typescript
-npx sdg-agents init --flavor mvc --idiom java
-npx sdg-agents init --flavor lite --idiom python
-npx sdg-agents init --flavor legacy --idiom csharp
+npx sdg-agents init --flavor vertical-slice
+npx sdg-agents init --flavor mvc
+npx sdg-agents init --flavor lite
+npx sdg-agents init --flavor legacy
 ```
 
 ---
 
-## Language Idioms (`--idiom`)
+## Stack Declaration (`land:`)
 
-Inject language-specific patterns alongside the governance rules. Repeatable or comma-separated:
+There is no `--idiom` flag — stack is declared at project inception through the `land:` cycle:
 
-| Idiom        | Stack                                       |
-| :----------- | :------------------------------------------ |
-| `typescript` | TypeScript (React / Angular / Node / Astro) |
-| `javascript` | JavaScript (Vanilla / ESM)                  |
-| `python`     | Python                                      |
-| `csharp`     | C# / .NET                                   |
-| `java`       | Java / Spring                               |
-| `kotlin`     | Kotlin                                      |
-| `go`         | Go                                          |
-| `rust`       | Rust                                        |
-| `swift`      | Swift / iOS                                 |
-| `flutter`    | Flutter / Dart                              |
-| `sql`        | SQL                                         |
-| `vbnet`      | VB.NET                                      |
-
-```bash
-# Single idiom
-npx sdg-agents init --flavor vertical-slice --idiom go
-
-# Multiple idioms — comma-separated or repeated flag
-npx sdg-agents init --flavor mvc --idiom typescript,python
-npx sdg-agents init --flavor mvc --idiom typescript --idiom python
 ```
+land: a Node.js + TypeScript API serving a React dashboard
+```
+
+The agent elicits every language/runtime/framework with its version, classifies entries by role (Backend / Frontend / Data / Scripts), optionally enriches via an allow-listed doc fetch, and writes the result to `.ai/backlog/stack.md`. Phase CODE reads that file on every session — edit it directly when versions change.
+
+### WebFetch allow-list
+
+The agent may only fetch enrichment from these canonical sources:
+
+| Language / Framework    | Source                                     |
+| :---------------------- | :----------------------------------------- |
+| JavaScript / ECMAScript | `tc39.es/ecma262/`                         |
+| TypeScript              | `typescriptlang.org/docs/`                 |
+| Node.js                 | `nodejs.org/api/`                          |
+| React                   | `react.dev/reference/`                     |
+| Astro                   | `docs.astro.build/`                        |
+| Python                  | `docs.python.org/3/`                       |
+| Go                      | `go.dev/doc/`                              |
+| Rust                    | `doc.rust-lang.org/stable/`                |
+| Kotlin                  | `kotlinlang.org/docs/`                     |
+| Dart / Flutter          | `dart.dev/guides`, `docs.flutter.dev/`     |
+| .NET / C#               | `learn.microsoft.com/dotnet/`              |
+| Swift                   | `developer.apple.com/documentation/swift/` |
 
 ---
 
 ## Maintenance Commands
 
 ```bash
+npx sdg-agents gate      # Run SDG gate review against staged diff (language-agnostic pre-commit)
 npx sdg-agents review    # Detect drift between local rules and source engine
-npx sdg-agents sync      # Update rulesets from the source (web-assisted)
-npx sdg-agents update    # Refresh the LTS version registry
+npx sdg-agents audit     # Run governance audit (law violations, drift)
 npx sdg-agents clear     # Remove the entire .ai/ governance layer
 ```
 
@@ -89,7 +92,7 @@ Prefix your message to the AI Agent to activate the corresponding governance cyc
 
 | Trigger               | Cycle   | Intent                                                                                                                                               |
 | :-------------------- | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `land: <description>` | Land    | Project inception — vision to sequenced `feat:` backlog, no code written.                                                                            |
+| `land: <description>` | Land    | Project inception — vision + stack declaration + sequenced `feat:` backlog, no code written.                                                         |
 | `feat: <description>` | Feature | New implementation — requires SPEC and PLAN approval before any code.                                                                                |
 | `fix: <description>`  | Fix     | Bug resolution — Root Cause Analysis and regression test mandatory.                                                                                  |
 | `docs: <description>` | Docs    | Technical memory sync — Changelogs, ADRs, Specs.                                                                                                     |
@@ -117,14 +120,15 @@ The Agent **stops and waits for explicit Developer approval** at SPEC and PLAN b
 
 ## Developer vs AI Agent
 
-| Responsibility                          | Developer | AI Agent |
-| :-------------------------------------- | :-------: | :------: |
-| Run CLI commands (`init`, `sync`, etc.) |    ✅     |    —     |
-| Approve SPEC and PLAN                   |    ✅     |    —     |
-| Execute CODE and TEST phases            |     —     |    ✅    |
-| Update CHANGELOG and backlog            |     —     |    ✅    |
-| Propose commit message                  |     —     |    ✅    |
-| Authorize commit and push               |    ✅     |    —     |
+| Responsibility                           | Developer | AI Agent |
+| :--------------------------------------- | :-------: | :------: |
+| Run CLI commands (`init`, `audit`, etc.) |    ✅     |    —     |
+| Declare the stack during `land:`         |    ✅     |    —     |
+| Approve SPEC and PLAN                    |    ✅     |    —     |
+| Execute CODE and TEST phases             |     —     |    ✅    |
+| Update CHANGELOG and backlog             |     —     |    ✅    |
+| Propose commit message                   |     —     |    ✅    |
+| Authorize commit and push                |    ✅     |    —     |
 
 ---
 

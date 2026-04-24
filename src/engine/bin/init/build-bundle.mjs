@@ -12,8 +12,7 @@ import { ResultUtils } from '../../lib/core/result-utils.mjs';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
 import { BundleUI } from '../../lib/core/ui-utils.mjs';
 
-const { gatherUserSelections, validateSelections, resolveVersionsByCodeStyle, autoDetectBump } =
-  WizardUtils;
+const { gatherUserSelections, validateSelections } = WizardUtils;
 const { prepareProjectStructure, injectRulesets } = RulesetInjector;
 const {
   buildMasterInstructions,
@@ -23,6 +22,7 @@ const {
   writeManifest,
   writeAutomationScripts,
   writeToolingAssets,
+  removeGeneratedInstructions,
 } = InstructionAssembler;
 const { success } = ResultUtils;
 const { bootstrapIfDirect } = FsUtils;
@@ -71,8 +71,7 @@ async function buildNonInteractive(targetDirectory, options) {
     process.exit(1);
   }
 
-  resolveVersionsByCodeStyle(selections);
-  autoDetectBump(selections);
+  if (selections.bump === undefined) selections.bump = true;
 
   const state = { step: 'execute', userSelections: selections };
   const result = await finalizeExecutionPhase(state, targetDirectory, {
@@ -201,6 +200,7 @@ function abortExecution(state) {
 
 function applyQuickPipeline(targetDirectory, selections) {
   printStep(1, 5, 'Preparing .ai/ structure...');
+  removeGeneratedInstructions(targetDirectory);
   prepareProjectStructure(targetDirectory);
 
   printStep(2, 5, 'Injecting rules...');
@@ -222,6 +222,7 @@ function applyQuickPipeline(targetDirectory, selections) {
 
 function applyAgentsPipeline(targetDirectory, selections) {
   printStep(1, 5, 'Preparing .ai/ structure...');
+  removeGeneratedInstructions(targetDirectory);
   prepareProjectStructure(targetDirectory);
 
   printStep(2, 5, 'Injecting rules...');

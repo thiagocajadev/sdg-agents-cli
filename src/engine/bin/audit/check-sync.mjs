@@ -12,7 +12,7 @@ const PROJECT_ROOT = process.cwd();
 const ASSETS_DIR = path.join(PROJECT_ROOT, 'src', 'assets', 'instructions');
 const AI_DIR = path.join(PROJECT_ROOT, '.ai', 'instructions');
 
-const MIRRORED_DIRS = ['core', 'idioms', 'templates', 'competencies'];
+const MIRRORED_DIRS = ['templates', 'competencies', 'commands', 'flavors'];
 
 function checkDrift() {
   const syncCheckOutcome = orchestrateSyncCheck();

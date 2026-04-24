@@ -20,13 +20,13 @@ your-project/
 │   │   ├── sql-style.md         ← SQL query rules
 │   │   └── ui-ux.md             ← Design thinking, presets, standards, architecture
 │   ├── instructions/
-│   │   ├── templates/           ← Working protocol (workflow.md), agent roles, context templates
+│   │   ├── templates/           ← Working protocol (workflow.md), agent roles, context + stack + tasks seeds
 │   │   ├── flavors/             ← Architectural patterns (vertical-slice, mvc, lite, legacy)
-│   │   ├── idioms/              ← Language conventions (typescript, python, go, etc.)
-│   │   └── competencies/        ← Layer rules (frontend, backend)
+│   │   └── competencies/        ← Delivery contract — BFF envelope + UI contract execution (fused)
 │   ├── commands/                ← Cycle command files (feat/fix/docs/audit/land/end)
 │   └── backlog/                 ← Harness Engineering (Memory) — gitignored, local working state
-│       ├── context.md           ← Project brief: stack, tech decisions, current state
+│       ├── context.md           ← Project brief: vision, decisions, current state
+│       ├── stack.md             ← Developer-declared languages/runtimes/versions (populated by land:)
 │       ├── tasks.md             ← Task list (TODO / IN_PROGRESS / DONE)
 │       ├── learned.md           ← Lessons learned: success patterns and research findings
 │       ├── troubleshoot.md      ← Troubleshooting: RCA logs and critical failure records
@@ -79,13 +79,16 @@ Domain skills. Each covers its concern end-to-end — for example, `api-design.m
 
 Rules for the project's architectural pattern. Defines where logic belongs — for example, whether business logic lives in UseCases, Services, or Controllers. One flavor per project: `vertical-slice`, `mvc`, `lite`, `legacy`.
 
-### instructions/idioms/
-
-Language-specific conventions. Each idiom file covers patterns, anti-patterns, and idiomatic usage for that stack: `typescript`, `javascript`, `python`, `csharp`, `java`, `kotlin`, `go`, `rust`, `swift`, `flutter`, `sql`, `vbnet`. Multi-idiom projects install more than one.
-
 ### instructions/competencies/
 
-Layer-specific rules for frontend and backend work — data flow, component boundaries, API contract rules. Loaded on demand by the SPEC phase of a `feat:` cycle when the cycle command requests it.
+A single file, `delivery.md`, covering both sides of the delivery contract with internal discriminators:
+
+- `## Backend (load if the task is server-side)` — BFF response envelope (SSOT), execution flow (Validate → Load Dep → Business Rules → Core Logic → Persist → Filter → Envelope), typed layer results, entry-point discipline.
+- `## Frontend (load if the task is UI)` — Design Thinking, wireframe discipline, visual layers, HTTP integration via `apiClient → Service → useApi → Component`, component hierarchy rules.
+
+Loaded on demand by the SPEC phase of a `feat:` cycle when the cycle command requests it. The agent picks whichever half matches the task.
+
+> **Stack specificity.** Static language idiom catalogs were retired in v5.0. Stack lives in `.ai/backlog/stack.md`, written by the `land:` cycle — the agent reads it on every session to know which languages/versions the project actually uses.
 
 ---
 
@@ -110,10 +113,11 @@ Gitignored. Persists project state across sessions so any agent — in any sessi
 
 **context.md** — written on first run, maintained by the agent at the END of each cycle. Captures:
 
-- Stack and frameworks used
-- Architectural decisions and their rationale
+- Vision, architectural decisions, and their rationale
 - Current objective (`## Now`)
 - Developer metadata (`## Partner`)
+
+**stack.md** — placeholder written on install, populated by the `land:` cycle. Single source of truth for project stack (languages, runtimes, frameworks, versions) grouped by role (Backend / Frontend / Data / Scripts). Phase CODE reads this file on every session.
 
 **tasks.md** — the task list. Tracks atomic units of work across sessions:
 
@@ -150,10 +154,11 @@ This design is inspired by the structural philosophy of [code-review-graph](http
 
 ## How the Files Are Used Per Phase
 
-| Phase | Files read                                                                                               |
-| :---- | :------------------------------------------------------------------------------------------------------- |
-| SPEC  | `commands/sdg-<cycle>.md`, `.ai/backlog/context.md`, `.ai/backlog/tasks.md`                              |
-| PLAN  | `.ai/backlog/tasks.md`, `.ai/backlog/impact-map.md` (written here via `git diff`)                        |
-| CODE  | `skills/code-style.md` + domain skills on demand, `.ai/backlog/impact-map.md`                            |
-| TEST  | `skills/testing.md` — Includes **Audit Gate** (drift detection) and **Circuit Breaker** (3-strike rule)  |
-| END   | `.ai/backlog/context.md`, `.ai/backlog/tasks.md`, `learned.md`, `troubleshoot.md`, `commands/sdg-end.md` |
+| Phase         | Files read                                                                                                 |
+| :------------ | :--------------------------------------------------------------------------------------------------------- |
+| Session Start | `.ai/backlog/context.md`, `.ai/backlog/stack.md`, `.ai/backlog/tasks.md`                                   |
+| SPEC          | `commands/sdg-<cycle>.md`, `.ai/backlog/context.md`, `.ai/backlog/tasks.md`                                |
+| PLAN          | `.ai/backlog/tasks.md`, `.ai/backlog/impact-map.md` (written here via `git diff`)                          |
+| CODE          | `skills/code-style.md` + domain skills + `competencies/delivery.md` on demand, `.ai/backlog/impact-map.md` |
+| TEST          | `skills/testing.md` — Includes **Audit Gate** (drift detection) and **Circuit Breaker** (3-strike rule)    |
+| END           | `.ai/backlog/context.md`, `.ai/backlog/tasks.md`, `learned.md`, `troubleshoot.md`, `commands/sdg-end.md`   |

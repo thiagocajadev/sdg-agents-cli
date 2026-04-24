@@ -1,4 +1,11 @@
-# Migrating from sdg-agents v2 → v3
+# Migrating sdg-agents (v2 → v3, v4.1 → v5.0)
+
+> For the **v4.1 → v5.0** breaks — static idioms removed, stack now declared via `land:`, competencies fused — jump to [v5.0 Migration Notes](#v42-migration-notes-dynamic-stack-context).
+> For the historic **v2 → v3** reformulation, continue below.
+
+---
+
+## v2 → v3 Reformulation
 
 `sdg-agents` v3.0 is a structural reformulation. The **generated `.ai/` layout, the skill model, and the engine internals** all changed. The public CLI surface (wizard, `init`, `audit`, `review`, `sync`, `clear`) stays compatible — the breaking changes are in the files written into your project.
 
@@ -140,6 +147,45 @@ git commit -m "chore: migrate to sdg-agents v3"
 - **Multi-agent generation** — one init run writes entry files for every selected agent.
 - **Multi-idiom support** — polyglot projects install `typescript,python,go` in a single command.
 - **Token discipline by default** — Terse Mode is the default output mode. Pedagogical Mode is opt-in via explicit "explain" or "why" in the prompt.
+
+---
+
+---
+
+## v5.0 Migration Notes — Dynamic Stack Context
+
+v5.0 removes the static idiom catalog. Stack specificity moves from the installer to the `land:` cycle, where the developer declares it — once, in `.ai/backlog/stack.md`.
+
+### Breaking Changes
+
+| Area                     | v4.1 (before)                                                                                     | v5.0 (now)                                                                                                                  |
+| :----------------------- | :------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------- |
+| Static idioms            | `.ai/instructions/idioms/<lang>/patterns.md` (15 language dirs) copied on `init`                  | **Removed.** Stack lives in `.ai/backlog/stack.md`, written by the `land:` cycle                                            |
+| CLI flag `--idiom`       | Accepted a comma-separated list (`--idiom typescript,python`)                                     | **Removed.** Flag no longer parsed; non-interactive mode needs only `--flavor`                                              |
+| Wizard idiom prompts     | Backend + Frontend selects asking for language per role                                           | **Removed.** Wizard is now `flavor → partner → done`                                                                        |
+| Competency files         | `competencies/backend.md` + `competencies/frontend.md` (copied conditionally based on idiom role) | **Fused** into `competencies/delivery.md` with internal `## Backend (load if ...)` / `## Frontend (load if ...)` gates      |
+| `codeStyle` selection    | `latest` / `conservative` for idiom version resolution                                            | **Removed** — no idioms, no version resolution                                                                              |
+| `sdg-agents update`      | Regenerated the LTS version registry by prompting an AI agent                                     | **Removed.** `stack-versions.mjs` no longer exists                                                                          |
+| `sdg-agents sync`        | Generated a prompt to sync idiom/UI pattern files against upstream docs                           | **Removed.** `sync-rulesets.mjs` deleted                                                                                    |
+| `AGENTS.md` Phase CODE   | Listed each installed idiom with language label and conditional Backend/Frontend competency       | Lists `delivery.md` + backend skills + frontend skill + surgical skills unconditionally; `stack.md` loaded at Session Start |
+| `.ai/instructions/` tree | Merged with any stale files from previous installs                                                | **Wiped and regenerated** on every `init` (migration is silent)                                                             |
+| `.ai/backlog/stack.md`   | Did not exist                                                                                     | **New file** — placeholder seed on `init`, populated by `land:`                                                             |
+
+### Step-by-Step (v4.1 → v5.0)
+
+1. Upgrade: `npm i -g sdg-agents@4.2` (or use `npx sdg-agents@4.2`).
+2. Re-run `npx sdg-agents init` — the installer silently wipes `.ai/instructions/` and rewrites it. `.ai/backlog/` is preserved.
+3. A new `.ai/backlog/stack.md` placeholder appears. Open the agent chat and run `land: <one-line vision>`. The agent will elicit languages/versions, optionally fetch canonical docs, and populate the file.
+4. Check your generated `AGENTS.md` — the Phase CODE block should list `delivery.md` and skills by category, with no `idioms/` references.
+5. Run `npx sdg-agents audit` — expect 100%.
+
+### Preserving Custom Idioms
+
+If you had hand-authored edits in `.ai/instructions/idioms/**/patterns.md`, copy them out before re-running `init`. The cleanest migration is to paste the surviving rules into `.ai/backlog/stack.md` as role-classified bullets, or into a project-local skill file in `.ai/skills/` if they are cross-cutting.
+
+### Why
+
+Static idiom catalogs were a knowledge dump — every install copied fifteen language subdirectories, most unused, and the version registry (`stack-versions.mjs`) rotted the moment any upstream released. v5.0 replaces that with developer authority: the `land:` cycle treats stack declaration as part of project inception, the same way `## Vision` and the epic list are. The agent reads the live declaration on every Phase CODE entry; the maintainer never has to ship a new catalog version.
 
 ---
 

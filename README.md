@@ -23,7 +23,8 @@ The instruction set covers:
 - **Working protocol**: a 5-phase cycle (SPEC → PLAN → CODE → TEST → END) that structures how the agent handles any task. Includes a **Pre-Code Checklist** (CODE entry), a **Pre-Finish Gate** (TEST), and a 3-strike **Circuit Breaker** (STOP) to prevent regression loops.
 - **Code style & quality gates**: consolidated in `code-style.md` — a single Pre-Code Checklist (Mental Reset, Target Files, Naming, Narrative, Comments, Tests, Security, Blockers) and a Pre-Finish Gate wired to narrative heuristics (Stepdown, SLA, Explaining Returns, banned abbreviations, Boolean prefix, Revealing Module Pattern, etc.).
 - **Skills, on-demand**: code style, testing, security, API design, data access, observability, CI/CD, cloud, SQL style, UI/UX — each a self-contained skill unit loaded only when the current cycle needs it.
-- **Language idioms**: idiomatic conventions for your specific stack (JS, TS, Python, C#, Java, Kotlin, Go, Rust, Swift, Flutter, SQL, VB.NET).
+- **Dynamic stack context**: the `land:` cycle elicits the project's languages and versions from the developer, optionally enriches them via an allow-listed doc fetch, and persists the result in `.ai/backlog/stack.md`. Phase CODE reads that file as the single source of truth — no static idiom catalog, no version registry to maintain.
+- **Delivery contract**: BFF response envelope (server-side) and UI contract execution (client-side) fused into one self-gated `competencies/delivery.md`, loaded when the task touches delivery logic.
 - **Architectural flavors**: rules for your project's structural pattern (vertical slice, MVC, lite, legacy).
 - **Any-agent compatible**: a single canonical `.ai/skills/AGENTS.md` that any AI agent (Claude Code, Cursor, Windsurf, Copilot, Codex, Gemini, Cline/Roo) can reference. `CLAUDE.md` is auto-generated at the repo root for Claude Code; other tools are wired up by a one-line pointer (see "Using with other IDEs" below).
 - **Harness Engineering (Memory)**: a `.ai/backlog/` folder that persists context and task state across sessions.
@@ -42,18 +43,20 @@ npx sdg-agents
   <kbd><img src="https://raw.githubusercontent.com/thiagocajadev/sgd-agents-cli/main/docs/img/sdg-agents-menu-v2.png" alt="Spec Driven Guide CLI in action" /></kbd>
 </p>
 
-The interactive wizard guides you through selecting an architectural flavor and one or more language idioms. For non-interactive use:
+The interactive wizard guides you through selecting an architectural flavor. Stack discovery (languages + versions) happens later via the `land:` cycle — kept out of install so the developer can declare it deliberately, once the project brief is clear. For non-interactive use:
 
 ```bash
-# Zero-prompt install (lite + JS/TS defaults)
+# Zero-prompt install (lite flavor + placeholder stack.md)
 npx sdg-agents init --quick
 
-# TypeScript + Vertical Slice
-npx sdg-agents init --flavor vertical-slice --idiom typescript
+# Vertical Slice — any stack
+npx sdg-agents init --flavor vertical-slice
 
-# Multi-idiom
-npx sdg-agents init --flavor mvc --idiom typescript,python
+# MVC — any stack
+npx sdg-agents init --flavor mvc
 ```
+
+After install, open the agent chat and run `land: <vision>` — the agent elicits the stack, writes `.ai/backlog/stack.md`, and seeds the backlog.
 
 ---
 
@@ -70,7 +73,7 @@ your-project/
 │   │   ├── testing.md
 │   │   ├── security.md
 │   │   └── ... (api-design, data-access, observability, ci-cd, cloud, sql-style, ui-ux)
-│   ├── instructions/            ← Flavors, idioms, competencies, templates
+│   ├── instructions/            ← Flavors, fused delivery competency, templates
 │   ├── commands/                ← Cycle commands (feat/fix/docs/audit/land/end)
 │   ├── tooling/                 ← Inert tooling bundle (scripts + husky hooks — activate on demand)
 │   └── backlog/                 ← Harness Engineering (Memory) — gitignored, local working state
@@ -129,21 +132,22 @@ For the data flow diagram of each flavor, see [Architectural Pipelines](docs/ref
 
 ---
 
-## Language Idioms
+## Stack Declaration via `land:`
 
-Install language-specific patterns alongside the protocol:
+Stack is **dynamic, not cataloged**. After `sdg-agents init`, run the `land:` cycle to declare the project's languages, runtimes, and framework versions:
 
-`typescript` · `javascript` · `python` · `csharp` · `java` · `kotlin` · `go` · `rust` · `swift` · `flutter` · `sql` · `vbnet`
-
-```bash
-# Single idiom
-npx sdg-agents init --idiom typescript
-
-# Multi-idiom (polyglot projects)
-npx sdg-agents init --idiom typescript,python,go
+```
+land: a Node.js + TypeScript API serving a React dashboard
 ```
 
-To add or extend support for a language, paste the idiom skill file into your agent via prompt — no CLI subcommand needed.
+The agent:
+
+1. Asks you to list every language and version (free-form).
+2. Classifies each entry by role (Backend / Frontend / Data / Scripts).
+3. Offers **optional** enrichment via an allow-list of canonical doc sources (`nodejs.org/api`, `react.dev`, `typescriptlang.org`, `tc39.es`, `docs.astro.build`, `docs.python.org`, `go.dev/doc`, `doc.rust-lang.org`, `kotlinlang.org/docs`, `dart.dev`, `learn.microsoft.com/dotnet`, `developer.apple.com/documentation/swift`).
+4. Writes `.ai/backlog/stack.md` — the single source of truth for stack-specific idioms. Edit it directly when versions change; no regen needed.
+
+Phase CODE loads `stack.md` on every cycle. No static idiom catalog, no `--idiom` flag.
 
 ---
 
@@ -170,8 +174,6 @@ To add or extend support for a language, paste the idiom skill file into your ag
 ```bash
 npx sdg-agents gate      # Run SDG gate review against staged diff (language-agnostic pre-commit)
 npx sdg-agents review    # Detect drift between local rules and source
-npx sdg-agents sync      # Update rulesets from source
-npx sdg-agents update    # Refresh the LTS version registry
 npx sdg-agents audit     # Run governance audit (law violations, drift)
 npx sdg-agents clear     # Remove the .ai/ folder
 ```

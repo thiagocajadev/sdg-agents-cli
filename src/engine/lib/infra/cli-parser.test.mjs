@@ -41,24 +41,6 @@ describe('CliParser', () => {
       assert.equal(actual.help, expectedHelp);
     });
 
-    it('should normalize comma-separated idioms into an array', () => {
-      const input = ['init', '--idiom', 'javascript,typescript,python'];
-      const expectedIdioms = ['javascript', 'typescript', 'python'];
-
-      const actual = parseCliArgs(input);
-
-      assert.deepEqual(actual.idioms, expectedIdioms);
-    });
-
-    it('should handle repeated flags for idioms', () => {
-      const input = ['init', '--idiom', 'go', '--idiom', 'rust'];
-      const expectedIdioms = ['go', 'rust'];
-
-      const actual = parseCliArgs(input);
-
-      assert.deepEqual(actual.idioms, expectedIdioms);
-    });
-
     it('should identify help and version flags (long and short)', () => {
       const inputHelpLong = ['--help'];
       const inputHelpShort = ['-h'];
@@ -96,65 +78,63 @@ describe('CliParser', () => {
     });
 
     it('should default quick to false when flag is absent', () => {
-      const input = ['init', '--flavor', 'lite', '--idiom', 'typescript'];
+      const input = ['init', '--flavor', 'lite'];
       const expectedQuick = false;
 
       const actual = parseCliArgs(input);
 
       assert.equal(actual.quick, expectedQuick);
     });
+
+    it('should not expose an idioms field (legacy flag removed in v5.0)', () => {
+      const input = ['init', '--flavor', 'lite'];
+
+      const actual = parseCliArgs(input);
+
+      const hasIdiomsField = Object.prototype.hasOwnProperty.call(actual, 'idioms');
+      const expectedAbsent = false;
+      assert.equal(hasIdiomsField, expectedAbsent);
+    });
   });
 
   describe('validateInit()', () => {
+    const expectedPass = null;
+
     it('should return null for --quick flag (bypasses all other validation)', () => {
-      const input = { quick: true, flavor: null, idioms: [], mode: null };
-      const expected = null;
+      const input = { quick: true, flavor: null, mode: null };
 
       const actual = validateInit(input);
 
-      assert.equal(actual, expected);
+      assert.equal(actual, expectedPass);
     });
 
     it('should return null for mode quick (bypasses all other validation)', () => {
-      const input = { quick: false, mode: 'quick', flavor: null, idioms: [] };
-      const expected = null;
+      const input = { quick: false, mode: 'quick', flavor: null };
 
       const actual = validateInit(input);
 
-      assert.equal(actual, expected);
+      assert.equal(actual, expectedPass);
     });
 
     it('should return null for valid non-interactive arguments', () => {
-      const input = { quick: false, flavor: 'lite', idioms: ['javascript'], mode: null };
-      const expected = null;
+      const input = { quick: false, flavor: 'lite', mode: null };
 
       const actual = validateInit(input);
 
-      assert.equal(actual, expected);
+      assert.equal(actual, expectedPass);
     });
 
-    it('should return null for interactive mode (no flavor or idioms)', () => {
-      const input = { quick: false, flavor: null, idioms: [], mode: null };
-      const expected = null;
+    it('should return null for interactive mode (no flavor)', () => {
+      const input = { quick: false, flavor: null, mode: null };
 
       const actual = validateInit(input);
 
-      assert.equal(actual, expected);
+      assert.equal(actual, expectedPass);
     });
 
     it('should return an error message if flavor is missing in non-interactive mode', () => {
-      const input = { quick: false, flavor: null, idioms: ['javascript'], mode: null };
+      const input = { quick: false, flavor: null, mode: 'agents' };
       const expectedError = '--flavor is required';
-
-      const actual = validateInit(input);
-      const hasExpectedError = actual.includes(expectedError);
-
-      assert.ok(hasExpectedError);
-    });
-
-    it('should return an error message if idioms are empty in non-interactive mode', () => {
-      const input = { quick: false, flavor: 'lite', idioms: [], mode: null };
-      const expectedError = 'At least one --idiom is required';
 
       const actual = validateInit(input);
       const hasExpectedError = actual.includes(expectedError);

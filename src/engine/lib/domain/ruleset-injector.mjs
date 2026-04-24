@@ -1,10 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { STACK_DISPLAY_NAMES } from '../../config/stack-display.mjs';
 import { FsUtils } from '../core/fs-utils.mjs';
 
-const { copyRecursiveSync, filterContentByVersion, getDirname } = FsUtils;
+const { copyRecursiveSync, getDirname } = FsUtils;
 
 const __dirname = getDirname(import.meta.url);
 const SOURCE_ASSETS = path.join(__dirname, '../../..', 'assets');
@@ -24,7 +23,7 @@ function prepareProjectStructure(targetDirectory) {
 }
 
 function injectRulesets(targetDirectory, selections) {
-  const { flavor, idioms } = selections;
+  const { flavor } = selections;
   const projectAiInstructions = path.join(targetDirectory, '.ai', 'instructions');
   const projectAiSkills = path.join(targetDirectory, '.ai', 'skills');
 
@@ -37,11 +36,7 @@ function injectRulesets(targetDirectory, selections) {
     copyRecursiveSync(flavorSrc, path.join(projectAiInstructions, 'flavor'));
   }
 
-  for (const idiomFolderKey of idioms) {
-    injectFilteredIdiom(idiomFolderKey, selections.versions[idiomFolderKey], projectAiInstructions);
-  }
-
-  injectCompetencies(selections, projectAiInstructions);
+  injectCompetencies(projectAiInstructions);
 
   copyRecursiveSync(
     path.join(SOURCE_INSTRUCTIONS, 'templates'),
@@ -53,68 +48,28 @@ function injectRulesets(targetDirectory, selections) {
   }
 }
 
-function collectOutputSummary(selections) {
-  const { flavor, idioms } = selections;
-  const directories = [];
-
-  directories.push('.ai/skills/');
-  if (flavor) directories.push('.ai/instructions/flavor/');
-  for (const idiom of idioms) directories.push(`.ai/instructions/idioms/${idiom}/`);
-  directories.push('.ai/instructions/templates/');
-  directories.push('.ai/instructions/competencies/');
-  directories.push('.ai/commands/');
+function collectOutputSummary() {
+  const directories = [
+    '.ai/skills/',
+    '.ai/instructions/flavor/',
+    '.ai/instructions/competencies/',
+    '.ai/instructions/templates/',
+    '.ai/commands/',
+  ];
 
   const summary = { directories };
   return summary;
 }
 
-function injectCompetencies(selections, projectAiInstructions) {
+function injectCompetencies(projectAiInstructions) {
   if (!fs.existsSync(SOURCE_COMPETENCIES)) return;
-
-  const hasBackend = selections.idioms.some(
-    (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isBackend
-  );
-  const hasFrontend = selections.idioms.some(
-    (idiomFolderKey) => STACK_DISPLAY_NAMES[idiomFolderKey]?.isFrontend
-  );
-
-  if (!hasBackend && !hasFrontend) return;
 
   const competenciesDir = path.join(projectAiInstructions, 'competencies');
   fs.mkdirSync(competenciesDir, { recursive: true });
 
-  if (hasBackend) {
-    const src = path.join(SOURCE_COMPETENCIES, 'backend.md');
-    if (fs.existsSync(src)) fs.copyFileSync(src, path.join(competenciesDir, 'backend.md'));
-  }
-
-  if (hasFrontend) {
-    const src = path.join(SOURCE_COMPETENCIES, 'frontend.md');
-    if (fs.existsSync(src)) fs.copyFileSync(src, path.join(competenciesDir, 'frontend.md'));
-  }
-}
-
-function injectFilteredIdiom(idiomFolderKey, targetVersion, projectAiInstructions) {
-  const idiomSrc = path.join(SOURCE_INSTRUCTIONS, 'idioms', idiomFolderKey);
-  if (!fs.existsSync(idiomSrc)) return;
-
-  const projectIdiomDir = path.join(projectAiInstructions, 'idioms', idiomFolderKey);
-  fs.mkdirSync(projectIdiomDir, { recursive: true });
-
-  for (const fileName of fs.readdirSync(idiomSrc)) {
-    const srcFile = path.join(idiomSrc, fileName);
-    const destFile = path.join(projectIdiomDir, fileName);
-
-    if (fileName.endsWith('.md') || fileName.endsWith('.xml')) {
-      let content = fs.readFileSync(srcFile, 'utf8');
-      if (content.includes('version=')) {
-        content = filterContentByVersion(content, targetVersion);
-      }
-      fs.writeFileSync(destFile, content, 'utf8');
-    } else {
-      copyRecursiveSync(srcFile, destFile);
-    }
-  }
+  const deliverySrc = path.join(SOURCE_COMPETENCIES, 'delivery.md');
+  if (!fs.existsSync(deliverySrc)) return;
+  fs.copyFileSync(deliverySrc, path.join(competenciesDir, 'delivery.md'));
 }
 
 export const RulesetInjector = {

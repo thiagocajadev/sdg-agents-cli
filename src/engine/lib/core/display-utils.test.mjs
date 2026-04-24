@@ -43,17 +43,8 @@ describe('DisplayUtils', () => {
       assert.equal(actualLegacy, expectedLegacy);
     });
 
-    it('should return name from STACK_DISPLAY_NAMES config if available', () => {
-      const input = 'javascript';
-      const expected = 'JavaScript (Vanilla / ESM)';
-
-      const actual = displayName(input);
-
-      assert.equal(actual, expected);
-    });
-
     it('should return the key itself if no display name is found', () => {
-      const input = 'unknown-stack-key';
+      const input = 'unknown-flavor-key';
       const expected = input;
 
       const actual = displayName(input);

@@ -3,10 +3,11 @@
  * Single responsibility: presentation and interaction only, no file I/O.
  */
 
-import { STACK_DISPLAY_NAMES } from '../../config/stack-display.mjs';
+import { DisplayUtils } from './display-utils.mjs';
 import { RulesetInjector } from '../domain/ruleset-injector.mjs';
 import { PromptUtils } from '../infra/prompt-utils.mjs';
 
+const { displayName } = DisplayUtils;
 const { collectOutputSummary } = RulesetInjector;
 const { safeConfirm } = PromptUtils;
 
@@ -35,6 +36,7 @@ function printActivationGuide() {
   console.log('\n  Your agent is ready. Start with a task.');
   console.log('  If it does not auto-load the rules, paste this once:');
   console.log('\n    Read .ai/skills/AGENTS.md\n');
+  console.log('  First task is `land:` — discover the project stack and seed backlog.\n');
 }
 
 function printSuccessAgents(targetDir) {
@@ -42,7 +44,7 @@ function printSuccessAgents(targetDir) {
   console.log('  ' + '─'.repeat(55));
   console.log(`  Project: ${targetDir}\n`);
   console.log('  .ai/                     (governance — canonical AGENTS.md lives here)');
-  console.log('  .ai/backlog/             (gitignored — local working state)');
+  console.log('  .ai/backlog/             (gitignored — local working state + stack.md)');
   console.log('  CLAUDE.md                (pointer at repo root — auto-loaded by Claude Code)');
   printActivationGuide();
 }
@@ -52,7 +54,7 @@ function printQuickSuccess(targetDir) {
   console.log('  ' + '─'.repeat(55));
   console.log(`  Project: ${targetDir}\n`);
   console.log('  .ai/                     (governance — canonical AGENTS.md lives here)');
-  console.log('  .ai/backlog/             (gitignored — local working state)');
+  console.log('  .ai/backlog/             (gitignored — local working state + stack.md)');
   console.log('  CLAUDE.md                (pointer at repo root — auto-loaded by Claude Code)');
   printActivationGuide();
 }
@@ -64,8 +66,8 @@ function printQuickDryRun(targetDir) {
   console.log(`  [1/5] Would prepare .ai/ structure`);
   console.log(`  [2/5] Would inject rules → .ai/`);
   console.log(`  [3/5] Would assemble AGENTS.md`);
-  console.log(`  [4/5] Would write agent config and backlog`);
-  console.log(`  [5/5] Would inject spec templates → .ai/prompts/dev-tracks/`);
+  console.log(`  [4/5] Would write agent config and backlog (stack.md placeholder)`);
+  console.log(`  [5/5] Would finalize manifest`);
   console.log('\n  Run without --dry-run to apply.\n');
 }
 
@@ -94,6 +96,7 @@ function renderPreviewDirectories(directories) {
 
 function renderPreviewInstructionSet() {
   console.log(`    📄 .ai/skills/AGENTS.md`);
+  console.log(`    📄 .ai/backlog/stack.md     (placeholder — populated by \`land:\`)`);
   console.log(`    📄 CLAUDE.md                (root pointer — auto-loaded by Claude Code)`);
 }
 
@@ -122,25 +125,10 @@ function renderSummaryHeader() {
 }
 
 function renderSummaryRows(selections) {
-  const { flavor, idioms, versions } = selections;
-
-  const flavorLabel = STACK_DISPLAY_NAMES[flavor]?.name ?? flavor;
-  const idiomsLabel = formatIdiomsLabel(idioms, versions);
-
+  const { flavor } = selections;
+  const flavorLabel = displayName(flavor);
   console.log(`  │  Flavor:  ${flavorLabel.padEnd(43)}│`);
-  console.log(`  │  Idioms:  ${idiomsLabel.padEnd(43)}│`);
-}
-
-function formatIdiomsLabel(idioms, versions) {
-  const labels = idioms.map((idiomKey) => {
-    const name = STACK_DISPLAY_NAMES[idiomKey]?.name ?? idiomKey;
-    const versionLabel = versions?.[idiomKey] ? ` (${versions[idiomKey]})` : '';
-    const label = `${name}${versionLabel}`;
-    return label;
-  });
-
-  const idiomsLabel = labels.join(', ');
-  return idiomsLabel;
+  console.log(`  │  Stack:   ${'declared by `land:` in stack.md'.padEnd(43)}│`);
 }
 
 function renderSummaryFooter() {
@@ -186,17 +174,17 @@ function printHelp(version) {
     -v, --version    Show version
 
   Init Options:
-    --quick              Install with defaults (lite + JS/TS) — no prompts
+    --quick              Install with defaults (lite flavor, stack.md placeholder) — no prompts
     --flavor <name>      Architecture (vertical-slice, mvc, lite, legacy)
-    --idiom <name>       Language idiom — repeatable or comma-separated
     --dry-run            Preview without writing files
 
   Examples:
     npx sdg-agents
     npx sdg-agents init --quick
-    npx sdg-agents init --flavor vertical-slice --idiom typescript
-    npx sdg-agents init --flavor mvc --idiom typescript,python
+    npx sdg-agents init --flavor vertical-slice
     npx sdg-agents clear
+
+  After install, run \`land:\` in your agent chat to discover and declare the project stack.
 `);
 }
 

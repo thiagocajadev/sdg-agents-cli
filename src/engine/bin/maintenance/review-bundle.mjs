@@ -78,19 +78,12 @@ async function orchestrateReview() {
 
 function printManifestSummary(manifest) {
   const { selections, generatedAt, sdgAgentVersion } = manifest;
-  const { flavor, idioms, versions } = selections;
+  const { flavor } = selections;
 
   const flavorLabel = displayName(flavor);
-  const idiomsLabels = idioms
-    .map((idiom) => {
-      const versionLabel = versions?.[idiom] ? ` (${versions[idiom]})` : '';
-      const label = `${displayName(idiom)}${versionLabel}`;
-      return label;
-    })
-    .join(', ');
 
   console.log(`  Current Flavor: ${flavorLabel}`);
-  console.log(`  Current Idioms: ${idiomsLabels}`);
+  console.log(`  Stack: declared in .ai/backlog/stack.md`);
   console.log(
     `  Last Sync: ${daysAgo(generatedAt)} — Spec Driven Guide v${sdgAgentVersion ?? 'unknown'}`
   );
