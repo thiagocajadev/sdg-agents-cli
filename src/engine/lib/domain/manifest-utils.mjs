@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { FsUtils } from '../core/fs-utils.mjs';
 
@@ -11,12 +11,12 @@ const INSTRUCTIONS_DIR = path.join(ASSETS_DIR, 'instructions');
 const SKILLS_DIR = path.join(ASSETS_DIR, 'skills');
 
 function hashFile(filePath) {
-  if (!fs.existsSync(filePath)) {
+  if (!fileSystem.existsSync(filePath)) {
     const missingFile = null;
     return missingFile;
   }
 
-  const content = fs.readFileSync(filePath);
+  const content = fileSystem.readFileSync(filePath);
   const hash = crypto.createHash('sha256').update(content).digest('hex');
   return hash;
 }
@@ -25,29 +25,29 @@ function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR, skillsDir
   const { flavor } = selections;
   const hashes = {};
 
-  if (fs.existsSync(skillsDir)) {
+  if (fileSystem.existsSync(skillsDir)) {
     scanDir(skillsDir, 'skills', hashes);
   }
 
   if (flavor) {
     const flavorDir = path.join(instructionsDir, 'flavors', flavor);
-    if (fs.existsSync(flavorDir)) {
+    if (fileSystem.existsSync(flavorDir)) {
       scanDir(flavorDir, 'flavor', hashes);
     }
   }
 
   const templatesDir = path.join(instructionsDir, 'templates');
-  if (fs.existsSync(templatesDir)) {
+  if (fileSystem.existsSync(templatesDir)) {
     scanDir(templatesDir, 'templates', hashes);
   }
 
   const competenciesDir = path.join(instructionsDir, 'competencies');
-  if (fs.existsSync(competenciesDir)) {
+  if (fileSystem.existsSync(competenciesDir)) {
     scanDir(competenciesDir, 'competencies', hashes);
   }
 
   const commandsDir = path.join(instructionsDir, 'commands');
-  if (fs.existsSync(commandsDir)) {
+  if (fileSystem.existsSync(commandsDir)) {
     scanDir(commandsDir, 'commands', hashes);
   }
 
@@ -56,11 +56,11 @@ function computeHashes(selections, instructionsDir = INSTRUCTIONS_DIR, skillsDir
 }
 
 function scanDir(directory, relativePrefix, hashes) {
-  if (!fs.existsSync(directory)) {
+  if (!fileSystem.existsSync(directory)) {
     return;
   }
 
-  const entries = fs.readdirSync(directory, { withFileTypes: true });
+  const entries = fileSystem.readdirSync(directory, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = path.join(directory, entry.name);
     const relativeFilePath = path.join(relativePrefix, entry.name);
@@ -116,13 +116,13 @@ function daysAgo(isoDate) {
 function loadManifest(projectRoot) {
   const manifestPath = path.join(projectRoot, '.ai', '.sdg-manifest.json');
 
-  if (!fs.existsSync(manifestPath)) {
+  if (!fileSystem.existsSync(manifestPath)) {
     const missingResult = null;
     return missingResult;
   }
 
   try {
-    const content = fs.readFileSync(manifestPath, 'utf8');
+    const content = fileSystem.readFileSync(manifestPath, 'utf8');
     const manifest = JSON.parse(content);
     return manifest;
   } catch {

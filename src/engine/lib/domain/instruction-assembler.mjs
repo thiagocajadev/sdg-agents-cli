@@ -3,7 +3,7 @@
  * Assembles agent config files and the project manifest.
  */
 
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import dedent from 'dedent';
 
@@ -190,7 +190,7 @@ function buildMasterInstructions(selections) {
  */
 function writeBacklogFiles(targetDirectory, selections) {
   const backlogDirectory = path.join(targetDirectory, '.ai', 'backlog');
-  fs.mkdirSync(backlogDirectory, { recursive: true });
+  fileSystem.mkdirSync(backlogDirectory, { recursive: true });
 
   writeContextFile(backlogDirectory, targetDirectory, selections);
   writeStackFile(backlogDirectory);
@@ -200,14 +200,17 @@ function writeBacklogFiles(targetDirectory, selections) {
 
   function detectProjectLanguage(projectDirectory) {
     const packagePath = path.join(projectDirectory, 'package.json');
-    if (!fs.existsSync(packagePath)) return 'en';
+    if (!fileSystem.existsSync(packagePath)) return 'en';
 
     try {
-      const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+      const packageData = JSON.parse(fileSystem.readFileSync(packagePath, 'utf8'));
       const deps = { ...packageData.dependencies, ...packageData.devDependencies };
       if (deps['i18next'] || deps['react-i18next']) {
         const localesDir = path.join(projectDirectory, 'src', 'locales');
-        if (fs.existsSync(localesDir) && fs.readdirSync(localesDir).includes('pt-BR')) {
+        if (
+          fileSystem.existsSync(localesDir) &&
+          fileSystem.readdirSync(localesDir).includes('pt-BR')
+        ) {
           const matchedLang = 'pt-BR';
           return matchedLang;
         }
@@ -242,57 +245,57 @@ function writeBacklogFiles(targetDirectory, selections) {
       partnerInfo = `${name} is the ${role}. Say "Hello ${name.split(' ')[0]}". Communication in English.`;
     }
 
-    if (fs.existsSync(contextPath)) {
+    if (fileSystem.existsSync(contextPath)) {
       injectPartnerSection(contextPath, partnerInfo);
       return;
     }
 
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'context.md');
-    let contextContent = fs.readFileSync(templatePath, 'utf8');
+    let contextContent = fileSystem.readFileSync(templatePath, 'utf8');
     contextContent = contextContent
       .replace('{{PROJECT_NAME}}', path.basename(projectDirectory))
       .replace('{{STACK}}', 'declared in .ai/backlog/stack.md (run `land:` to populate)')
       .replace('{{PARTNER}}', partnerInfo);
 
-    fs.writeFileSync(contextPath, contextContent);
+    fileSystem.writeFileSync(contextPath, contextContent);
   }
 
   function injectPartnerSection(contextPath, partnerInfo) {
-    const existingContent = fs.readFileSync(contextPath, 'utf8');
+    const existingContent = fileSystem.readFileSync(contextPath, 'utf8');
     if (existingContent.includes('## Partner')) return;
 
     const separator = existingContent.endsWith('\n') ? '' : '\n';
     const injection = `\n## Partner\n\n${partnerInfo}\n`;
-    fs.appendFileSync(contextPath, `${separator}${injection}`);
+    fileSystem.appendFileSync(contextPath, `${separator}${injection}`);
   }
 
   function writeStackFile(backlogDirectoryPath) {
     const stackPath = path.join(backlogDirectoryPath, 'stack.md');
-    if (fs.existsSync(stackPath)) return;
+    if (fileSystem.existsSync(stackPath)) return;
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'stack.md');
-    if (!fs.existsSync(templatePath)) return;
-    fs.copyFileSync(templatePath, stackPath);
+    if (!fileSystem.existsSync(templatePath)) return;
+    fileSystem.copyFileSync(templatePath, stackPath);
   }
 
   function writeTasksFile(backlogDirectoryPath) {
     const tasksPath = path.join(backlogDirectoryPath, 'tasks.md');
-    if (fs.existsSync(tasksPath)) return;
+    if (fileSystem.existsSync(tasksPath)) return;
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'tasks.md');
-    fs.copyFileSync(templatePath, tasksPath);
+    fileSystem.copyFileSync(templatePath, tasksPath);
   }
 
   function writeLearnedFile(backlogDirectoryPath) {
     const learnedPath = path.join(backlogDirectoryPath, 'learned.md');
-    if (fs.existsSync(learnedPath)) return;
+    if (fileSystem.existsSync(learnedPath)) return;
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'learned.md');
-    fs.copyFileSync(templatePath, learnedPath);
+    fileSystem.copyFileSync(templatePath, learnedPath);
   }
 
   function writeTroubleshootFile(backlogDirectoryPath) {
     const troubleshootPath = path.join(backlogDirectoryPath, 'troubleshoot.md');
-    if (fs.existsSync(troubleshootPath)) return;
+    if (fileSystem.existsSync(troubleshootPath)) return;
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'troubleshoot.md');
-    fs.copyFileSync(templatePath, troubleshootPath);
+    fileSystem.copyFileSync(templatePath, troubleshootPath);
   }
 }
 
@@ -329,14 +332,16 @@ function buildClaudeContent() {
  */
 function writeAgentConfig(targetDirectory, content) {
   const skillDir = path.join(targetDirectory, '.ai', 'skills');
-  fs.mkdirSync(skillDir, { recursive: true });
-  fs.writeFileSync(path.join(skillDir, 'AGENTS.md'), content);
+  fileSystem.mkdirSync(skillDir, { recursive: true });
+  fileSystem.writeFileSync(path.join(skillDir, 'AGENTS.md'), content);
 
   const claudePath = path.join(targetDirectory, 'CLAUDE.md');
   const claudeContent = buildClaudeContent();
-  const existingClaude = fs.existsSync(claudePath) ? fs.readFileSync(claudePath, 'utf8') : null;
+  const existingClaude = fileSystem.existsSync(claudePath)
+    ? fileSystem.readFileSync(claudePath, 'utf8')
+    : null;
   if (existingClaude !== claudeContent) {
-    fs.writeFileSync(claudePath, claudeContent);
+    fileSystem.writeFileSync(claudePath, claudeContent);
   }
 }
 
@@ -358,8 +363,8 @@ function writeGitignore(targetDirectory) {
     },
   ];
 
-  const existingContent = fs.existsSync(gitignorePath)
-    ? fs.readFileSync(gitignorePath, 'utf8')
+  const existingContent = fileSystem.existsSync(gitignorePath)
+    ? fileSystem.readFileSync(gitignorePath, 'utf8')
     : '';
 
   const existingLines = existingContent.split('\n').map((line) => line.trim());
@@ -379,7 +384,7 @@ function writeGitignore(targetDirectory) {
   if (blocksToAppend.length === 0) return;
 
   const separator = existingContent.length > 0 && !existingContent.endsWith('\n') ? '\n' : '';
-  fs.appendFileSync(gitignorePath, `${separator}\n${blocksToAppend.join('\n\n')}\n`);
+  fileSystem.appendFileSync(gitignorePath, `${separator}\n${blocksToAppend.join('\n\n')}\n`);
 }
 
 /**
@@ -394,11 +399,11 @@ function writeManifest(targetDirectory, selections, packageVersion) {
   };
 
   const aiDirectory = path.join(targetDirectory, '.ai');
-  fs.mkdirSync(aiDirectory, { recursive: true });
+  fileSystem.mkdirSync(aiDirectory, { recursive: true });
 
   const manifestPath = path.join(aiDirectory, '.sdg-manifest.json');
-  const originalContent = fs.existsSync(manifestPath)
-    ? fs.readFileSync(manifestPath, 'utf8')
+  const originalContent = fileSystem.existsSync(manifestPath)
+    ? fileSystem.readFileSync(manifestPath, 'utf8')
     : null;
 
   writeJsonAtomic(manifestPath, manifest, originalContent);
@@ -422,25 +427,25 @@ function writeAutomationScripts(targetDirectory, selections) {
     packageData.scripts &&
     (packageData.scripts.bump || packageData.scripts.release || packageData.scripts.version);
 
-  if (hasExistingBump && !fs.existsSync(bumpScriptPath)) {
+  if (hasExistingBump && !fileSystem.existsSync(bumpScriptPath)) {
     return;
   }
 
-  if (!fs.existsSync(bumpScriptPath)) {
-    fs.mkdirSync(scriptsDir, { recursive: true });
+  if (!fileSystem.existsSync(bumpScriptPath)) {
+    fileSystem.mkdirSync(scriptsDir, { recursive: true });
     const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'bump.mjs');
-    const templateContent = fs.readFileSync(templatePath, 'utf8');
-    fs.writeFileSync(bumpScriptPath, templateContent);
+    const templateContent = fileSystem.readFileSync(templatePath, 'utf8');
+    fileSystem.writeFileSync(bumpScriptPath, templateContent);
   }
 
   if (!packageData.scripts) packageData.scripts = {};
   if (!packageData.scripts.bump) {
     packageData.scripts.bump = 'node scripts/bump.mjs';
-    writeJsonAtomic(packagePath, packageData, fs.readFileSync(packagePath, 'utf8'));
+    writeJsonAtomic(packagePath, packageData, fileSystem.readFileSync(packagePath, 'utf8'));
   }
 
   const huskyDirectory = path.join(targetDirectory, '.husky');
-  if (fs.existsSync(huskyDirectory)) {
+  if (fileSystem.existsSync(huskyDirectory)) {
     const prePushPath = path.join(huskyDirectory, 'pre-push');
     const nvmShim = dedent`
       # NVM Shim (Essential for projects Staff in Linux/NVM)
@@ -450,12 +455,12 @@ function writeAutomationScripts(targetDirectory, selections) {
 
     const bumpCmd = '# Pre-push check (non-mutating)\nnpm test';
 
-    if (fs.existsSync(prePushPath)) {
-      const content = fs.readFileSync(prePushPath, 'utf8');
+    if (fileSystem.existsSync(prePushPath)) {
+      const content = fileSystem.readFileSync(prePushPath, 'utf8');
       if (!content.includes('npm test')) {
         const separator = content.endsWith('\n') ? '' : '\n';
         const newPrePushContent = `${content}${separator}\n${nvmShim}\n${bumpCmd}\n`;
-        fs.writeFileSync(prePushPath, newPrePushContent);
+        fileSystem.writeFileSync(prePushPath, newPrePushContent);
       }
     } else {
       const prePushContent = dedent`
@@ -465,7 +470,7 @@ function writeAutomationScripts(targetDirectory, selections) {
 
         ${bumpCmd}
       `;
-      fs.writeFileSync(prePushPath, prePushContent, { mode: 0o755 });
+      fileSystem.writeFileSync(prePushPath, prePushContent, { mode: 0o755 });
     }
   }
 }
@@ -474,16 +479,16 @@ function writeToolingAssets(targetDirectory) {
   const sourceToolingDir = path.join(__dirname, '../../..', 'assets', 'tooling');
   const targetToolingDir = path.join(targetDirectory, '.ai', 'tooling');
 
-  const hasSourceAssets = fs.existsSync(sourceToolingDir);
+  const hasSourceAssets = fileSystem.existsSync(sourceToolingDir);
   if (!hasSourceAssets) return;
 
-  fs.cpSync(sourceToolingDir, targetToolingDir, { recursive: true, force: true });
+  fileSystem.cpSync(sourceToolingDir, targetToolingDir, { recursive: true, force: true });
 
   const executableHooks = ['pre-commit', 'commit-msg'];
   for (const hookName of executableHooks) {
     const hookPath = path.join(targetToolingDir, 'husky', hookName);
-    const hookExists = fs.existsSync(hookPath);
-    if (hookExists) fs.chmodSync(hookPath, 0o755);
+    const hookExists = fileSystem.existsSync(hookPath);
+    if (hookExists) fileSystem.chmodSync(hookPath, 0o755);
   }
 }
 
@@ -495,8 +500,8 @@ function writeToolingAssets(targetDirectory) {
  */
 function removeGeneratedInstructions(targetDirectory) {
   const generatedInstructionsDir = path.join(targetDirectory, '.ai', 'instructions');
-  if (!fs.existsSync(generatedInstructionsDir)) return;
-  fs.rmSync(generatedInstructionsDir, { recursive: true, force: true });
+  if (!fileSystem.existsSync(generatedInstructionsDir)) return;
+  fileSystem.rmSync(generatedInstructionsDir, { recursive: true, force: true });
 }
 
 export const InstructionAssembler = {

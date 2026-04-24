@@ -3,7 +3,7 @@
  * Automates semantic versioning and promotes Unreleased changes in CHANGELOG.md.
  */
 
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 
@@ -31,9 +31,9 @@ function run() {
   };
 
   const npmType = typeMap[bumpType];
-  const oldVersion = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')).version;
-  const oldChangelog = fs.existsSync(CHANGELOG_PATH)
-    ? fs.readFileSync(CHANGELOG_PATH, 'utf8')
+  const oldVersion = JSON.parse(fileSystem.readFileSync(PACKAGE_JSON_PATH, 'utf8')).version;
+  const oldChangelog = fileSystem.existsSync(CHANGELOG_PATH)
+    ? fileSystem.readFileSync(CHANGELOG_PATH, 'utf8')
     : null;
 
   try {
@@ -42,7 +42,7 @@ function run() {
     execSync(`npm version ${npmType} --no-git-tag-version`, { stdio: 'inherit' });
 
     // 2. Get new version
-    const newVersion = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')).version;
+    const newVersion = JSON.parse(fileSystem.readFileSync(PACKAGE_JSON_PATH, 'utf8')).version;
 
     // 3. Update CHANGELOG.md
     updateChangelog(newVersion);
@@ -55,21 +55,21 @@ function run() {
     console.error('\n❌ Release failed. Attempting to revert versioning changes...\n');
 
     // Restoration focus: only metadata files. Developer code is safely preserved.
-    fs.writeFileSync(
+    fileSystem.writeFileSync(
       PACKAGE_JSON_PATH,
       JSON.stringify(
-        { ...JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')), version: oldVersion },
+        { ...JSON.parse(fileSystem.readFileSync(PACKAGE_JSON_PATH, 'utf8')), version: oldVersion },
         null,
         2
       )
     );
 
     if (oldChangelog !== null) {
-      fs.writeFileSync(CHANGELOG_PATH, oldChangelog);
+      fileSystem.writeFileSync(CHANGELOG_PATH, oldChangelog);
     }
 
     // Try to sync lockfile if it exists
-    if (fs.existsSync(path.join(ROOT_DIR, 'package-lock.json'))) {
+    if (fileSystem.existsSync(path.join(ROOT_DIR, 'package-lock.json'))) {
       try {
         execSync('npm install --package-lock-only', { stdio: 'ignore' });
       } catch {
@@ -84,12 +84,12 @@ function run() {
 }
 
 function updateChangelog(newVersion) {
-  if (!fs.existsSync(CHANGELOG_PATH)) {
+  if (!fileSystem.existsSync(CHANGELOG_PATH)) {
     console.warn('⚠️  CHANGELOG.md not found. Skipping changelog update.');
     return;
   }
 
-  const content = fs.readFileSync(CHANGELOG_PATH, 'utf8');
+  const content = fileSystem.readFileSync(CHANGELOG_PATH, 'utf8');
   const today = new Date().toLocaleDateString('en-CA');
 
   // Pattern to find the [Unreleased] section
@@ -114,7 +114,7 @@ function updateChangelog(newVersion) {
   updatedContent =
     updatedContent.slice(0, insertIndex) + nextBlock + updatedContent.slice(insertIndex);
 
-  fs.writeFileSync(CHANGELOG_PATH, updatedContent);
+  fileSystem.writeFileSync(CHANGELOG_PATH, updatedContent);
 }
 
 run();

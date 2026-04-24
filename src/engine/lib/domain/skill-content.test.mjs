@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -14,7 +14,7 @@ const STACK_TEMPLATE = path.join(ASSETS, 'instructions', 'templates', 'backlog',
 const DELIVERY_COMPETENCY = path.join(ASSETS, 'instructions', 'competencies', 'delivery.md');
 
 function readAsset(assetPath) {
-  const content = fs.readFileSync(assetPath, 'utf8');
+  const content = fileSystem.readFileSync(assetPath, 'utf8');
   return content;
 }
 

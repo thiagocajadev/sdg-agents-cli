@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 
 const DONE_HEADING = '## Done';
@@ -14,7 +14,7 @@ function run() {
   const existsResult = ensureTasksFileExists(tasksPath);
   if (existsResult === false) return;
 
-  const originalContent = fs.readFileSync(tasksPath, 'utf8');
+  const originalContent = fileSystem.readFileSync(tasksPath, 'utf8');
   const pruneOutcome = pruneDoneSection(originalContent, keepCount);
 
   if (pruneOutcome.unchanged) {
@@ -23,7 +23,7 @@ function run() {
     return;
   }
 
-  fs.writeFileSync(tasksPath, pruneOutcome.nextContent);
+  fileSystem.writeFileSync(tasksPath, pruneOutcome.nextContent);
   const successMessage = `✅ Pruned: kept ${keepCount} / ${pruneOutcome.totalEntries} total.`;
   console.log(successMessage);
 }
@@ -50,7 +50,7 @@ function resolveTasksPath() {
 }
 
 function ensureTasksFileExists(tasksPath) {
-  if (fs.existsSync(tasksPath)) return true;
+  if (fileSystem.existsSync(tasksPath)) return true;
   console.error(`❌ Not found: ${tasksPath}`);
   process.exit(1);
 }

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { FsUtils } from './fs-utils.mjs';
@@ -55,43 +55,46 @@ describe('FsUtils', () => {
 
   describe('copyRecursiveSync()', () => {
     it('should copy a single file to a destination', () => {
-      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
+      const tmpDir = fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
       const srcFile = path.join(tmpDir, 'source.txt');
       const destFile = path.join(tmpDir, 'dest.txt');
       const expectedContent = 'hello';
-      fs.writeFileSync(srcFile, expectedContent);
+      fileSystem.writeFileSync(srcFile, expectedContent);
 
       copyRecursiveSync(srcFile, destFile);
 
-      const actualExists = fs.existsSync(destFile);
-      const actualContent = fs.readFileSync(destFile, 'utf8');
+      const actualExists = fileSystem.existsSync(destFile);
+      const actualContent = fileSystem.readFileSync(destFile, 'utf8');
 
       assert.ok(actualExists);
       assert.equal(actualContent, expectedContent);
 
-      fs.rmSync(tmpDir, { recursive: true, force: true });
+      fileSystem.rmSync(tmpDir, { recursive: true, force: true });
     });
 
     it('should copy a directory tree recursively', () => {
-      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
+      const tmpDir = fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
       const srcDir = path.join(tmpDir, 'src');
       const subDir = path.join(srcDir, 'sub');
       const rootText = 'root';
       const nestedText = 'nested';
-      fs.mkdirSync(subDir, { recursive: true });
-      fs.writeFileSync(path.join(srcDir, 'root.txt'), rootText);
-      fs.writeFileSync(path.join(subDir, 'nested.txt'), nestedText);
+      fileSystem.mkdirSync(subDir, { recursive: true });
+      fileSystem.writeFileSync(path.join(srcDir, 'root.txt'), rootText);
+      fileSystem.writeFileSync(path.join(subDir, 'nested.txt'), nestedText);
       const destDir = path.join(tmpDir, 'dest');
 
       copyRecursiveSync(srcDir, destDir);
 
-      const actualRootText = fs.readFileSync(path.join(destDir, 'root.txt'), 'utf8');
-      const actualNestedText = fs.readFileSync(path.join(destDir, 'sub', 'nested.txt'), 'utf8');
+      const actualRootText = fileSystem.readFileSync(path.join(destDir, 'root.txt'), 'utf8');
+      const actualNestedText = fileSystem.readFileSync(
+        path.join(destDir, 'sub', 'nested.txt'),
+        'utf8'
+      );
 
       assert.equal(actualRootText, rootText);
       assert.equal(actualNestedText, nestedText);
 
-      fs.rmSync(tmpDir, { recursive: true, force: true });
+      fileSystem.rmSync(tmpDir, { recursive: true, force: true });
     });
 
     it('should do nothing when the source path does not exist', () => {
@@ -101,7 +104,7 @@ describe('FsUtils', () => {
 
       copyRecursiveSync(input, destFile);
 
-      const actual = fs.existsSync(destFile);
+      const actual = fileSystem.existsSync(destFile);
 
       assert.equal(actual, expected);
     });

@@ -3,7 +3,7 @@
  * Automates semantic versioning and promotes Unreleased changes in CHANGELOG.md.
  */
 
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 
@@ -33,7 +33,7 @@ function run() {
 
   try {
     // 1. Get current version
-    const pkg = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8'));
+    const pkg = JSON.parse(fileSystem.readFileSync(PACKAGE_JSON_PATH, 'utf8'));
     const oldVersion = pkg.version;
 
     // 2. Bump version in package.json (no git tag/commit yet)
@@ -41,7 +41,7 @@ function run() {
     execSync(`npm version ${npmType} --no-git-tag-version`, { stdio: 'inherit' });
 
     // 3. Get new version
-    const newPkg = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8'));
+    const newPkg = JSON.parse(fileSystem.readFileSync(PACKAGE_JSON_PATH, 'utf8'));
     const newVersion = newPkg.version;
 
     // 4. Update CHANGELOG.md
@@ -57,12 +57,12 @@ function run() {
 }
 
 function updateChangelog(newVersion) {
-  if (!fs.existsSync(CHANGELOG_PATH)) {
+  if (!fileSystem.existsSync(CHANGELOG_PATH)) {
     console.warn('⚠️  CHANGELOG.md not found. Skipping changelog update.');
     return;
   }
 
-  const content = fs.readFileSync(CHANGELOG_PATH, 'utf8');
+  const content = fileSystem.readFileSync(CHANGELOG_PATH, 'utf8');
   const today = new Date().toLocaleDateString('en-CA');
 
   // Pattern to find the [Unreleased] section
@@ -86,7 +86,7 @@ function updateChangelog(newVersion) {
   updatedContent =
     updatedContent.slice(0, insertIndex) + nextBlock + updatedContent.slice(insertIndex);
 
-  fs.writeFileSync(CHANGELOG_PATH, updatedContent);
+  fileSystem.writeFileSync(CHANGELOG_PATH, updatedContent);
 }
 
 run();

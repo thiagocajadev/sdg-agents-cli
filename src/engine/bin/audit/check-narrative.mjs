@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { NARRATIVE_CHECKLIST } from '../../config/governance.mjs';
 import { FsUtils } from '../../lib/core/fs-utils.mjs';
@@ -42,11 +42,11 @@ function collectTargetFiles() {
   ];
 
   const files = targetDirectories.flatMap((directory) => {
-    if (!fs.existsSync(directory)) {
+    if (!fileSystem.existsSync(directory)) {
       const emptyList = [];
       return emptyList;
     }
-    const directoryFiles = fs
+    const directoryFiles = fileSystem
       .readdirSync(directory)
       .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
       .map((file) => path.join(directory, file));
@@ -63,7 +63,7 @@ function scanFilesForViolations(files) {
 
   for (const filePath of files) {
     const relativePath = path.relative(PROJECT_ROOT, filePath);
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = fileSystem.readFileSync(filePath, 'utf8');
     const fileViolations = [];
 
     for (const rule of NARRATIVE_CHECKLIST) {

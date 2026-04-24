@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -16,11 +16,11 @@ const {
 } = InstructionAssembler;
 
 function makeTempDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
+  return fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
 }
 
 function cleanup(dir) {
-  fs.rmSync(dir, { recursive: true, force: true });
+  fileSystem.rmSync(dir, { recursive: true, force: true });
 }
 
 describe('InstructionAssembler', () => {
@@ -33,8 +33,8 @@ describe('InstructionAssembler', () => {
       try {
         writeAgentConfig(tmpDir, inputContent);
 
-        const actualExists = fs.existsSync(expectedPath);
-        const actualContent = fs.readFileSync(expectedPath, 'utf8');
+        const actualExists = fileSystem.existsSync(expectedPath);
+        const actualContent = fileSystem.readFileSync(expectedPath, 'utf8');
 
         assert.ok(actualExists);
         assert.equal(actualContent, inputContent);
@@ -50,7 +50,7 @@ describe('InstructionAssembler', () => {
       try {
         writeAgentConfig(tmpDir, 'content');
 
-        const actualExists = fs.existsSync(expectedDir);
+        const actualExists = fileSystem.existsSync(expectedDir);
         assert.ok(actualExists);
       } finally {
         cleanup(tmpDir);
@@ -67,7 +67,7 @@ describe('InstructionAssembler', () => {
       try {
         writeManifest(tmpDir, inputSelections, '1.0.0');
 
-        const actualExists = fs.existsSync(expectedFile);
+        const actualExists = fileSystem.existsSync(expectedFile);
         assert.ok(actualExists);
       } finally {
         cleanup(tmpDir);
@@ -83,7 +83,7 @@ describe('InstructionAssembler', () => {
       try {
         writeManifest(tmpDir, inputSelections, inputVersion);
 
-        const actualRaw = fs.readFileSync(manifestPath, 'utf8');
+        const actualRaw = fileSystem.readFileSync(manifestPath, 'utf8');
         const actual = JSON.parse(actualRaw);
 
         assert.ok(actual.generatedAt);
@@ -104,7 +104,7 @@ describe('InstructionAssembler', () => {
         writeManifest(tmpDir, { flavor: 'lite' }, '1.0.0');
 
         const after = Date.now();
-        const actualManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        const actualManifest = JSON.parse(fileSystem.readFileSync(manifestPath, 'utf8'));
         const actualTs = new Date(actualManifest.generatedAt).getTime();
 
         assert.ok(actualTs >= before && actualTs <= after);
@@ -276,7 +276,7 @@ describe('InstructionAssembler', () => {
 
         for (const relativePath of expectedFiles) {
           const absolutePath = path.join(tmpDir, relativePath);
-          const fileExists = fs.existsSync(absolutePath);
+          const fileExists = fileSystem.existsSync(absolutePath);
           assert.ok(fileExists, `Missing tooling asset: ${relativePath}`);
         }
       } finally {
@@ -294,7 +294,7 @@ describe('InstructionAssembler', () => {
 
         for (const hookName of hookNames) {
           const hookPath = path.join(tmpDir, '.ai', 'tooling', 'husky', hookName);
-          const stats = fs.statSync(hookPath);
+          const stats = fileSystem.statSync(hookPath);
           const actualPermissionBits = stats.mode & 0o111;
           const isExecutable = (actualPermissionBits & expectedPermissionMask) !== 0;
           assert.ok(isExecutable, `Hook not executable: ${hookName}`);
@@ -310,10 +310,10 @@ describe('InstructionAssembler', () => {
 
       try {
         writeToolingAssets(tmpDir);
-        const firstRunContent = fs.readFileSync(referencePath, 'utf8');
+        const firstRunContent = fileSystem.readFileSync(referencePath, 'utf8');
 
         writeToolingAssets(tmpDir);
-        const secondRunContent = fs.readFileSync(referencePath, 'utf8');
+        const secondRunContent = fileSystem.readFileSync(referencePath, 'utf8');
 
         assert.equal(firstRunContent, secondRunContent);
       } finally {
@@ -329,7 +329,7 @@ describe('InstructionAssembler', () => {
 
       try {
         writeBacklogFiles(tmpDir, { flavor: 'lite' });
-        const actualContent = fs.readFileSync(contextPath, 'utf8');
+        const actualContent = fileSystem.readFileSync(contextPath, 'utf8');
 
         assert.ok(actualContent.includes('## Tooling (optional)'));
         assert.ok(actualContent.includes('.ai/tooling/'));
@@ -345,10 +345,10 @@ describe('InstructionAssembler', () => {
       try {
         writeBacklogFiles(tmpDir, { flavor: 'lite' });
 
-        const actualExists = fs.existsSync(stackPath);
+        const actualExists = fileSystem.existsSync(stackPath);
         assert.ok(actualExists, 'stack.md seed must be written on init');
 
-        const actualContent = fs.readFileSync(stackPath, 'utf8');
+        const actualContent = fileSystem.readFileSync(stackPath, 'utf8');
         assert.ok(actualContent.includes('# Project Stack'));
         assert.ok(actualContent.includes('### Backend'));
         assert.ok(actualContent.includes('### Frontend'));
@@ -364,12 +364,12 @@ describe('InstructionAssembler', () => {
       const preexistingContent = '# Custom Stack\n\n- Node 24\n';
 
       try {
-        fs.mkdirSync(backlogDir, { recursive: true });
-        fs.writeFileSync(stackPath, preexistingContent);
+        fileSystem.mkdirSync(backlogDir, { recursive: true });
+        fileSystem.writeFileSync(stackPath, preexistingContent);
 
         writeBacklogFiles(tmpDir, { flavor: 'lite' });
 
-        const actualContent = fs.readFileSync(stackPath, 'utf8');
+        const actualContent = fileSystem.readFileSync(stackPath, 'utf8');
         assert.equal(actualContent, preexistingContent);
       } finally {
         cleanup(tmpDir);
@@ -384,12 +384,12 @@ describe('InstructionAssembler', () => {
       const staleFile = path.join(staleDir, 'typescript', 'patterns.md');
 
       try {
-        fs.mkdirSync(path.dirname(staleFile), { recursive: true });
-        fs.writeFileSync(staleFile, '# stale');
+        fileSystem.mkdirSync(path.dirname(staleFile), { recursive: true });
+        fileSystem.writeFileSync(staleFile, '# stale');
 
         removeGeneratedInstructions(tmpDir);
 
-        const staleStillExists = fs.existsSync(staleDir);
+        const staleStillExists = fileSystem.existsSync(staleDir);
         const expectedAbsent = false;
         assert.equal(staleStillExists, expectedAbsent, 'stale idioms dir must be removed');
       } finally {

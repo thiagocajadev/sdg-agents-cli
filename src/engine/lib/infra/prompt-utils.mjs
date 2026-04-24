@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { exec } from 'node:child_process';
 import dedent from 'dedent';
@@ -104,9 +104,9 @@ const PROMPT_FILE = path.join(AI_DIR, 'last-prompt.md');
 
 function isMaintainerMode() {
   const packagePath = path.join(PROJECT_ROOT, 'package.json');
-  if (!fs.existsSync(packagePath)) return false;
+  if (!fileSystem.existsSync(packagePath)) return false;
   try {
-    const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+    const packageData = JSON.parse(fileSystem.readFileSync(packagePath, 'utf8'));
     const isMaintainer = packageData.name === 'sdg-agents';
     return isMaintainer;
   } catch {
@@ -115,10 +115,10 @@ function isMaintainerMode() {
 }
 
 function savePromptToFile(content) {
-  if (!fs.existsSync(AI_DIR)) {
-    fs.mkdirSync(AI_DIR, { recursive: true });
+  if (!fileSystem.existsSync(AI_DIR)) {
+    fileSystem.mkdirSync(AI_DIR, { recursive: true });
   }
-  fs.writeFileSync(PROMPT_FILE, content, 'utf8');
+  fileSystem.writeFileSync(PROMPT_FILE, content, 'utf8');
 }
 
 async function copyToClipboard(content) {

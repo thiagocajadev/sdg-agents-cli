@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 
 const PROJECT_ROOT = process.cwd();
@@ -16,8 +16,8 @@ const MAINTAINER_DIRECTORIES = [
 
 function getMaintainerFiles() {
   const sourceFiles = MAINTAINER_DIRECTORIES.flatMap((directory) => {
-    if (!fs.existsSync(directory)) return [];
-    return fs
+    if (!fileSystem.existsSync(directory)) return [];
+    return fileSystem
       .readdirSync(directory)
       .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
       .map((file) => path.join(directory, file));
@@ -27,8 +27,8 @@ function getMaintainerFiles() {
 
 function getMaintainerTestFiles() {
   const testFiles = MAINTAINER_DIRECTORIES.flatMap((directory) => {
-    if (!fs.existsSync(directory)) return [];
-    return fs
+    if (!fileSystem.existsSync(directory)) return [];
+    return fileSystem
       .readdirSync(directory)
       .filter((file) => file.endsWith('.test.mjs'))
       .map((file) => path.join(directory, file));
@@ -37,11 +37,11 @@ function getMaintainerTestFiles() {
 }
 
 function getFilesRecursive(baseDir, filterFn) {
-  if (!fs.existsSync(baseDir)) return [];
+  if (!fileSystem.existsSync(baseDir)) return [];
   const files = [];
 
   function walk(dir) {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const entries = fileSystem.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory() && entry.name !== 'node_modules' && !entry.name.startsWith('.')) {

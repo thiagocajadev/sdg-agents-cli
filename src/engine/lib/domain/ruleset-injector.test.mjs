@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -9,11 +9,11 @@ import { RulesetInjector } from './ruleset-injector.mjs';
 const { prepareProjectStructure, injectRulesets, collectOutputSummary } = RulesetInjector;
 
 function makeTempDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
+  return fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
 }
 
 function cleanup(dir) {
-  fs.rmSync(dir, { recursive: true, force: true });
+  fileSystem.rmSync(dir, { recursive: true, force: true });
 }
 
 describe('RulesetInjector', () => {
@@ -29,7 +29,7 @@ describe('RulesetInjector', () => {
         prepareProjectStructure(tmpDir);
 
         for (const expectedDir of expectedDirs) {
-          assert.ok(fs.existsSync(expectedDir));
+          assert.ok(fileSystem.existsSync(expectedDir));
         }
       } finally {
         cleanup(tmpDir);
@@ -59,7 +59,7 @@ describe('RulesetInjector', () => {
         prepareProjectStructure(tmpDir);
         injectRulesets(tmpDir, inputSelections);
 
-        assert.ok(fs.existsSync(expectedSkillFile));
+        assert.ok(fileSystem.existsSync(expectedSkillFile));
       } finally {
         cleanup(tmpDir);
       }
@@ -74,7 +74,7 @@ describe('RulesetInjector', () => {
         prepareProjectStructure(tmpDir);
         injectRulesets(tmpDir, inputSelections);
 
-        assert.ok(fs.existsSync(expectedDir));
+        assert.ok(fileSystem.existsSync(expectedDir));
       } finally {
         cleanup(tmpDir);
       }
@@ -90,8 +90,8 @@ describe('RulesetInjector', () => {
         prepareProjectStructure(tmpDir);
         injectRulesets(tmpDir, inputSelections);
 
-        assert.ok(fs.existsSync(expectedTemplates));
-        assert.ok(fs.existsSync(expectedCommands));
+        assert.ok(fileSystem.existsSync(expectedTemplates));
+        assert.ok(fileSystem.existsSync(expectedCommands));
       } finally {
         cleanup(tmpDir);
       }
@@ -108,9 +108,9 @@ describe('RulesetInjector', () => {
         prepareProjectStructure(tmpDir);
         injectRulesets(tmpDir, inputSelections);
 
-        const hasDelivery = fs.existsSync(deliveryPath);
-        const hasLegacyBackend = fs.existsSync(backendPath);
-        const hasLegacyFrontend = fs.existsSync(frontendPath);
+        const hasDelivery = fileSystem.existsSync(deliveryPath);
+        const hasLegacyBackend = fileSystem.existsSync(backendPath);
+        const hasLegacyFrontend = fileSystem.existsSync(frontendPath);
         const expectedAbsent = false;
 
         assert.ok(hasDelivery, 'delivery.md must be copied');
@@ -130,7 +130,7 @@ describe('RulesetInjector', () => {
         prepareProjectStructure(tmpDir);
         injectRulesets(tmpDir, inputSelections);
 
-        const hasLegacyIdiomsDir = fs.existsSync(legacyIdiomsDir);
+        const hasLegacyIdiomsDir = fileSystem.existsSync(legacyIdiomsDir);
         const expectedAbsent = false;
         assert.equal(hasLegacyIdiomsDir, expectedAbsent);
       } finally {

@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 
 import { FsUtils } from '../core/fs-utils.mjs';
@@ -17,9 +17,9 @@ function prepareProjectStructure(targetDirectory) {
   const commandsDir = path.join(targetDirectory, '.ai', 'commands');
   const skillsDir = path.join(targetDirectory, '.ai', 'skills');
 
-  fs.mkdirSync(instructionsDir, { recursive: true });
-  fs.mkdirSync(commandsDir, { recursive: true });
-  fs.mkdirSync(skillsDir, { recursive: true });
+  fileSystem.mkdirSync(instructionsDir, { recursive: true });
+  fileSystem.mkdirSync(commandsDir, { recursive: true });
+  fileSystem.mkdirSync(skillsDir, { recursive: true });
 }
 
 function injectRulesets(targetDirectory, selections) {
@@ -27,12 +27,12 @@ function injectRulesets(targetDirectory, selections) {
   const projectAiInstructions = path.join(targetDirectory, '.ai', 'instructions');
   const projectAiSkills = path.join(targetDirectory, '.ai', 'skills');
 
-  if (fs.existsSync(SOURCE_SKILLS)) {
+  if (fileSystem.existsSync(SOURCE_SKILLS)) {
     copyRecursiveSync(SOURCE_SKILLS, projectAiSkills);
   }
 
   const flavorSrc = path.join(SOURCE_INSTRUCTIONS, 'flavors', flavor);
-  if (fs.existsSync(flavorSrc)) {
+  if (fileSystem.existsSync(flavorSrc)) {
     copyRecursiveSync(flavorSrc, path.join(projectAiInstructions, 'flavor'));
   }
 
@@ -43,7 +43,7 @@ function injectRulesets(targetDirectory, selections) {
     path.join(projectAiInstructions, 'templates')
   );
 
-  if (fs.existsSync(SOURCE_COMMANDS)) {
+  if (fileSystem.existsSync(SOURCE_COMMANDS)) {
     copyRecursiveSync(SOURCE_COMMANDS, path.join(targetDirectory, '.ai', 'commands'));
   }
 }
@@ -62,14 +62,14 @@ function collectOutputSummary() {
 }
 
 function injectCompetencies(projectAiInstructions) {
-  if (!fs.existsSync(SOURCE_COMPETENCIES)) return;
+  if (!fileSystem.existsSync(SOURCE_COMPETENCIES)) return;
 
   const competenciesDir = path.join(projectAiInstructions, 'competencies');
-  fs.mkdirSync(competenciesDir, { recursive: true });
+  fileSystem.mkdirSync(competenciesDir, { recursive: true });
 
   const deliverySrc = path.join(SOURCE_COMPETENCIES, 'delivery.md');
-  if (!fs.existsSync(deliverySrc)) return;
-  fs.copyFileSync(deliverySrc, path.join(competenciesDir, 'delivery.md'));
+  if (!fileSystem.existsSync(deliverySrc)) return;
+  fileSystem.copyFileSync(deliverySrc, path.join(competenciesDir, 'delivery.md'));
 }
 
 export const RulesetInjector = {

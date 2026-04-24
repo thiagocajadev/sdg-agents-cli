@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { confirm } from '@inquirer/prompts';
 import { ResultUtils } from '../../lib/core/result-utils.mjs';
@@ -27,19 +27,19 @@ async function orchestrateCleanup(targetDirectory, options = {}) {
   // Check current directory
   for (const itemName of itemsToRemove) {
     const fullPath = path.join(targetDirectory, itemName);
-    if (fs.existsSync(fullPath)) {
+    if (fileSystem.existsSync(fullPath)) {
       existingItems.push({ name: itemName, fullPath });
     }
   }
 
   // Check packages/* if we are in a monorepo
   const packagesDir = path.join(targetDirectory, 'packages');
-  if (fs.existsSync(packagesDir)) {
-    const subPackages = fs.readdirSync(packagesDir);
+  if (fileSystem.existsSync(packagesDir)) {
+    const subPackages = fileSystem.readdirSync(packagesDir);
     for (const packageFolderName of subPackages) {
       for (const itemName of itemsToRemove) {
         const fullPath = path.join(packagesDir, packageFolderName, itemName);
-        if (fs.existsSync(fullPath)) {
+        if (fileSystem.existsSync(fullPath)) {
           existingItems.push({ name: `packages/${packageFolderName}/${itemName}`, fullPath });
         }
       }
@@ -133,10 +133,10 @@ function applyCleanup(items) {
   for (const entry of items) {
     const { name, fullPath } = entry;
     try {
-      if (fs.statSync(fullPath).isDirectory()) {
-        fs.rmSync(fullPath, { recursive: true, force: true });
+      if (fileSystem.statSync(fullPath).isDirectory()) {
+        fileSystem.rmSync(fullPath, { recursive: true, force: true });
       } else {
-        fs.unlinkSync(fullPath);
+        fileSystem.unlinkSync(fullPath);
       }
       console.log(`  [OK] Removed ${name}`);
     } catch (error) {
@@ -151,8 +151,8 @@ function findBacklogsAtRisk(items) {
     .map((aiEntry) => path.join(aiEntry.fullPath, 'backlog'));
 
   const populatedBacklogs = backlogPaths.filter((backlogPath) => {
-    if (!fs.existsSync(backlogPath)) return false;
-    const isPopulated = fs.readdirSync(backlogPath).length > 0;
+    if (!fileSystem.existsSync(backlogPath)) return false;
+    const isPopulated = fileSystem.readdirSync(backlogPath).length > 0;
     return isPopulated;
   });
 

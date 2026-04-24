@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -11,10 +11,10 @@ const __dirname = path.dirname(__filename);
 const SCRIPT_PATH = path.join(__dirname, 'bump-version.mjs');
 
 function makeTempProject(initialVersion) {
-  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-bump-test-'));
+  const projectDir = fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-bump-test-'));
   const packagePath = path.join(projectDir, 'package.json');
   const packageData = { name: 'test-project', version: initialVersion };
-  fs.writeFileSync(packagePath, `${JSON.stringify(packageData, null, 2)}\n`);
+  fileSystem.writeFileSync(packagePath, `${JSON.stringify(packageData, null, 2)}\n`);
   return { projectDir, packagePath };
 }
 
@@ -27,13 +27,13 @@ function runScript(projectDir, args = []) {
 }
 
 function readVersion(packagePath) {
-  const raw = fs.readFileSync(packagePath, 'utf8');
+  const raw = fileSystem.readFileSync(packagePath, 'utf8');
   const parsed = JSON.parse(raw);
   return parsed.version;
 }
 
 function cleanup(projectDir) {
-  fs.rmSync(projectDir, { recursive: true, force: true });
+  fileSystem.rmSync(projectDir, { recursive: true, force: true });
 }
 
 describe('bump-version.mjs', () => {
@@ -81,7 +81,7 @@ describe('bump-version.mjs', () => {
   });
 
   it('should preserve package.json fields other than version', () => {
-    const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-bump-test-'));
+    const projectDir = fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-bump-test-'));
     const packagePath = path.join(projectDir, 'package.json');
     const originalPackage = {
       name: 'test-project',
@@ -90,11 +90,11 @@ describe('bump-version.mjs', () => {
       scripts: { test: 'echo ok' },
       dependencies: { foo: '^1.0.0' },
     };
-    fs.writeFileSync(packagePath, `${JSON.stringify(originalPackage, null, 2)}\n`);
+    fileSystem.writeFileSync(packagePath, `${JSON.stringify(originalPackage, null, 2)}\n`);
 
     try {
       runScript(projectDir, ['patch']);
-      const actualRaw = fs.readFileSync(packagePath, 'utf8');
+      const actualRaw = fileSystem.readFileSync(packagePath, 'utf8');
       const actualParsed = JSON.parse(actualRaw);
 
       assert.equal(actualParsed.name, originalPackage.name);
@@ -128,7 +128,7 @@ describe('bump-version.mjs', () => {
   });
 
   it('should exit 1 when package.json is absent', () => {
-    const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-bump-test-'));
+    const projectDir = fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-bump-test-'));
 
     try {
       assert.throws(() => runScript(projectDir, ['patch']));
@@ -138,7 +138,7 @@ describe('bump-version.mjs', () => {
   });
 
   it('should not import child_process (zero git side-effects guarantee)', () => {
-    const scriptSource = fs.readFileSync(SCRIPT_PATH, 'utf8');
+    const scriptSource = fileSystem.readFileSync(SCRIPT_PATH, 'utf8');
 
     assert.ok(!scriptSource.includes('child_process'));
     assert.ok(!scriptSource.includes('execSync'));

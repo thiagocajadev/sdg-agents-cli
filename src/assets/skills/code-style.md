@@ -11,73 +11,62 @@
 
 ---
 
-## Code style
+## Structure & Tooling
 
-- **Functions** 4–20 lines. Name needs "and" → split.
-- **Files** under 500 lines. One concern per module (SRP).
-- **Names by domain intent**, not storage or implementation detail. Name requires a comment → naming failure.
+- **File naming** `domain.operation.ext` (`order.compute.js`, `user.validate.ts`). Never `helpers.js`, `utils.js`, `common.js`.
+- **Files** under 500 lines. One concern per module (SRP). Follow framework convention (Rails, Django, Next.js, Astro) — don't reinvent the tree.
+- **Formatter**: language default (`prettier`, `gofmt`, `black`, `cargo fmt`, `rubocop -A`). No style debates beyond that. No alignment padding for `=` or `:`.
+- **Logging**: Structured JSON for debug / observability (one event per line, stable keys). Plain text only for user-facing CLI output.
+
+---
+
+## Form — function structure and narrative
+
+- **English source** — code is universal; short unambiguous names in English.
+- **Narrative code** — the code tells the story; if it needs a comment to be understood, naming failed.
+- **Clean entry point** — `run()` / `start()` / `init()` as headline caller: single-statement side-effect form (`await call();`) OR canonical 2-statement form (`const result = call(); return result;`). Forbidden: ternary on return line, any logic.
+- **Vertical signature** — up to 3 parameters per line; 4+ must use an object. Destructuring inside function body, not in the signature.
+- **Orchestrator on top** — the caller is visible before the details (top-down).
+- **Details below** — helpers sit below the caller (Stepdown Rule). One-use helpers as **Narrative Siblings**: directly below their caller, nowhere else.
+- **No logic in return** — **Explaining Returns**: assign to a named `const` before every meaningful `return`; no logic / ternary / anonymous object on the return line. Void-terminator form is exempt — a side-effect call (`console.log(message);`) ends the function with an implicit return. Never ceremonialize into `const X = sideEffect(); return X;`.
+
+---
+
+## Readability — flow, visual density, and names
+
+- **Early return** — exit early on failure; no `else` after `return`. Max 2 indent levels.
+- **Control flow** — match tool to shape: guards for failure exits • lookup table for value mapping (`const MAP = {...}; return MAP[key] ?? default`) • `switch` for action dispatch (side-effects) • `Map` for non-string / dynamic keys • ternary only for 2-value assignment • `===` / `!==` always (never `==`). Each function orchestrates OR implements (SLA) — never both.
+- **Low visual density** — **Paragraphs of Intent**: 1 blank line between logical groups, 0 within a group, never 2+ consecutive. Wall of tight code and double-blank noise are equal violations.
+- **Expressive names** — names reveal domain intent, not storage or implementation detail.
   - Banned verbs: `handle`, `do`, `run`, `execute`, `perform`; `get` for computations (use `compute` / `calculate` / `derive`).
   - Banned nouns: `data`, `info`, `obj`, `item`, `thing`, `helpers`, `utils`, `common`, `shared`, `misc`.
   - Banned abbreviations: `req` → `request`, `res` → `response`, `ctx` → `context`, plus `idx`, `prev`, `arr`, `val`, `tmp`, `cb`, `fn`, `mgr`, `ctrl`, `svc`.
-- **Booleans** carry semantic prefix: `is` / `has` / `can` / `should` / `did` / `needs` / `supports` / `allows`. Never bare `loading`, `error`, `active`.
-- **Explaining Returns**: assign to named `const` before every meaningful `return`; no logic / ternary / anonymous object on the return line. Void-terminator form is exempt — a side-effect call (`console.log(msg);`) ends the function with an implicit return. Never ceremonialize into `const X = sideEffect(); return X;`.
-- **Narrative Cascade**: entry point first (Stepdown); one-use helpers as siblings below their caller; each function orchestrates OR implements (SLA) — never both.
-- **Early returns** over nested conditionals. Max 2 levels of indentation.
-- **Immutability default**: `const` / readonly; mutation crosses boundaries explicitly.
-- **CQS**: function mutates (command) OR reads (query, pure) — never both.
-- **File naming**: `domain.operation.ext` (`order.compute.js`, `user.validate.ts`). Never `helpers.js`, `utils.js`, `common.js`.
-- **Types explicit** where the language supports them — no `any`, no untyped public function.
+  - **Booleans** carry semantic prefix: `is` / `has` / `can` / `should` / `did` / `needs` / `supports` / `allows`. Never bare `loading`, `error`, `active`.
+  - **Import aliasing** — imports whose public symbol is single-letter or a meaningless acronym must be aliased with an intent name at the import site.
+    - `import z from 'zod'` → `import { z as validate } from 'zod'`
+    - `import fs from 'node:fs'` → `import fileSystem from 'node:fs'`
+    - `import { t } from 'node:test'` → `import { test as testCase } from 'node:test'`
+    - Carve-outs: identifiers ≥3 chars that are already English words or established acronyms (`path`, `os`, `url`, `http`, `crypto`) stay as-is.
+- **Code as documentation** — names replace comments. WHY over WHAT; skip `// increment counter` above `i++`. `// why:` permitted only for hidden constraints (invariants, workarounds, bug references). Docstrings on public functions: intent + one usage example. Reference issue numbers / commit SHAs when a line exists because of a specific bug. No section banners (`// --- Section ---`). Keep your own comments on refactor — they carry intent and provenance.
+- **No magic values** — named constants instead of loose numbers and strings. Exception messages include the offending value and the expected shape.
+
+---
+
+## Quality Control — state, errors, async, and tests
+
+- **Small functions** — 4–30 lines. Name needs "and" → split. One responsibility, one level of abstraction.
+- **Compute vs format** — compute data and format output in separate functions.
+- **Immutability by default** — `const` / readonly first; `let` only when necessary. Mutation crosses boundaries explicitly.
+- **CQS** — function mutates (command) OR reads (query, pure) — never both.
+- **Explicit dependencies** — inject via constructor / parameter; no hidden globals, no module-level singletons for mutable state. Wrap third-party libs behind a thin interface owned by this project.
+- **Fail fast** — validate early; abort invalid flow at the boundary.
+- **Explicit return** — exceptions are not control flow. Return `Result` / discriminated union / explicit `null` for expected absence.
+- **Consistent contracts** — standardized response shapes; the same format every time.
+- **Centralized error handling** — typed error classes; `try/catch` at boundaries, not scattered.
+- **Async I/O** — `async/await`, never block.
+- **Explicit types** where the language supports them — no `any`, no untyped public function.
 - **No duplication** — extract shared logic when the pattern repeats three times (Rule of Three), not sooner.
-- **Exception messages** include the offending value and the expected shape.
-
----
-
-## Comments
-
-- **WHY, not WHAT** — skip `// increment counter` above `i++`. `// why:` permitted only for hidden constraints (invariants, workarounds, bug references).
-- **Keep your own comments on refactor** — they carry intent and provenance.
-- **Docstrings on public functions**: intent + one usage example.
-- **Reference issue numbers / commit SHAs** when a line exists because of a specific bug or upstream constraint.
-- **No section banners** (`// --- Section ---`). No explanatory headers inside a file.
-
----
-
-## Tests
-
-- **Every new function gets a test.** Bug fixes get a regression test.
-- **F.I.R.S.T**: Fast, Independent, Repeatable, Self-validating, Timely.
-- **Mock external I/O** (API, DB, filesystem) with named fake classes — not inline stubs.
-- Each suite covers **happy path + edge case + expected failure**.
-
----
-
-## Dependencies
-
-- **Inject** via constructor / parameter — no hidden globals, no module-level singletons for mutable state.
-- **Wrap third-party libs** behind a thin interface owned by this project. Swap cost stays bounded.
-
----
-
-## Structure
-
-- Follow framework convention (Rails, Django, Next.js, Astro, etc.) — don't reinvent the tree.
-- Small focused modules over god files.
-- Predictable paths: `controller` / `model` / `view`, `src` / `lib` / `test`.
-
----
-
-## Formatting
-
-- Language default formatter: `prettier`, `gofmt`, `black`, `cargo fmt`, `rubocop -A`. No style debates beyond that.
-- No alignment padding for `=` or `:`.
-- **Paragraphs of Intent**: 1 blank line between logical groups, 0 within a group, never 2+ consecutive. Wall of tight code and double-blank noise are equal violations.
-
----
-
-## Logging
-
-- **Structured JSON** for debugging / observability — one event per line, stable keys.
-- **Plain text** only for user-facing CLI output.
+- **Structured tests** — F.I.R.S.T (Fast, Independent, Repeatable, Self-validating, Timely). **AAA** phases explicit: Arrange / Act / Assert, clean asserts without inline expressions. Every new function gets a test; bug fixes get a regression test. Mock external I/O (API, DB, filesystem) with named fake classes — not inline stubs. Each suite covers happy path + edge case + expected failure.
 
 ---
 
@@ -89,10 +78,10 @@
 
 - [ ] **Mental Reset** — named which training default is being suspended for this task (verbose prose, dense walls, auto-summarize, taboo verbs).
 - [ ] **Target Files** — explicit path list from approved Plan; no drift.
-- [ ] **Naming** — no banned verbs / nouns / abbreviations; booleans carry semantic prefix; files follow `domain.operation.ext`.
-- [ ] **Narrative** — Stepdown, SLA, Explaining Returns, guard clauses, ≤2 indent levels.
+- [ ] **Naming** — no banned verbs / nouns / abbreviations; booleans carry semantic prefix; files follow `domain.operation.ext`; single-letter imports aliased with intent name.
+- [ ] **Narrative** — Stepdown, SLA, Explaining Returns, control-flow tool matches shape, ≤2 indent levels.
 - [ ] **Comments** — WHY only; no what-comments; docstring on public surfaces.
-- [ ] **Tests planned** — new function → test; bug fix → regression test; external I/O mocked.
+- [ ] **Tests planned** — new function → test; bug fix → regression test; external I/O mocked; AAA phases explicit.
 - [ ] **Security** — boundary inputs validated; no string-concat into queries / commands / paths.
 - [ ] **Blockers** — `none` or enumerated.
 
@@ -104,14 +93,14 @@
 
 > Recite at Phase TEST. Binary pass / fail — no partial credit. Each item is wired to a narrative heuristic validator in `governance.mjs`.
 
+- [ ] **Pure entry point**: `run()` as headline caller only (single-statement or canonical 2-statement form).
 - [ ] **Narrative Siblings**: one-use helpers as siblings below callers.
 - [ ] **Explaining Returns**: named `const` above every meaningful `return` (void-terminator exempt).
-- [ ] **No framework abbreviations**: `req` / `res` / `ctx` forbidden; plus SDG taboos (banned verbs / nouns / abbrs).
-- [ ] **Vertical Density**: 1 blank between groups, 0 within, never 2+.
 - [ ] **Revealing Module Pattern**: named export at footer.
+- [ ] **Vertical Density**: 1 blank between groups, 0 within, never 2+.
 - [ ] **Boolean prefix**: `is` / `has` / `can` / `should` / `did` / `needs` / `supports` / `allows`.
+- [ ] **No framework abbreviations**: `req` / `res` / `ctx` forbidden; plus SDG taboos (banned verbs / nouns / abbrs).
 - [ ] **No section banners**: no `// --- Section ---` dividers.
-- [ ] **Pure entry point**: `run()` as headline caller only (single-statement or canonical 2-statement form).
 
 </rule>
 

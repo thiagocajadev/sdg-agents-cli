@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -11,15 +11,15 @@ const __dirname = path.dirname(__filename);
 const SCRIPT_PATH = path.join(__dirname, 'prune-backlog.mjs');
 
 function makeTempProject() {
-  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdg-prune-test-'));
+  const projectDir = fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-prune-test-'));
   const backlogDir = path.join(projectDir, '.ai', 'backlog');
-  fs.mkdirSync(backlogDir, { recursive: true });
+  fileSystem.mkdirSync(backlogDir, { recursive: true });
   return { projectDir, backlogDir };
 }
 
 function writeTasks(backlogDir, content) {
   const tasksPath = path.join(backlogDir, 'tasks.md');
-  fs.writeFileSync(tasksPath, content);
+  fileSystem.writeFileSync(tasksPath, content);
   return tasksPath;
 }
 
@@ -32,7 +32,7 @@ function runScript(projectDir, args = []) {
 }
 
 function cleanup(projectDir) {
-  fs.rmSync(projectDir, { recursive: true, force: true });
+  fileSystem.rmSync(projectDir, { recursive: true, force: true });
 }
 
 function buildTasksWithDone(entryCount) {
@@ -55,7 +55,7 @@ describe('prune-backlog.mjs', () => {
 
     try {
       const stdout = runScript(projectDir, ['--keep', '3']);
-      const actualContent = fs.readFileSync(tasksPath, 'utf8');
+      const actualContent = fileSystem.readFileSync(tasksPath, 'utf8');
 
       assert.ok(stdout.includes('Pruned: kept 3 / 7'));
       assert.ok(actualContent.includes(expectedFirstKept));
@@ -74,7 +74,7 @@ describe('prune-backlog.mjs', () => {
 
     try {
       const stdout = runScript(projectDir, ['--keep', '3']);
-      const actualContent = fs.readFileSync(tasksPath, 'utf8');
+      const actualContent = fileSystem.readFileSync(tasksPath, 'utf8');
 
       assert.ok(stdout.includes('Nothing to prune'));
       assert.equal(actualContent, expectedContent);
@@ -90,7 +90,7 @@ describe('prune-backlog.mjs', () => {
 
     try {
       runScript(projectDir, []);
-      const actualContent = fs.readFileSync(tasksPath, 'utf8');
+      const actualContent = fileSystem.readFileSync(tasksPath, 'utf8');
       const actualEntryMatches = actualContent.match(/^- \[DONE\]/gm);
       const actualEntryCount = actualEntryMatches ? actualEntryMatches.length : 0;
       const expectedEntryCount = 3;
@@ -108,7 +108,7 @@ describe('prune-backlog.mjs', () => {
 
     try {
       runScript(projectDir, ['--keep', '2']);
-      const actualContent = fs.readFileSync(tasksPath, 'utf8');
+      const actualContent = fileSystem.readFileSync(tasksPath, 'utf8');
 
       assert.ok(actualContent.includes('- [IN_PROGRESS] live task'));
       assert.ok(actualContent.includes('- [BACKLOG] pending item'));

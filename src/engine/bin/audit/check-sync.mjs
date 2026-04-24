@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
@@ -36,12 +36,12 @@ function orchestrateSyncCheck() {
 }
 
 function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
-  if (!fs.existsSync(liveDirectory)) {
+  if (!fileSystem.existsSync(liveDirectory)) {
     const emptyResult = [];
     return emptyResult;
   }
 
-  const entries = fs.readdirSync(liveDirectory, { withFileTypes: true });
+  const entries = fileSystem.readdirSync(liveDirectory, { withFileTypes: true });
   const localDrifts = [];
 
   for (const entry of entries) {
@@ -63,7 +63,7 @@ function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
 }
 
 function checkFileDrift(livePath, sourcePath, relativePath) {
-  if (!fs.existsSync(sourcePath)) {
+  if (!fileSystem.existsSync(sourcePath)) {
     const missingDrift = { relativePath, reason: 'missing in src/assets/' };
     return missingDrift;
   }
@@ -80,7 +80,7 @@ function checkFileDrift(livePath, sourcePath, relativePath) {
 }
 
 function hashFile(filePath) {
-  const content = fs.readFileSync(filePath);
+  const content = fileSystem.readFileSync(filePath);
   const fileHash = crypto.createHash('sha256').update(content).digest('hex');
   return fileHash;
 }

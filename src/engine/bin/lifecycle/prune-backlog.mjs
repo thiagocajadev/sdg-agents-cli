@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -59,13 +59,13 @@ async function dispatchPrune() {
 }
 
 async function orchestratePrune() {
-  if (!fs.existsSync(TASKS_PATH)) {
+  if (!fileSystem.existsSync(TASKS_PATH)) {
     console.log('  prune-backlog: skipped (tasks.md not found)');
     const skippedResult = success({ removed: 0, skipped: true });
     return skippedResult;
   }
 
-  const originalContent = fs.readFileSync(TASKS_PATH, 'utf8');
+  const originalContent = fileSystem.readFileSync(TASKS_PATH, 'utf8');
   const { pruned, removed } = pruneBacklog(originalContent);
 
   if (removed === 0) {
@@ -74,7 +74,7 @@ async function orchestratePrune() {
     return noopResult;
   }
 
-  fs.writeFileSync(TASKS_PATH, pruned);
+  fileSystem.writeFileSync(TASKS_PATH, pruned);
   const prunedReport = `  prune-backlog: dropped ${removed} entries (kept last ${DEFAULT_KEEP_COUNT})`;
   console.log(prunedReport);
   const finalResult = success({ removed, skipped: false });

@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { SyncChecker } from './check-sync.mjs';
@@ -11,8 +11,8 @@ const { smartTruncate } = DisplayUtils;
 
 const PROJECT_ROOT = process.cwd();
 const PACKAGE_JSON_PATH = path.join(PROJECT_ROOT, 'package.json');
-const PROJECT_VERSION = fs.existsSync(PACKAGE_JSON_PATH)
-  ? (JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf8')).version ?? 'unknown')
+const PROJECT_VERSION = fileSystem.existsSync(PACKAGE_JSON_PATH)
+  ? (JSON.parse(fileSystem.readFileSync(PACKAGE_JSON_PATH, 'utf8')).version ?? 'unknown')
   : 'unknown';
 const { bootstrapIfDirect, isMaintainerMode } = FsUtils;
 
@@ -50,12 +50,12 @@ function printHeader() {
 
 function checkChangelogHealth() {
   const changelogPath = path.join(PROJECT_ROOT, 'CHANGELOG.md');
-  if (!fs.existsSync(changelogPath)) {
+  if (!fileSystem.existsSync(changelogPath)) {
     const missingChangelogResult = { isFailure: true, reason: 'CHANGELOG.md missing' };
     return missingChangelogResult;
   }
 
-  const content = fs.readFileSync(changelogPath, 'utf8');
+  const content = fileSystem.readFileSync(changelogPath, 'utf8');
   const hasUnreleased = /##\s*\[Unreleased\]/i.test(content);
   const unreleasedMatch = content.match(
     /##\s*\[Unreleased\].*?\n([\s\S]*?)(?=\n##\s|(?:\n){0,1}$)/i
@@ -105,7 +105,7 @@ function checkCodeStyleCompliance() {
 
   const violations = [];
   for (const filePath of files) {
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = fileSystem.readFileSync(filePath, 'utf8');
     const fileName = path.basename(filePath);
 
     for (const rule of NARRATIVE_CHECKLIST) {
@@ -137,7 +137,7 @@ function checkTestNamedExpectations() {
   const violations = [];
 
   for (const testFile of testFiles) {
-    const content = fs.readFileSync(testFile, 'utf8');
+    const content = fileSystem.readFileSync(testFile, 'utf8');
     const slopMatches = content.match(/\/\/\s*(Arrange|Act|Assert)/gi);
     if (slopMatches) {
       violations.push(
@@ -178,14 +178,14 @@ function checkTestNamedExpectations() {
 
 function checkBacklogHealth() {
   const backlogDir = path.join(PROJECT_ROOT, '.ai', 'backlog');
-  if (!fs.existsSync(backlogDir)) {
+  if (!fileSystem.existsSync(backlogDir)) {
     const missingBacklogResult = { isFailure: false, message: 'Backlog not initialized' };
     return missingBacklogResult;
   }
 
-  const files = fs.readdirSync(backlogDir);
+  const files = fileSystem.readdirSync(backlogDir);
   const largeFiles = files.filter((file) => {
-    const stats = fs.statSync(path.join(backlogDir, file));
+    const stats = fileSystem.statSync(path.join(backlogDir, file));
     const isLarge = stats.size > 1024 * 50; // > 50KB
     return isLarge;
   });
@@ -207,7 +207,7 @@ function checkSoulPulse() {
     ? ['docs/i18n/README.pt-BR.md', 'docs/ROADMAP.md']
     : [];
   const files = [...requiredFiles, ...maintainerOnlyFiles];
-  const missing = files.filter((file) => !fs.existsSync(path.join(PROJECT_ROOT, file)));
+  const missing = files.filter((file) => !fileSystem.existsSync(path.join(PROJECT_ROOT, file)));
   const soulPulse = { isFailure: missing.length > 0, missing };
   return soulPulse;
 }

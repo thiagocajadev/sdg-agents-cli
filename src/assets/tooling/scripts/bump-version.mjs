@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 
 const VALID_BUMP_TYPES = ['patch', 'minor', 'major'];
@@ -32,12 +32,12 @@ function resolvePackagePath() {
 }
 
 function readPackageJson(packagePath) {
-  if (!fs.existsSync(packagePath)) {
+  if (!fileSystem.existsSync(packagePath)) {
     console.error(`❌ Not found: ${packagePath}`);
     process.exit(1);
   }
 
-  const rawContent = fs.readFileSync(packagePath, 'utf8');
+  const rawContent = fileSystem.readFileSync(packagePath, 'utf8');
   const parsed = JSON.parse(rawContent);
 
   const hasVersion = typeof parsed.version === 'string' && parsed.version.length > 0;
@@ -71,7 +71,7 @@ function incrementVersion(currentVersion, bumpType) {
 
 function writePackageJson(packagePath, packageData) {
   const serialized = `${JSON.stringify(packageData, null, 2)}\n`;
-  fs.writeFileSync(packagePath, serialized);
+  fileSystem.writeFileSync(packagePath, serialized);
 }
 
 run();

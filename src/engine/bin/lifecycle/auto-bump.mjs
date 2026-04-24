@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fileSystem from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -61,7 +61,7 @@ async function orchestrateAutoBump() {
   }
 
   const rootPackagePath = PACKAGE_PATHS[0];
-  const rawRootContent = fs.readFileSync(rootPackagePath, 'utf8');
+  const rawRootContent = fileSystem.readFileSync(rootPackagePath, 'utf8');
   const rootPackage = JSON.parse(rawRootContent);
   const nextVersion = bumpVersion(rootPackage.version, bumpType);
 
@@ -78,9 +78,9 @@ async function orchestrateAutoBump() {
 }
 
 function updateChangelog(newVersion) {
-  if (!fs.existsSync(CHANGELOG_PATH)) return;
+  if (!fileSystem.existsSync(CHANGELOG_PATH)) return;
 
-  const content = fs.readFileSync(CHANGELOG_PATH, 'utf8');
+  const content = fileSystem.readFileSync(CHANGELOG_PATH, 'utf8');
   const today = new Date().toLocaleDateString('en-CA');
   const unreleasedRegex = /##\s*\[Unreleased\](\s*-\s*\d{4}-\d{2}-\d{2})?/i;
 
@@ -95,19 +95,19 @@ function updateChangelog(newVersion) {
   updatedContent =
     updatedContent.slice(0, insertIndex) + nextBlock + updatedContent.slice(insertIndex);
 
-  fs.writeFileSync(CHANGELOG_PATH, updatedContent);
+  fileSystem.writeFileSync(CHANGELOG_PATH, updatedContent);
 }
 
 function syncAllPackages(nextVersion) {
-  const validPaths = PACKAGE_PATHS.filter(fs.existsSync);
+  const validPaths = PACKAGE_PATHS.filter(fileSystem.existsSync);
 
   for (const packagePath of validPaths) {
-    const rawContent = fs.readFileSync(packagePath, 'utf8');
+    const rawContent = fileSystem.readFileSync(packagePath, 'utf8');
     const packageData = JSON.parse(rawContent);
     packageData.version = nextVersion;
 
     const serialized = JSON.stringify(packageData, null, 2) + '\n';
-    fs.writeFileSync(packagePath, serialized);
+    fileSystem.writeFileSync(packagePath, serialized);
   }
 }
 
