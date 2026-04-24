@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { NarrativeHeuristics } from './heuristics/narrative-heuristics.mjs';
 
 /**
  * Governance SSOT — Single Source of Truth for SDG Agents Engineering Laws.
@@ -11,10 +12,23 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STANDARDS_PATH = path.resolve(__dirname, '../../assets/skills/code-style.md');
 
-/**
- * Loads and parses the Master Checklist from engineering-standards.md.
- * Returns an array of Rule objects { id, label, description, heuristic }.
- */
+const NARRATIVE_VALIDATION_STRATEGIES = {
+  'Stepdown Rule': () => ({ pass: true }),
+  SLA: () => ({ pass: true }),
+  'Narrative Siblings': NarrativeHeuristics.validateNarrativeSiblings,
+  'Explaining Returns': NarrativeHeuristics.validateExplainingReturns,
+  'No framework abbreviations': NarrativeHeuristics.validateNamingDiscipline,
+  'Vertical Density': NarrativeHeuristics.validateVerticalDensity,
+  'Revealing Module Pattern': NarrativeHeuristics.validateRevealingModulePattern,
+  'Shallow Boundaries': () => ({ pass: true }),
+  'Destructuring inside function body, not in parameters': () => ({ pass: true }),
+  'Boolean prefix': NarrativeHeuristics.validateBooleanPrefixes,
+  'No explanatory comments': () => ({ pass: true }),
+  'No section banners': NarrativeHeuristics.validateNoSectionBanners,
+  'Pure entry point': NarrativeHeuristics.validateSlaCompliance,
+  'Reads like a short story': () => ({ pass: true }),
+};
+
 function loadDynamicRules() {
   const content = fs.readFileSync(STANDARDS_PATH, 'utf8');
   const checklistSection = content.match(/<rule name="EnforcementChecklist">([\s\S]*?)<\/rule>/);
@@ -47,246 +61,6 @@ function loadDynamicRules() {
 
   const finalDynamicRules = dynamicRules;
   return finalDynamicRules;
-}
-
-/**
- * Maps Markdown rule names to JavaScript automated check functions.
- */
-const NARRATIVE_VALIDATION_STRATEGIES = {
-  'Stepdown Rule': () => ({ pass: true }),
-  SLA: () => ({ pass: true }),
-  'Narrative Siblings': (content) => validateNarrativeSiblings(content),
-  'Explaining Returns': (content) => validateExplainingReturns(content),
-  'No framework abbreviations': (content) => validateNamingDiscipline(content),
-  'Vertical Density': () => ({ pass: true }),
-  'Revealing Module Pattern': (content) => validateRevealingModulePattern(content),
-  'Shallow Boundaries': () => ({ pass: true }),
-  'Destructuring inside function body, not in parameters': () => ({ pass: true }),
-  'Boolean prefix': (content) => validateBooleanPrefixes(content),
-  'No explanatory comments': () => ({ pass: true }),
-  'No section banners': (content) => validateNoSectionBanners(content),
-  'Pure entry point': (content) => validateSlaCompliance(content),
-  'Reads like a short story': () => ({ pass: true }),
-};
-
-function validateSlaCompliance(content) {
-  const entryPointRegex =
-    /(?:async\s+)?function\s+(run|start|init)\s*\([\s\S]*?\)\s*\{([\s\S]*?)\n\}/g;
-  const violations = [];
-  let regexMatch;
-
-  while ((regexMatch = entryPointRegex.exec(content)) !== null) {
-    const entryPointName = regexMatch[1];
-    const functionBody = regexMatch[2];
-    const bodyLines = functionBody
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line !== '');
-
-    const shapeViolation = detectEntryPointShapeViolation(entryPointName, bodyLines);
-    if (shapeViolation) violations.push(shapeViolation);
-  }
-
-  const runFunctionMatch = content.match(/(?:async\s+)?function run\(\) \{([\s\S]*?)\n\}/);
-  if (runFunctionMatch) {
-    const runBody = runFunctionMatch[1];
-    const forbiddenPatterns = [
-      { pattern: /console\.log\(/, label: 'console.log' },
-      { pattern: /path\.resolve\(/, label: 'path.resolve' },
-      { pattern: /process\.argv/, label: 'process.argv access' },
-    ];
-
-    forbiddenPatterns.forEach((item) => {
-      if (item.pattern.test(runBody)) {
-        violations.push(`Implementation logic (${item.label}) in run()`);
-      }
-    });
-  }
-
-  const slaResult = {
-    pass: violations.length === 0,
-    reason: violations.length > 0 ? `Pure Entry Point violation: ${violations.join('; ')}` : null,
-  };
-  return slaResult;
-}
-
-function detectEntryPointShapeViolation(entryPointName, bodyLines) {
-  if (bodyLines.length === 1) {
-    const onlyLine = bodyLines[0];
-    const hasTernary = /\?[^?]*:/.test(onlyLine);
-    if (hasTernary) {
-      const ternaryViolation = `${entryPointName}() has ternary on body — extract to 'const X = ...; return X;'`;
-      return ternaryViolation;
-    }
-    return null;
-  }
-
-  if (bodyLines.length === 2 && isCanonicalDelegationShape(bodyLines)) return null;
-
-  const lengthViolation = `${entryPointName}() body must be 1 statement OR canonical 'const X = call(); return X;' (got ${bodyLines.length} lines)`;
-  return lengthViolation;
-}
-
-function isCanonicalDelegationShape(bodyLines) {
-  const [firstLine, secondLine] = bodyLines;
-  const constMatch = firstLine.match(/^const\s+(\w+)\s*=/);
-  if (!constMatch) return false;
-  const constName = constMatch[1];
-  const expectedReturn = `return ${constName};`;
-  const isMatching = secondLine === expectedReturn || secondLine === `return ${constName}`;
-  return isMatching;
-}
-
-function validateNarrativeSiblings(content) {
-  const topLevelFunctionsCount = (content.match(/^function\s+\w+/gm) || []).length;
-  const exportedFunctionsCount = (content.match(/^\s+\w+,/gm) || []).length;
-
-  // Balance is Key: Threshold of 12 to favor "Chapters" (Narrative Siblings) over monolithic nesting
-  const isViolatingDensity =
-    topLevelFunctionsCount > 12 && exportedFunctionsCount < topLevelFunctionsCount / 2;
-
-  const siblingsResult = {
-    pass: !isViolatingDensity,
-    reason: isViolatingDensity
-      ? 'Excessive top-level function density (>12). Consider refactoring to dedicated lib.'
-      : null,
-  };
-  return siblingsResult;
-}
-
-function validateExplainingReturns(content) {
-  const lines = content.split('\n');
-  const violations = [];
-
-  for (let index = 2; index < lines.length; index++) {
-    const currentLine = lines[index].trim();
-
-    const isPotentialBareReturn =
-      currentLine.startsWith('return ') &&
-      !['return null', 'return false', 'return true', 'return;'].some((statement) =>
-        currentLine.startsWith(statement)
-      );
-
-    if (isPotentialBareReturn) {
-      const returnMatch = currentLine.match(/return\s+([a-zA-Z0-9_$]+);?$/);
-
-      if (!returnMatch) {
-        violations.push(`line ${index + 1} (Literal return)`);
-        continue;
-      }
-
-      const returnedSymbol = returnMatch[1];
-      const isExplained = scanForSymbolExplainer(lines, index, returnedSymbol);
-      if (!isExplained) {
-        violations.push(`line ${index + 1} (Bare return: "${returnedSymbol}")`);
-      }
-    }
-  }
-
-  const explainingResult = {
-    pass: violations.length === 0,
-    reason: violations.length > 0 ? `Laws Compliance violation: ${violations.join('; ')}` : null,
-  };
-  return explainingResult;
-
-  function scanForSymbolExplainer(sourceLines, returnLineIndex, symbol) {
-    const SCAN_LIMIT = 100;
-    const startPos = Math.max(0, returnLineIndex - SCAN_LIMIT);
-    const constRegex = new RegExp(`const\\s+${symbol}\\b`);
-
-    for (let currentPos = returnLineIndex - 1; currentPos >= startPos; currentPos--) {
-      const lineText = sourceLines[currentPos].trim();
-
-      // Skip whitespace, structural braces, backticks, and continuation punctuation
-      const isSkipLine = lineText === '' || /^[{}'`\];,.!]+$/.test(lineText);
-      if (isSkipLine) continue;
-
-      // If we find the const, we are happy.
-      if (constRegex.test(lineText)) return true;
-
-      // SLA exception
-      const isPureDelegation =
-        /(function|async)\s+\w+\s*\(/.test(lineText) && lineText.includes('{');
-      if (isPureDelegation) return true;
-
-      // We allow skipping indented lines (likely part of a multi-line template or object)
-      const isIndented =
-        sourceLines[currentPos].startsWith('  ') || sourceLines[currentPos].startsWith('\t');
-      if (isIndented && !lineText.includes('const ')) continue;
-
-      // If we hit any other keyword (if, for, return from another block), it's a bare return
-      if (/^(if|for|while|switch|return|export|async|function)\b/.test(lineText)) break;
-
-      // Otherwise, keep looking for the const (up to limit)
-      continue;
-    }
-    return false;
-  }
-}
-
-function validateNamingDiscipline(content) {
-  const cleanContent = content
-    .replace(/\/\*[\s\S]*?\*\//g, '') // Multiline comments
-    .replace(/\/\/.*/g, '') // Single line comments
-    .replace(/(['"`])(?:(?!\1)[^\\]|\\.)*\1/g, ''); // Strings
-
-  const forbiddenAbbreviations = ['r' + 'eq', 'r' + 'es'];
-  const abbreviationPattern = new RegExp(`\\b(${forbiddenAbbreviations.join('|')})\\b`, 'g');
-  const singleLetterPattern = /[\s(,]([a-z])[\s,)=+]/g;
-
-  const abbreviationMatches = cleanContent.match(abbreviationPattern) || [];
-  const singleLetterMatches = [];
-  let regexMatch;
-
-  while ((regexMatch = singleLetterPattern.exec(cleanContent)) !== null) {
-    singleLetterMatches.push(regexMatch[1]);
-  }
-
-  const totalViolations = [...abbreviationMatches, ...singleLetterMatches];
-
-  const namingResult = {
-    pass: totalViolations.length === 0,
-    reason:
-      totalViolations.length > 0 ? `Banned naming detected: ${totalViolations.join(', ')}` : null,
-  };
-  return namingResult;
-}
-
-function validateRevealingModulePattern(content) {
-  const hasRevealingObject = /export const \w+ = \{[\s\S]*\};/m.test(content);
-  const forbiddenDefaultExport = 'export ' + 'default';
-  const hasExportDefault = content.includes(forbiddenDefaultExport);
-
-  const revealingResult = {
-    pass: hasRevealingObject && !hasExportDefault,
-    reason: !hasRevealingObject
-      ? 'Missing Revealing Module Pattern export.'
-      : hasExportDefault
-        ? `Uses ${forbiddenDefaultExport}.`
-        : null,
-  };
-  return revealingResult;
-}
-
-function validateBooleanPrefixes(content) {
-  const bareBooleanMatches = content.match(/\bconst\s+(loading|error|active|valid)\s*=/g);
-
-  const booleanResult = {
-    pass: !bareBooleanMatches,
-    reason: bareBooleanMatches ? `Bare boolean detected: ${bareBooleanMatches.join(', ')}` : null,
-  };
-  return booleanResult;
-}
-
-function validateNoSectionBanners(content) {
-  const bannerPrefix = '// -' + '--';
-  const hasBanner = content.includes(bannerPrefix);
-
-  const bannerResult = {
-    pass: !hasBanner,
-    reason: hasBanner ? `Detected section banners (${bannerPrefix}).` : null,
-  };
-  return bannerResult;
 }
 
 export const GOVERNANCE_RULES = {

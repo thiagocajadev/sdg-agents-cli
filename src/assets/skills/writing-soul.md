@@ -19,7 +19,23 @@
 
 Default tone: **pedagogical, calm, inviting**. Make complexity accessible.
 
-Technical terms: keep in English + add contextual explanation: `CI/CD (pipeline that automates build, test, deploy on every commit)` not `CI/CD (Continuous Integration/Deployment)`. Explain **what it does**, not the acronym expansion.
+Technical terms: keep in English. On first occurrence, format depends on type:
+
+- **Acronyms** — bold + full English expansion in parentheses: `**API** (Application Programming Interface)`. Optionally add a short functional gloss: `**CI/CD** (Continuous Integration/Continuous Delivery — pipeline that automates build, test, deploy)`.
+- **Non-acronym terms** — bold + short contextual explanation: `**callback** (function passed as argument, invoked later)`.
+- **Headings** — short form only, no full expansion: `## API design`, not `## API (Application Programming Interface) design`.
+
+Subsequent occurrences use the bare term. Code identifiers stay in backticks and are not bolded.
+
+### Default Content Structure
+
+Perennial artifacts (READMEs, guides, technical docs, learning material) follow this opening sequence by default:
+
+1. **Intro paragraph** — right after the H1, in prose. Names what the document covers and who it serves. Never a heading immediately after H1.
+2. **Concepts table** — a `## Fundamental concepts` (or localized equivalent) section with a `| Concept | What it is |` table whenever the doc introduces 3+ technical terms. Glossary first, narrative second.
+3. **Body** — sections per the document's own context (tutorial, reference, decision record, etc.). The shape after the table is free.
+
+Skip the table only when the doc has fewer than 3 technical terms or is a pure changelog/index. Never skip the intro paragraph.
 
 ### Style Rules
 

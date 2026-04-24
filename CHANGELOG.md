@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [4.0.0] - 2026-04-23
+
+### Added
+
+- **Narrative heuristics back-port (patch bundle absorption)**: external dogfood project contributions absorbed into the seed. [writing-soul.md](src/assets/skills/writing-soul.md) Pedagogical Tone rewritten with three distinct first-occurrence formats (acronym with full English expansion + optional gloss, non-acronym term with short explanation, heading short form only) plus new `Default Content Structure` section mandating intro paragraph after H1 and `## Fundamental concepts` glossary table whenever a doc introduces 3+ technical terms. Narrative heuristics in [governance.mjs](src/engine/config/governance.mjs) expanded to the full patch spec: `validateNamingDiscipline` now covers the complete 12-token banned set (`req, res, ctx, idx, tmp, arr, val, cb, mgr, ctrl, svc, prev`) with word-boundary regex plus `[,)=:.]` lookahead (drops the noisy single-letter detector); `validateExplainingReturns` now classifies logic-in-return patterns into specific hints (Ternary / Template literal / Arithmetic / Constructor / String interpolation) via the new `classifyReturnLogic` helper; `validateVerticalDensity` promoted from no-op to real implementation covering three sub-detectors — (a) double blank lines, (b) Explaining Return Tight (no blank between canonical prep+return pair), (c) Orphan-of-1 (single atomic literal between blanks after a literal pair); `validateNoSectionBanners` rewritten with multi-language regex `/^\s*(\/\/|#|--)\s*[-=]{3,}/m` covering JS, Python/shell, and SQL banner styles. All narrative validators extracted into the new sibling module [heuristics/narrative-heuristics.mjs](src/engine/config/heuristics/narrative-heuristics.mjs) via Revealing Module Pattern; `governance.mjs` reduced to a thin strategy-map + loader. [ROADMAP.md](docs/ROADMAP.md) gained a `v4.0 — Narrative Heuristics Maturity` milestone row and detailed-vision entry describing this release. Patch 03 (pedagogy detectors for documentation artifacts) evaluated and routed to a future standalone package rather than into the CLI, to preserve mission focus on code governance. 206/206 tests green (+26 new positive/negative cases across the 6 expanded detectors), audit 100%, lint pass.
+
+### Fixed
+
 ## [3.9.0] - 2026-04-18
 
 ### Added
