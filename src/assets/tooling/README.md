@@ -111,3 +111,50 @@ Edit `package.json`:
 ```
 
 Or ask your agent: "wire the tooling scripts into package.json."
+
+### Activate SQLFluff
+
+Requires SQLFluff 2.x.
+
+1. Install SQLFluff:
+
+```
+pip install sqlfluff
+```
+
+2. Copy the standard config to your project root:
+
+```
+cp .ai/tooling/sqlfluff/.sqlfluff .sqlfluff
+```
+
+3. Wire format-on-save in VSCode (`.vscode/settings.json`):
+
+```json
+{
+  "editor.formatOnSave": true,
+  "[sql]": {
+    "editor.defaultFormatter": "dorzey.vscode-sqlfluff"
+  }
+}
+```
+
+4. For PostgreSQL projects, change in `.sqlfluff`:
+
+```ini
+dialect = postgres
+[sqlfluff:rules:capitalisation.identifiers]
+capitalisation_policy = lower
+```
+
+**Rules included:**
+
+| Rule                         | Coverage                                    |
+| :--------------------------- | :------------------------------------------ |
+| `capitalisation.keywords`    | Keywords uppercase                          |
+| `capitalisation.identifiers` | Identifiers PascalCase (SQL Server default) |
+| `layout.comma`               | Trailing commas                             |
+| `layout.operators`           | Trailing `AND` / `OR` (after operator)      |
+| `references.qualification`   | Requires `Table.Column` qualification       |
+
+Or ask your agent: "wire SQLFluff into my project."

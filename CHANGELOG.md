@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.5.2] - 2026-04-25
+
+### Fixed
+
+- **`sql-style.md` — formatter-first rewrite**: formatting ownership delegated to SQLFluff. New `.ai/tooling/sqlfluff/.sqlfluff` standard config (dialect, indent, keyword/identifier casing, trailing comma, trailing `AND`/`OR`, `table.column` qualification). Activation recipe added to `.ai/tooling/README.md`. Skill reduced to: formatter-enforced table + vertical style guidance (clause-per-line, 2-space indent, Rule of 3 inline exception, JOIN single vs complex ON, no short aliases) + visual density (blank lines for function signature/body, CTEs, procedure stages). All examples in PostgreSQL `snake_case`.
+
 ## [5.5.1] - 2026-04-25
 
 ### Fixed

@@ -1,97 +1,160 @@
-# SQL Style — SDG Linear Flow
+# SQL Style
 
-<ruleset name="SQLStyleAesthetics">
+<ruleset name="SQLStyle">
 
 > Load in Phase CODE when writing, reviewing, or refactoring SQL.
+> Formatting is owned by **SQLFluff** — enforce via CI, not review comments.
 > For structural data access rules (pooling, transactions, indexes), see `.ai/skills/data-access.md`.
 
-## SDG Linear Flow (Keyword Alignment)
+## Formatter-enforced (SQLFluff auto-fix)
 
-Left-Edge Table Pattern + Trailing Conjunctions:
+> These rules run before the agent sees the code. No gate check needed.
 
-- **Keywords (L0)**: `SELECT`, `FROM`, `JOIN`, `WHERE`, `GROUP BY`, `ORDER BY` on own lines
-- **Left-Edge Subjects (L0)**: Table names and `(` at left margin
-- **Indented Content (L1)**: Fields, values, aliases indented one level
-- **Trailing Conjunctions**: `AND`, `OR`, `,` at END of line — never leading
-- **Qualified Identifiers**: Always `Table.Column` — never bare columns
-- **Temp Suffix**: `...Temp` alias for subqueries used in JOINs
+| Rule                         | Coverage                                        |
+| :--------------------------- | :---------------------------------------------- |
+| `capitalisation.keywords`    | Keywords uppercase                              |
+| `capitalisation.identifiers` | Identifiers snake_case lowercase (PostgreSQL)   |
+| `layout.comma`               | Trailing commas                                 |
+| `layout.operators`           | Trailing `AND` / `OR` (after operator)          |
+| `references.qualification`   | Requires `table_name.column_name` qualification |
+
+Activation recipe: `.ai/tooling/sqlfluff/.sqlfluff` + `.ai/tooling/README.md`.
+
+## Vertical Style
+
+One clause per line, content indented 2 spaces. Read top-to-bottom, no horizontal scroll.
+Inline only when ≤ 3 fields AND ≤ 1 condition — anything beyond goes vertical.
+
+Never use short aliases (`u`, `o`, `t`). Always qualify with the full table name.
 
 ```sql
--- ✅ SDG Linear Flow
+-- ✅ vertical
 SELECT
-  Users.Id,
-  Users.Name
+  users.id,
+  users.name,
+  users.email
 FROM
-Users
+  users
 WHERE
-  Users.IsActive = 1 AND
-  Users.Age > 18
+  users.is_active = TRUE AND
+  users.created_at > '2024-01-01'
 ORDER BY
-  Users.Name ASC;
+  users.name ASC;
 
--- ✅ JOIN with subquery (Temp Suffix)
+-- ✅ inline exception (≤ 3 fields, ≤ 1 condition)
+SELECT users.id, users.name FROM users WHERE users.is_active = TRUE;
+DELETE FROM logs WHERE logs.id = 123;
+```
+
+JOIN with a single ON condition — ON stays on the same line as the table:
+
+```sql
 SELECT
-  Users.Name,
-  OrdersTemp.Total
+  users.name,
+  statuses.description
 FROM
-Users
-JOIN (
+  users
+JOIN
+  statuses ON users.status_id = statuses.id
+WHERE
+  users.is_active = TRUE;
+```
+
+JOIN with multiple ON conditions — each condition on its own line, aligned after ON:
+
+```sql
+JOIN
+  statuses
+  ON users.status_id = statuses.id AND
+     users.is_active = statuses.is_active AND
+     statuses.type = 'DEFAULT'
+```
+
+## Visual Density
+
+Clauses (`SELECT`, `FROM`, `WHERE`, `JOIN`) act as visual separators — no blank lines between them.
+Blank lines apply only where SQLFluff won't add them automatically:
+
+**Function: one blank line between signature and body**
+
+```sql
+CREATE OR REPLACE FUNCTION get_football_team_by_id(team_id INT)
+RETURNS TABLE (id INT, name TEXT) AS $$
+
+BEGIN
+  RETURN QUERY
   SELECT
-    Orders.UserId,
-    Orders.Total
+    football_teams.id,
+    football_teams.name
   FROM
-  Orders
+    football_teams
   WHERE
-    Orders.Status = 'CONFIRMED'
-) OrdersTemp ON
-  OrdersTemp.UserId = Users.Id
-WHERE
-  Users.IsActive = 1
-ORDER BY
-  Users.Name ASC;
+    football_teams.id = team_id;
+END;
+
+$$ LANGUAGE plpgsql;
 ```
 
-## Rule of 3 (Inline Exception)
-
-- Single-line SQL permitted only when ≤3 fields AND ≤1 condition
-- If inline forces horizontal scrolling → refactor to Linear Flow
+**CTEs: one blank line between each block**
 
 ```sql
--- ✅ Inline OK for trivial ops
-DELETE FROM Logs WHERE Logs.Id = 123;
-```
+WITH team_cte AS (
+  SELECT
+    football_teams.id,
+    football_teams.name
+  FROM
+    football_teams
+  WHERE
+    football_teams.id = 1
+),
 
-## Query Discipline
-
-- **Early filtering**: `WHERE` before joins; narrow driving table first.
-- **Descriptive aliases**: by domain (`Orders`, `Users`), not letters.
-- **Named parameters**: `@orderId` / `:user_id` — never inline literals.
-- **Explicit `ORDER BY`**: always state the column.
-- **No `SELECT *`**: see `data-access.md`.
-
-## CTE vs Temp Table
-
-- **CTE (`WITH`)**: single-read derivation — prefer for readability.
-- **Temp Table (`#Temp`)**: multi-read reuse, indexed intermediate, perf-critical.
-- **Promote CTE → Temp**: when read >1× or benefits from index.
-
-## Multi-Row INSERT (Vertical Layout)
-
-INSERT with 4+ fields follows Left-Edge Pattern:
-
-```sql
-INSERT INTO Orders (
-  UserId,
-  Status,
-  Total,
-  CreatedAt
+active_players_cte AS (
+  SELECT
+    players.id,
+    players.name,
+    players.team_id
+  FROM
+    players
+  WHERE
+    players.is_active = TRUE
 )
-VALUES (
-  42,
-  'PENDING',
-  199.90,
-  NOW()
-);
+
+SELECT
+  team_cte.name,
+  active_players_cte.name
+FROM
+  team_cte
+JOIN
+  active_players_cte ON team_cte.id = active_players_cte.team_id;
+```
+
+**Function stages: one blank line between distinct logical blocks**
+
+```sql
+INSERT INTO active_orders
+(
+  order_id,
+  customer_id,
+  total_amount
+)
+SELECT
+  orders.id,
+  orders.customer_id,
+  orders.total_amount
+FROM
+  orders
+WHERE
+  orders.status = 'active' AND
+  orders.created_at >= start_date AND
+  orders.created_at < end_date;
+
+SELECT
+  active_orders.order_id,
+  customers.name AS customer_name
+FROM
+  active_orders
+JOIN
+  customers ON active_orders.customer_id = customers.id;
 ```
 
 </ruleset>
