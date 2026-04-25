@@ -74,8 +74,8 @@ services:
   api:
     deploy:
       resources:
-        limits: { memory: 512m, cpus: '0.5' }
-        reservations: { memory: 256m, cpus: '0.25' }
+        limits: { memory: 512m, cpus: "0.5" }
+        reservations: { memory: 256m, cpus: "0.25" }
 ```
 
 </ruleset>

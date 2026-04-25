@@ -1,5 +1,5 @@
-import { RulesLoader } from './rules-loader.mjs';
-import { GatePreflight } from './gate-preflight.mjs';
+import { RulesLoader } from "./rules-loader.mjs";
+import { GatePreflight } from "./gate-preflight.mjs";
 
 function buildPrompt(diff) {
   const rules = RulesLoader.loadRules();
@@ -10,28 +10,28 @@ function buildPrompt(diff) {
   const preflightSection = buildPreflightSection(preflightMatches);
 
   const promptParts = [
-    'You are a code reviewer enforcing SDG (Spec Driven Guide) engineering rules.',
-    '',
-    'Review the git diff below. Respond with ONLY valid JSON — no markdown, no explanation.',
-    '',
+    "You are a code reviewer enforcing SDG (Spec Driven Guide) engineering rules.",
+    "",
+    "Review the git diff below. Respond with ONLY valid JSON — no markdown, no explanation.",
+    "",
     responseSchema,
-    '',
-    'Rules:',
+    "",
+    "Rules:",
     rulesSection,
-    '',
+    "",
     exclusionsNote,
-    '',
-    '`canCommit` MUST be false if ANY BLOCK violation is found.',
-    'For each violation include the exact snippet and a corrected `fix`.',
+    "",
+    "`canCommit` MUST be false if ANY BLOCK violation is found.",
+    "For each violation include the exact snippet and a corrected `fix`.",
   ];
 
   if (preflightSection) {
-    promptParts.push('', preflightSection);
+    promptParts.push("", preflightSection);
   }
 
-  promptParts.push('', 'Diff:', diff);
+  promptParts.push("", "Diff:", diff);
 
-  const prompt = promptParts.join('\n');
+  const prompt = promptParts.join("\n");
   return prompt;
 }
 
@@ -44,12 +44,12 @@ function buildPreflightSection(matches) {
     (match) => `- [${match.rule}] line ${match.line}: \`${match.snippet}\``
   );
 
-  const signalsSection = ['## Pre-filter Signals', ...lines].join('\n');
+  const signalsSection = ["## Pre-filter Signals", ...lines].join("\n");
   return signalsSection;
 }
 
 function formatRulesSection(rules) {
-  const formatted = rules.all.map(formatRule).join('\n');
+  const formatted = rules.all.map(formatRule).join("\n");
   return formatted;
 }
 
@@ -61,15 +61,15 @@ function formatRule(rule) {
 function buildResponseSchema() {
   const schema = JSON.stringify(
     {
-      canCommit: 'boolean',
+      canCommit: "boolean",
       violations: [
         {
-          file: 'string',
-          line: 'number | null',
-          rule: 'rule-id string',
-          tier: 'BLOCK | WARN',
-          snippet: 'string',
-          fix: 'string',
+          file: "string",
+          line: "number | null",
+          rule: "rule-id string",
+          tier: "BLOCK | WARN",
+          snippet: "string",
+          fix: "string",
         },
       ],
     },
@@ -82,7 +82,7 @@ function buildResponseSchema() {
 }
 
 function formatExclusionsNote(excludePatterns) {
-  const patternList = excludePatterns.join(', ');
+  const patternList = excludePatterns.join(", ");
   const note = `Skip files matching: ${patternList}`;
   return note;
 }

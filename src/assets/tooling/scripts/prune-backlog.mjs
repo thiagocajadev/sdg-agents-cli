@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import fileSystem from 'node:fs';
-import path from 'node:path';
+import fileSystem from "node:fs";
+import path from "node:path";
 
-const DONE_HEADING = '## Done';
-const DONE_ENTRY_PREFIX = '- [DONE]';
+const DONE_HEADING = "## Done";
+const DONE_ENTRY_PREFIX = "- [DONE]";
 const DEFAULT_KEEP = 3;
 
 function run() {
@@ -16,7 +16,7 @@ function run() {
     return;
   }
 
-  const originalContent = fileSystem.readFileSync(tasksPath, 'utf8');
+  const originalContent = fileSystem.readFileSync(tasksPath, "utf8");
   const pruneOutcome = pruneDoneSection(originalContent, keepCount);
 
   if (pruneOutcome.unchanged) {
@@ -31,7 +31,7 @@ function run() {
 }
 
 function parseKeepArg(args) {
-  const keepIndex = args.indexOf('--keep');
+  const keepIndex = args.indexOf("--keep");
   const hasKeepFlag = keepIndex >= 0 && args[keepIndex + 1];
   if (!hasKeepFlag) {
     return DEFAULT_KEEP;
@@ -40,7 +40,7 @@ function parseKeepArg(args) {
   const parsedKeep = Number.parseInt(args[keepIndex + 1], 10);
   const isValidKeep = Number.isFinite(parsedKeep) && parsedKeep >= 0;
   if (!isValidKeep) {
-    console.error('❌ Invalid --keep value. Expected non-negative integer.');
+    console.error("❌ Invalid --keep value. Expected non-negative integer.");
     process.exit(1);
   }
 
@@ -49,7 +49,7 @@ function parseKeepArg(args) {
 }
 
 function resolveTasksPath() {
-  const tasksPath = path.join(process.cwd(), '.ai', 'backlog', 'tasks.md');
+  const tasksPath = path.join(process.cwd(), ".ai", "backlog", "tasks.md");
   return tasksPath;
 }
 
@@ -63,8 +63,10 @@ function ensureTasksFileExists(tasksPath) {
 }
 
 function pruneDoneSection(content, keepCount) {
-  const lines = content.split('\n');
-  const doneStartIndex = lines.findIndex((line) => line.trim() === DONE_HEADING);
+  const lines = content.split("\n");
+  const doneStartIndex = lines.findIndex(
+    (line) => line.trim() === DONE_HEADING
+  );
 
   const hasDoneSection = doneStartIndex >= 0;
   if (!hasDoneSection) {
@@ -73,9 +75,14 @@ function pruneDoneSection(content, keepCount) {
   }
 
   const afterDoneLines = lines.slice(doneStartIndex + 1);
-  const doneEndOffset = afterDoneLines.findIndex((line) => line.startsWith('## '));
+  const doneEndOffset = afterDoneLines.findIndex((line) =>
+    line.startsWith("## ")
+  );
+
   const hasNextSection = doneEndOffset >= 0;
-  const doneEndIndex = hasNextSection ? doneStartIndex + 1 + doneEndOffset : lines.length;
+  const doneEndIndex = hasNextSection
+    ? doneStartIndex + 1 + doneEndOffset
+    : lines.length;
 
   const doneBlock = lines.slice(doneStartIndex + 1, doneEndIndex);
   const entryIndices = collectEntryIndices(doneBlock);
@@ -94,7 +101,7 @@ function pruneDoneSection(content, keepCount) {
     ...lines.slice(doneEndIndex),
   ];
 
-  const nextContent = nextLines.join('\n');
+  const nextContent = nextLines.join("\n");
 
   const prunedOutcome = { unchanged: false, totalEntries, nextContent };
   return prunedOutcome;
@@ -115,9 +122,10 @@ function collectEntryIndices(doneBlock) {
 function keepFirstEntries(doneBlock, entryIndices, keepCount) {
   const keepUntilIndex = entryIndices[keepCount];
   const preservedHead = doneBlock.slice(0, entryIndices[0]);
-  const preservedEntries = keepCount === 0 ? [] : doneBlock.slice(entryIndices[0], keepUntilIndex);
+  const preservedEntries =
+    keepCount === 0 ? [] : doneBlock.slice(entryIndices[0], keepUntilIndex);
 
-  const trailingSeparator = preservedEntries.length > 0 ? [''] : [];
+  const trailingSeparator = preservedEntries.length > 0 ? [""] : [];
   const pruned = [...preservedHead, ...preservedEntries, ...trailingSeparator];
   return pruned;
 }

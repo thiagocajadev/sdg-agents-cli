@@ -15,7 +15,7 @@
 
 - **File naming** `domain.operation.ext` (`order.compute.js`, `user.validate.ts`). Never `helpers.js`, `utils.js`, `common.js`.
 - **Files** under 500 lines. One concern per module (SRP). Follow framework convention (Rails, Django, Next.js, Astro) — don't reinvent the tree.
-- **Formatter**: language default (`prettier`, `gofmt`, `black`, `cargo fmt`, `rubocop -A`). No style debates beyond that. No alignment padding for `=` or `:`.
+- **Formatter**: language default (`prettier`, `gofmt`, `black`, `cargo fmt`, `rubocop -A`). No style debates beyond that. No alignment padding for `=` or `:`. Visual density (grouping blanks, dot-chain breaks) layers **on top** — formatter handles wrapping and indentation; blank lines between statements are the developer's signal layer and are never reformatted by the tool.
 - **Logging**: Structured JSON for debug / observability (one event per line, stable keys). Plain text only for user-facing CLI output.
 
 ---
@@ -112,13 +112,15 @@
 
 > These rules run before the agent sees the code. No gate check needed.
 
-| Rule                              | Coverage                                                            |
-| :-------------------------------- | :------------------------------------------------------------------ |
-| `curly: all`                      | Every `if`/`else`/`for`/`while` body wrapped in `{ }`               |
-| `local/semantic-spacing`          | Blank line after multiline statement in non-trivial function bodies |
-| `local/no-boolean-comparison`     | `value === true/false` → `value` / `!value`                         |
-| `padding-line-between-statements` | Blank line before/after top-level function declarations             |
-| `prettier`                        | Formatting, indentation, quotes, semicolons                         |
+| Rule                              | Coverage                                                                                                                                                 |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `curly: all`                      | Every `if`/`else`/`for`/`while` body wrapped in `{ }`                                                                                                    |
+| `local/semantic-spacing`          | Blank line after multiline statement; 2+2 split in 4-statement non-test bodies; no spurious blanks between consecutive VDs before a side-effect terminal |
+| `local/no-boolean-comparison`     | `value === true/false` → `value` / `!value`                                                                                                              |
+| `local/no-inline-assert`          | Named `actual*` / `expected*` identifiers on both sides of every assertion (test files)                                                                  |
+| `local/blank-before-assertion`    | Blank line before first `assert.*` / `expect()` in a block; no blank between consecutive assertions (test files)                                         |
+| `padding-line-between-statements` | Blank line before/after top-level function declarations                                                                                                  |
+| `prettier`                        | Formatting, indentation, quotes, semicolons, dot-chain wrapping (printWidth 80)                                                                          |
 
 Activation recipe: `.ai/tooling/eslint-config/snippet.mjs` + `.ai/tooling/README.md`.
 

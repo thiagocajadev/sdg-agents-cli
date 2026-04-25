@@ -3,7 +3,12 @@ function checkResult(jsonInput) {
 
   const isParseFailure = !parsed.isSuccess;
   if (isParseFailure) {
-    const parseError = { canCommit: true, violations: [], parseError: parsed.error };
+    const parseError = {
+      canCommit: true,
+      violations: [],
+      parseError: parsed.error,
+    };
+
     return parseError;
   }
 
@@ -28,18 +33,25 @@ function parseJson(rawInput) {
     const successResult = { isSuccess: true, value };
     return successResult;
   } catch {
-    const failResult = { isSuccess: false, error: 'Invalid JSON from LLM output' };
+    const failResult = {
+      isSuccess: false,
+      error: "Invalid JSON from LLM output",
+    };
+
     return failResult;
   }
 }
 
 function stripFences(text) {
-  const isFenced = text.startsWith('```');
+  const isFenced = text.startsWith("```");
   if (!isFenced) {
     return text;
   }
 
-  const stripped = text.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+  const stripped = text
+    .replace(/^```(?:json)?\s*\n?/, "")
+    .replace(/\n?```\s*$/, "");
+
   return stripped;
 }
 
@@ -50,18 +62,24 @@ function filterBlockViolations(violations) {
     return emptyResult;
   }
 
-  const blockOnly = violations.filter((violation) => violation.tier === 'BLOCK');
+  const blockOnly = violations.filter(
+    (violation) => violation.tier === "BLOCK"
+  );
+
   return blockOnly;
 }
 
 function formatViolationReport(violations) {
   const lines = violations.map(formatViolationLine);
-  const report = lines.join('\n');
+  const report = lines.join("\n");
   return report;
 }
 
 function formatViolationLine(violation) {
-  const location = violation.line ? `${violation.file}:${violation.line}` : violation.file;
+  const location = violation.line
+    ? `${violation.file}:${violation.line}`
+    : violation.file;
+
   const line = `  [${violation.tier}] ${violation.rule} — ${location}\n    ${violation.snippet}\n    Fix: ${violation.fix}`;
   return line;
 }

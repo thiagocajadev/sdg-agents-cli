@@ -1,6 +1,6 @@
-import fileSystem from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fileSystem from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 function getDirectories(source) {
   if (!fileSystem.existsSync(source)) {
@@ -8,7 +8,10 @@ function getDirectories(source) {
     return emptyList;
   }
 
-  const directoryEntries = fileSystem.readdirSync(source, { withFileTypes: true });
+  const directoryEntries = fileSystem.readdirSync(source, {
+    withFileTypes: true,
+  });
+
   const directoryNames = directoryEntries
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name);
@@ -34,7 +37,11 @@ function copyRecursiveSync(src, dest, options = {}) {
     }
 
     for (const childItemName of fileSystem.readdirSync(src)) {
-      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName), options);
+      copyRecursiveSync(
+        path.join(src, childItemName),
+        path.join(dest, childItemName),
+        options
+      );
     }
   } else {
     fileSystem.copyFileSync(src, dest);
@@ -55,10 +62,10 @@ function bootstrapIfDirect(importMetaUrl, entryFunction) {
   const entryFile = fileSystem.realpathSync(path.resolve(process.argv[1]));
   if (currentFile === entryFile) {
     const result = entryFunction();
-    if (result && typeof result.catch === 'function') {
+    if (result && typeof result.catch === "function") {
       result.catch((error) => {
-        if (error.name === 'ExitPromptError') {
-          console.log('\n\n  Aborted.\n');
+        if (error.name === "ExitPromptError") {
+          console.log("\n\n  Aborted.\n");
           process.exit(0);
         }
 
@@ -70,7 +77,7 @@ function bootstrapIfDirect(importMetaUrl, entryFunction) {
 }
 
 function detectIndentation(content) {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   for (const line of lines) {
     const match = line.match(/^(\s+)/);
     if (match) {
@@ -79,12 +86,12 @@ function detectIndentation(content) {
     }
   }
 
-  const defaultIndentation = '  ';
+  const defaultIndentation = "  ";
   return defaultIndentation;
 }
 
 function writeJsonAtomic(filePath, data, originalContent = null) {
-  const indent = originalContent ? detectIndentation(originalContent) : '  ';
+  const indent = originalContent ? detectIndentation(originalContent) : "  ";
   const newContent = `${JSON.stringify(data, null, indent)}\n`;
 
   if (originalContent === newContent) {
@@ -105,7 +112,7 @@ function safeReadJson(filePath) {
   }
 
   try {
-    const jsonText = fileSystem.readFileSync(filePath, 'utf8');
+    const jsonText = fileSystem.readFileSync(filePath, "utf8");
     const parsed = JSON.parse(jsonText);
     return parsed;
   } catch {
@@ -115,10 +122,10 @@ function safeReadJson(filePath) {
 
 function isMaintainerMode() {
   const projectRoot = process.cwd();
-  const pkgPath = path.join(projectRoot, 'package.json');
+  const pkgPath = path.join(projectRoot, "package.json");
   const pkg = safeReadJson(pkgPath);
-  const assetsPath = path.join(projectRoot, 'src', 'assets', 'instructions');
-  const isSdgAgents = pkg?.name === 'sdg-agents';
+  const assetsPath = path.join(projectRoot, "src", "assets", "instructions");
+  const isSdgAgents = pkg?.name === "sdg-agents";
   const hasAssets = fileSystem.existsSync(assetsPath);
   const maintainerMode = isSdgAgents && hasAssets;
   return maintainerMode;

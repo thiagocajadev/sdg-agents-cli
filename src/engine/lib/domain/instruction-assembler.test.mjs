@@ -1,10 +1,10 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
-import fileSystem from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import fileSystem from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
-import { InstructionAssembler } from './instruction-assembler.mjs';
+import { InstructionAssembler } from "./instruction-assembler.mjs";
 
 const {
   buildMasterInstructions,
@@ -16,25 +16,25 @@ const {
 } = InstructionAssembler;
 
 function makeTempDir() {
-  return fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
+  return fileSystem.mkdtempSync(path.join(os.tmpdir(), "sdg-test-"));
 }
 
 function cleanup(dir) {
   fileSystem.rmSync(dir, { recursive: true, force: true });
 }
 
-describe('InstructionAssembler', () => {
-  describe('writeAgentConfig()', () => {
-    it('should write .ai/skills/AGENTS.md', () => {
+describe("InstructionAssembler", () => {
+  describe("writeAgentConfig()", () => {
+    it("should write .ai/skills/AGENTS.md", () => {
       const tmpDir = makeTempDir();
-      const inputContent = 'content';
-      const expectedPath = path.join(tmpDir, '.ai', 'skills', 'AGENTS.md');
+      const inputContent = "content";
+      const expectedPath = path.join(tmpDir, ".ai", "skills", "AGENTS.md");
 
       try {
         writeAgentConfig(tmpDir, inputContent);
 
         const actualExists = fileSystem.existsSync(expectedPath);
-        const actualContent = fileSystem.readFileSync(expectedPath, 'utf8');
+        const actualContent = fileSystem.readFileSync(expectedPath, "utf8");
 
         assert.ok(actualExists);
         assert.equal(actualContent, inputContent);
@@ -43,14 +43,15 @@ describe('InstructionAssembler', () => {
       }
     });
 
-    it('should create .ai/skills/ directory if it does not exist', () => {
+    it("should create .ai/skills/ directory if it does not exist", () => {
       const tmpDir = makeTempDir();
-      const expectedDir = path.join(tmpDir, '.ai', 'skills');
+      const expectedDir = path.join(tmpDir, ".ai", "skills");
 
       try {
-        writeAgentConfig(tmpDir, 'content');
+        writeAgentConfig(tmpDir, "content");
 
         const actualExists = fileSystem.existsSync(expectedDir);
+
         assert.ok(actualExists);
       } finally {
         cleanup(tmpDir);
@@ -58,36 +59,39 @@ describe('InstructionAssembler', () => {
     });
   });
 
-  describe('writeManifest()', () => {
-    it('should create .ai/.sdg-manifest.json', () => {
+  describe("writeManifest()", () => {
+    it("should create .ai/.sdg-manifest.json", () => {
       const tmpDir = makeTempDir();
-      const inputSelections = { flavor: 'lite' };
-      const expectedFile = path.join(tmpDir, '.ai', '.sdg-manifest.json');
+      const inputSelections = { flavor: "lite" };
+      const expectedFile = path.join(tmpDir, ".ai", ".sdg-manifest.json");
 
       try {
-        writeManifest(tmpDir, inputSelections, '1.0.0');
+        writeManifest(tmpDir, inputSelections, "1.0.0");
 
         const actualExists = fileSystem.existsSync(expectedFile);
+
         assert.ok(actualExists);
       } finally {
         cleanup(tmpDir);
       }
     });
 
-    it('should write valid JSON with all required fields', () => {
+    it("should write valid JSON with all required fields", () => {
       const tmpDir = makeTempDir();
-      const inputSelections = { flavor: 'lite' };
-      const inputVersion = '2.0.0';
-      const manifestPath = path.join(tmpDir, '.ai', '.sdg-manifest.json');
+      const inputSelections = { flavor: "lite" };
+      const inputVersion = "2.0.0";
+      const manifestPath = path.join(tmpDir, ".ai", ".sdg-manifest.json");
 
       try {
         writeManifest(tmpDir, inputSelections, inputVersion);
 
-        const actualRaw = fileSystem.readFileSync(manifestPath, 'utf8');
+        const actualRaw = fileSystem.readFileSync(manifestPath, "utf8");
         const actual = JSON.parse(actualRaw);
         const actualGeneratedAt = actual.generatedAt;
         const actualSdgVersion = actual.sdgAgentVersion;
-        const actualContentHashesIsObject = typeof actual.contentHashes === 'object';
+        const actualContentHashesIsObject =
+          typeof actual.contentHashes === "object";
+
         const actualSelections = actual.selections;
 
         assert.ok(actualGeneratedAt);
@@ -99,16 +103,19 @@ describe('InstructionAssembler', () => {
       }
     });
 
-    it('should store a valid ISO generatedAt timestamp', () => {
+    it("should store a valid ISO generatedAt timestamp", () => {
       const tmpDir = makeTempDir();
       const before = Date.now();
-      const manifestPath = path.join(tmpDir, '.ai', '.sdg-manifest.json');
+      const manifestPath = path.join(tmpDir, ".ai", ".sdg-manifest.json");
 
       try {
-        writeManifest(tmpDir, { flavor: 'lite' }, '1.0.0');
+        writeManifest(tmpDir, { flavor: "lite" }, "1.0.0");
 
         const after = Date.now();
-        const actualManifest = JSON.parse(fileSystem.readFileSync(manifestPath, 'utf8'));
+        const actualManifest = JSON.parse(
+          fileSystem.readFileSync(manifestPath, "utf8")
+        );
+
         const actualTs = new Date(actualManifest.generatedAt).getTime();
         const actualTsInRange = actualTs >= before && actualTs <= after;
 
@@ -119,12 +126,12 @@ describe('InstructionAssembler', () => {
     });
   });
 
-  describe('buildMasterInstructions()', () => {
-    const baseSelections = { flavor: 'lite' };
+  describe("buildMasterInstructions()", () => {
+    const baseSelections = { flavor: "lite" };
 
-    it('should point at code-style.md and workflow.md in the header', () => {
-      const expectedCodeStyleRef = '.ai/skills/code-style.md';
-      const expectedWorkflowRef = '.ai/instructions/templates/workflow.md';
+    it("should point at code-style.md and workflow.md in the header", () => {
+      const expectedCodeStyleRef = ".ai/skills/code-style.md";
+      const expectedWorkflowRef = ".ai/instructions/templates/workflow.md";
 
       const actual = buildMasterInstructions(baseSelections);
       const hasCodeStyleRef = actual.includes(expectedCodeStyleRef);
@@ -134,70 +141,95 @@ describe('InstructionAssembler', () => {
       assert.ok(hasWorkflowRef);
     });
 
-    it('should NOT reference removed staff-dna.md skill', () => {
+    it("should NOT reference removed staff-dna.md skill", () => {
       const actual = buildMasterInstructions(baseSelections);
-      const hasNoStaffDnaLink = !actual.includes('staff-dna.md');
+      const hasNoStaffDnaLink = !actual.includes("staff-dna.md");
+
       assert.ok(hasNoStaffDnaLink);
     });
 
-    it('should reference .ai/backlog/stack.md in Session Start', () => {
+    it("should reference .ai/backlog/stack.md in Session Start", () => {
       const actual = buildMasterInstructions(baseSelections);
-      const hasStackPointer = actual.includes('.ai/backlog/stack.md');
-      assert.ok(hasStackPointer, 'stack.md must appear as Phase CODE context source');
+      const hasStackPointer = actual.includes(".ai/backlog/stack.md");
+
+      assert.ok(
+        hasStackPointer,
+        "stack.md must appear as Phase CODE context source"
+      );
     });
 
-    it('should reference delivery.md (fused competency) and NOT the legacy split files', () => {
+    it("should reference delivery.md (fused competency) and NOT the legacy split files", () => {
       const actual = buildMasterInstructions(baseSelections);
 
-      const hasDeliveryRef = actual.includes('.ai/instructions/competencies/delivery.md');
-      const hasNoBackendSplit = !actual.includes('competencies/backend.md');
-      const hasNoFrontendSplit = !actual.includes('competencies/frontend.md');
+      const hasDeliveryRef = actual.includes(
+        ".ai/instructions/competencies/delivery.md"
+      );
 
-      assert.ok(hasDeliveryRef, 'delivery.md must replace the split backend/frontend competencies');
-      assert.ok(hasNoBackendSplit, 'legacy backend.md reference must not resurface');
-      assert.ok(hasNoFrontendSplit, 'legacy frontend.md reference must not resurface');
+      const hasNoBackendSplit = !actual.includes("competencies/backend.md");
+      const hasNoFrontendSplit = !actual.includes("competencies/frontend.md");
+
+      assert.ok(
+        hasDeliveryRef,
+        "delivery.md must replace the split backend/frontend competencies"
+      );
+
+      assert.ok(
+        hasNoBackendSplit,
+        "legacy backend.md reference must not resurface"
+      );
+
+      assert.ok(
+        hasNoFrontendSplit,
+        "legacy frontend.md reference must not resurface"
+      );
     });
 
-    it('should NOT reference the removed idioms directory', () => {
+    it("should NOT reference the removed idioms directory", () => {
       const actual = buildMasterInstructions(baseSelections);
       const hasNoIdiomsRef = !actual.match(/idioms\/[a-z-]+\/patterns\.md/);
-      const hasNoIdiomsHeader = !actual.includes('Stack idioms');
-      assert.ok(hasNoIdiomsRef, 'static idiom paths must not resurface');
-      assert.ok(hasNoIdiomsHeader, 'Stack idioms header must be replaced by Stack context');
+      const hasNoIdiomsHeader = !actual.includes("Stack idioms");
+
+      assert.ok(hasNoIdiomsRef, "static idiom paths must not resurface");
+      assert.ok(
+        hasNoIdiomsHeader,
+        "Stack idioms header must be replaced by Stack context"
+      );
     });
 
-    it('should include Semantic Router with all cycle triggers', () => {
+    it("should include Semantic Router with all cycle triggers", () => {
       const expectedSubstrings = [
-        '## Semantic Router',
-        'feat:',
-        'fix:',
-        'docs:',
-        'audit:',
-        'land:',
-        'end:',
+        "## Semantic Router",
+        "feat:",
+        "fix:",
+        "docs:",
+        "audit:",
+        "land:",
+        "end:",
       ];
 
       const actual = buildMasterInstructions(baseSelections);
 
       for (const expected of expectedSubstrings) {
         const hasExpectedTrigger = actual.includes(expected);
+
         assert.ok(hasExpectedTrigger, `Missing: ${expected}`);
       }
     });
 
-    it('should include Phase CODE skill loading section', () => {
+    it("should include Phase CODE skill loading section", () => {
       const actual = buildMasterInstructions(baseSelections);
-      const hasPhaseCodeHeader = actual.includes('## Phase CODE');
+      const hasPhaseCodeHeader = actual.includes("## Phase CODE");
+
       assert.ok(hasPhaseCodeHeader);
     });
 
-    it('should classify testing/security/observability as surgical skills', () => {
+    it("should classify testing/security/observability as surgical skills", () => {
       const actual = buildMasterInstructions(baseSelections);
 
-      const hasSurgicalHeader = actual.includes('**Surgical**');
-      const hasTestingSkill = actual.includes('testing.md');
-      const hasSecuritySkill = actual.includes('security.md');
-      const hasObservabilitySkill = actual.includes('observability.md');
+      const hasSurgicalHeader = actual.includes("**Surgical**");
+      const hasTestingSkill = actual.includes("testing.md");
+      const hasSecuritySkill = actual.includes("security.md");
+      const hasObservabilitySkill = actual.includes("observability.md");
 
       assert.ok(hasSurgicalHeader);
       assert.ok(hasTestingSkill);
@@ -205,19 +237,20 @@ describe('InstructionAssembler', () => {
       assert.ok(hasObservabilitySkill);
     });
 
-    it('should unconditionally include Agent Roles block', () => {
+    it("should unconditionally include Agent Roles block", () => {
       const actual = buildMasterInstructions(baseSelections);
-      const hasAgentRolesHeader = actual.includes('## Agent Roles');
-      const hasAgentRolesLink = actual.includes('agent-roles.md');
+      const hasAgentRolesHeader = actual.includes("## Agent Roles");
+      const hasAgentRolesLink = actual.includes("agent-roles.md");
+
       assert.ok(hasAgentRolesHeader);
       assert.ok(hasAgentRolesLink);
     });
 
-    it('should NOT include DNA-GATE or Working Protocol inline blocks', () => {
+    it("should NOT include DNA-GATE or Working Protocol inline blocks", () => {
       const actual = buildMasterInstructions(baseSelections);
-      const hasNoDnaGateBlock = !actual.includes('DNA-GATE & MENTAL RESET');
-      const hasNoPhaseBanner = !actual.includes('PHASE EXECUTION IS MANDATORY');
-      const hasNoWorkingProtocolBlock = !actual.includes('## Working Protocol');
+      const hasNoDnaGateBlock = !actual.includes("DNA-GATE & MENTAL RESET");
+      const hasNoPhaseBanner = !actual.includes("PHASE EXECUTION IS MANDATORY");
+      const hasNoWorkingProtocolBlock = !actual.includes("## Working Protocol");
 
       assert.ok(hasNoDnaGateBlock);
       assert.ok(hasNoPhaseBanner);
@@ -225,13 +258,13 @@ describe('InstructionAssembler', () => {
     });
   });
 
-  describe('Token Budget Guard', () => {
-    const WORST_CASE_INPUT = { flavor: 'vertical-slice' };
+  describe("Token Budget Guard", () => {
+    const WORST_CASE_INPUT = { flavor: "vertical-slice" };
     const TOKEN_BUDGET_BYTES = 2600;
 
     it(`should stay under ${TOKEN_BUDGET_BYTES} bytes`, () => {
       const actual = buildMasterInstructions(WORST_CASE_INPUT);
-      const actualBytes = Buffer.byteLength(actual, 'utf8');
+      const actualBytes = Buffer.byteLength(actual, "utf8");
 
       const isWithinTokenBudget = actualBytes <= TOKEN_BUDGET_BYTES;
       const tokenLeakMessage = `Token leak detected: ${actualBytes} bytes (budget: ${TOKEN_BUDGET_BYTES}).`;
@@ -239,7 +272,7 @@ describe('InstructionAssembler', () => {
       assert.ok(isWithinTokenBudget, tokenLeakMessage);
     });
 
-    it('should not duplicate any file path reference', () => {
+    it("should not duplicate any file path reference", () => {
       const actual = buildMasterInstructions(WORST_CASE_INPUT);
       const pathMatches = actual.match(/`\.ai\/[^`]+\.md`/g) || [];
 
@@ -250,34 +283,35 @@ describe('InstructionAssembler', () => {
       assert.equal(actualPathCount, expectedUniqueCount);
     });
 
-    it('should not contain verbose protocol patterns', () => {
+    it("should not contain verbose protocol patterns", () => {
       const actual = buildMasterInstructions(WORST_CASE_INPUT);
 
       const forbiddenPatterns = [
-        'SOVEREIGN PROTOCOL',
-        'PHASE EXECUTION IS MANDATORY',
-        'DNA-GATE',
-        'Engineering Laws',
-        '[!IMPORTANT]',
-        '[!CAUTION]',
+        "SOVEREIGN PROTOCOL",
+        "PHASE EXECUTION IS MANDATORY",
+        "DNA-GATE",
+        "Engineering Laws",
+        "[!IMPORTANT]",
+        "[!CAUTION]",
       ];
 
       for (const pattern of forbiddenPatterns) {
         const isPatternAbsent = !actual.includes(pattern);
+
         assert.ok(isPatternAbsent, `Verbose pattern leaked: "${pattern}"`);
       }
     });
   });
 
-  describe('writeToolingAssets()', () => {
-    it('should copy tooling directory into .ai/tooling/ preserving structure', () => {
+  describe("writeToolingAssets()", () => {
+    it("should copy tooling directory into .ai/tooling/ preserving structure", () => {
       const tmpDir = makeTempDir();
       const expectedFiles = [
-        path.join('.ai', 'tooling', 'scripts', 'prune-backlog.mjs'),
-        path.join('.ai', 'tooling', 'scripts', 'bump-version.mjs'),
-        path.join('.ai', 'tooling', 'husky', 'pre-commit'),
-        path.join('.ai', 'tooling', 'husky', 'commit-msg'),
-        path.join('.ai', 'tooling', 'README.md'),
+        path.join(".ai", "tooling", "scripts", "prune-backlog.mjs"),
+        path.join(".ai", "tooling", "scripts", "bump-version.mjs"),
+        path.join(".ai", "tooling", "husky", "pre-commit"),
+        path.join(".ai", "tooling", "husky", "commit-msg"),
+        path.join(".ai", "tooling", "README.md"),
       ];
 
       try {
@@ -286,6 +320,7 @@ describe('InstructionAssembler', () => {
         for (const relativePath of expectedFiles) {
           const absolutePath = path.join(tmpDir, relativePath);
           const fileExists = fileSystem.existsSync(absolutePath);
+
           assert.ok(fileExists, `Missing tooling asset: ${relativePath}`);
         }
       } finally {
@@ -293,20 +328,29 @@ describe('InstructionAssembler', () => {
       }
     });
 
-    it('should mark husky hooks as executable', () => {
+    it("should mark husky hooks as executable", () => {
       const tmpDir = makeTempDir();
-      const hookNames = ['pre-commit', 'commit-msg'];
+      const hookNames = ["pre-commit", "commit-msg"];
       const expectedPermissionMask = 0o100;
 
       try {
         writeToolingAssets(tmpDir);
 
         for (const hookName of hookNames) {
-          const hookPath = path.join(tmpDir, '.ai', 'tooling', 'husky', hookName);
+          const hookPath = path.join(
+            tmpDir,
+            ".ai",
+            "tooling",
+            "husky",
+            hookName
+          );
+
           const stats = fileSystem.statSync(hookPath);
 
           const actualPermissionBits = stats.mode & 0o111;
-          const isExecutable = (actualPermissionBits & expectedPermissionMask) !== 0;
+          const isExecutable =
+            (actualPermissionBits & expectedPermissionMask) !== 0;
+
           assert.ok(isExecutable, `Hook not executable: ${hookName}`);
         }
       } finally {
@@ -314,16 +358,16 @@ describe('InstructionAssembler', () => {
       }
     });
 
-    it('should be idempotent when invoked twice', () => {
+    it("should be idempotent when invoked twice", () => {
       const tmpDir = makeTempDir();
-      const referencePath = path.join(tmpDir, '.ai', 'tooling', 'README.md');
+      const referencePath = path.join(tmpDir, ".ai", "tooling", "README.md");
 
       try {
         writeToolingAssets(tmpDir);
-        const firstRunContent = fileSystem.readFileSync(referencePath, 'utf8');
+        const firstRunContent = fileSystem.readFileSync(referencePath, "utf8");
 
         writeToolingAssets(tmpDir);
-        const secondRunContent = fileSystem.readFileSync(referencePath, 'utf8');
+        const secondRunContent = fileSystem.readFileSync(referencePath, "utf8");
 
         assert.equal(firstRunContent, secondRunContent);
       } finally {
@@ -332,16 +376,19 @@ describe('InstructionAssembler', () => {
     });
   });
 
-  describe('writeBacklogFiles()', () => {
-    it('should include Tooling (optional) section in generated context.md', () => {
+  describe("writeBacklogFiles()", () => {
+    it("should include Tooling (optional) section in generated context.md", () => {
       const tmpDir = makeTempDir();
-      const contextPath = path.join(tmpDir, '.ai', 'backlog', 'context.md');
+      const contextPath = path.join(tmpDir, ".ai", "backlog", "context.md");
 
       try {
-        writeBacklogFiles(tmpDir, { flavor: 'lite' });
-        const actualContent = fileSystem.readFileSync(contextPath, 'utf8');
-        const actualHasToolingSection = actualContent.includes('## Tooling (optional)');
-        const actualHasToolingPath = actualContent.includes('.ai/tooling/');
+        writeBacklogFiles(tmpDir, { flavor: "lite" });
+        const actualContent = fileSystem.readFileSync(contextPath, "utf8");
+        const actualHasToolingSection = actualContent.includes(
+          "## Tooling (optional)"
+        );
+
+        const actualHasToolingPath = actualContent.includes(".ai/tooling/");
 
         assert.ok(actualHasToolingSection);
         assert.ok(actualHasToolingPath);
@@ -350,20 +397,21 @@ describe('InstructionAssembler', () => {
       }
     });
 
-    it('should write .ai/backlog/stack.md placeholder when missing', () => {
+    it("should write .ai/backlog/stack.md placeholder when missing", () => {
       const tmpDir = makeTempDir();
-      const stackPath = path.join(tmpDir, '.ai', 'backlog', 'stack.md');
+      const stackPath = path.join(tmpDir, ".ai", "backlog", "stack.md");
 
       try {
-        writeBacklogFiles(tmpDir, { flavor: 'lite' });
+        writeBacklogFiles(tmpDir, { flavor: "lite" });
 
         const actualExists = fileSystem.existsSync(stackPath);
-        assert.ok(actualExists, 'stack.md seed must be written on init');
 
-        const actualContent = fileSystem.readFileSync(stackPath, 'utf8');
-        const actualHasProjectStack = actualContent.includes('# Project Stack');
-        const actualHasBackend = actualContent.includes('### Backend');
-        const actualHasFrontend = actualContent.includes('### Frontend');
+        assert.ok(actualExists, "stack.md seed must be written on init");
+
+        const actualContent = fileSystem.readFileSync(stackPath, "utf8");
+        const actualHasProjectStack = actualContent.includes("# Project Stack");
+        const actualHasBackend = actualContent.includes("### Backend");
+        const actualHasFrontend = actualContent.includes("### Frontend");
 
         assert.ok(actualHasProjectStack);
         assert.ok(actualHasBackend);
@@ -373,19 +421,20 @@ describe('InstructionAssembler', () => {
       }
     });
 
-    it('should never overwrite an existing .ai/backlog/stack.md', () => {
+    it("should never overwrite an existing .ai/backlog/stack.md", () => {
       const tmpDir = makeTempDir();
-      const backlogDir = path.join(tmpDir, '.ai', 'backlog');
-      const stackPath = path.join(backlogDir, 'stack.md');
-      const preexistingContent = '# Custom Stack\n\n- Node 24\n';
+      const backlogDir = path.join(tmpDir, ".ai", "backlog");
+      const stackPath = path.join(backlogDir, "stack.md");
+      const preexistingContent = "# Custom Stack\n\n- Node 24\n";
 
       try {
         fileSystem.mkdirSync(backlogDir, { recursive: true });
         fileSystem.writeFileSync(stackPath, preexistingContent);
 
-        writeBacklogFiles(tmpDir, { flavor: 'lite' });
+        writeBacklogFiles(tmpDir, { flavor: "lite" });
 
-        const actualContent = fileSystem.readFileSync(stackPath, 'utf8');
+        const actualContent = fileSystem.readFileSync(stackPath, "utf8");
+
         assert.equal(actualContent, preexistingContent);
       } finally {
         cleanup(tmpDir);
@@ -393,27 +442,32 @@ describe('InstructionAssembler', () => {
     });
   });
 
-  describe('removeGeneratedInstructions()', () => {
-    it('should delete legacy .ai/instructions/idioms/ tree', () => {
+  describe("removeGeneratedInstructions()", () => {
+    it("should delete legacy .ai/instructions/idioms/ tree", () => {
       const tmpDir = makeTempDir();
-      const staleDir = path.join(tmpDir, '.ai', 'instructions', 'idioms');
-      const staleFile = path.join(staleDir, 'typescript', 'patterns.md');
+      const staleDir = path.join(tmpDir, ".ai", "instructions", "idioms");
+      const staleFile = path.join(staleDir, "typescript", "patterns.md");
 
       try {
         fileSystem.mkdirSync(path.dirname(staleFile), { recursive: true });
-        fileSystem.writeFileSync(staleFile, '# stale');
+        fileSystem.writeFileSync(staleFile, "# stale");
 
         removeGeneratedInstructions(tmpDir);
 
         const staleStillExists = fileSystem.existsSync(staleDir);
         const expectedAbsent = false;
-        assert.equal(staleStillExists, expectedAbsent, 'stale idioms dir must be removed');
+
+        assert.equal(
+          staleStillExists,
+          expectedAbsent,
+          "stale idioms dir must be removed"
+        );
       } finally {
         cleanup(tmpDir);
       }
     });
 
-    it('should be a no-op when no stale idioms exist', () => {
+    it("should be a no-op when no stale idioms exist", () => {
       const tmpDir = makeTempDir();
 
       try {

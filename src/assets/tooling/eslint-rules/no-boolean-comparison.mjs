@@ -1,25 +1,27 @@
 export const noBooleanComparison = {
   meta: {
-    type: 'suggestion',
+    type: "suggestion",
     docs: {
-      description: 'disallow comparisons to boolean literals',
+      description: "disallow comparisons to boolean literals",
     },
-    fixable: 'code',
+    fixable: "code",
     schema: [],
   },
 
   create(context) {
     function isBooleanLiteral(node) {
-      return node.type === 'Literal' && typeof node.value === 'boolean';
+      return node.type === "Literal" && typeof node.value === "boolean";
     }
 
     function requiresParens(node) {
-      return node.type === 'BinaryExpression' || node.type === 'LogicalExpression';
+      return (
+        node.type === "BinaryExpression" || node.type === "LogicalExpression"
+      );
     }
 
     return {
       BinaryExpression(node) {
-        if (!['==', '===', '!=', '!=='].includes(node.operator)) {
+        if (!["==", "===", "!=", "!=="].includes(node.operator)) {
           return;
         }
 
@@ -31,15 +33,18 @@ export const noBooleanComparison = {
 
         const subject = rightIsBool ? node.left : node.right;
         const literal = rightIsBool ? node.right : node.left;
-        const isNegated = node.operator === '!=' || node.operator === '!==';
+        const isNegated = node.operator === "!=" || node.operator === "!==";
         const wantNegated = literal.value ? isNegated : !isNegated;
 
         context.report({
           node,
-          message: 'Avoid comparing to boolean literals. Use the value directly.',
+          message:
+            "Avoid comparing to boolean literals. Use the value directly.",
           fix(fixer) {
             const subjectText = context.sourceCode.getText(subject);
-            const wrapped = requiresParens(subject) ? `(${subjectText})` : subjectText;
+            const wrapped = requiresParens(subject)
+              ? `(${subjectText})`
+              : subjectText;
 
             const replacement = wantNegated ? `!${wrapped}` : wrapped;
             return fixer.replaceText(node, replacement);

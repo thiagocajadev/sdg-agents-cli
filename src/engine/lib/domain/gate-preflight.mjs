@@ -1,12 +1,16 @@
 const PREFLIGHT_PATTERNS = [
   {
-    rule: 'named-const-before-call',
-    pattern: /assert\.(ok|equal|notEqual|deepEqual|strictEqual|throws|rejects)\s*\([^,)]*\.\w+\(/gm,
+    rule: "named-const-before-call",
+    pattern:
+      /assert\.(ok|equal|notEqual|deepEqual|strictEqual|throws|rejects)\s*\([^,)]*\.\w+\(/gm,
   },
 ];
 
 function runPreflight(diff) {
-  const matches = PREFLIGHT_PATTERNS.flatMap((entry) => collectMatches(diff, entry));
+  const matches = PREFLIGHT_PATTERNS.flatMap((entry) =>
+    collectMatches(diff, entry)
+  );
+
   return matches;
 }
 
@@ -25,7 +29,7 @@ function buildMatch(hit, rule) {
 }
 
 function computeLineNumber(source, index) {
-  const lineNumber = source.slice(0, index).split('\n').length;
+  const lineNumber = source.slice(0, index).split("\n").length;
   return lineNumber;
 }
 

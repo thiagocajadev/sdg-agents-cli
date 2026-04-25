@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-import fileSystem from 'node:fs';
-import path from 'node:path';
+import fileSystem from "node:fs";
+import path from "node:path";
 
-const VALID_BUMP_TYPES = ['patch', 'minor', 'major'];
+const VALID_BUMP_TYPES = ["patch", "minor", "major"];
 
 function run() {
   const bumpType = process.argv[2];
   const isValidBumpType = VALID_BUMP_TYPES.includes(bumpType);
   if (!isValidBumpType) {
-    console.error(`❌ Usage: bump-version.mjs <${VALID_BUMP_TYPES.join('|')}>`);
+    console.error(`❌ Usage: bump-version.mjs <${VALID_BUMP_TYPES.join("|")}>`);
     process.exit(1);
   }
 
@@ -27,7 +27,7 @@ function run() {
 }
 
 function resolvePackagePath() {
-  const packagePath = path.join(process.cwd(), 'package.json');
+  const packagePath = path.join(process.cwd(), "package.json");
   return packagePath;
 }
 
@@ -37,10 +37,12 @@ function readPackageJson(packagePath) {
     process.exit(1);
   }
 
-  const rawContent = fileSystem.readFileSync(packagePath, 'utf8');
+  const rawContent = fileSystem.readFileSync(packagePath, "utf8");
   const parsed = JSON.parse(rawContent);
 
-  const hasVersion = typeof parsed.version === 'string' && parsed.version.length > 0;
+  const hasVersion =
+    typeof parsed.version === "string" && parsed.version.length > 0;
+
   if (!hasVersion) {
     console.error(`❌ Missing "version" field in ${packagePath}`);
     process.exit(1);
@@ -50,8 +52,13 @@ function readPackageJson(packagePath) {
 }
 
 function incrementVersion(currentVersion, bumpType) {
-  const parts = currentVersion.split('.').map((value) => Number.parseInt(value, 10));
-  const isSemverTriplet = parts.length === 3 && parts.every((value) => Number.isFinite(value));
+  const parts = currentVersion
+    .split(".")
+    .map((value) => Number.parseInt(value, 10));
+
+  const isSemverTriplet =
+    parts.length === 3 && parts.every((value) => Number.isFinite(value));
+
   if (!isSemverTriplet) {
     console.error(`❌ Invalid semver: ${currentVersion}`);
     process.exit(1);

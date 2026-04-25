@@ -5,21 +5,21 @@
  * Supports interactive and non-interactive modes.
  */
 
-import { createRequire } from 'node:module';
-import path from 'node:path';
+import { createRequire } from "node:module";
+import path from "node:path";
 
-import { FsUtils } from '../lib/core/fs-utils.mjs';
-import { PromptUtils } from '../lib/infra/prompt-utils.mjs';
-import { CliParser } from '../lib/infra/cli-parser.mjs';
-import { BundleUI } from '../lib/core/ui-utils.mjs';
-import { VersionUtils } from '../lib/domain/version-utils.mjs';
+import { FsUtils } from "../lib/core/fs-utils.mjs";
+import { PromptUtils } from "../lib/infra/prompt-utils.mjs";
+import { CliParser } from "../lib/infra/cli-parser.mjs";
+import { BundleUI } from "../lib/core/ui-utils.mjs";
+import { VersionUtils } from "../lib/domain/version-utils.mjs";
 
 const { bootstrapIfDirect } = FsUtils;
 const { safeSelect } = PromptUtils;
 const { parseCliArgs, validateInit } = CliParser;
 
 const require = createRequire(import.meta.url);
-const packageJson = require('../../../package.json');
+const packageJson = require("../../../package.json");
 
 async function run() {
   const lifecycleResult = await orchestrateCommandLineLifecycle();
@@ -93,7 +93,7 @@ async function ensureMaintainerSync(targetDirectory) {
     return idleResult;
   }
 
-  const { SyncChecker } = await import('./audit/check-sync.mjs');
+  const { SyncChecker } = await import("./audit/check-sync.mjs");
   const syncResult = SyncChecker.check();
 
   const isDriftDetected = syncResult.isFailure;
@@ -107,23 +107,30 @@ async function ensureMaintainerSync(targetDirectory) {
 }
 
 async function applyAutomaticSync(targetDirectory) {
-  console.log('\n  🛠️  MAINTAINER MODE: Drift detected in core instructions.');
-  console.log('  🔄 Automatic sync in progress...\n');
+  console.log("\n  🛠️  MAINTAINER MODE: Drift detected in core instructions.");
+  console.log("  🔄 Automatic sync in progress...\n");
 
-  const { ManifestUtils } = await import('../lib/domain/manifest-utils.mjs');
-  const { SDG: SpecDrivenGuide } = await import('./init/build-bundle.mjs');
+  const { ManifestUtils } = await import("../lib/domain/manifest-utils.mjs");
+  const { SDG: SpecDrivenGuide } = await import("./init/build-bundle.mjs");
   const manifest = ManifestUtils.loadManifest(targetDirectory);
 
   if (!manifest) {
-    const missingMsg = '  ⚠️  Cannot auto-sync: No manifest found. Run "init" once.\n';
+    const missingMsg =
+      '  ⚠️  Cannot auto-sync: No manifest found. Run "init" once.\n';
+
     console.log(missingMsg);
     return;
   }
 
   try {
-    await SpecDrivenGuide.run(targetDirectory, { selections: manifest.selections });
-    const successMsg = '\n  ✅ Core instructions synchronized. Agent rules are up-to-date.\n';
-    const divider = `${'─'.repeat(50)}\n`;
+    await SpecDrivenGuide.run(targetDirectory, {
+      selections: manifest.selections,
+    });
+
+    const successMsg =
+      "\n  ✅ Core instructions synchronized. Agent rules are up-to-date.\n";
+
+    const divider = `${"─".repeat(50)}\n`;
     const successOutput = `${successMsg}${divider}`;
     console.log(successOutput);
   } catch (error) {
@@ -134,32 +141,32 @@ async function applyAutomaticSync(targetDirectory) {
 
 async function dispatchSubcommand(args) {
   switch (args.subcommand) {
-    case 'init': {
+    case "init": {
       const initResult = await processInitSubcommand(args);
       return initResult;
     }
-    case 'review': {
-      const { Reviewer } = await import('./maintenance/review-bundle.mjs');
+    case "review": {
+      const { Reviewer } = await import("./maintenance/review-bundle.mjs");
       const reviewResult = await Reviewer.review();
       return reviewResult;
     }
-    case 'clear': {
-      const { Cleaner } = await import('./maintenance/clear-bundle.mjs');
+    case "clear": {
+      const { Cleaner } = await import("./maintenance/clear-bundle.mjs");
       const clearResult = await Cleaner.clear(args.targetDirectory);
       return clearResult;
     }
-    case 'audit': {
-      const { AuditRunner } = await import('./audit/audit-bundle.mjs');
+    case "audit": {
+      const { AuditRunner } = await import("./audit/audit-bundle.mjs");
       const auditResult = await AuditRunner.audit();
       return auditResult;
     }
-    case 'narrative': {
-      const { NarrativeChecker } = await import('./audit/check-narrative.mjs');
+    case "narrative": {
+      const { NarrativeChecker } = await import("./audit/check-narrative.mjs");
       const narrativeResult = await NarrativeChecker.check();
       return narrativeResult;
     }
-    case 'gate': {
-      const { GateRunner } = await import('./maintenance/gate-bundle.mjs');
+    case "gate": {
+      const { GateRunner } = await import("./maintenance/gate-bundle.mjs");
       const gateResult = await GateRunner.dispatch(args);
       return gateResult;
     }
@@ -180,13 +187,13 @@ async function processInitSubcommand(args) {
     return;
   }
 
-  const { SDG: SpecDrivenGuide } = await import('./init/build-bundle.mjs');
-  const isQuickMode = args.quick || args.mode === 'quick';
+  const { SDG: SpecDrivenGuide } = await import("./init/build-bundle.mjs");
+  const isQuickMode = args.quick || args.mode === "quick";
   const isNonInteractive = isQuickMode || args.mode || args.flavor;
 
   const selectionPayload = isNonInteractive
     ? {
-        mode: isQuickMode ? 'quick' : args.mode || 'agents',
+        mode: isQuickMode ? "quick" : args.mode || "agents",
         flavor: args.flavor,
         track: args.track,
       }
@@ -197,7 +204,11 @@ async function processInitSubcommand(args) {
     selections: selectionPayload,
   };
 
-  const buildResult = await SpecDrivenGuide.run(args.targetDirectory, buildParams);
+  const buildResult = await SpecDrivenGuide.run(
+    args.targetDirectory,
+    buildParams
+  );
+
   return buildResult;
 }
 
@@ -213,27 +224,27 @@ async function startInteractiveMode(args) {
   try {
     while (true) {
       const menuChoice = await safeSelect({
-        message: 'What would you like to do?',
+        message: "What would you like to do?",
         choices: [
           {
-            name: '1. 🏗️  Build Project — Inject staff-level engineering rules',
-            value: 'init',
+            name: "1. 🏗️  Build Project — Inject staff-level engineering rules",
+            value: "init",
           },
           {
-            name: '2. ⚙️  Settings — Audit, update rules, and maintenance',
-            value: 'settings',
+            name: "2. ⚙️  Settings — Audit, update rules, and maintenance",
+            value: "settings",
           },
-          { name: '3. ❌ Exit', value: 'exit' },
+          { name: "3. ❌ Exit", value: "exit" },
         ],
       });
 
-      const isExit = menuChoice === 'exit' || menuChoice === 'back';
+      const isExit = menuChoice === "exit" || menuChoice === "back";
       if (isExit) {
         break;
       }
 
       await dispatchMenuAction(menuChoice, args);
-      console.log(`\n${'─'.repeat(50)}\n`);
+      console.log(`\n${"─".repeat(50)}\n`);
     }
   } catch (error) {
     reportExitError(error);
@@ -243,27 +254,29 @@ async function startInteractiveMode(args) {
 }
 
 function reportExitError(error) {
-  const isForceClosed = error.message?.includes('force closed') || error.name === 'ExitPromptError';
+  const isForceClosed =
+    error.message?.includes("force closed") || error.name === "ExitPromptError";
+
   if (isForceClosed) {
-    console.log('\n\n  👋 Goodbye! See you soon engineer.');
+    console.log("\n\n  👋 Goodbye! See you soon engineer.");
     process.exit(0);
   }
 
-  console.error('\n  ❌ Error:', error.message);
+  console.error("\n  ❌ Error:", error.message);
   process.exit(1);
 }
 
 async function dispatchMenuAction(menuChoice, args) {
   switch (menuChoice) {
-    case 'init': {
-      const { SDG: SpecDrivenGuide } = await import('./init/build-bundle.mjs');
+    case "init": {
+      const { SDG: SpecDrivenGuide } = await import("./init/build-bundle.mjs");
       const initResult = await SpecDrivenGuide.run(args.targetDirectory, {
         isDryRun: args.isDryRun,
       });
 
       return initResult;
     }
-    case 'settings': {
+    case "settings": {
       const settingsResult = await openSettingsMenu(args.targetDirectory);
       return settingsResult;
     }
@@ -276,39 +289,42 @@ async function dispatchMenuAction(menuChoice, args) {
 
 async function openSettingsMenu(targetDirectory) {
   const settingsChoice = await safeSelect({
-    message: 'Settings:',
+    message: "Settings:",
     choices: [
       {
-        name: '1. 🔍 Governance Audit — Detect drift and law violations',
-        value: 'audit',
+        name: "1. 🔍 Governance Audit — Detect drift and law violations",
+        value: "audit",
       },
       {
-        name: '2. 🔄 Update Instructions — Re-apply latest rules (uses saved config)',
-        value: 'update-instructions',
+        name: "2. 🔄 Update Instructions — Re-apply latest rules (uses saved config)",
+        value: "update-instructions",
       },
-      { name: '3. 🗑️  Clear Generated Content — Remove all generated files', value: 'clear' },
-      { name: '4. Back', value: 'back' },
+      {
+        name: "3. 🗑️  Clear Generated Content — Remove all generated files",
+        value: "clear",
+      },
+      { name: "4. Back", value: "back" },
     ],
   });
 
-  const isBack = settingsChoice === 'back';
+  const isBack = settingsChoice === "back";
   if (isBack) {
     const backResult = null;
     return backResult;
   }
 
   switch (settingsChoice) {
-    case 'audit': {
-      const { AuditRunner } = await import('./audit/audit-bundle.mjs');
+    case "audit": {
+      const { AuditRunner } = await import("./audit/audit-bundle.mjs");
       const auditResult = await AuditRunner.audit();
       return auditResult;
     }
-    case 'update-instructions': {
+    case "update-instructions": {
       const updateResult = await applyUpdateInstructions(targetDirectory);
       return updateResult;
     }
-    case 'clear': {
-      const { Cleaner } = await import('./maintenance/clear-bundle.mjs');
+    case "clear": {
+      const { Cleaner } = await import("./maintenance/clear-bundle.mjs");
       const clearResult = await Cleaner.clear(targetDirectory);
       return clearResult;
     }
@@ -320,13 +336,15 @@ async function openSettingsMenu(targetDirectory) {
 }
 
 async function applyUpdateInstructions(targetDirectory) {
-  const { ManifestUtils } = await import('../lib/domain/manifest-utils.mjs');
-  const { SDG: SpecDrivenGuide } = await import('./init/build-bundle.mjs');
+  const { ManifestUtils } = await import("../lib/domain/manifest-utils.mjs");
+  const { SDG: SpecDrivenGuide } = await import("./init/build-bundle.mjs");
   const manifest = ManifestUtils.loadManifest(targetDirectory);
 
   if (!manifest) {
-    const noManifestMsg = '\n  ⚠️  No saved config found (.ai/.sdg-manifest.json).\n';
-    const runHint = '  Run init first.\n';
+    const noManifestMsg =
+      "\n  ⚠️  No saved config found (.ai/.sdg-manifest.json).\n";
+
+    const runHint = "  Run init first.\n";
     const noManifestOutput = noManifestMsg + runHint;
     console.log(noManifestOutput);
     return;
@@ -337,7 +355,9 @@ async function applyUpdateInstructions(targetDirectory) {
   console.log(updateHeader);
 
   try {
-    await SpecDrivenGuide.run(targetDirectory, { selections: manifest.selections });
+    await SpecDrivenGuide.run(targetDirectory, {
+      selections: manifest.selections,
+    });
   } catch (error) {
     const failureOutput = `\n  ❌ Update failed: ${error.message}\n`;
     console.log(failureOutput);

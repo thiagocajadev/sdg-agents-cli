@@ -1,11 +1,13 @@
-import fileSystem from 'node:fs';
-import path from 'node:path';
-import { exec } from 'node:child_process';
-import dedent from 'dedent';
-import { select, checkbox, confirm, input } from '@inquirer/prompts';
+import fileSystem from "node:fs";
+import path from "node:path";
+import { exec } from "node:child_process";
+import dedent from "dedent";
+import { select, checkbox, confirm, input } from "@inquirer/prompts";
 
 function isExitError(error) {
-  const isExit = error.name === 'ExitPromptError' || error.message?.includes('force closed');
+  const isExit =
+    error.name === "ExitPromptError" || error.message?.includes("force closed");
+
   return isExit;
 }
 
@@ -15,7 +17,7 @@ async function safeSelect(options) {
     return selection;
   } catch (error) {
     if (isExitError(error)) {
-      const backSignal = 'back';
+      const backSignal = "back";
       return backSignal;
     }
 
@@ -29,7 +31,7 @@ async function safeCheckbox(options) {
     return selection;
   } catch (error) {
     if (isExitError(error)) {
-      const backList = ['back'];
+      const backList = ["back"];
       return backList;
     }
 
@@ -60,18 +62,18 @@ async function safeConfirm(options) {
  */
 function sanitizeInput(value, maxLength = 200) {
   if (!value) {
-    const emptyInput = '';
+    const emptyInput = "";
     return emptyInput;
   }
 
   let sanitized = String(value)
-    .normalize('NFKD') // Resovle acentos estranhos / Unicode Normalization
-    .replace(/[\u0300-\u036f]/g, '') // Remove acentos remanescentes
-    .replace(/<[^>]*>?/gm, '') // Strip HTML tags
+    .normalize("NFKD") // Resovle acentos estranhos / Unicode Normalization
+    .replace(/[\u0300-\u036f]/g, "") // Remove acentos remanescentes
+    .replace(/<[^>]*>?/gm, "") // Strip HTML tags
     .trim();
 
   // Escaping Markdown characters to prevent breaking context.md structure
-  sanitized = sanitized.replace(/([\\`*_{}[\]()#+\-.!])/g, '\\$1');
+  sanitized = sanitized.replace(/([\\`*_{}[\]()#+\-.!])/g, "\\$1");
 
   const finalSanitizedInput = sanitized.slice(0, maxLength);
   return finalSanitizedInput;
@@ -83,15 +85,18 @@ async function safeInput(options) {
   try {
     while (true) {
       const response = await input(inquirerOptions);
-      if (response === 'back') {
-        const backSignal = 'back';
+      if (response === "back") {
+        const backSignal = "back";
         return backSignal;
       }
 
       const sanitized = sanitizeInput(response, maxLength);
 
       if (minLength > 0 && sanitized.length < minLength) {
-        console.log(`\n  ⚠️  Input too short (minimum ${minLength} characters).\n`);
+        console.log(
+          `\n  ⚠️  Input too short (minimum ${minLength} characters).\n`
+        );
+
         continue;
       }
 
@@ -100,7 +105,7 @@ async function safeInput(options) {
     }
   } catch (error) {
     if (isExitError(error)) {
-      const backResult = 'back';
+      const backResult = "back";
       return backResult;
     }
 
@@ -109,18 +114,21 @@ async function safeInput(options) {
 }
 
 const PROJECT_ROOT = process.cwd();
-const AI_DIR = path.join(PROJECT_ROOT, '.ai');
-const PROMPT_FILE = path.join(AI_DIR, 'last-prompt.md');
+const AI_DIR = path.join(PROJECT_ROOT, ".ai");
+const PROMPT_FILE = path.join(AI_DIR, "last-prompt.md");
 
 function isMaintainerMode() {
-  const packagePath = path.join(PROJECT_ROOT, 'package.json');
+  const packagePath = path.join(PROJECT_ROOT, "package.json");
   if (!fileSystem.existsSync(packagePath)) {
     return false;
   }
 
   try {
-    const packageData = JSON.parse(fileSystem.readFileSync(packagePath, 'utf8'));
-    const isMaintainer = packageData.name === 'sdg-agents';
+    const packageData = JSON.parse(
+      fileSystem.readFileSync(packagePath, "utf8")
+    );
+
+    const isMaintainer = packageData.name === "sdg-agents";
     return isMaintainer;
   } catch {
     return false;
@@ -132,15 +140,15 @@ function savePromptToFile(content) {
     fileSystem.mkdirSync(AI_DIR, { recursive: true });
   }
 
-  fileSystem.writeFileSync(PROMPT_FILE, content, 'utf8');
+  fileSystem.writeFileSync(PROMPT_FILE, content, "utf8");
 }
 
 async function copyToClipboard(content) {
   const clipboardPromise = new Promise((resolve) => {
     const COMMAND_MAP = {
-      darwin: 'pbcopy',
-      win32: 'clip',
-      linux: 'xclip -selection clipboard || xsel -bi',
+      darwin: "pbcopy",
+      win32: "clip",
+      linux: "xclip -selection clipboard || xsel -bi",
     };
 
     const command = COMMAND_MAP[process.platform];
@@ -154,12 +162,12 @@ async function copyToClipboard(content) {
       resolve(!error);
     });
 
-    child.on('error', () => {
+    child.on("error", () => {
       resolve(false);
     });
 
     if (child.stdin) {
-      child.stdin.on('error', () => {
+      child.stdin.on("error", () => {
         resolve(false);
       });
 
@@ -174,7 +182,7 @@ async function copyToClipboard(content) {
   return finalClipboardPromise;
 }
 
-async function printPromptUI(content, title = 'AI Prompt Generated') {
+async function printPromptUI(content, title = "AI Prompt Generated") {
   renderPromptHeader(title, content);
   const copied = await copyToClipboard(content);
   renderCopyStatus(copied);
@@ -189,23 +197,27 @@ function renderPromptHeader(title, content) {
   console.log(`\n  ✅ ${title}`);
 
   if (maintainer) {
-    console.log('  🛠️  MAINTAINER MODE DETECTED: Prompt targets the Core Instructions.');
+    console.log(
+      "  🛠️  MAINTAINER MODE DETECTED: Prompt targets the Core Instructions."
+    );
   }
 
-  console.log(`  ${'─'.repeat(60)}`);
+  console.log(`  ${"─".repeat(60)}`);
 }
 
 function renderCopyStatus(copied) {
   if (copied) {
-    console.log('  📋 COPIED TO CLIPBOARD AUTOMATICALLY.');
+    console.log("  📋 COPIED TO CLIPBOARD AUTOMATICALLY.");
   } else {
-    console.log('  ⚠️  COULD NOT COPY TO CLIPBOARD (Install xclip/xsel on Linux).');
+    console.log(
+      "  ⚠️  COULD NOT COPY TO CLIPBOARD (Install xclip/xsel on Linux)."
+    );
   }
 }
 
 function renderPersistenceInfo() {
   const persistenceMessage = `  💾 SAVED TO: .ai/last-prompt.md`;
-  const separator = `  ${'─'.repeat(60)}`;
+  const separator = `  ${"─".repeat(60)}`;
 
   console.log(persistenceMessage);
   console.log(separator);
@@ -219,7 +231,7 @@ function renderUsageInstructions() {
 
     🌍 HOW TO USE WITH WEB CHATS (Claude.ai, ChatGPT, Gemini):
        The prompt is already in your clipboard. Just paste it (Ctrl+V).
-    ${'─'.repeat(60)}
+    ${"─".repeat(60)}
   `;
 
   console.log(instructions);

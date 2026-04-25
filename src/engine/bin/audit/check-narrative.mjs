@@ -1,7 +1,7 @@
-import fileSystem from 'node:fs';
-import path from 'node:path';
-import { NARRATIVE_CHECKLIST } from '../../config/governance.mjs';
-import { FsUtils } from '../../lib/core/fs-utils.mjs';
+import fileSystem from "node:fs";
+import path from "node:path";
+import { NARRATIVE_CHECKLIST } from "../../config/governance.mjs";
+import { FsUtils } from "../../lib/core/fs-utils.mjs";
 
 /**
  * Narrative Auditor — Narrative Cascade compliance tool.
@@ -25,21 +25,21 @@ async function orchestrateNarrativeAudit() {
 }
 
 function printHeader() {
-  console.log(`\n${'─'.repeat(50)}`);
-  console.log('  📖 SDG NARRATIVE AUDIT — Narrative Cascade Compliance');
-  console.log(`${'─'.repeat(50)}\n`);
+  console.log(`\n${"─".repeat(50)}`);
+  console.log("  📖 SDG NARRATIVE AUDIT — Narrative Cascade Compliance");
+  console.log(`${"─".repeat(50)}\n`);
 }
 
 function collectTargetFiles() {
   const targetDirectories = [
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'core'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'domain'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'infra'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'init'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'audit'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'maintenance'),
-    path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'lifecycle'),
+    path.join(PROJECT_ROOT, "src", "engine", "lib", "core"),
+    path.join(PROJECT_ROOT, "src", "engine", "lib", "domain"),
+    path.join(PROJECT_ROOT, "src", "engine", "lib", "infra"),
+    path.join(PROJECT_ROOT, "src", "engine", "bin"),
+    path.join(PROJECT_ROOT, "src", "engine", "bin", "init"),
+    path.join(PROJECT_ROOT, "src", "engine", "bin", "audit"),
+    path.join(PROJECT_ROOT, "src", "engine", "bin", "maintenance"),
+    path.join(PROJECT_ROOT, "src", "engine", "bin", "lifecycle"),
   ];
 
   const files = targetDirectories.flatMap((directory) => {
@@ -50,7 +50,7 @@ function collectTargetFiles() {
 
     const directoryFiles = fileSystem
       .readdirSync(directory)
-      .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
+      .filter((file) => file.endsWith(".mjs") && !file.endsWith(".test.mjs"))
       .map((file) => path.join(directory, file));
 
     return directoryFiles;
@@ -66,7 +66,7 @@ function scanFilesForViolations(files) {
 
   for (const filePath of files) {
     const relativePath = path.relative(PROJECT_ROOT, filePath);
-    const content = fileSystem.readFileSync(filePath, 'utf8');
+    const content = fileSystem.readFileSync(filePath, "utf8");
     const fileViolations = [];
 
     for (const rule of NARRATIVE_CHECKLIST) {
@@ -94,7 +94,10 @@ function reportResults(violationsByFile, totalViolations) {
   const filePaths = Object.keys(violationsByFile);
 
   if (filePaths.length === 0) {
-    console.log('  ✅ ALL FILES NARRATIVE COMPLIANT. Scansion flow is healthy.\n');
+    console.log(
+      "  ✅ ALL FILES NARRATIVE COMPLIANT. Scansion flow is healthy.\n"
+    );
+
     return;
   }
 
@@ -104,13 +107,19 @@ function reportResults(violationsByFile, totalViolations) {
       console.log(`     — ${violation.label}: ${violation.reason}`);
     }
 
-    console.log('');
+    console.log("");
   }
 
-  console.log('─'.repeat(50));
-  console.log(`  ⚠️  NARRATIVE DRIFT DETECTED: ${totalViolations} violations found.`);
-  console.log('  Recommendation: Apply "Code as Documentation" (see code-style.md).');
-  console.log(`${'─'.repeat(50)}\n`);
+  console.log("─".repeat(50));
+  console.log(
+    `  ⚠️  NARRATIVE DRIFT DETECTED: ${totalViolations} violations found.`
+  );
+
+  console.log(
+    '  Recommendation: Apply "Code as Documentation" (see code-style.md).'
+  );
+
+  console.log(`${"─".repeat(50)}\n`);
 }
 
 export const NarrativeChecker = { check: checkNarrative };

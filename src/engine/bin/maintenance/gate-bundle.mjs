@@ -1,6 +1,6 @@
-import { GatePrompt } from '../../lib/domain/gate-prompt.mjs';
-import { GateChecker } from '../../lib/domain/gate-checker.mjs';
-import { FsUtils } from '../../lib/core/fs-utils.mjs';
+import { GatePrompt } from "../../lib/domain/gate-prompt.mjs";
+import { GateChecker } from "../../lib/domain/gate-checker.mjs";
+import { FsUtils } from "../../lib/core/fs-utils.mjs";
 
 const { bootstrapIfDirect } = FsUtils;
 
@@ -57,9 +57,14 @@ async function processCheckMode() {
     process.exit(1);
   }
 
-  const hasWarnViolations = result.violations.length > result.blockViolations.length;
+  const hasWarnViolations =
+    result.violations.length > result.blockViolations.length;
+
   if (hasWarnViolations) {
-    const warnViolations = result.violations.filter((violation) => violation.tier === 'WARN');
+    const warnViolations = result.violations.filter(
+      (violation) => violation.tier === "WARN"
+    );
+
     const report = GateChecker.formatViolationReport(warnViolations);
 
     const warnOutput = `\n  ⚠️  SDG Gate — Warnings (not blocking)\n\n${report}\n`;
@@ -77,23 +82,23 @@ async function readStdin() {
     chunks.push(chunk);
   }
 
-  const stdin = Buffer.concat(chunks).toString('utf8');
+  const stdin = Buffer.concat(chunks).toString("utf8");
   return stdin;
 }
 
 function printUsage() {
   const message = [
-    '',
-    '  SDG Gate — Language-agnostic pre-commit code reviewer',
-    '',
-    '  Usage:',
-    '    git diff --staged | sdg-agents gate --prompt | <llm-cli> | sdg-agents gate --check',
-    '',
-    '  Flags:',
-    '    --prompt   Read diff from stdin, print review prompt to stdout',
-    '    --check    Read LLM JSON result from stdin, exit 0 (pass) or 1 (block)',
-    '',
-  ].join('\n');
+    "",
+    "  SDG Gate — Language-agnostic pre-commit code reviewer",
+    "",
+    "  Usage:",
+    "    git diff --staged | sdg-agents gate --prompt | <llm-cli> | sdg-agents gate --check",
+    "",
+    "  Flags:",
+    "    --prompt   Read diff from stdin, print review prompt to stdout",
+    "    --check    Read LLM JSON result from stdin, exit 0 (pass) or 1 (block)",
+    "",
+  ].join("\n");
 
   console.log(message);
 }

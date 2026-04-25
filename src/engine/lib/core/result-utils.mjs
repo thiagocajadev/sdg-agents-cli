@@ -4,7 +4,13 @@ function success(value) {
 }
 
 function fail(message, code) {
-  const result = { isSuccess: false, isFailure: true, value: null, error: { message, code } };
+  const result = {
+    isSuccess: false,
+    isFailure: true,
+    value: null,
+    error: { message, code },
+  };
+
   return result;
 }
 

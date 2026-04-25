@@ -1,17 +1,17 @@
-import fileSystem from 'node:fs';
-import path from 'node:path';
+import fileSystem from "node:fs";
+import path from "node:path";
 
 const PROJECT_ROOT = process.cwd();
 
 const MAINTAINER_DIRECTORIES = [
-  path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'core'),
-  path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'domain'),
-  path.join(PROJECT_ROOT, 'src', 'engine', 'lib', 'infra'),
-  path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'init'),
-  path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'audit'),
-  path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'maintenance'),
-  path.join(PROJECT_ROOT, 'src', 'engine', 'bin', 'lifecycle'),
-  path.join(PROJECT_ROOT, 'src', 'engine', 'config'),
+  path.join(PROJECT_ROOT, "src", "engine", "lib", "core"),
+  path.join(PROJECT_ROOT, "src", "engine", "lib", "domain"),
+  path.join(PROJECT_ROOT, "src", "engine", "lib", "infra"),
+  path.join(PROJECT_ROOT, "src", "engine", "bin", "init"),
+  path.join(PROJECT_ROOT, "src", "engine", "bin", "audit"),
+  path.join(PROJECT_ROOT, "src", "engine", "bin", "maintenance"),
+  path.join(PROJECT_ROOT, "src", "engine", "bin", "lifecycle"),
+  path.join(PROJECT_ROOT, "src", "engine", "config"),
 ];
 
 function getMaintainerFiles() {
@@ -23,7 +23,7 @@ function getMaintainerFiles() {
 
     return fileSystem
       .readdirSync(directory)
-      .filter((file) => file.endsWith('.mjs') && !file.endsWith('.test.mjs'))
+      .filter((file) => file.endsWith(".mjs") && !file.endsWith(".test.mjs"))
       .map((file) => path.join(directory, file));
   });
 
@@ -39,7 +39,7 @@ function getMaintainerTestFiles() {
 
     return fileSystem
       .readdirSync(directory)
-      .filter((file) => file.endsWith('.test.mjs'))
+      .filter((file) => file.endsWith(".test.mjs"))
       .map((file) => path.join(directory, file));
   });
 
@@ -58,7 +58,11 @@ function getFilesRecursive(baseDir, filterFn) {
     const entries = fileSystem.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory() && entry.name !== 'node_modules' && !entry.name.startsWith('.')) {
+      if (
+        entry.isDirectory() &&
+        entry.name !== "node_modules" &&
+        !entry.name.startsWith(".")
+      ) {
         walk(fullPath);
       } else if (entry.isFile() && filterFn(entry.name)) {
         files.push(fullPath);
@@ -72,4 +76,8 @@ function getFilesRecursive(baseDir, filterFn) {
   return collectedFiles;
 }
 
-export const AuditFileScanner = { getMaintainerFiles, getMaintainerTestFiles, getFilesRecursive };
+export const AuditFileScanner = {
+  getMaintainerFiles,
+  getMaintainerTestFiles,
+  getFilesRecursive,
+};

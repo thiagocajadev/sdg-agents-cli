@@ -1,17 +1,22 @@
 const TEST_FILE_PATTERN = /\.test\.[mc]?[jt]sx?$/;
-const THROW_LIKE_METHODS = new Set(['throws', 'doesNotThrow', 'rejects', 'doesNotReject']);
-const ONE_VALUE_METHODS = new Set(['ok', 'ifError']);
+const THROW_LIKE_METHODS = new Set([
+  "throws",
+  "doesNotThrow",
+  "rejects",
+  "doesNotReject",
+]);
+const ONE_VALUE_METHODS = new Set(["ok", "ifError"]);
 
 export const noInlineAssert = {
   meta: {
-    type: 'problem',
+    type: "problem",
     docs: {
-      description: 'require named identifiers as arguments to assert.* calls',
+      description: "require named identifiers as arguments to assert.* calls",
     },
     schema: [],
     messages: {
       inlineArgument:
-        'assert.{{method}}() argument must be a named identifier — extract to a named const.',
+        "assert.{{method}}() argument must be a named identifier — extract to a named const.",
     },
   },
 
@@ -24,12 +29,12 @@ export const noInlineAssert = {
     return {
       CallExpression(node) {
         const { callee, arguments: args } = node;
-        if (callee.type !== 'MemberExpression') {
+        if (callee.type !== "MemberExpression") {
           return;
         }
 
         const objectNode = callee.object;
-        if (objectNode.type !== 'Identifier' || objectNode.name !== 'assert') {
+        if (objectNode.type !== "Identifier" || objectNode.name !== "assert") {
           return;
         }
 
@@ -45,22 +50,23 @@ export const noInlineAssert = {
           const isStringMessage =
             isLastArg &&
             hasMessageSlot &&
-            (arg.type === 'TemplateLiteral' ||
-              (arg.type === 'Literal' && typeof arg.value === 'string'));
+            (arg.type === "TemplateLiteral" ||
+              (arg.type === "Literal" && typeof arg.value === "string"));
 
           const isFunctionArg =
             index === 0 &&
             THROW_LIKE_METHODS.has(methodName) &&
-            (arg.type === 'ArrowFunctionExpression' || arg.type === 'FunctionExpression');
+            (arg.type === "ArrowFunctionExpression" ||
+              arg.type === "FunctionExpression");
 
           if (isStringMessage || isFunctionArg) {
             continue;
           }
 
-          if (arg.type !== 'Identifier') {
+          if (arg.type !== "Identifier") {
             context.report({
               node: arg,
-              messageId: 'inlineArgument',
+              messageId: "inlineArgument",
               data: { method: methodName },
             });
           }

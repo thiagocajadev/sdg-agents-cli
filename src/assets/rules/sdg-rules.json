@@ -27,7 +27,16 @@
       "id": "boolean-prefix",
       "tier": "BLOCK",
       "description": "All boolean variables must carry a semantic prefix: is, has, can, should, did, needs, supports, allows.",
-      "requiredPrefixes": ["is", "has", "can", "should", "did", "needs", "supports", "allows"],
+      "requiredPrefixes": [
+        "is",
+        "has",
+        "can",
+        "should",
+        "did",
+        "needs",
+        "supports",
+        "allows"
+      ],
       "exampleViolation": "const active = user.status === 'active';",
       "exampleFix": "const isActive = user.status === 'active';"
     },

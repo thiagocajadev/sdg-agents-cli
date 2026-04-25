@@ -1,40 +1,40 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
-import fileSystem from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { FsUtils } from './fs-utils.mjs';
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import fileSystem from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { FsUtils } from "./fs-utils.mjs";
 
 const { getDirname, getDirectories, copyRecursiveSync } = FsUtils;
 
-describe('FsUtils', () => {
-  describe('getDirname()', () => {
-    it('should return a valid directory path from a file URL', () => {
-      const input = 'file:///home/user/project/src/index.mjs';
-      const expected = '/home/user/project/src';
+describe("FsUtils", () => {
+  describe("getDirname()", () => {
+    it("should return a valid directory path from a file URL", () => {
+      const input = "file:///home/user/project/src/index.mjs";
+      const expected = "/home/user/project/src";
 
       const actual = getDirname(input);
 
       assert.equal(actual, expected);
     });
 
-    it('should return the directory of the current test file', () => {
+    it("should return the directory of the current test file", () => {
       const input = import.meta.url;
-      const expected = true;
 
+      const expected = true;
       const actualRaw = getDirname(input);
 
       const actual =
-        actualRaw.endsWith('/src/engine/lib/core') ||
-        actualRaw.endsWith('\\src\\engine\\lib\\core');
+        actualRaw.endsWith("/src/engine/lib/core") ||
+        actualRaw.endsWith("\\src\\engine\\lib\\core");
 
       assert.equal(actual, expected);
     });
   });
 
-  describe('getDirectories()', () => {
-    it('should return an empty array when the path does not exist', () => {
-      const input = '/non-existent-path-sdg-test';
+  describe("getDirectories()", () => {
+    it("should return an empty array when the path does not exist", () => {
+      const input = "/non-existent-path-sdg-test";
       const expected = [];
 
       const actual = getDirectories(input);
@@ -42,11 +42,11 @@ describe('FsUtils', () => {
       assert.deepEqual(actual, expected);
     });
 
-    it('should return a list of directory names for a valid path', () => {
+    it("should return a list of directory names for a valid path", () => {
       const coreDir = getDirname(import.meta.url);
-      const input = path.join(coreDir, '..');
-      const expected = true;
+      const input = path.join(coreDir, "..");
 
+      const expected = true;
       const actualRaw = getDirectories(input);
       const actual = Array.isArray(actualRaw) && actualRaw.length > 0;
 
@@ -54,18 +54,21 @@ describe('FsUtils', () => {
     });
   });
 
-  describe('copyRecursiveSync()', () => {
-    it('should copy a single file to a destination', () => {
-      const tmpDir = fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
-      const srcFile = path.join(tmpDir, 'source.txt');
-      const destFile = path.join(tmpDir, 'dest.txt');
-      const expectedContent = 'hello';
+  describe("copyRecursiveSync()", () => {
+    it("should copy a single file to a destination", () => {
+      const tmpDir = fileSystem.mkdtempSync(
+        path.join(os.tmpdir(), "sdg-test-")
+      );
+
+      const srcFile = path.join(tmpDir, "source.txt");
+      const destFile = path.join(tmpDir, "dest.txt");
+      const expectedContent = "hello";
       fileSystem.writeFileSync(srcFile, expectedContent);
 
       copyRecursiveSync(srcFile, destFile);
 
       const actualExists = fileSystem.existsSync(destFile);
-      const actualContent = fileSystem.readFileSync(destFile, 'utf8');
+      const actualContent = fileSystem.readFileSync(destFile, "utf8");
 
       assert.ok(actualExists);
       assert.equal(actualContent, expectedContent);
@@ -73,24 +76,30 @@ describe('FsUtils', () => {
       fileSystem.rmSync(tmpDir, { recursive: true, force: true });
     });
 
-    it('should copy a directory tree recursively', () => {
-      const tmpDir = fileSystem.mkdtempSync(path.join(os.tmpdir(), 'sdg-test-'));
-      const srcDir = path.join(tmpDir, 'src');
-      const subDir = path.join(srcDir, 'sub');
-      const rootText = 'root';
-      const nestedText = 'nested';
+    it("should copy a directory tree recursively", () => {
+      const tmpDir = fileSystem.mkdtempSync(
+        path.join(os.tmpdir(), "sdg-test-")
+      );
+
+      const srcDir = path.join(tmpDir, "src");
+      const subDir = path.join(srcDir, "sub");
+      const rootText = "root";
+      const nestedText = "nested";
       fileSystem.mkdirSync(subDir, { recursive: true });
-      fileSystem.writeFileSync(path.join(srcDir, 'root.txt'), rootText);
-      fileSystem.writeFileSync(path.join(subDir, 'nested.txt'), nestedText);
-      const destDir = path.join(tmpDir, 'dest');
+      fileSystem.writeFileSync(path.join(srcDir, "root.txt"), rootText);
+      fileSystem.writeFileSync(path.join(subDir, "nested.txt"), nestedText);
+      const destDir = path.join(tmpDir, "dest");
 
       copyRecursiveSync(srcDir, destDir);
 
-      const actualRootText = fileSystem.readFileSync(path.join(destDir, 'root.txt'), 'utf8');
+      const actualRootText = fileSystem.readFileSync(
+        path.join(destDir, "root.txt"),
+        "utf8"
+      );
 
       const actualNestedText = fileSystem.readFileSync(
-        path.join(destDir, 'sub', 'nested.txt'),
-        'utf8'
+        path.join(destDir, "sub", "nested.txt"),
+        "utf8"
       );
 
       assert.equal(actualRootText, rootText);
@@ -99,11 +108,10 @@ describe('FsUtils', () => {
       fileSystem.rmSync(tmpDir, { recursive: true, force: true });
     });
 
-    it('should do nothing when the source path does not exist', () => {
-      const destFile = '/tmp/sdg-dest-non-existent.txt';
-      const input = '/non-existent-path-sdg-test/file.txt';
+    it("should do nothing when the source path does not exist", () => {
+      const destFile = "/tmp/sdg-dest-non-existent.txt";
+      const input = "/non-existent-path-sdg-test/file.txt";
       const expected = false;
-
       copyRecursiveSync(input, destFile);
 
       const actual = fileSystem.existsSync(destFile);

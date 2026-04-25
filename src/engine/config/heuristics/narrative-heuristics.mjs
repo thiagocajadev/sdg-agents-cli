@@ -1,16 +1,16 @@
 const BANNED_ABBREVIATIONS = [
-  'req',
-  'res',
-  'ctx',
-  'idx',
-  'tmp',
-  'arr',
-  'val',
-  'cb',
-  'mgr',
-  'ctrl',
-  'svc',
-  'prev',
+  "req",
+  "res",
+  "ctx",
+  "idx",
+  "tmp",
+  "arr",
+  "val",
+  "cb",
+  "mgr",
+  "ctrl",
+  "svc",
+  "prev",
 ];
 
 const ATOMIC_DECLARATION_PATTERN =
@@ -29,23 +29,30 @@ function validateSlaCompliance(content) {
     const entryPointName = regexMatch[1];
     const functionBody = regexMatch[2];
     const bodyLines = functionBody
-      .split('\n')
+      .split("\n")
       .map((line) => line.trim())
-      .filter((line) => line !== '');
+      .filter((line) => line !== "");
 
-    const shapeViolation = detectEntryPointShapeViolation(entryPointName, bodyLines);
+    const shapeViolation = detectEntryPointShapeViolation(
+      entryPointName,
+      bodyLines
+    );
+
     if (shapeViolation) {
       violations.push(shapeViolation);
     }
   }
 
-  const runFunctionMatch = content.match(/(?:async\s+)?function run\(\) \{([\s\S]*?)\n\}/);
+  const runFunctionMatch = content.match(
+    /(?:async\s+)?function run\(\) \{([\s\S]*?)\n\}/
+  );
+
   if (runFunctionMatch) {
     const runBody = runFunctionMatch[1];
     const forbiddenPatterns = [
-      { pattern: /console\.log\(/, label: 'console.log' },
-      { pattern: /path\.resolve\(/, label: 'path.resolve' },
-      { pattern: /process\.argv/, label: 'process.argv access' },
+      { pattern: /console\.log\(/, label: "console.log" },
+      { pattern: /path\.resolve\(/, label: "path.resolve" },
+      { pattern: /process\.argv/, label: "process.argv access" },
     ];
 
     forbiddenPatterns.forEach((item) => {
@@ -57,7 +64,10 @@ function validateSlaCompliance(content) {
 
   const slaResult = {
     pass: violations.length === 0,
-    reason: violations.length > 0 ? `Pure Entry Point violation: ${violations.join('; ')}` : null,
+    reason:
+      violations.length > 0
+        ? `Pure Entry Point violation: ${violations.join("; ")}`
+        : null,
   };
 
   return slaResult;
@@ -93,21 +103,26 @@ function isCanonicalDelegationShape(bodyLines) {
   const constName = constMatch[1];
   const expectedReturn = `return ${constName};`;
 
-  const isMatching = secondLine === expectedReturn || secondLine === `return ${constName}`;
+  const isMatching =
+    secondLine === expectedReturn || secondLine === `return ${constName}`;
+
   return isMatching;
 }
 
 function validateNarrativeSiblings(content) {
-  const topLevelFunctionsCount = (content.match(/^function\s+\w+/gm) || []).length;
+  const topLevelFunctionsCount = (content.match(/^function\s+\w+/gm) || [])
+    .length;
+
   const exportedFunctionsCount = (content.match(/^\s+\w+,/gm) || []).length;
 
   const isViolatingDensity =
-    topLevelFunctionsCount > 12 && exportedFunctionsCount < topLevelFunctionsCount / 2;
+    topLevelFunctionsCount > 12 &&
+    exportedFunctionsCount < topLevelFunctionsCount / 2;
 
   const siblingsResult = {
     pass: !isViolatingDensity,
     reason: isViolatingDensity
-      ? 'Excessive top-level function density (>12). Consider refactoring to dedicated lib.'
+      ? "Excessive top-level function density (>12). Consider refactoring to dedicated lib."
       : null,
   };
 
@@ -115,16 +130,16 @@ function validateNarrativeSiblings(content) {
 }
 
 function validateExplainingReturns(content) {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const violations = [];
 
   for (let index = 2; index < lines.length; index++) {
     const currentLine = lines[index].trim();
 
     const isPotentialBareReturn =
-      currentLine.startsWith('return ') &&
-      !['return null', 'return false', 'return true', 'return;'].some((statement) =>
-        currentLine.startsWith(statement)
+      currentLine.startsWith("return ") &&
+      !["return null", "return false", "return true", "return;"].some(
+        (statement) => currentLine.startsWith(statement)
       );
 
     if (isPotentialBareReturn) {
@@ -147,7 +162,10 @@ function validateExplainingReturns(content) {
 
   const explainingResult = {
     pass: violations.length === 0,
-    reason: violations.length > 0 ? `Laws Compliance violation: ${violations.join('; ')}` : null,
+    reason:
+      violations.length > 0
+        ? `Laws Compliance violation: ${violations.join("; ")}`
+        : null,
   };
 
   return explainingResult;
@@ -158,10 +176,14 @@ function scanForSymbolExplainer(sourceLines, returnLineIndex, symbol) {
   const startPos = Math.max(0, returnLineIndex - SCAN_LIMIT);
   const constRegex = new RegExp(`const\\s+${symbol}\\b`);
 
-  for (let currentPos = returnLineIndex - 1; currentPos >= startPos; currentPos--) {
+  for (
+    let currentPos = returnLineIndex - 1;
+    currentPos >= startPos;
+    currentPos--
+  ) {
     const lineText = sourceLines[currentPos].trim();
 
-    const isSkipLine = lineText === '' || /^[{}'`\];,.!]+$/.test(lineText);
+    const isSkipLine = lineText === "" || /^[{}'`\];,.!]+$/.test(lineText);
     if (isSkipLine) {
       continue;
     }
@@ -170,19 +192,24 @@ function scanForSymbolExplainer(sourceLines, returnLineIndex, symbol) {
       return true;
     }
 
-    const isPureDelegation = /(function|async)\s+\w+\s*\(/.test(lineText) && lineText.includes('{');
+    const isPureDelegation =
+      /(function|async)\s+\w+\s*\(/.test(lineText) && lineText.includes("{");
+
     if (isPureDelegation) {
       return true;
     }
 
     const isIndented =
-      sourceLines[currentPos].startsWith('  ') || sourceLines[currentPos].startsWith('\t');
+      sourceLines[currentPos].startsWith("  ") ||
+      sourceLines[currentPos].startsWith("\t");
 
-    if (isIndented && !lineText.includes('const ')) {
+    if (isIndented && !lineText.includes("const ")) {
       continue;
     }
 
-    if (/^(if|for|while|switch|return|export|async|function)\b/.test(lineText)) {
+    if (
+      /^(if|for|while|switch|return|export|async|function)\b/.test(lineText)
+    ) {
       break;
     }
   }
@@ -193,42 +220,45 @@ function scanForSymbolExplainer(sourceLines, returnLineIndex, symbol) {
 function classifyReturnLogic(line) {
   const isTemplateLiteral = /return\s+[^;]*`[^`]*\$\{/.test(line);
   if (isTemplateLiteral) {
-    return 'Template literal in return';
+    return "Template literal in return";
   }
 
   const isStringInterpolation = /return\s+[^;]*\$"[^"]*\{/.test(line);
   if (isStringInterpolation) {
-    return 'String interpolation in return';
+    return "String interpolation in return";
   }
 
   const isTernary = /return\s+[^;?]+\?[^;:]+:[^;]+/.test(line);
   if (isTernary) {
-    return 'Ternary in return';
+    return "Ternary in return";
   }
 
-  const isArithmetic = /return\s+[a-zA-Z_]\w*\s*[+\-*/]\s*[a-zA-Z_]\w*/.test(line);
+  const isArithmetic = /return\s+[a-zA-Z_]\w*\s*[+\-*/]\s*[a-zA-Z_]\w*/.test(
+    line
+  );
+
   if (isArithmetic) {
-    return 'Arithmetic in return';
+    return "Arithmetic in return";
   }
 
   const isConstructor = /return\s+new\s+[A-Z]\w*\s*\(/.test(line);
   if (isConstructor) {
-    return 'Constructor in return';
+    return "Constructor in return";
   }
 
-  const genericHint = 'Literal return';
+  const genericHint = "Literal return";
   return genericHint;
 }
 
 function validateNamingDiscipline(content) {
   const cleanContent = content
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/\/\/.*/g, '')
-    .replace(/(['"`])(?:(?!\1)[^\\]|\\.)*\1/g, '');
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*/g, "")
+    .replace(/(['"`])(?:(?!\1)[^\\]|\\.)*\1/g, "");
 
   const abbreviationPattern = new RegExp(
-    `\\b(${BANNED_ABBREVIATIONS.join('|')})\\b\\s*(?=[,)=:.])`,
-    'g'
+    `\\b(${BANNED_ABBREVIATIONS.join("|")})\\b\\s*(?=[,)=:.])`,
+    "g"
   );
 
   const abbreviationMatches = cleanContent.match(abbreviationPattern) || [];
@@ -237,14 +267,16 @@ function validateNamingDiscipline(content) {
   const namingResult = {
     pass: normalized.length === 0,
     reason:
-      normalized.length > 0 ? `Banned abbreviations detected: ${normalized.join(', ')}` : null,
+      normalized.length > 0
+        ? `Banned abbreviations detected: ${normalized.join(", ")}`
+        : null,
   };
 
   return namingResult;
 }
 
 function validateVerticalDensity(content) {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const doubleBlankViolations = scanDoubleBlankLines(lines);
   const tightReturnViolations = scanExplainingReturnTight(lines);
   const orphanAtomicViolations = scanOrphanAtomic(lines);
@@ -257,7 +289,10 @@ function validateVerticalDensity(content) {
 
   const densityResult = {
     pass: violations.length === 0,
-    reason: violations.length > 0 ? `Vertical Density violation: ${violations.join('; ')}` : null,
+    reason:
+      violations.length > 0
+        ? `Vertical Density violation: ${violations.join("; ")}`
+        : null,
   };
 
   return densityResult;
@@ -267,7 +302,9 @@ function scanDoubleBlankLines(lines) {
   const violations = [];
 
   for (let index = 0; index < lines.length - 1; index++) {
-    const isDoubleBlank = lines[index].trim() === '' && lines[index + 1].trim() === '';
+    const isDoubleBlank =
+      lines[index].trim() === "" && lines[index + 1].trim() === "";
+
     if (isDoubleBlank) {
       violations.push(`line ${index + 1} (double blank line)`);
     }
@@ -286,13 +323,17 @@ function scanExplainingReturnTight(lines) {
       continue;
     }
 
-    const hasBlankAbove = lines[index - 1].trim() === '';
+    const hasBlankAbove = lines[index - 1].trim() === "";
     const hasAtomicPrep = isAtomicDeclaration(lines[index - 2]);
     const hasDeclarationBoundary = isDeclarationBoundary(lines[index - 3]);
 
-    const isTightPairViolation = hasBlankAbove && hasAtomicPrep && hasDeclarationBoundary;
+    const isTightPairViolation =
+      hasBlankAbove && hasAtomicPrep && hasDeclarationBoundary;
+
     if (isTightPairViolation) {
-      violations.push(`line ${index + 1} (Explaining Return pair must be tight)`);
+      violations.push(
+        `line ${index + 1} (Explaining Return pair must be tight)`
+      );
     }
   }
 
@@ -311,7 +352,7 @@ function scanOrphanAtomic(lines) {
 
     const hasOrphanShape =
       isSimpleLiteralAtomic(orphan) &&
-      blankBefore.trim() === '' &&
+      blankBefore.trim() === "" &&
       isSimpleLiteralAtomic(pairSecond) &&
       isSimpleLiteralAtomic(pairFirst) &&
       isIsolatedBelow(nextLine);
@@ -320,19 +361,23 @@ function scanOrphanAtomic(lines) {
       continue;
     }
 
-    const isNextContinuingGroup = typeof nextLine === 'string' && isAtomicDeclaration(nextLine);
+    const isNextContinuingGroup =
+      typeof nextLine === "string" && isAtomicDeclaration(nextLine);
+
     if (isNextContinuingGroup) {
       continue;
     }
 
-    violations.push(`line ${index + 1} (orphan atomic — fold into trio or rebalance to 2+2)`);
+    violations.push(
+      `line ${index + 1} (orphan atomic — fold into trio or rebalance to 2+2)`
+    );
   }
 
   return violations;
 }
 
 function isAtomicDeclaration(line) {
-  if (typeof line !== 'string') {
+  if (typeof line !== "string") {
     return false;
   }
 
@@ -351,10 +396,11 @@ function isSimpleLiteralAtomic(line) {
     return false;
   }
 
-  const rhs = line.split('=').slice(1).join('=');
+  const rhs = line.split("=").slice(1).join("=");
+
   const hasAwait = /\bawait\b/.test(rhs);
-  const hasCall = rhs.includes('(');
-  const hasIndex = rhs.includes('[');
+  const hasCall = rhs.includes("(");
+  const hasIndex = rhs.includes("[");
   const isLiteralOnly = !hasAwait && !hasCall && !hasIndex;
   return isLiteralOnly;
 }
@@ -365,7 +411,7 @@ function isDeclarationBoundary(line) {
   }
 
   const trimmed = line.trim();
-  if (trimmed === '') {
+  if (trimmed === "") {
     return true;
   }
 
@@ -384,7 +430,7 @@ function isIsolatedBelow(nextLine) {
   }
 
   const trimmed = nextLine.trim();
-  if (trimmed === '') {
+  if (trimmed === "") {
     return true;
   }
 
@@ -395,12 +441,12 @@ function isIsolatedBelow(nextLine) {
 function validateRevealingModulePattern(content) {
   const hasRevealingObject = /export const \w+ = \{[\s\S]*\};/m.test(content);
   // self-flag evasion: the literal string 'export default' would make this very file trip its own detector.
-  const forbiddenDefaultExport = 'export ' + 'default';
+  const forbiddenDefaultExport = "export " + "default";
   const hasExportDefault = content.includes(forbiddenDefaultExport);
 
   let revealingReason = null;
   if (!hasRevealingObject) {
-    revealingReason = 'Missing Revealing Module Pattern export.';
+    revealingReason = "Missing Revealing Module Pattern export.";
   } else if (hasExportDefault) {
     revealingReason = `Uses ${forbiddenDefaultExport}.`;
   }
@@ -414,11 +460,15 @@ function validateRevealingModulePattern(content) {
 }
 
 function validateBooleanPrefixes(content) {
-  const bareBooleanMatches = content.match(/\bconst\s+(loading|error|active|valid)\s*=/g);
+  const bareBooleanMatches = content.match(
+    /\bconst\s+(loading|error|active|valid)\s*=/g
+  );
 
   const booleanResult = {
     pass: !bareBooleanMatches,
-    reason: bareBooleanMatches ? `Bare boolean detected: ${bareBooleanMatches.join(', ')}` : null,
+    reason: bareBooleanMatches
+      ? `Bare boolean detected: ${bareBooleanMatches.join(", ")}`
+      : null,
   };
 
   return booleanResult;
@@ -431,7 +481,9 @@ function validateNoSectionBanners(content) {
   const bannerResult = {
     pass: uniqueBanners.length === 0,
     reason:
-      uniqueBanners.length > 0 ? `Section banner detected: ${uniqueBanners.join(', ')}` : null,
+      uniqueBanners.length > 0
+        ? `Section banner detected: ${uniqueBanners.join(", ")}`
+        : null,
   };
 
   return bannerResult;

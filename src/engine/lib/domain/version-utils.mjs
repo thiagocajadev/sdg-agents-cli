@@ -2,7 +2,7 @@
  * Version Utils — Logic for checking updates on npm registry.
  */
 
-const REGISTRY_URL = 'https://registry.npmjs.org/sdg-agents/latest';
+const REGISTRY_URL = "https://registry.npmjs.org/sdg-agents/latest";
 const CHECK_TIMEOUT_MS = 2000;
 
 /**
@@ -48,8 +48,9 @@ function isNewer(current, latest) {
     return isSameVersion;
   }
 
-  const currentParts = current.split('.').map(Number);
-  const latestParts = latest.split('.').map(Number);
+  const currentParts = current.split(".").map(Number);
+
+  const latestParts = latest.split(".").map(Number);
 
   for (let index = 0; index < 3; index++) {
     const currentPart = currentParts[index] || 0;

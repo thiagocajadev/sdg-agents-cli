@@ -50,25 +50,24 @@ describe('ValidateCredentials', () => {
 
 > **Non-Negotiable**: No magic strings/literals in assertions. Phases: arrange → act (`actual`) → assert (`expected` + `assert.*`). Named on both sides. Enforced by `local/no-inline-assert` ESLint rule.
 
-`actual` and `expected` are grouped together before the assert, separated from it by a blank line. When derivation is needed (`actualPrice = actual.price`), the main call stays alone and the derived value groups with `expected`.
+Phases: arrange (inputs) | blank | all expected + actual + derivations (no blank between them) | blank | all asserts (no blank between them). Enforced by `local/blank-before-assertion`.
 
 ```javascript
-it('removes H1 heading', () => {
-  const input = '# Title\nBody';
+it("removes H1 heading", () => {
+  const input = "# Title\nBody";
 
+  const expected = "Body";
   const actual = sanitize(input);
-  const expected = 'Body';
 
   assert.strictEqual(actual, expected);
 });
 
-it('applies 10% discount', () => {
+it("applies 10% discount", () => {
   const order = { price: 100, discountPct: 10 };
 
-  const actual = applyDiscount(order);
-
-  const actualPrice = actual.price;
   const expected = 90;
+  const actual = applyDiscount(order);
+  const actualPrice = actual.price;
 
   assert.strictEqual(actualPrice, expected);
 });

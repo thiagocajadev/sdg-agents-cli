@@ -4,14 +4,14 @@
  */
 function displayName(flavorKey) {
   const PRESET_DISPLAY_NAMES = {
-    none: '(none)',
-    lite: 'Lite',
-    'vertical-slice': 'Vertical Slice',
-    mvc: 'MVC',
-    legacy: 'Legacy Pipeline',
+    none: "(none)",
+    lite: "Lite",
+    "vertical-slice": "Vertical Slice",
+    mvc: "MVC",
+    legacy: "Legacy Pipeline",
   };
 
-  const key = flavorKey || 'none';
+  const key = flavorKey || "none";
   const resolvedName = PRESET_DISPLAY_NAMES[key] ?? key;
 
   const displayNameResult = resolvedName;
@@ -23,19 +23,21 @@ function displayName(flavorKey) {
  */
 function smartTruncate(content, headLimit = 100, tailLimit = 50) {
   if (!content) {
-    const emptyOutput = '';
+    const emptyOutput = "";
     return emptyOutput;
   }
 
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const threshold = headLimit + tailLimit + 10; // Buffer to avoid truncating small overlaps
 
   if (lines.length <= threshold) {
     return content;
   }
 
-  const head = lines.slice(0, headLimit).join('\n');
-  const tail = lines.slice(-tailLimit).join('\n');
+  const head = lines.slice(0, headLimit).join("\n");
+
+  const tail = lines.slice(-tailLimit).join("\n");
+
   const skippedCount = lines.length - headLimit - tailLimit;
 
   const truncationMessage = `\n... [TRUNCATED ${skippedCount} LINES] ...\n`;
@@ -49,13 +51,14 @@ function smartTruncate(content, headLimit = 100, tailLimit = 50) {
  * Used in Impact Maps to prevent context bloat.
  */
 function createReference(targetFile, contextSummary) {
-  const timestamp = new Date().toISOString().split('T')[0];
+  const timestamp = new Date().toISOString().split("T")[0];
+
   const reference = [
     `REF: ${targetFile}`,
     `STATUS: Contextual Snapshot (${timestamp})`,
     `REASON: ${contextSummary}`,
     `ACTION: Use 'view_file' or 'grep' to access full content if needed.`,
-  ].join('\n');
+  ].join("\n");
 
   return reference;
 }

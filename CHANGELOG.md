@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.5.1] - 2026-04-25
+
+### Fixed
+
+- **Prettier config — double quotes + printWidth 80**: `.prettierrc` updated to `singleQuote: false` and `printWidth: 80`. Full codebase reformatted. Dot-chain wrapping (chains that exceed 80 chars) now handled automatically by Prettier; `newline-per-chained-call` ESLint rule removed (irreconcilable conflict with `prettier/prettier`).
+- **`blank-before-assertion` — new ESLint rule replacing `blank-before-expect`**: `src/assets/tooling/eslint-rules/blank-before-assertion.mjs` covers both `expect()` and `assert.*()` calls. Sibling-check prevents false positives on consecutive assertions. Scoped to `**/*.test.*` in `eslint.config.mjs` and exported as `sdgTestConfig` from `snippet.mjs`.
+- **`semantic-spacing` — assertion carve-out for Rule 2b/2d/3**: Rules that insert/remove blanks in 4/5-statement blocks now skip blocks whose terminal statement is an `assert.*` or `expect()` call. Eliminates conflict with `blank-before-assertion`.
+- **Test files — AAA grouping sweep**: all 20 `*.test.mjs` files updated to "melhor" pattern: arrange (inputs) | blank | expected + actual + derivations (no blank between) | blank | all asserts (no blank between). 235/235 tests green, lint 0 errors.
+- **`code-style.md` + `testing.md` — visual density hierarchy clarified**: formatter (Prettier) is the base authority; visual density layers on top. Linter-enforced table updated with `blank-before-assertion` and `no-inline-assert`; `semantic-spacing` description expanded. `testing.md` `NamedExpectations` example updated to new grouping pattern.
+
 ## [5.5.0] - 2026-04-24
 
 ### Fixed

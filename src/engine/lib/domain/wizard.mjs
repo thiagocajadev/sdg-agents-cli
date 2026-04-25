@@ -1,8 +1,8 @@
-import path from 'node:path';
-import { DisplayUtils } from '../core/display-utils.mjs';
-import { FsUtils } from '../core/fs-utils.mjs';
-import { ResultUtils } from '../core/result-utils.mjs';
-import { PromptUtils } from '../infra/prompt-utils.mjs';
+import path from "node:path";
+import { DisplayUtils } from "../core/display-utils.mjs";
+import { FsUtils } from "../core/fs-utils.mjs";
+import { ResultUtils } from "../core/result-utils.mjs";
+import { PromptUtils } from "../infra/prompt-utils.mjs";
 
 const { displayName } = DisplayUtils;
 const { getDirectories, getDirname } = FsUtils;
@@ -10,13 +10,18 @@ const { success, fail } = ResultUtils;
 const { safeSelect, safeInput } = PromptUtils;
 
 const __dirname = getDirname(import.meta.url);
-const SOURCE_INSTRUCTIONS = path.join(__dirname, '../../..', 'assets', 'instructions');
+const SOURCE_INSTRUCTIONS = path.join(
+  __dirname,
+  "../../..",
+  "assets",
+  "instructions"
+);
 
 const WIZARD_STEPS = {
-  INITIAL: 'initial',
-  FLAVOR: 'flavor',
-  PARTNER: 'partner',
-  DONE: 'done',
+  INITIAL: "initial",
+  FLAVOR: "flavor",
+  PARTNER: "partner",
+  DONE: "done",
 };
 
 const STEP_ORDER = [
@@ -27,11 +32,13 @@ const STEP_ORDER = [
 ];
 
 async function gatherUserSelections(targetDirectory = process.cwd()) {
-  const availableFlavors = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'flavors'));
+  const availableFlavors = getDirectories(
+    path.join(SOURCE_INSTRUCTIONS, "flavors")
+  );
 
   let selections = {
-    mode: 'agents',
-    flavor: 'vertical-slice',
+    mode: "agents",
+    flavor: "vertical-slice",
   };
 
   let step = WIZARD_STEPS.INITIAL;
@@ -46,7 +53,7 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
       return stepFailure;
     }
 
-    if (stepResult.value.mode === 'quick') {
+    if (stepResult.value.mode === "quick") {
       const quickSetupData = buildQuickSetup();
       return quickSetupData;
     }
@@ -59,7 +66,8 @@ async function gatherUserSelections(targetDirectory = process.cwd()) {
       let lastState;
       while (
         historyStack.length > 0 &&
-        STEP_ORDER.indexOf(historyStack[historyStack.length - 1].step) >= nextStepIndex
+        STEP_ORDER.indexOf(historyStack[historyStack.length - 1].step) >=
+          nextStepIndex
       ) {
         lastState = historyStack.pop();
       }
@@ -107,43 +115,49 @@ async function dispatchWizardStep(step, context) {
     [WIZARD_STEPS.PARTNER]: () => promptPartnerInfo(),
   };
 
-  const handler = STEP_HANDLERS[step] ?? (() => success({ nextStep: WIZARD_STEPS.DONE }));
+  const handler =
+    STEP_HANDLERS[step] ?? (() => success({ nextStep: WIZARD_STEPS.DONE }));
+
   const stepResult = await handler();
   return stepResult;
 }
 
 async function promptInitialChoice() {
   const result = await safeSelect({
-    message: 'What would you like to do?',
+    message: "What would you like to do?",
     choices: [
       {
-        name: '1. Full Setup — configure architecture flavor and partner info',
-        value: 'agents',
+        name: "1. Full Setup — configure architecture flavor and partner info",
+        value: "agents",
       },
       {
-        name: '2. ⚡ Quick — install with defaults (lite flavor, placeholder stack.md)',
-        value: 'quick',
+        name: "2. ⚡ Quick — install with defaults (lite flavor, placeholder stack.md)",
+        value: "quick",
       },
-      { name: '3. Back', value: 'back' },
+      { name: "3. Back", value: "back" },
     ],
   });
 
-  if (result === 'back') {
-    const backResult = fail('', 'USER_BACK');
+  if (result === "back") {
+    const backResult = fail("", "USER_BACK");
     return backResult;
   }
 
-  const initialChoiceResult = success({ nextStep: WIZARD_STEPS.FLAVOR, mode: result });
+  const initialChoiceResult = success({
+    nextStep: WIZARD_STEPS.FLAVOR,
+    mode: result,
+  });
+
   return initialChoiceResult;
 }
 
 function buildQuickSetup() {
   const quickSetupResult = success({
-    mode: 'quick',
-    flavor: 'lite',
+    mode: "quick",
+    flavor: "lite",
     partner: {
-      name: 'Human Developer',
-      role: 'Dev Partner',
+      name: "Human Developer",
+      role: "Dev Partner",
     },
   });
 
@@ -156,11 +170,11 @@ async function promptArchitectureFlavor(context) {
   const flavorChoices = buildFlavorChoices(availableFlavors);
 
   const flavor = await safeSelect({
-    message: 'Which architecture should the project follow?',
-    choices: [...flavorChoices, { name: 'Back', value: 'back' }],
+    message: "Which architecture should the project follow?",
+    choices: [...flavorChoices, { name: "Back", value: "back" }],
   });
 
-  if (flavor === 'back') {
+  if (flavor === "back") {
     const backResult = success({ nextStep: WIZARD_STEPS.INITIAL });
     return backResult;
   }
@@ -170,7 +184,7 @@ async function promptArchitectureFlavor(context) {
 }
 
 function buildFlavorChoices(flavors) {
-  const RANK_ORDER = { lite: 0, 'vertical-slice': 1, mvc: 2, legacy: 3 };
+  const RANK_ORDER = { lite: 0, "vertical-slice": 1, mvc: 2, legacy: 3 };
 
   const choices = flavors.map(toFlavorOption);
   const prioritizedChoices = choices.sort((choiceA, choiceB) => {
@@ -187,13 +201,15 @@ function buildFlavorChoices(flavors) {
 function toFlavorOption(flavorFolderKey) {
   const PRESET_LABELS = {
     lite: (base) => `0. ${base} (Simple & Agile)`,
-    'vertical-slice': (base) => `1. ${base} (Recommended)`,
+    "vertical-slice": (base) => `1. ${base} (Recommended)`,
     mvc: (base) => `2. ${base} (Standard Layers)`,
     legacy: (base) => `3. ${base} (Event-Driven / SSR)`,
   };
 
   const baseLabel = displayName(flavorFolderKey);
-  const formatter = PRESET_LABELS[flavorFolderKey] ?? ((base) => `Sub. ${base}`);
+  const formatter =
+    PRESET_LABELS[flavorFolderKey] ?? ((base) => `Sub. ${base}`);
+
   const label = formatter(baseLabel);
 
   const choice = { name: label, value: flavorFolderKey };
@@ -206,7 +222,7 @@ async function promptPartnerInfo() {
     maxLength: 80,
   });
 
-  if (input === 'back') {
+  if (input === "back") {
     const backResult = success({ nextStep: WIZARD_STEPS.FLAVOR });
     return backResult;
   }
@@ -223,7 +239,7 @@ function parsePartnerInput(input) {
     return emptyPartner;
   }
 
-  const separatorIndex = input.indexOf(',');
+  const separatorIndex = input.indexOf(",");
   const hasComma = separatorIndex !== -1;
 
   if (!hasComma) {
@@ -240,23 +256,25 @@ function parsePartnerInput(input) {
 }
 
 function validateSelections(selections) {
-  if (selections.mode === 'quick') {
-    selections.flavor = selections.flavor || 'lite';
+  if (selections.mode === "quick") {
+    selections.flavor = selections.flavor || "lite";
 
     const quickValidResult = success(selections);
     return quickValidResult;
   }
 
-  const availableFlavors = getDirectories(path.join(SOURCE_INSTRUCTIONS, 'flavors'));
+  const availableFlavors = getDirectories(
+    path.join(SOURCE_INSTRUCTIONS, "flavors")
+  );
 
   if (!selections.flavor) {
-    const missingFlavorResult = fail('--flavor is required.', 'MISSING_FLAVOR');
+    const missingFlavorResult = fail("--flavor is required.", "MISSING_FLAVOR");
     return missingFlavorResult;
   }
 
   if (!availableFlavors.includes(selections.flavor)) {
-    const invalidFlavorMessage = `Unknown flavor: "${selections.flavor}". Available: ${availableFlavors.join(', ')}`;
-    const invalidFlavorResult = fail(invalidFlavorMessage, 'INVALID_FLAVOR');
+    const invalidFlavorMessage = `Unknown flavor: "${selections.flavor}". Available: ${availableFlavors.join(", ")}`;
+    const invalidFlavorResult = fail(invalidFlavorMessage, "INVALID_FLAVOR");
     return invalidFlavorResult;
   }
 

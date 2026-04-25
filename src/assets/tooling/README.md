@@ -56,9 +56,9 @@ npm install --save-dev eslint @eslint/js prettier eslint-plugin-prettier eslint-
 2. Import `sdgEslintConfig` from the snippet and add it **after** `prettierRecommended` in your flat config:
 
 ```js
-import js from '@eslint/js';
-import prettierRecommended from 'eslint-plugin-prettier/recommended';
-import { sdgEslintConfig } from '.ai/tooling/eslint-config/snippet.mjs';
+import js from "@eslint/js";
+import prettierRecommended from "eslint-plugin-prettier/recommended";
+import { sdgEslintConfig } from ".ai/tooling/eslint-config/snippet.mjs";
 
 export default [js.configs.recommended, prettierRecommended, sdgEslintConfig];
 ```

@@ -3,20 +3,25 @@
  * Assembles agent config files and the project manifest.
  */
 
-import fileSystem from 'node:fs';
-import path from 'node:path';
-import dedent from 'dedent';
+import fileSystem from "node:fs";
+import path from "node:path";
+import dedent from "dedent";
 
-import { DisplayUtils } from '../core/display-utils.mjs';
-import { ManifestUtils } from './manifest-utils.mjs';
-import { FsUtils } from '../core/fs-utils.mjs';
+import { DisplayUtils } from "../core/display-utils.mjs";
+import { ManifestUtils } from "./manifest-utils.mjs";
+import { FsUtils } from "../core/fs-utils.mjs";
 
 const { displayName } = DisplayUtils;
 const { computeHashes } = ManifestUtils;
 const { getDirname, writeJsonAtomic, safeReadJson } = FsUtils;
 
 const __dirname = getDirname(import.meta.url);
-const SOURCE_INSTRUCTIONS = path.join(__dirname, '../../..', 'assets', 'instructions');
+const SOURCE_INSTRUCTIONS = path.join(
+  __dirname,
+  "../../..",
+  "assets",
+  "instructions"
+);
 
 /**
  * Canonical skill catalog — single source of truth for AGENTS.md rendering.
@@ -26,39 +31,59 @@ const SOURCE_INSTRUCTIONS = path.join(__dirname, '../../..', 'assets', 'instruct
  */
 const SKILL_CATALOG = [
   {
-    path: '.ai/skills/code-style.md',
-    category: 'core',
-    description: 'Code Style & Standards',
+    path: ".ai/skills/code-style.md",
+    category: "core",
+    description: "Code Style & Standards",
   },
   {
-    path: '.ai/instructions/competencies/delivery.md',
-    category: 'delivery',
-    description: 'BFF envelope + Frontend contract execution',
-  },
-  { path: '.ai/skills/api-design.md', category: 'backend', description: 'API Design' },
-  { path: '.ai/skills/data-access.md', category: 'backend', description: 'DB layer' },
-  { path: '.ai/skills/sql-style.md', category: 'backend', description: 'SQL queries' },
-  { path: '.ai/skills/ci-cd.md', category: 'backend', description: 'Pipelines & deploy' },
-  { path: '.ai/skills/cloud.md', category: 'backend', description: 'Cloud & Containers' },
-  {
-    path: '.ai/skills/ui-ux.md',
-    category: 'frontend',
-    description: 'UI/UX design system & writing voice',
+    path: ".ai/instructions/competencies/delivery.md",
+    category: "delivery",
+    description: "BFF envelope + Frontend contract execution",
   },
   {
-    path: '.ai/skills/testing.md',
-    category: 'surgical',
-    description: 'test creation or modification',
+    path: ".ai/skills/api-design.md",
+    category: "backend",
+    description: "API Design",
   },
   {
-    path: '.ai/skills/security.md',
-    category: 'surgical',
-    description: 'auth, validation, secrets',
+    path: ".ai/skills/data-access.md",
+    category: "backend",
+    description: "DB layer",
   },
   {
-    path: '.ai/skills/observability.md',
-    category: 'surgical',
-    description: 'logging, metrics, tracing',
+    path: ".ai/skills/sql-style.md",
+    category: "backend",
+    description: "SQL queries",
+  },
+  {
+    path: ".ai/skills/ci-cd.md",
+    category: "backend",
+    description: "Pipelines & deploy",
+  },
+  {
+    path: ".ai/skills/cloud.md",
+    category: "backend",
+    description: "Cloud & Containers",
+  },
+  {
+    path: ".ai/skills/ui-ux.md",
+    category: "frontend",
+    description: "UI/UX design system & writing voice",
+  },
+  {
+    path: ".ai/skills/testing.md",
+    category: "surgical",
+    description: "test creation or modification",
+  },
+  {
+    path: ".ai/skills/security.md",
+    category: "surgical",
+    description: "auth, validation, secrets",
+  },
+  {
+    path: ".ai/skills/observability.md",
+    category: "surgical",
+    description: "logging, metrics, tracing",
   },
 ];
 
@@ -80,7 +105,7 @@ function buildMasterInstructions(selections) {
     semanticRouter,
     skillRouter,
     agentRoles,
-  ].join('\n\n');
+  ].join("\n\n");
 
   return fullInstructionContent;
 
@@ -129,21 +154,27 @@ function buildMasterInstructions(selections) {
     const groupedByCategory = groupSkills(SKILL_CATALOG);
 
     const sections = [
-      '## Phase CODE — Skill Loading',
-      '',
-      '> Load on Phase CODE entry only. Match skills to task domain. Stack context lives in `stack.md`, already loaded at Session Start.',
-      '',
+      "## Phase CODE — Skill Loading",
+      "",
+      "> Load on Phase CODE entry only. Match skills to task domain. Stack context lives in `stack.md`, already loaded at Session Start.",
+      "",
     ];
 
     const categoryHeaders = {
-      core: '**Core** (always in Phase CODE)',
-      delivery: '**Delivery** (BFF + UI contract execution)',
-      backend: '**Backend** (API, DB, infrastructure tasks)',
-      frontend: '**Frontend** (UI, component tasks)',
-      surgical: '**Surgical** (only if task directly touches domain)',
+      core: "**Core** (always in Phase CODE)",
+      delivery: "**Delivery** (BFF + UI contract execution)",
+      backend: "**Backend** (API, DB, infrastructure tasks)",
+      frontend: "**Frontend** (UI, component tasks)",
+      surgical: "**Surgical** (only if task directly touches domain)",
     };
 
-    for (const category of ['core', 'delivery', 'backend', 'frontend', 'surgical']) {
+    for (const category of [
+      "core",
+      "delivery",
+      "backend",
+      "frontend",
+      "surgical",
+    ]) {
       const skills = groupedByCategory[category];
       if (!skills || skills.length === 0) {
         continue;
@@ -154,23 +185,30 @@ function buildMasterInstructions(selections) {
         sections.push(`- \`${skill.path}\` — ${skill.description}`);
       }
 
-      sections.push('');
+      sections.push("");
     }
 
-    if (flavor && flavor !== 'none') {
+    if (flavor && flavor !== "none") {
       sections.push(
-        '**Architectural flavor**',
+        "**Architectural flavor**",
         `- \`.ai/instructions/flavor/principles.md\` — Flavor: ${displayName(flavor)}`,
-        ''
+        ""
       );
     }
 
-    const registryBlock = sections.join('\n').trimEnd();
+    const registryBlock = sections.join("\n").trimEnd();
     return registryBlock;
   }
 
   function groupSkills(skills) {
-    const groups = { core: [], delivery: [], backend: [], frontend: [], surgical: [] };
+    const groups = {
+      core: [],
+      delivery: [],
+      backend: [],
+      frontend: [],
+      surgical: [],
+    };
+
     for (const skill of skills) {
       if (groups[skill.category]) {
         groups[skill.category].push(skill);
@@ -196,7 +234,7 @@ function buildMasterInstructions(selections) {
  * Only writes each file if it does not already exist — never overwrites user content.
  */
 function writeBacklogFiles(targetDirectory, selections) {
-  const backlogDirectory = path.join(targetDirectory, '.ai', 'backlog');
+  const backlogDirectory = path.join(targetDirectory, ".ai", "backlog");
   fileSystem.mkdirSync(backlogDirectory, { recursive: true });
 
   writeContextFile(backlogDirectory, targetDirectory, selections);
@@ -206,55 +244,69 @@ function writeBacklogFiles(targetDirectory, selections) {
   writeTroubleshootFile(backlogDirectory);
 
   function detectProjectLanguage(projectDirectory) {
-    const packagePath = path.join(projectDirectory, 'package.json');
+    const packagePath = path.join(projectDirectory, "package.json");
     if (!fileSystem.existsSync(packagePath)) {
-      const defaultLanguage = 'en';
+      const defaultLanguage = "en";
       return defaultLanguage;
     }
 
     try {
-      const packageData = JSON.parse(fileSystem.readFileSync(packagePath, 'utf8'));
-      const deps = { ...packageData.dependencies, ...packageData.devDependencies };
-      if (deps['i18next'] || deps['react-i18next']) {
-        const localesDir = path.join(projectDirectory, 'src', 'locales');
+      const packageData = JSON.parse(
+        fileSystem.readFileSync(packagePath, "utf8")
+      );
+
+      const deps = {
+        ...packageData.dependencies,
+        ...packageData.devDependencies,
+      };
+
+      if (deps["i18next"] || deps["react-i18next"]) {
+        const localesDir = path.join(projectDirectory, "src", "locales");
         if (
           fileSystem.existsSync(localesDir) &&
-          fileSystem.readdirSync(localesDir).includes('pt-BR')
+          fileSystem.readdirSync(localesDir).includes("pt-BR")
         ) {
-          const matchedLang = 'pt-BR';
+          const matchedLang = "pt-BR";
           return matchedLang;
         }
       }
 
       if (
-        packageData.description?.toLowerCase().includes('guia') ||
-        packageData.description?.toLowerCase().includes('sistema')
+        packageData.description?.toLowerCase().includes("guia") ||
+        packageData.description?.toLowerCase().includes("sistema")
       ) {
-        const matchingDescriptionLang = 'pt-BR';
+        const matchingDescriptionLang = "pt-BR";
         return matchingDescriptionLang;
       }
     } catch {
-      const fallbackLang = 'en';
+      const fallbackLang = "en";
       return fallbackLang;
     }
 
-    const defaultLang = 'en';
+    const defaultLang = "en";
     return defaultLang;
   }
 
-  function writeContextFile(backlogDirectoryPath, projectDirectory, currentSelections) {
-    const contextPath = path.join(backlogDirectoryPath, 'context.md');
+  function writeContextFile(
+    backlogDirectoryPath,
+    projectDirectory,
+    currentSelections
+  ) {
+    const contextPath = path.join(backlogDirectoryPath, "context.md");
 
     const language = detectProjectLanguage(projectDirectory);
     const partner = currentSelections.partner || {};
-    const name = partner.name || (language === 'pt-BR' ? 'Dev Parceiro' : 'Dev Partner');
-    const role = partner.role || (language === 'pt-BR' ? 'Fundador/Dev' : 'Founder/Dev');
+    const name =
+      partner.name || (language === "pt-BR" ? "Dev Parceiro" : "Dev Partner");
 
-    let partnerInfo = '';
-    if (language === 'pt-BR') {
-      partnerInfo = `${name} é o ${role}. Diga "Oi ${name.split(' ')[0]}". Comunicação em Português Brasileiro.`;
+    const role =
+      partner.role || (language === "pt-BR" ? "Fundador/Dev" : "Founder/Dev");
+
+    let partnerInfo = "";
+    if (language === "pt-BR") {
+      partnerInfo = `${name} é o ${role}. Diga "Oi ${name.split(" ")[0]}". Comunicação em Português Brasileiro.`;
     } else {
-      partnerInfo = `${name} is the ${role}. Say "Hello ${name.split(' ')[0]}". Communication in English.`;
+      partnerInfo = `${name} is the ${role}. Say "Hello ${name.split(" ")[0]}". Communication in English.`;
     }
 
     if (fileSystem.existsSync(contextPath)) {
@@ -262,35 +314,50 @@ function writeBacklogFiles(targetDirectory, selections) {
       return;
     }
 
-    const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'context.md');
+    const templatePath = path.join(
+      SOURCE_INSTRUCTIONS,
+      "templates",
+      "backlog",
+      "context.md"
+    );
+
     const projectName = path.basename(projectDirectory);
-    let contextContent = fileSystem.readFileSync(templatePath, 'utf8');
+    let contextContent = fileSystem.readFileSync(templatePath, "utf8");
     contextContent = contextContent
-      .replace('{{PROJECT_NAME}}', projectName)
-      .replace('{{STACK}}', 'declared in .ai/backlog/stack.md (run `land:` to populate)')
-      .replace('{{PARTNER}}', partnerInfo);
+      .replace("{{PROJECT_NAME}}", projectName)
+      .replace(
+        "{{STACK}}",
+        "declared in .ai/backlog/stack.md (run `land:` to populate)"
+      )
+      .replace("{{PARTNER}}", partnerInfo);
 
     fileSystem.writeFileSync(contextPath, contextContent);
   }
 
   function injectPartnerSection(contextPath, partnerInfo) {
-    const existingContent = fileSystem.readFileSync(contextPath, 'utf8');
-    if (existingContent.includes('## Partner')) {
+    const existingContent = fileSystem.readFileSync(contextPath, "utf8");
+    if (existingContent.includes("## Partner")) {
       return;
     }
 
-    const separator = existingContent.endsWith('\n') ? '' : '\n';
+    const separator = existingContent.endsWith("\n") ? "" : "\n";
     const injection = `\n## Partner\n\n${partnerInfo}\n`;
     fileSystem.appendFileSync(contextPath, `${separator}${injection}`);
   }
 
   function writeStackFile(backlogDirectoryPath) {
-    const stackPath = path.join(backlogDirectoryPath, 'stack.md');
+    const stackPath = path.join(backlogDirectoryPath, "stack.md");
     if (fileSystem.existsSync(stackPath)) {
       return;
     }
 
-    const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'stack.md');
+    const templatePath = path.join(
+      SOURCE_INSTRUCTIONS,
+      "templates",
+      "backlog",
+      "stack.md"
+    );
+
     if (!fileSystem.existsSync(templatePath)) {
       return;
     }
@@ -299,32 +366,50 @@ function writeBacklogFiles(targetDirectory, selections) {
   }
 
   function writeTasksFile(backlogDirectoryPath) {
-    const tasksPath = path.join(backlogDirectoryPath, 'tasks.md');
+    const tasksPath = path.join(backlogDirectoryPath, "tasks.md");
     if (fileSystem.existsSync(tasksPath)) {
       return;
     }
 
-    const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'tasks.md');
+    const templatePath = path.join(
+      SOURCE_INSTRUCTIONS,
+      "templates",
+      "backlog",
+      "tasks.md"
+    );
+
     fileSystem.copyFileSync(templatePath, tasksPath);
   }
 
   function writeLearnedFile(backlogDirectoryPath) {
-    const learnedPath = path.join(backlogDirectoryPath, 'learned.md');
+    const learnedPath = path.join(backlogDirectoryPath, "learned.md");
     if (fileSystem.existsSync(learnedPath)) {
       return;
     }
 
-    const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'learned.md');
+    const templatePath = path.join(
+      SOURCE_INSTRUCTIONS,
+      "templates",
+      "backlog",
+      "learned.md"
+    );
+
     fileSystem.copyFileSync(templatePath, learnedPath);
   }
 
   function writeTroubleshootFile(backlogDirectoryPath) {
-    const troubleshootPath = path.join(backlogDirectoryPath, 'troubleshoot.md');
+    const troubleshootPath = path.join(backlogDirectoryPath, "troubleshoot.md");
     if (fileSystem.existsSync(troubleshootPath)) {
       return;
     }
 
-    const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'backlog', 'troubleshoot.md');
+    const templatePath = path.join(
+      SOURCE_INSTRUCTIONS,
+      "templates",
+      "backlog",
+      "troubleshoot.md"
+    );
+
     fileSystem.copyFileSync(templatePath, troubleshootPath);
   }
 }
@@ -361,14 +446,14 @@ function buildClaudeContent() {
  * README "Using with other IDEs" for native pointers per tool.
  */
 function writeAgentConfig(targetDirectory, content) {
-  const skillDir = path.join(targetDirectory, '.ai', 'skills');
+  const skillDir = path.join(targetDirectory, ".ai", "skills");
   fileSystem.mkdirSync(skillDir, { recursive: true });
-  fileSystem.writeFileSync(path.join(skillDir, 'AGENTS.md'), content);
+  fileSystem.writeFileSync(path.join(skillDir, "AGENTS.md"), content);
 
-  const claudePath = path.join(targetDirectory, 'CLAUDE.md');
+  const claudePath = path.join(targetDirectory, "CLAUDE.md");
   const claudeContent = buildClaudeContent();
   const existingClaude = fileSystem.existsSync(claudePath)
-    ? fileSystem.readFileSync(claudePath, 'utf8')
+    ? fileSystem.readFileSync(claudePath, "utf8")
     : null;
 
   if (existingClaude !== claudeContent) {
@@ -381,36 +466,41 @@ function writeAgentConfig(targetDirectory, content) {
  * Idempotent — each block only appends entries not already present.
  */
 function writeGitignore(targetDirectory) {
-  const gitignorePath = path.join(targetDirectory, '.gitignore');
+  const gitignorePath = path.join(targetDirectory, ".gitignore");
 
   const BLOCKS = [
     {
-      header: '# Environment — never commit secrets',
-      entries: ['.env', '.env.*'],
+      header: "# Environment — never commit secrets",
+      entries: [".env", ".env.*"],
     },
     {
-      header: '# AI artifacts — session state, not project logic',
-      entries: ['.ai/backlog/', 'tmp/', 'temp/'],
+      header: "# AI artifacts — session state, not project logic",
+      entries: [".ai/backlog/", "tmp/", "temp/"],
     },
   ];
 
   const existingContent = fileSystem.existsSync(gitignorePath)
-    ? fileSystem.readFileSync(gitignorePath, 'utf8')
-    : '';
+    ? fileSystem.readFileSync(gitignorePath, "utf8")
+    : "";
 
-  const existingLines = existingContent.split('\n').map((line) => line.trim());
+  const existingLines = existingContent.split("\n").map((line) => line.trim());
 
   const blocksToAppend = BLOCKS.map((block) => {
-    const missingEntries = block.entries.filter((entry) => !existingLines.includes(entry));
+    const missingEntries = block.entries.filter(
+      (entry) => !existingLines.includes(entry)
+    );
+
     if (missingEntries.length === 0) {
       const emptyBlock = null;
       return emptyBlock;
     }
 
     const alreadyHasHeader = existingContent.includes(block.header);
-    const lines = alreadyHasHeader ? missingEntries : [block.header, ...missingEntries];
+    const lines = alreadyHasHeader
+      ? missingEntries
+      : [block.header, ...missingEntries];
 
-    const blockContent = lines.join('\n');
+    const blockContent = lines.join("\n");
     return blockContent;
   }).filter(Boolean);
 
@@ -418,8 +508,13 @@ function writeGitignore(targetDirectory) {
     return;
   }
 
-  const separator = existingContent.length > 0 && !existingContent.endsWith('\n') ? '\n' : '';
-  fileSystem.appendFileSync(gitignorePath, `${separator}\n${blocksToAppend.join('\n\n')}\n`);
+  const separator =
+    existingContent.length > 0 && !existingContent.endsWith("\n") ? "\n" : "";
+
+  fileSystem.appendFileSync(
+    gitignorePath,
+    `${separator}\n${blocksToAppend.join("\n\n")}\n`
+  );
 }
 
 /**
@@ -433,13 +528,13 @@ function writeManifest(targetDirectory, selections, packageVersion) {
     contentHashes: computeHashes(selections, SOURCE_INSTRUCTIONS),
   };
 
-  const aiDirectory = path.join(targetDirectory, '.ai');
+  const aiDirectory = path.join(targetDirectory, ".ai");
   fileSystem.mkdirSync(aiDirectory, { recursive: true });
 
-  const manifestPath = path.join(aiDirectory, '.sdg-manifest.json');
+  const manifestPath = path.join(aiDirectory, ".sdg-manifest.json");
 
   const originalContent = fileSystem.existsSync(manifestPath)
-    ? fileSystem.readFileSync(manifestPath, 'utf8')
+    ? fileSystem.readFileSync(manifestPath, "utf8")
     : null;
 
   writeJsonAtomic(manifestPath, manifest, originalContent);
@@ -454,10 +549,10 @@ function writeAutomationScripts(targetDirectory, selections) {
     return;
   }
 
-  const scriptsDir = path.join(targetDirectory, 'scripts');
-  const bumpScriptPath = path.join(scriptsDir, 'bump.mjs');
+  const scriptsDir = path.join(targetDirectory, "scripts");
+  const bumpScriptPath = path.join(scriptsDir, "bump.mjs");
 
-  const packagePath = path.join(targetDirectory, 'package.json');
+  const packagePath = path.join(targetDirectory, "package.json");
   const packageData = safeReadJson(packagePath);
   if (!packageData) {
     return;
@@ -465,7 +560,9 @@ function writeAutomationScripts(targetDirectory, selections) {
 
   const hasExistingBump =
     packageData.scripts &&
-    (packageData.scripts.bump || packageData.scripts.release || packageData.scripts.version);
+    (packageData.scripts.bump ||
+      packageData.scripts.release ||
+      packageData.scripts.version);
 
   if (hasExistingBump && !fileSystem.existsSync(bumpScriptPath)) {
     return;
@@ -473,9 +570,13 @@ function writeAutomationScripts(targetDirectory, selections) {
 
   if (!fileSystem.existsSync(bumpScriptPath)) {
     fileSystem.mkdirSync(scriptsDir, { recursive: true });
-    const templatePath = path.join(SOURCE_INSTRUCTIONS, 'templates', 'bump.mjs');
+    const templatePath = path.join(
+      SOURCE_INSTRUCTIONS,
+      "templates",
+      "bump.mjs"
+    );
 
-    const templateContent = fileSystem.readFileSync(templatePath, 'utf8');
+    const templateContent = fileSystem.readFileSync(templatePath, "utf8");
     fileSystem.writeFileSync(bumpScriptPath, templateContent);
   }
 
@@ -484,25 +585,29 @@ function writeAutomationScripts(targetDirectory, selections) {
   }
 
   if (!packageData.scripts.bump) {
-    packageData.scripts.bump = 'node scripts/bump.mjs';
-    writeJsonAtomic(packagePath, packageData, fileSystem.readFileSync(packagePath, 'utf8'));
+    packageData.scripts.bump = "node scripts/bump.mjs";
+    writeJsonAtomic(
+      packagePath,
+      packageData,
+      fileSystem.readFileSync(packagePath, "utf8")
+    );
   }
 
-  const huskyDirectory = path.join(targetDirectory, '.husky');
+  const huskyDirectory = path.join(targetDirectory, ".husky");
   if (fileSystem.existsSync(huskyDirectory)) {
-    const prePushPath = path.join(huskyDirectory, 'pre-push');
+    const prePushPath = path.join(huskyDirectory, "pre-push");
     const nvmShim = dedent`
       # NVM Shim (Essential for projects Staff in Linux/NVM)
       export NVM_DIR="$HOME/.nvm"
       [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
     `;
 
-    const bumpCmd = '# Pre-push check (non-mutating)\nnpm test';
+    const bumpCmd = "# Pre-push check (non-mutating)\nnpm test";
 
     if (fileSystem.existsSync(prePushPath)) {
-      const content = fileSystem.readFileSync(prePushPath, 'utf8');
-      if (!content.includes('npm test')) {
-        const separator = content.endsWith('\n') ? '' : '\n';
+      const content = fileSystem.readFileSync(prePushPath, "utf8");
+      if (!content.includes("npm test")) {
+        const separator = content.endsWith("\n") ? "" : "\n";
         const newPrePushContent = `${content}${separator}\n${nvmShim}\n${bumpCmd}\n`;
         fileSystem.writeFileSync(prePushPath, newPrePushContent);
       }
@@ -521,19 +626,28 @@ function writeAutomationScripts(targetDirectory, selections) {
 }
 
 function writeToolingAssets(targetDirectory) {
-  const sourceToolingDir = path.join(__dirname, '../../..', 'assets', 'tooling');
-  const targetToolingDir = path.join(targetDirectory, '.ai', 'tooling');
+  const sourceToolingDir = path.join(
+    __dirname,
+    "../../..",
+    "assets",
+    "tooling"
+  );
+
+  const targetToolingDir = path.join(targetDirectory, ".ai", "tooling");
 
   const hasSourceAssets = fileSystem.existsSync(sourceToolingDir);
   if (!hasSourceAssets) {
     return;
   }
 
-  fileSystem.cpSync(sourceToolingDir, targetToolingDir, { recursive: true, force: true });
+  fileSystem.cpSync(sourceToolingDir, targetToolingDir, {
+    recursive: true,
+    force: true,
+  });
 
-  const executableHooks = ['pre-commit', 'commit-msg'];
+  const executableHooks = ["pre-commit", "commit-msg"];
   for (const hookName of executableHooks) {
-    const hookPath = path.join(targetToolingDir, 'husky', hookName);
+    const hookPath = path.join(targetToolingDir, "husky", hookName);
     const hookExists = fileSystem.existsSync(hookPath);
     if (hookExists) {
       fileSystem.chmodSync(hookPath, 0o755);
@@ -548,7 +662,12 @@ function writeToolingAssets(targetDirectory) {
  * Scoped to `.ai/instructions/` — never touches `.ai/backlog/` (developer state).
  */
 function removeGeneratedInstructions(targetDirectory) {
-  const generatedInstructionsDir = path.join(targetDirectory, '.ai', 'instructions');
+  const generatedInstructionsDir = path.join(
+    targetDirectory,
+    ".ai",
+    "instructions"
+  );
+
   if (!fileSystem.existsSync(generatedInstructionsDir)) {
     return;
   }
