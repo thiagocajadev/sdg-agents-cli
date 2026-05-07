@@ -8,7 +8,7 @@ const PREFLIGHT_PATTERNS = [
 
 function runPreflight(diff) {
   const matches = PREFLIGHT_PATTERNS.flatMap((entry) =>
-    collectMatches(diff, entry)
+    collectMatches(diff, entry),
   );
 
   return matches;

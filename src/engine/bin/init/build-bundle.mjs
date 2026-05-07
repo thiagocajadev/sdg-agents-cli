@@ -55,7 +55,7 @@ async function orchestrateBuild(targetDirectory, options) {
   if (options.selections) {
     const nonInteractiveResult = await buildNonInteractive(
       targetDirectory,
-      options
+      options,
     );
 
     return nonInteractiveResult;
@@ -114,7 +114,7 @@ async function processExecutionStep(state, targetDirectory, options) {
     case "selections": {
       const selectionStepResult = await processSelectionPhase(
         state,
-        targetDirectory
+        targetDirectory,
       );
 
       return selectionStepResult;
@@ -123,7 +123,7 @@ async function processExecutionStep(state, targetDirectory, options) {
       const executionStepResult = await finalizeExecutionPhase(
         state,
         targetDirectory,
-        options
+        options,
       );
 
       return executionStepResult;
@@ -175,7 +175,7 @@ async function finalizeExecutionPhase(state, targetDirectory, options = {}) {
     selections,
     {
       skipConfirm,
-    }
+    },
   );
 
   return agentsModeResult;
@@ -186,7 +186,7 @@ async function buildQuickMode(state, targetDirectory, { isDryRun }) {
     const dryRunResult = abortForDryRun(
       state,
       targetDirectory,
-      printQuickDryRun
+      printQuickDryRun,
     );
 
     return dryRunResult;
@@ -206,7 +206,7 @@ async function buildAgentsMode(
   state,
   targetDirectory,
   selections,
-  { skipConfirm = false } = {}
+  { skipConfirm = false } = {},
 ) {
   const confirmed = skipConfirm || (await printBuildSummary(selections));
   if (!confirmed) {

@@ -28,7 +28,7 @@ export const semanticSpacing = {
         return node.declarations.some(
           (declarator) =>
             declarator.init &&
-            declarator.init.loc.start.line !== declarator.init.loc.end.line
+            declarator.init.loc.start.line !== declarator.init.loc.end.line,
         );
       }
 
@@ -43,7 +43,7 @@ export const semanticSpacing = {
 
       const textBetween = context.sourceCode.text.slice(
         tokenBefore.range[1],
-        node.range[0]
+        node.range[0],
       );
 
       return textBetween.includes("\n\n");
@@ -58,7 +58,7 @@ export const semanticSpacing = {
       const tokenBefore = context.sourceCode.getTokenBefore(node);
       const textBetween = context.sourceCode.text.slice(
         tokenBefore.range[1],
-        node.range[0]
+        node.range[0],
       );
 
       const doubleNewlineIdx = textBetween.indexOf("\n\n");

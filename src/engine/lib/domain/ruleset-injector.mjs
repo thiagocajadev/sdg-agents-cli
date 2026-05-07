@@ -27,7 +27,7 @@ function injectRulesets(targetDirectory, selections) {
   const projectAiInstructions = path.join(
     targetDirectory,
     ".ai",
-    "instructions"
+    "instructions",
   );
 
   const projectAiSkills = path.join(targetDirectory, ".ai", "skills");
@@ -45,13 +45,13 @@ function injectRulesets(targetDirectory, selections) {
 
   copyRecursiveSync(
     path.join(SOURCE_INSTRUCTIONS, "templates"),
-    path.join(projectAiInstructions, "templates")
+    path.join(projectAiInstructions, "templates"),
   );
 
   if (fileSystem.existsSync(SOURCE_COMMANDS)) {
     copyRecursiveSync(
       SOURCE_COMMANDS,
-      path.join(targetDirectory, ".ai", "commands")
+      path.join(targetDirectory, ".ai", "commands"),
     );
   }
 }
@@ -84,7 +84,7 @@ function injectCompetencies(projectAiInstructions) {
 
   fileSystem.copyFileSync(
     deliverySrc,
-    path.join(competenciesDir, "delivery.md")
+    path.join(competenciesDir, "delivery.md"),
   );
 }
 

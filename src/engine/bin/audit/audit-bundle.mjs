@@ -63,7 +63,7 @@ function checkChangelogHealth() {
   const content = fileSystem.readFileSync(changelogPath, "utf8");
   const hasUnreleased = /##\s*\[Unreleased\]/i.test(content);
   const unreleasedMatch = content.match(
-    /##\s*\[Unreleased\].*?\n([\s\S]*?)(?=\n##\s|(?:\n){0,1}$)/i
+    /##\s*\[Unreleased\].*?\n([\s\S]*?)(?=\n##\s|(?:\n){0,1}$)/i,
   );
 
   const narrative = unreleasedMatch
@@ -92,7 +92,7 @@ function checkChangelogHealth() {
   const today = new Date().toISOString().split("T").at(0);
 
   const todayReleasePattern = new RegExp(
-    `##\\s*\\[\\d+\\.\\d+\\.\\d+\\]\\s*-\\s*${today}`
+    `##\\s*\\[\\d+\\.\\d+\\.\\d+\\]\\s*-\\s*${today}`,
   );
 
   const isReleaseContext = todayReleasePattern.test(content);
@@ -117,7 +117,7 @@ function checkCodeStyleCompliance() {
     : AuditFileScanner.getFilesRecursive(
         path.join(PROJECT_ROOT, "src"),
         (fileName) =>
-          fileName.endsWith(".mjs") && !fileName.endsWith(".test.mjs")
+          fileName.endsWith(".mjs") && !fileName.endsWith(".test.mjs"),
       );
 
   const violations = [];
@@ -155,7 +155,7 @@ function checkTestNamedExpectations() {
     ? AuditFileScanner.getMaintainerTestFiles()
     : AuditFileScanner.getFilesRecursive(
         path.join(PROJECT_ROOT, "src"),
-        (fileName) => fileName.endsWith(".test.mjs")
+        (fileName) => fileName.endsWith(".test.mjs"),
       );
 
   const violations = [];
@@ -165,13 +165,13 @@ function checkTestNamedExpectations() {
     const slopMatches = content.match(/\/\/\s*(Arrange|Act|Assert)/gi);
     if (slopMatches) {
       violations.push(
-        `${testFile}: Detected narrative slop (${slopMatches.join(", ")}). Use Vertical Scansion.`
+        `${testFile}: Detected narrative slop (${slopMatches.join(", ")}). Use Vertical Scansion.`,
       );
     }
 
     if (!content.includes("actual") || !content.includes("expected")) {
       violations.push(
-        `${testFile}: Missing Named Expectations triad (actual/expected variables).`
+        `${testFile}: Missing Named Expectations triad (actual/expected variables).`,
       );
     }
 
@@ -179,18 +179,18 @@ function checkTestNamedExpectations() {
     if (numberedMatches) {
       violations.push(
         `${testFile}: Detected numbered variables (${Array.from(
-          new Set(numberedMatches)
-        ).join(", ")}).`
+          new Set(numberedMatches),
+        ).join(", ")}).`,
       );
     }
 
     const hasStrictMagicMatch = content.match(
-      /assert\.(?:equal|deepEqual|strictEqual)\s*\([^,]+,\s*(?:['"`0-9]|\b(?:null|true|false)\b)/
+      /assert\.(?:equal|deepEqual|strictEqual)\s*\([^,]+,\s*(?:['"`0-9]|\b(?:null|true|false)\b)/,
     );
 
     if (hasStrictMagicMatch) {
       violations.push(
-        `${testFile}: Detected magic values in assertions. Use named constants.`
+        `${testFile}: Detected magic values in assertions. Use named constants.`,
       );
     }
   }
@@ -246,7 +246,7 @@ function checkSoulPulse() {
 
   const files = [...requiredFiles, ...maintainerOnlyFiles];
   const missing = files.filter(
-    (file) => !fileSystem.existsSync(path.join(PROJECT_ROOT, file))
+    (file) => !fileSystem.existsSync(path.join(PROJECT_ROOT, file)),
   );
 
   const soulPulse = { isFailure: missing.length > 0, missing };
@@ -354,7 +354,7 @@ function printResult(label, isPassed, reason) {
 export const AuditRunner = { audit: auditGovernance };
 
 bootstrapIfDirect(import.meta.url, () =>
-  auditGovernance().catch(reportAuditError)
+  auditGovernance().catch(reportAuditError),
 );
 
 function reportAuditError(error) {

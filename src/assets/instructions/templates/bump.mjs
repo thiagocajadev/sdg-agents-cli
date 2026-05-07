@@ -17,7 +17,7 @@ function run() {
 
   if (!["feat", "fix", "docs", "land", "major"].includes(bumpType)) {
     console.error(
-      "❌ Error: Please specify bump type (feat, fix, docs, land, or major)."
+      "❌ Error: Please specify bump type (feat, fix, docs, land, or major).",
     );
 
     console.log("Usage: npm run bump <feat|fix|docs|land|major>");
@@ -47,7 +47,7 @@ function run() {
 
     // 3. Get new version
     const newPkg = JSON.parse(
-      fileSystem.readFileSync(PACKAGE_JSON_PATH, "utf8")
+      fileSystem.readFileSync(PACKAGE_JSON_PATH, "utf8"),
     );
 
     const newVersion = newPkg.version;
@@ -78,7 +78,7 @@ function updateChangelog(newVersion) {
 
   if (!unreleasedRegex.test(content)) {
     console.warn(
-      '⚠️  Could not find "## [Unreleased]" header in CHANGELOG.md.'
+      '⚠️  Could not find "## [Unreleased]" header in CHANGELOG.md.',
     );
 
     console.log("Skipping content promotion.");

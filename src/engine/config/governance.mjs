@@ -11,7 +11,7 @@ import { NarrativeHeuristics } from "./heuristics/narrative-heuristics.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STANDARDS_PATH = path.resolve(
   __dirname,
-  "../../assets/skills/code-style.md"
+  "../../assets/skills/code-style.md",
 );
 
 const NARRATIVE_VALIDATION_STRATEGIES = {
@@ -29,7 +29,7 @@ const NARRATIVE_VALIDATION_STRATEGIES = {
 function loadDynamicRules() {
   const content = fileSystem.readFileSync(STANDARDS_PATH, "utf8");
   const ruleSection = content.match(
-    /<rule name="WorkChecklist">([\s\S]*?)<\/rule>/
+    /<rule name="WorkChecklist">([\s\S]*?)<\/rule>/,
   );
 
   if (!ruleSection) {

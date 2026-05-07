@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.6.4] - 2026-05-07
+
+### Fixed
+
+- **ESLint 10 compat in `no-inline-assert.mjs`** — replaced removed `context.getFilename()` with `context.filename`. Restores rule loading in downstream projects on ESLint 10+.
+- **Prettier `trailingComma` policy bumped from `es5` → `all`** — aligns shipped assets with downstream `comma-dangle: 'always-multiline'` configs. Reformatted 42 files (commas only, no semantic change).
+
 ## [5.6.3] - 2026-05-05
 
 ### Added

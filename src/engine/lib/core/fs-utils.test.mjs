@@ -57,7 +57,7 @@ describe("FsUtils", () => {
   describe("copyRecursiveSync()", () => {
     it("should copy a single file to a destination", () => {
       const tmpDir = fileSystem.mkdtempSync(
-        path.join(os.tmpdir(), "sdg-test-")
+        path.join(os.tmpdir(), "sdg-test-"),
       );
 
       const srcFile = path.join(tmpDir, "source.txt");
@@ -78,7 +78,7 @@ describe("FsUtils", () => {
 
     it("should copy a directory tree recursively", () => {
       const tmpDir = fileSystem.mkdtempSync(
-        path.join(os.tmpdir(), "sdg-test-")
+        path.join(os.tmpdir(), "sdg-test-"),
       );
 
       const srcDir = path.join(tmpDir, "src");
@@ -94,12 +94,12 @@ describe("FsUtils", () => {
 
       const actualRootText = fileSystem.readFileSync(
         path.join(destDir, "root.txt"),
-        "utf8"
+        "utf8",
       );
 
       const actualNestedText = fileSystem.readFileSync(
         path.join(destDir, "sub", "nested.txt"),
-        "utf8"
+        "utf8",
       );
 
       assert.equal(actualRootText, rootText);

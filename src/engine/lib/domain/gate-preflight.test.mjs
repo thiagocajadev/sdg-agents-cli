@@ -6,7 +6,7 @@ describe("GatePreflight", () => {
   describe("runPreflight()", () => {
     it("should detect method-call-as-subject in assert.ok", () => {
       const diff = ["+assert.ok(actual.includes(expectedSubstring));"].join(
-        "\n"
+        "\n",
       );
 
       const actual = GatePreflight.runPreflight(diff);

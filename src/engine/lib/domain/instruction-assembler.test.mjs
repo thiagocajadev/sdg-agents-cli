@@ -113,7 +113,7 @@ describe("InstructionAssembler", () => {
 
         const after = Date.now();
         const actualManifest = JSON.parse(
-          fileSystem.readFileSync(manifestPath, "utf8")
+          fileSystem.readFileSync(manifestPath, "utf8"),
         );
 
         const actualTs = new Date(actualManifest.generatedAt).getTime();
@@ -154,7 +154,7 @@ describe("InstructionAssembler", () => {
 
       assert.ok(
         hasStackPointer,
-        "stack.md must appear as Phase CODE context source"
+        "stack.md must appear as Phase CODE context source",
       );
     });
 
@@ -162,7 +162,7 @@ describe("InstructionAssembler", () => {
       const actual = buildMasterInstructions(baseSelections);
 
       const hasDeliveryRef = actual.includes(
-        ".ai/instructions/competencies/delivery.md"
+        ".ai/instructions/competencies/delivery.md",
       );
 
       const hasNoBackendSplit = !actual.includes("competencies/backend.md");
@@ -170,17 +170,17 @@ describe("InstructionAssembler", () => {
 
       assert.ok(
         hasDeliveryRef,
-        "delivery.md must replace the split backend/frontend competencies"
+        "delivery.md must replace the split backend/frontend competencies",
       );
 
       assert.ok(
         hasNoBackendSplit,
-        "legacy backend.md reference must not resurface"
+        "legacy backend.md reference must not resurface",
       );
 
       assert.ok(
         hasNoFrontendSplit,
-        "legacy frontend.md reference must not resurface"
+        "legacy frontend.md reference must not resurface",
       );
     });
 
@@ -192,7 +192,7 @@ describe("InstructionAssembler", () => {
       assert.ok(hasNoIdiomsRef, "static idiom paths must not resurface");
       assert.ok(
         hasNoIdiomsHeader,
-        "Stack idioms header must be replaced by Stack context"
+        "Stack idioms header must be replaced by Stack context",
       );
     });
 
@@ -342,7 +342,7 @@ describe("InstructionAssembler", () => {
             ".ai",
             "tooling",
             "husky",
-            hookName
+            hookName,
           );
 
           const stats = fileSystem.statSync(hookPath);
@@ -385,7 +385,7 @@ describe("InstructionAssembler", () => {
         writeBacklogFiles(tmpDir, { flavor: "lite" });
         const actualContent = fileSystem.readFileSync(contextPath, "utf8");
         const actualHasToolingSection = actualContent.includes(
-          "## Tooling (optional)"
+          "## Tooling (optional)",
         );
 
         const actualHasToolingPath = actualContent.includes(".ai/tooling/");
@@ -460,7 +460,7 @@ describe("InstructionAssembler", () => {
         assert.equal(
           staleStillExists,
           expectedAbsent,
-          "stale idioms dir must be removed"
+          "stale idioms dir must be removed",
         );
       } finally {
         cleanup(tmpDir);

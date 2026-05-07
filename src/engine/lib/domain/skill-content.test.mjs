@@ -13,20 +13,20 @@ const LAND_COMMAND = path.join(
   ASSETS,
   "instructions",
   "commands",
-  "sdg-land.md"
+  "sdg-land.md",
 );
 const STACK_TEMPLATE = path.join(
   ASSETS,
   "instructions",
   "templates",
   "backlog",
-  "stack.md"
+  "stack.md",
 );
 const DELIVERY_COMPETENCY = path.join(
   ASSETS,
   "instructions",
   "competencies",
-  "delivery.md"
+  "delivery.md",
 );
 
 function readAsset(assetPath) {
@@ -46,7 +46,7 @@ describe("Skill Content — Governance Layer", () => {
       ];
 
       const actualMissing = expectedFragments.filter(
-        (fragment) => !input.includes(fragment)
+        (fragment) => !input.includes(fragment),
       );
 
       const expectedEmpty = [];
@@ -54,7 +54,7 @@ describe("Skill Content — Governance Layer", () => {
       assert.deepEqual(
         actualMissing,
         expectedEmpty,
-        "Security-first block must be explicit and early"
+        "Security-first block must be explicit and early",
       );
     });
 
@@ -86,7 +86,7 @@ describe("Skill Content — Governance Layer", () => {
       ];
 
       const actualMissing = expectedFragments.filter(
-        (fragment) => !input.includes(fragment)
+        (fragment) => !input.includes(fragment),
       );
 
       const expectedEmpty = [];
@@ -94,7 +94,7 @@ describe("Skill Content — Governance Layer", () => {
       assert.deepEqual(
         actualMissing,
         expectedEmpty,
-        "Intent section must cover all eight concerns"
+        "Intent section must cover all eight concerns",
       );
     });
 
@@ -113,7 +113,7 @@ describe("Skill Content — Governance Layer", () => {
       ];
 
       const actualMissing = expectedFragments.filter(
-        (fragment) => !input.includes(fragment)
+        (fragment) => !input.includes(fragment),
       );
 
       const expectedEmpty = [];
@@ -121,7 +121,7 @@ describe("Skill Content — Governance Layer", () => {
       assert.deepEqual(
         actualMissing,
         expectedEmpty,
-        "Form section must match heuristic strategy keys"
+        "Form section must match heuristic strategy keys",
       );
     });
 
@@ -136,7 +136,7 @@ describe("Skill Content — Governance Layer", () => {
       ];
 
       const actualLeaks = forbiddenFragments.filter((fragment) =>
-        input.includes(fragment)
+        input.includes(fragment),
       );
 
       const expectedEmpty = [];
@@ -144,7 +144,7 @@ describe("Skill Content — Governance Layer", () => {
       assert.deepEqual(
         actualLeaks,
         expectedEmpty,
-        "code-style must not reference removed governance ceremony"
+        "code-style must not reference removed governance ceremony",
       );
     });
   });
@@ -164,7 +164,7 @@ describe("Skill Content — Governance Layer", () => {
 
       assert.ok(
         isStackBetweenScopeAndBacklog,
-        "Phase STACK must sit between SCOPE and BACKLOG"
+        "Phase STACK must sit between SCOPE and BACKLOG",
       );
     });
 
@@ -181,7 +181,7 @@ describe("Skill Content — Governance Layer", () => {
       ];
 
       const actualMissing = expectedSources.filter(
-        (fragment) => !input.includes(fragment)
+        (fragment) => !input.includes(fragment),
       );
 
       const expectedEmpty = [];
@@ -189,7 +189,7 @@ describe("Skill Content — Governance Layer", () => {
       assert.deepEqual(
         actualMissing,
         expectedEmpty,
-        "Phase STACK must expose the doc-source allow-list"
+        "Phase STACK must expose the doc-source allow-list",
       );
     });
 
@@ -214,7 +214,7 @@ describe("Skill Content — Governance Layer", () => {
       ];
 
       const actualMissing = expectedHeaders.filter(
-        (fragment) => !input.includes(fragment)
+        (fragment) => !input.includes(fragment),
       );
 
       const expectedEmpty = [];
@@ -222,7 +222,7 @@ describe("Skill Content — Governance Layer", () => {
       assert.deepEqual(
         actualMissing,
         expectedEmpty,
-        "stack.md seed must declare all four role headers"
+        "stack.md seed must declare all four role headers",
       );
     });
 
@@ -247,7 +247,7 @@ describe("Skill Content — Governance Layer", () => {
       ];
 
       const actualMissing = expectedFragments.filter(
-        (fragment) => !input.includes(fragment)
+        (fragment) => !input.includes(fragment),
       );
 
       const expectedEmpty = [];
@@ -255,7 +255,7 @@ describe("Skill Content — Governance Layer", () => {
       assert.deepEqual(
         actualMissing,
         expectedEmpty,
-        "delivery.md must contain both discriminated sections"
+        "delivery.md must contain both discriminated sections",
       );
     });
   });
@@ -276,7 +276,7 @@ describe("Skill Content — Governance Layer", () => {
 
       const expectedFragments = ["Edit", "Write", "NotebookEdit"];
       const actualMissing = expectedFragments.filter(
-        (fragment) => !input.includes(fragment)
+        (fragment) => !input.includes(fragment),
       );
 
       const expectedEmpty = [];
@@ -284,7 +284,7 @@ describe("Skill Content — Governance Layer", () => {
       assert.deepEqual(
         actualMissing,
         expectedEmpty,
-        "Phase CODE must name blocked write tools"
+        "Phase CODE must name blocked write tools",
       );
     });
 
@@ -300,7 +300,7 @@ describe("Skill Content — Governance Layer", () => {
       ];
 
       const actualLeaks = forbiddenFragments.filter((fragment) =>
-        input.includes(fragment)
+        input.includes(fragment),
       );
 
       const expectedEmpty = [];
@@ -308,7 +308,7 @@ describe("Skill Content — Governance Layer", () => {
       assert.deepEqual(
         actualLeaks,
         expectedEmpty,
-        "workflow.md must not retain removed governance ceremony"
+        "workflow.md must not retain removed governance ceremony",
       );
     });
   });

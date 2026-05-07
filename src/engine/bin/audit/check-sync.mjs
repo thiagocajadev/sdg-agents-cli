@@ -34,7 +34,7 @@ function orchestrateSyncCheck() {
     const directoryDrifts = collectDriftedFiles(
       liveDirectory,
       sourceDirectory,
-      mirroredDirectory
+      mirroredDirectory,
     );
 
     driftedFiles.push(...directoryDrifts);
@@ -65,7 +65,7 @@ function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
       const nestedDrifts = collectDriftedFiles(
         livePath,
         sourcePath,
-        relativePath
+        relativePath,
       );
 
       localDrifts.push(...nestedDrifts);
@@ -107,7 +107,7 @@ function hashFile(filePath) {
 function reportResult(drifts) {
   if (drifts.length === 0) {
     console.log(
-      "\n  ✅ .ai/instructions/ is in sync with src/assets/instructions/\n"
+      "\n  ✅ .ai/instructions/ is in sync with src/assets/instructions/\n",
     );
 
     const syncOk = success();
@@ -115,7 +115,7 @@ function reportResult(drifts) {
   }
 
   console.error(
-    "\n  ❌ Drift detected — files in .ai/ differ from src/assets/:\n"
+    "\n  ❌ Drift detected — files in .ai/ differ from src/assets/:\n",
   );
 
   for (const drift of drifts) {
@@ -123,7 +123,7 @@ function reportResult(drifts) {
   }
 
   console.error(
-    "\n  Fix: apply the same edits to both copies, or re-run `npx sdg-agents init` to regenerate.\n"
+    "\n  Fix: apply the same edits to both copies, or re-run `npx sdg-agents init` to regenerate.\n",
   );
 
   const driftFailure = fail({ message: "SYNC_DRIFT", count: drifts.length });

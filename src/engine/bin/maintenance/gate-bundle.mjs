@@ -62,7 +62,7 @@ async function processCheckMode() {
 
   if (hasWarnViolations) {
     const warnViolations = result.violations.filter(
-      (violation) => violation.tier === "WARN"
+      (violation) => violation.tier === "WARN",
     );
 
     const report = GateChecker.formatViolationReport(warnViolations);

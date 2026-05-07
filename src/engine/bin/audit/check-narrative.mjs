@@ -95,7 +95,7 @@ function reportResults(violationsByFile, totalViolations) {
 
   if (filePaths.length === 0) {
     console.log(
-      "  ✅ ALL FILES NARRATIVE COMPLIANT. Scansion flow is healthy.\n"
+      "  ✅ ALL FILES NARRATIVE COMPLIANT. Scansion flow is healthy.\n",
     );
 
     return;
@@ -112,11 +112,11 @@ function reportResults(violationsByFile, totalViolations) {
 
   console.log("─".repeat(50));
   console.log(
-    `  ⚠️  NARRATIVE DRIFT DETECTED: ${totalViolations} violations found.`
+    `  ⚠️  NARRATIVE DRIFT DETECTED: ${totalViolations} violations found.`,
   );
 
   console.log(
-    '  Recommendation: Apply "Code as Documentation" (see code-style.md).'
+    '  Recommendation: Apply "Code as Documentation" (see code-style.md).',
   );
 
   console.log(`${"─".repeat(50)}\n`);

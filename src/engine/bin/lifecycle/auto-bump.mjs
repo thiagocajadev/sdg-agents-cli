@@ -11,7 +11,7 @@ const { bootstrapIfDirect } = FsUtils;
 
 const ROOT_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
-  "../../../../"
+  "../../../../",
 );
 const PACKAGE_PATHS = [path.join(ROOT_DIR, "package.json")];
 const CHANGELOG_PATH = path.join(ROOT_DIR, "CHANGELOG.md");

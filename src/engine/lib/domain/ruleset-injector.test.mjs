@@ -61,7 +61,7 @@ describe("RulesetInjector", () => {
         tmpDir,
         ".ai",
         "skills",
-        "code-style.md"
+        "code-style.md",
       );
 
       try {
@@ -99,7 +99,7 @@ describe("RulesetInjector", () => {
         tmpDir,
         ".ai",
         "instructions",
-        "templates"
+        "templates",
       );
 
       const expectedCommands = path.join(tmpDir, ".ai", "commands");
@@ -125,7 +125,7 @@ describe("RulesetInjector", () => {
         ".ai",
         "instructions",
         "competencies",
-        "delivery.md"
+        "delivery.md",
       );
 
       const backendPath = path.join(
@@ -133,7 +133,7 @@ describe("RulesetInjector", () => {
         ".ai",
         "instructions",
         "competencies",
-        "backend.md"
+        "backend.md",
       );
 
       const frontendPath = path.join(
@@ -141,7 +141,7 @@ describe("RulesetInjector", () => {
         ".ai",
         "instructions",
         "competencies",
-        "frontend.md"
+        "frontend.md",
       );
 
       try {
@@ -157,13 +157,13 @@ describe("RulesetInjector", () => {
         assert.equal(
           hasLegacyBackend,
           expectedAbsent,
-          "legacy backend.md must not be copied"
+          "legacy backend.md must not be copied",
         );
 
         assert.equal(
           hasLegacyFrontend,
           expectedAbsent,
-          "legacy frontend.md must not be copied"
+          "legacy frontend.md must not be copied",
         );
       } finally {
         cleanup(tmpDir);
@@ -177,7 +177,7 @@ describe("RulesetInjector", () => {
         tmpDir,
         ".ai",
         "instructions",
-        "idioms"
+        "idioms",
       );
 
       try {
@@ -214,7 +214,7 @@ describe("RulesetInjector", () => {
       const { directories: actual } = collectOutputSummary();
 
       const hasIdiomsEntry = actual.some((directory) =>
-        directory.includes("idioms")
+        directory.includes("idioms"),
       );
 
       assert.equal(hasIdiomsEntry, expectedAbsent);

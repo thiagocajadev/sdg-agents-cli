@@ -106,7 +106,7 @@ describe("CliParser", () => {
       const actual = parseCliArgs(input);
       const hasIdiomsField = Object.prototype.hasOwnProperty.call(
         actual,
-        "idioms"
+        "idioms",
       );
 
       assert.equal(hasIdiomsField, expectedAbsent);

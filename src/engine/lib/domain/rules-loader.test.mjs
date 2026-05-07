@@ -24,11 +24,11 @@ describe("RulesLoader", () => {
       assert.ok(isWarnArray);
 
       const hasOnlyBlockRules = actual.block.every(
-        (rule) => rule.tier === "BLOCK"
+        (rule) => rule.tier === "BLOCK",
       );
 
       const hasOnlyWarnRules = actual.warn.every(
-        (rule) => rule.tier === "WARN"
+        (rule) => rule.tier === "WARN",
       );
 
       assert.ok(hasOnlyBlockRules);
@@ -101,7 +101,7 @@ describe("RulesLoader", () => {
 
       const hasBinaryForm = rule.description.includes(expectedBinaryFragment);
       const hasNegationForm = rule.description.includes(
-        expectedNegationFragment
+        expectedNegationFragment,
       );
 
       assert.ok(hasBinaryForm);

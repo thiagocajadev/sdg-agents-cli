@@ -63,7 +63,7 @@ function filterBlockViolations(violations) {
   }
 
   const blockOnly = violations.filter(
-    (violation) => violation.tier === "BLOCK"
+    (violation) => violation.tier === "BLOCK",
   );
 
   return blockOnly;

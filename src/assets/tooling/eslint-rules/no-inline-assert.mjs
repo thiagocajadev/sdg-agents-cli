@@ -21,7 +21,7 @@ export const noInlineAssert = {
   },
 
   create(context) {
-    const filename = context.getFilename();
+    const filename = context.filename;
     if (!TEST_FILE_PATTERN.test(filename)) {
       return {};
     }

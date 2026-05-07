@@ -206,7 +206,7 @@ async function processInitSubcommand(args) {
 
   const buildResult = await SpecDrivenGuide.run(
     args.targetDirectory,
-    buildParams
+    buildParams,
   );
 
   return buildResult;

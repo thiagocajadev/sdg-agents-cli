@@ -12,7 +12,7 @@ const SCRIPT_PATH = path.join(__dirname, "prune-backlog.mjs");
 
 function makeTempProject() {
   const projectDir = fileSystem.mkdtempSync(
-    path.join(os.tmpdir(), "sdg-prune-test-")
+    path.join(os.tmpdir(), "sdg-prune-test-"),
   );
 
   const backlogDir = path.join(projectDir, ".ai", "backlog");
@@ -42,7 +42,7 @@ function cleanup(projectDir) {
 function buildTasksWithDone(entryCount) {
   const doneEntries = Array.from(
     { length: entryCount },
-    (_, index) => `- [DONE] entry ${entryCount - index} description text`
+    (_, index) => `- [DONE] entry ${entryCount - index} description text`,
   ).join("\n");
 
   const content = `# Tasks\n\n## Active\n\n- _(idle)_\n\n## Done\n\n${doneEntries}\n`;
@@ -127,11 +127,11 @@ describe("prune-backlog.mjs", () => {
       const actualContent = fileSystem.readFileSync(tasksPath, "utf8");
 
       const actualIncludesInProgress = actualContent.includes(
-        "- [IN_PROGRESS] live task"
+        "- [IN_PROGRESS] live task",
       );
 
       const actualIncludesBacklog = actualContent.includes(
-        "- [BACKLOG] pending item"
+        "- [BACKLOG] pending item",
       );
 
       const actualIncludesDoneOld1 = actualContent.includes("- [DONE] old 1");

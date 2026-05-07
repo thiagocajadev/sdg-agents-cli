@@ -31,7 +31,7 @@ async function orchestrateReview() {
   const manifest = loadManifest(PROJECT_ROOT);
   if (!manifest) {
     console.log(
-      '\n  No manifest found (.ai/.sdg-manifest.json). Run "Build Project Context" first.\n'
+      '\n  No manifest found (.ai/.sdg-manifest.json). Run "Build Project Context" first.\n',
     );
 
     const noManifestResult = success();
@@ -41,7 +41,7 @@ async function orchestrateReview() {
   printManifestSummary(manifest);
 
   console.log(
-    "\n  Checking project rules against Spec Driven Guide core instructions...\n"
+    "\n  Checking project rules against Spec Driven Guide core instructions...\n",
   );
 
   const currentHashes = computeHashes(manifest.selections, SOURCE_INSTRUCTIONS);
@@ -53,7 +53,7 @@ async function orchestrateReview() {
 
   if (totalChanges === 0) {
     console.log(
-      "  \n  ✅ Your instructions are up to date with the Spec Driven Guide core.\n"
+      "  \n  ✅ Your instructions are up to date with the Spec Driven Guide core.\n",
     );
 
     const upToDateResult = success();
@@ -91,7 +91,7 @@ function printManifestSummary(manifest) {
   console.log(`  Current Flavor: ${flavorLabel}`);
   console.log(`  Stack: declared in .ai/backlog/stack.md`);
   console.log(
-    `  Last Sync: ${daysAgo(generatedAt)} — Spec Driven Guide v${sdgAgentVersion ?? "unknown"}`
+    `  Last Sync: ${daysAgo(generatedAt)} — Spec Driven Guide v${sdgAgentVersion ?? "unknown"}`,
   );
 }
 

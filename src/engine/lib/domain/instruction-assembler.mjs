@@ -20,7 +20,7 @@ const SOURCE_INSTRUCTIONS = path.join(
   __dirname,
   "../../..",
   "assets",
-  "instructions"
+  "instructions",
 );
 
 /**
@@ -207,7 +207,7 @@ function buildMasterInstructions(selections) {
       sections.push(
         "**Architectural flavor**",
         `- \`.ai/instructions/flavor/principles.md\` — Flavor: ${displayName(flavor)}`,
-        ""
+        "",
       );
     }
 
@@ -267,7 +267,7 @@ function writeBacklogFiles(targetDirectory, selections) {
 
     try {
       const packageData = JSON.parse(
-        fileSystem.readFileSync(packagePath, "utf8")
+        fileSystem.readFileSync(packagePath, "utf8"),
       );
 
       const deps = {
@@ -305,7 +305,7 @@ function writeBacklogFiles(targetDirectory, selections) {
   function writeContextFile(
     backlogDirectoryPath,
     projectDirectory,
-    currentSelections
+    currentSelections,
   ) {
     const contextPath = path.join(backlogDirectoryPath, "context.md");
 
@@ -333,7 +333,7 @@ function writeBacklogFiles(targetDirectory, selections) {
       SOURCE_INSTRUCTIONS,
       "templates",
       "backlog",
-      "context.md"
+      "context.md",
     );
 
     const projectName = path.basename(projectDirectory);
@@ -342,7 +342,7 @@ function writeBacklogFiles(targetDirectory, selections) {
       .replace("{{PROJECT_NAME}}", projectName)
       .replace(
         "{{STACK}}",
-        "declared in .ai/backlog/stack.md (run `land:` to populate)"
+        "declared in .ai/backlog/stack.md (run `land:` to populate)",
       )
       .replace("{{PARTNER}}", partnerInfo);
 
@@ -370,7 +370,7 @@ function writeBacklogFiles(targetDirectory, selections) {
       SOURCE_INSTRUCTIONS,
       "templates",
       "backlog",
-      "stack.md"
+      "stack.md",
     );
 
     if (!fileSystem.existsSync(templatePath)) {
@@ -390,7 +390,7 @@ function writeBacklogFiles(targetDirectory, selections) {
       SOURCE_INSTRUCTIONS,
       "templates",
       "backlog",
-      "tasks.md"
+      "tasks.md",
     );
 
     fileSystem.copyFileSync(templatePath, tasksPath);
@@ -406,7 +406,7 @@ function writeBacklogFiles(targetDirectory, selections) {
       SOURCE_INSTRUCTIONS,
       "templates",
       "backlog",
-      "learned.md"
+      "learned.md",
     );
 
     fileSystem.copyFileSync(templatePath, learnedPath);
@@ -422,7 +422,7 @@ function writeBacklogFiles(targetDirectory, selections) {
       SOURCE_INSTRUCTIONS,
       "templates",
       "backlog",
-      "troubleshoot.md"
+      "troubleshoot.md",
     );
 
     fileSystem.copyFileSync(templatePath, troubleshootPath);
@@ -502,7 +502,7 @@ function writeGitignore(targetDirectory) {
 
   const blocksToAppend = BLOCKS.map((block) => {
     const missingEntries = block.entries.filter(
-      (entry) => !existingLines.includes(entry)
+      (entry) => !existingLines.includes(entry),
     );
 
     if (missingEntries.length === 0) {
@@ -528,7 +528,7 @@ function writeGitignore(targetDirectory) {
 
   fileSystem.appendFileSync(
     gitignorePath,
-    `${separator}\n${blocksToAppend.join("\n\n")}\n`
+    `${separator}\n${blocksToAppend.join("\n\n")}\n`,
   );
 }
 
@@ -588,7 +588,7 @@ function writeAutomationScripts(targetDirectory, selections) {
     const templatePath = path.join(
       SOURCE_INSTRUCTIONS,
       "templates",
-      "bump.mjs"
+      "bump.mjs",
     );
 
     const templateContent = fileSystem.readFileSync(templatePath, "utf8");
@@ -604,7 +604,7 @@ function writeAutomationScripts(targetDirectory, selections) {
     writeJsonAtomic(
       packagePath,
       packageData,
-      fileSystem.readFileSync(packagePath, "utf8")
+      fileSystem.readFileSync(packagePath, "utf8"),
     );
   }
 
@@ -645,7 +645,7 @@ function writeToolingAssets(targetDirectory) {
     __dirname,
     "../../..",
     "assets",
-    "tooling"
+    "tooling",
   );
 
   const targetToolingDir = path.join(targetDirectory, ".ai", "tooling");
@@ -680,7 +680,7 @@ function removeGeneratedInstructions(targetDirectory) {
   const generatedInstructionsDir = path.join(
     targetDirectory,
     ".ai",
-    "instructions"
+    "instructions",
   );
 
   if (!fileSystem.existsSync(generatedInstructionsDir)) {

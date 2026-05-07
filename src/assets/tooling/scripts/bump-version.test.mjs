@@ -12,14 +12,14 @@ const SCRIPT_PATH = path.join(__dirname, "bump-version.mjs");
 
 function makeTempProject(initialVersion) {
   const projectDir = fileSystem.mkdtempSync(
-    path.join(os.tmpdir(), "sdg-bump-test-")
+    path.join(os.tmpdir(), "sdg-bump-test-"),
   );
 
   const packagePath = path.join(projectDir, "package.json");
   const packageData = { name: "test-project", version: initialVersion };
   fileSystem.writeFileSync(
     packagePath,
-    `${JSON.stringify(packageData, null, 2)}\n`
+    `${JSON.stringify(packageData, null, 2)}\n`,
   );
 
   return { projectDir, packagePath };
@@ -91,7 +91,7 @@ describe("bump-version.mjs", () => {
 
   it("should preserve package.json fields other than version", () => {
     const projectDir = fileSystem.mkdtempSync(
-      path.join(os.tmpdir(), "sdg-bump-test-")
+      path.join(os.tmpdir(), "sdg-bump-test-"),
     );
 
     const packagePath = path.join(projectDir, "package.json");
@@ -106,7 +106,7 @@ describe("bump-version.mjs", () => {
 
     fileSystem.writeFileSync(
       packagePath,
-      `${JSON.stringify(originalPackage, null, 2)}\n`
+      `${JSON.stringify(originalPackage, null, 2)}\n`,
     );
 
     try {
@@ -156,7 +156,7 @@ describe("bump-version.mjs", () => {
 
   it("should exit 1 when package.json is absent", () => {
     const projectDir = fileSystem.mkdtempSync(
-      path.join(os.tmpdir(), "sdg-bump-test-")
+      path.join(os.tmpdir(), "sdg-bump-test-"),
     );
 
     try {

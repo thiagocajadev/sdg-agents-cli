@@ -14,7 +14,7 @@ const SOURCE_INSTRUCTIONS = path.join(
   __dirname,
   "../../..",
   "assets",
-  "instructions"
+  "instructions",
 );
 
 const WIZARD_STEPS = {
@@ -33,7 +33,7 @@ const STEP_ORDER = [
 
 async function gatherUserSelections(targetDirectory = process.cwd()) {
   const availableFlavors = getDirectories(
-    path.join(SOURCE_INSTRUCTIONS, "flavors")
+    path.join(SOURCE_INSTRUCTIONS, "flavors"),
   );
 
   let selections = {
@@ -264,7 +264,7 @@ function validateSelections(selections) {
   }
 
   const availableFlavors = getDirectories(
-    path.join(SOURCE_INSTRUCTIONS, "flavors")
+    path.join(SOURCE_INSTRUCTIONS, "flavors"),
   );
 
   if (!selections.flavor) {

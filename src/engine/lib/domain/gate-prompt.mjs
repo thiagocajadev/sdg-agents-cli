@@ -41,7 +41,7 @@ function buildPreflightSection(matches) {
   }
 
   const lines = matches.map(
-    (match) => `- [${match.rule}] line ${match.line}: \`${match.snippet}\``
+    (match) => `- [${match.rule}] line ${match.line}: \`${match.snippet}\``,
   );
 
   const signalsSection = ["## Pre-filter Signals", ...lines].join("\n");
@@ -74,7 +74,7 @@ function buildResponseSchema() {
       ],
     },
     null,
-    2
+    2,
   );
 
   const schemaSection = `Response schema:\n${schema}`;

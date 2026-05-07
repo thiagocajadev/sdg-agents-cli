@@ -94,7 +94,7 @@ async function safeInput(options) {
 
       if (minLength > 0 && sanitized.length < minLength) {
         console.log(
-          `\n  ⚠️  Input too short (minimum ${minLength} characters).\n`
+          `\n  ⚠️  Input too short (minimum ${minLength} characters).\n`,
         );
 
         continue;
@@ -125,7 +125,7 @@ function isMaintainerMode() {
 
   try {
     const packageData = JSON.parse(
-      fileSystem.readFileSync(packagePath, "utf8")
+      fileSystem.readFileSync(packagePath, "utf8"),
     );
 
     const isMaintainer = packageData.name === "sdg-agents";
@@ -198,7 +198,7 @@ function renderPromptHeader(title, content) {
 
   if (maintainer) {
     console.log(
-      "  🛠️  MAINTAINER MODE DETECTED: Prompt targets the Core Instructions."
+      "  🛠️  MAINTAINER MODE DETECTED: Prompt targets the Core Instructions.",
     );
   }
 
@@ -210,7 +210,7 @@ function renderCopyStatus(copied) {
     console.log("  📋 COPIED TO CLIPBOARD AUTOMATICALLY.");
   } else {
     console.log(
-      "  ⚠️  COULD NOT COPY TO CLIPBOARD (Install xclip/xsel on Linux)."
+      "  ⚠️  COULD NOT COPY TO CLIPBOARD (Install xclip/xsel on Linux).",
     );
   }
 }

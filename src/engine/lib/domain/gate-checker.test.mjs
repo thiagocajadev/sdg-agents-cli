@@ -8,7 +8,7 @@ import { GateChecker } from "./gate-checker.mjs";
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const resultsDir = path.resolve(
   currentDir,
-  "../../../../tests/fixtures/gate/results"
+  "../../../../tests/fixtures/gate/results",
 );
 
 describe("GateChecker", () => {
@@ -16,7 +16,7 @@ describe("GateChecker", () => {
     it("should return canCommit false when BLOCK violation present", () => {
       const input = readFileSync(
         path.join(resultsDir, "block-result.json"),
-        "utf8"
+        "utf8",
       );
 
       const expected = false;
@@ -30,7 +30,7 @@ describe("GateChecker", () => {
     it("should return canCommit true when result is clean", () => {
       const input = readFileSync(
         path.join(resultsDir, "pass-result.json"),
-        "utf8"
+        "utf8",
       );
 
       const expected = true;
@@ -44,7 +44,7 @@ describe("GateChecker", () => {
     it("should return canCommit true when only WARN violations present", () => {
       const input = readFileSync(
         path.join(resultsDir, "warn-result.json"),
-        "utf8"
+        "utf8",
       );
 
       const expected = true;
@@ -58,7 +58,7 @@ describe("GateChecker", () => {
     it("should isolate block violations from warn violations", () => {
       const input = readFileSync(
         path.join(resultsDir, "block-result.json"),
-        "utf8"
+        "utf8",
       );
 
       const expectedBlockCount = 1;
@@ -96,7 +96,7 @@ describe("GateChecker", () => {
     it("should include rule id and file in report", () => {
       const input = readFileSync(
         path.join(resultsDir, "block-result.json"),
-        "utf8"
+        "utf8",
       );
 
       const expectedRule = "explaining-returns";

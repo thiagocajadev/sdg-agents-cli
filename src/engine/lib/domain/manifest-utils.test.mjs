@@ -143,7 +143,7 @@ describe("ManifestUtils", () => {
 
     it('should return "N days ago" for older dates', () => {
       const input = new Date(
-        Date.now() - 1000 * 60 * 60 * 24 * 5
+        Date.now() - 1000 * 60 * 60 * 24 * 5,
       ).toISOString();
 
       const expected = "5 days ago";
@@ -155,7 +155,7 @@ describe("ManifestUtils", () => {
 
     it("should handle ISO date strings correctly", () => {
       const input = new Date(
-        Date.now() - 1000 * 60 * 60 * 24 * 10
+        Date.now() - 1000 * 60 * 60 * 24 * 10,
       ).toISOString();
 
       const expected = "10 days ago";

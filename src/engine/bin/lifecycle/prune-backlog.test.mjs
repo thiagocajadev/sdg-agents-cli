@@ -19,7 +19,7 @@ const buildBacklog = (doneEntries, trailingSection = "") => {
 describe("PruneBacklog.pruneBacklog()", () => {
   it("should truncate Done section to keepCount and report dropped count", () => {
     const input = buildBacklog(
-      Array.from({ length: 28 }, (_unused, index) => `cycle-${index}`)
+      Array.from({ length: 28 }, (_unused, index) => `cycle-${index}`),
     );
 
     const expectedRemoved = 25;
@@ -63,7 +63,7 @@ describe("PruneBacklog.pruneBacklog()", () => {
     const trailingSection = "## Notes\n\n- keep me intact";
     const input = buildBacklog(
       Array.from({ length: 5 }, (_unused, index) => `cycle-${index}`),
-      trailingSection
+      trailingSection,
     );
 
     const expectedRemoved = 2;
@@ -80,7 +80,7 @@ describe("PruneBacklog.pruneBacklog()", () => {
 
   it("should be idempotent — second prune is no-op", () => {
     const input = buildBacklog(
-      Array.from({ length: 10 }, (_unused, index) => `cycle-${index}`)
+      Array.from({ length: 10 }, (_unused, index) => `cycle-${index}`),
     );
 
     const expectedSecondRemoved = 0;
@@ -96,7 +96,7 @@ describe("PruneBacklog.pruneBacklog()", () => {
 
   it("should leave exactly one blank line between Done header and first entry", () => {
     const input = buildBacklog(
-      Array.from({ length: 6 }, (_unused, index) => `cycle-${index}`)
+      Array.from({ length: 6 }, (_unused, index) => `cycle-${index}`),
     );
 
     const expectedSeparator = "## Done\n\n- [DONE]";
@@ -106,12 +106,12 @@ describe("PruneBacklog.pruneBacklog()", () => {
 
     assert.ok(
       actualIncludesSeparator,
-      `Expected clean separator; got:\n${actual.pruned}`
+      `Expected clean separator; got:\n${actual.pruned}`,
     );
 
     assert.ok(
       actualHasNoDoubleBlanks,
-      "Must not leave double blank line after Done header"
+      "Must not leave double blank line after Done header",
     );
   });
 });

@@ -22,7 +22,7 @@ describe("governance.NARRATIVE_CHECKLIST", () => {
 
   it("maps every label to a strategy or explicit placeholder (no orphan rules)", () => {
     const orphanRules = NARRATIVE_CHECKLIST.filter(
-      (rule) => rule.heuristic === null
+      (rule) => rule.heuristic === null,
     );
 
     const orphanLabels = orphanRules.map((rule) => rule.label);
@@ -317,7 +317,7 @@ describe("governance.validateVerticalDensity (Vertical Density)", () => {
     const result = rule.heuristic(source);
 
     const hasTightViolation = (result.reason || "").includes(
-      "Explaining Return pair"
+      "Explaining Return pair",
     );
 
     assert.equal(hasTightViolation, EXPECT_FAIL);
@@ -473,7 +473,7 @@ describe("governance.validateNoSectionBanners (No section banners)", () => {
 
   it("flags equals banner", () => {
     const source = ["// ======= Section =======", "function helper() {}"].join(
-      "\n"
+      "\n",
     );
 
     const actualPass = rule.heuristic(source).pass;

@@ -40,7 +40,7 @@ function copyRecursiveSync(src, dest, options = {}) {
       copyRecursiveSync(
         path.join(src, childItemName),
         path.join(dest, childItemName),
-        options
+        options,
       );
     }
   } else {

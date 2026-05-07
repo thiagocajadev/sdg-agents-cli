@@ -17,7 +17,7 @@ function run() {
 
   if (!["feat", "fix", "docs", "land", "audit", "major"].includes(bumpType)) {
     console.error(
-      "❌ Error: Please specify bump type (feat, fix, docs, land, audit, or major)."
+      "❌ Error: Please specify bump type (feat, fix, docs, land, audit, or major).",
     );
 
     console.log("Usage: npm run bump <feat|fix|docs|land|audit|major>");
@@ -35,7 +35,7 @@ function run() {
 
   const npmType = typeMap[bumpType];
   const oldVersion = JSON.parse(
-    fileSystem.readFileSync(PACKAGE_JSON_PATH, "utf8")
+    fileSystem.readFileSync(PACKAGE_JSON_PATH, "utf8"),
   ).version;
 
   const oldChangelog = fileSystem.existsSync(CHANGELOG_PATH)
@@ -51,7 +51,7 @@ function run() {
 
     // 2. Get new version
     const newVersion = JSON.parse(
-      fileSystem.readFileSync(PACKAGE_JSON_PATH, "utf8")
+      fileSystem.readFileSync(PACKAGE_JSON_PATH, "utf8"),
     ).version;
 
     // 3. Update CHANGELOG.md
@@ -63,7 +63,7 @@ function run() {
     console.log('⚠️  Files staged. Run "git commit" manually after approval.');
   } catch {
     console.error(
-      "\n❌ Release failed. Attempting to revert versioning changes...\n"
+      "\n❌ Release failed. Attempting to revert versioning changes...\n",
     );
 
     // Restoration focus: only metadata files. Developer code is safely preserved.
@@ -75,8 +75,8 @@ function run() {
           version: oldVersion,
         },
         null,
-        2
-      )
+        2,
+      ),
     );
 
     if (oldChangelog !== null) {
@@ -94,7 +94,7 @@ function run() {
 
     console.error("⚠️  Metadata reverted to", oldVersion);
     console.error(
-      '🛠️  Fix the issue (e.g. lint errors) and run "npm run bump" again.'
+      '🛠️  Fix the issue (e.g. lint errors) and run "npm run bump" again.',
     );
 
     process.exit(1);
@@ -116,7 +116,7 @@ function updateChangelog(newVersion) {
 
   if (!unreleasedRegex.test(content)) {
     console.warn(
-      '⚠️  Could not find "## [Unreleased]" header in CHANGELOG.md.'
+      '⚠️  Could not find "## [Unreleased]" header in CHANGELOG.md.',
     );
 
     console.log("Skipping content promotion.");

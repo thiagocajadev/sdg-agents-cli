@@ -65,7 +65,7 @@ export const blankBeforeAssertion = {
 
       const textBetween = context.sourceCode.text.slice(
         tokenBefore.range[1],
-        node.range[0]
+        node.range[0],
       );
 
       return textBetween.includes("\n\n");

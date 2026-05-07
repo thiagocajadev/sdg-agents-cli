@@ -69,7 +69,7 @@ describe("WizardUtils (Non-Interactive)", () => {
         assert.equal(
           actualIsSuccess,
           expectedSuccess,
-          `flavor ${flavor} should be accepted`
+          `flavor ${flavor} should be accepted`,
         );
       }
     });

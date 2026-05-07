@@ -65,7 +65,7 @@ function ensureTasksFileExists(tasksPath) {
 function pruneDoneSection(content, keepCount) {
   const lines = content.split("\n");
   const doneStartIndex = lines.findIndex(
-    (line) => line.trim() === DONE_HEADING
+    (line) => line.trim() === DONE_HEADING,
   );
 
   const hasDoneSection = doneStartIndex >= 0;
@@ -76,7 +76,7 @@ function pruneDoneSection(content, keepCount) {
 
   const afterDoneLines = lines.slice(doneStartIndex + 1);
   const doneEndOffset = afterDoneLines.findIndex((line) =>
-    line.startsWith("## ")
+    line.startsWith("## "),
   );
 
   const hasNextSection = doneEndOffset >= 0;

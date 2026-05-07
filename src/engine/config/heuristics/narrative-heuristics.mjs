@@ -35,7 +35,7 @@ function validateSlaCompliance(content) {
 
     const shapeViolation = detectEntryPointShapeViolation(
       entryPointName,
-      bodyLines
+      bodyLines,
     );
 
     if (shapeViolation) {
@@ -44,7 +44,7 @@ function validateSlaCompliance(content) {
   }
 
   const runFunctionMatch = content.match(
-    /(?:async\s+)?function run\(\) \{([\s\S]*?)\n\}/
+    /(?:async\s+)?function run\(\) \{([\s\S]*?)\n\}/,
   );
 
   if (runFunctionMatch) {
@@ -139,7 +139,7 @@ function validateExplainingReturns(content) {
     const isPotentialBareReturn =
       currentLine.startsWith("return ") &&
       !["return null", "return false", "return true", "return;"].some(
-        (statement) => currentLine.startsWith(statement)
+        (statement) => currentLine.startsWith(statement),
       );
 
     if (isPotentialBareReturn) {
@@ -234,7 +234,7 @@ function classifyReturnLogic(line) {
   }
 
   const isArithmetic = /return\s+[a-zA-Z_]\w*\s*[+\-*/]\s*[a-zA-Z_]\w*/.test(
-    line
+    line,
   );
 
   if (isArithmetic) {
@@ -258,7 +258,7 @@ function validateNamingDiscipline(content) {
 
   const abbreviationPattern = new RegExp(
     `\\b(${BANNED_ABBREVIATIONS.join("|")})\\b\\s*(?=[,)=:.])`,
-    "g"
+    "g",
   );
 
   const abbreviationMatches = cleanContent.match(abbreviationPattern) || [];
@@ -332,7 +332,7 @@ function scanExplainingReturnTight(lines) {
 
     if (isTightPairViolation) {
       violations.push(
-        `line ${index + 1} (Explaining Return pair must be tight)`
+        `line ${index + 1} (Explaining Return pair must be tight)`,
       );
     }
   }
@@ -369,7 +369,7 @@ function scanOrphanAtomic(lines) {
     }
 
     violations.push(
-      `line ${index + 1} (orphan atomic — fold into trio or rebalance to 2+2)`
+      `line ${index + 1} (orphan atomic — fold into trio or rebalance to 2+2)`,
     );
   }
 
@@ -461,7 +461,7 @@ function validateRevealingModulePattern(content) {
 
 function validateBooleanPrefixes(content) {
   const bareBooleanMatches = content.match(
-    /\bconst\s+(loading|error|active|valid)\s*=/g
+    /\bconst\s+(loading|error|active|valid)\s*=/g,
   );
 
   const booleanResult = {

@@ -13,7 +13,7 @@ describe("GatePrompt", () => {
     it("should include the diff content in the prompt", () => {
       const input = readFileSync(
         path.join(fixturesDir, "violations/explaining-returns.diff"),
-        "utf8"
+        "utf8",
       );
 
       const expectedFragment = "return Result<Order>.Ok(order);";
@@ -82,7 +82,7 @@ describe("GatePrompt", () => {
     it("should include named-const-before-call diff content in the prompt", () => {
       const input = readFileSync(
         path.join(fixturesDir, "violations/named-const-before-call.diff"),
-        "utf8"
+        "utf8",
       );
 
       const expectedFragment = "assert.ok(actualBytes < 2700";
@@ -96,7 +96,7 @@ describe("GatePrompt", () => {
     it("should include named-const-before-call method-call-as-subject fixture case", () => {
       const input = readFileSync(
         path.join(fixturesDir, "violations/named-const-before-call.diff"),
-        "utf8"
+        "utf8",
       );
 
       const expectedFragment = "assert.ok(actual.includes(expectedSubstring))";

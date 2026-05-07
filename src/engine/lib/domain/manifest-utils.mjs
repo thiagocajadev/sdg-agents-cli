@@ -24,7 +24,7 @@ function hashFile(filePath) {
 function computeHashes(
   selections,
   instructionsDir = INSTRUCTIONS_DIR,
-  skillsDir = SKILLS_DIR
+  skillsDir = SKILLS_DIR,
 ) {
   const { flavor } = selections;
   const hashes = {};

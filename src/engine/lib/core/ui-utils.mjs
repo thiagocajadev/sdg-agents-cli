@@ -37,7 +37,7 @@ function printActivationGuide() {
   console.log("  If it does not auto-load the rules, paste this once:");
   console.log("\n    Read .ai/skills/AGENTS.md\n");
   console.log(
-    "  First task is `land:` — discover the project stack and seed backlog.\n"
+    "  First task is `land:` — discover the project stack and seed backlog.\n",
   );
 }
 
@@ -46,15 +46,15 @@ function printSuccessAgents(targetDir) {
   console.log(`  ${"─".repeat(55)}`);
   console.log(`  Project: ${targetDir}\n`);
   console.log(
-    "  .ai/                     (governance — canonical AGENTS.md lives here)"
+    "  .ai/                     (governance — canonical AGENTS.md lives here)",
   );
 
   console.log(
-    "  .ai/backlog/             (gitignored — local working state + stack.md)"
+    "  .ai/backlog/             (gitignored — local working state + stack.md)",
   );
 
   console.log(
-    "  CLAUDE.md                (pointer at repo root — auto-loaded by Claude Code)"
+    "  CLAUDE.md                (pointer at repo root — auto-loaded by Claude Code)",
   );
 
   printActivationGuide();
@@ -65,15 +65,15 @@ function printQuickSuccess(targetDir) {
   console.log(`  ${"─".repeat(55)}`);
   console.log(`  Project: ${targetDir}\n`);
   console.log(
-    "  .ai/                     (governance — canonical AGENTS.md lives here)"
+    "  .ai/                     (governance — canonical AGENTS.md lives here)",
   );
 
   console.log(
-    "  .ai/backlog/             (gitignored — local working state + stack.md)"
+    "  .ai/backlog/             (gitignored — local working state + stack.md)",
   );
 
   console.log(
-    "  CLAUDE.md                (pointer at repo root — auto-loaded by Claude Code)"
+    "  CLAUDE.md                (pointer at repo root — auto-loaded by Claude Code)",
   );
 
   printActivationGuide();
@@ -87,7 +87,7 @@ function printQuickDryRun(targetDir) {
   console.log(`  [2/5] Would inject rules → .ai/`);
   console.log(`  [3/5] Would assemble AGENTS.md`);
   console.log(
-    `  [4/5] Would write agent config and backlog (stack.md placeholder)`
+    `  [4/5] Would write agent config and backlog (stack.md placeholder)`,
   );
 
   console.log(`  [5/5] Would finalize manifest`);
@@ -120,11 +120,11 @@ function renderPreviewDirectories(directories) {
 function renderPreviewInstructionSet() {
   console.log(`    📄 .ai/skills/AGENTS.md`);
   console.log(
-    `    📄 .ai/backlog/stack.md     (placeholder — populated by \`land:\`)`
+    `    📄 .ai/backlog/stack.md     (placeholder — populated by \`land:\`)`,
   );
 
   console.log(
-    `    📄 CLAUDE.md                (root pointer — auto-loaded by Claude Code)`
+    `    📄 CLAUDE.md                (root pointer — auto-loaded by Claude Code)`,
   );
 }
 

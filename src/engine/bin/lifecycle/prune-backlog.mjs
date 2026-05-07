@@ -10,7 +10,7 @@ const { bootstrapIfDirect } = FsUtils;
 
 const ROOT_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
-  "../../../../"
+  "../../../../",
 );
 const TASKS_PATH = path.join(ROOT_DIR, ".ai", "backlog", "tasks.md");
 const DEFAULT_KEEP_COUNT = 3;
