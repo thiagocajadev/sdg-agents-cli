@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.7.0] - 2026-05-11
+
+### Added
+
+- **`visual-density` registered in `SKILL_CATALOG` (Surgical).** Engine now lists the skill under the Surgical tier in the rendered `AGENTS.md` (`Visual-density readability deep dive`). Token-budget guard raised from 2600 → 2700 bytes to accommodate the entry (rendered output: 2624 b). `instruction-assembler.test.mjs` updated to assert the new entry alongside `testing`, `security`, `observability`.
+- **`src/assets/tooling/biome/biome.json` — opt-in Biome config.** Rule subset mirrors visual-density expectations: `lineWidth: 100`, double quotes, trailing commas, `useConst`, `useTemplate`, `useSingleVarDeclarator`, `noVar`, `noUselessElse`, `useArrowFunction`. Pairs with ESLint — does not replace it. Activation recipe added to tooling README with Biome 2.0 schema link + VSCode format-on-save snippet.
+- **`src/assets/tooling/hooks/writing-lint.mjs` — advisory PostToolUse hook.** Scans Write/Edit/MultiEdit tool calls for Markdown writes against the banlists derived from `writing-soul.md` (banned adverbs, openers, emphasis, jargon — English only). Scope: `src/assets/skills/*.md`, `docs/**.md`, `README*.md`, `CHANGELOG.md`. Working-state files (`tasks.md`, `context.md`, `impact-map.md`, `stack.md`, `troubleshoot.md`, `learned.md`) excluded by basename. Hook is advisory: exit 0 always, hits reported to stderr. Ships with 19 unit tests covering scope filter, tool-shape extraction, banlist categories, and output formatting. Activation recipe in tooling README wires it via `.claude/settings.json`.
+
+### Fixed
+
+- **`printUpdateNotification` — ASCII box removed.** The 6-line box rendered as `┌──┐ │ │ └──┘` was breaking under several terminals. Replaced with a 2-line plain notice: headline + install hint. Cleaner, terminal-agnostic, same information density.
+
 ## [5.6.5] - 2026-05-11
 
 ### Added

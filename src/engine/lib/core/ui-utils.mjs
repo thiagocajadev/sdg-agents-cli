@@ -175,12 +175,9 @@ function printHeader(version) {
 }
 
 function printUpdateNotification(current, latest) {
-  console.log("  ┌──────────────────────────────────────────────────────┐");
-  console.log(`  │  🚀 NEW VERSION AVAILABLE: v${latest.padEnd(25)} │`);
-  console.log(`  │  Your version: v${current.padEnd(32)} │`);
-  console.log("  │                                                      │");
-  console.log("  │  Update with: npm install -g sdg-agents              │");
-  console.log("  └──────────────────────────────────────────────────────┘\n");
+  const headline = `\n  🚀 New version available: v${latest} (current: v${current})`;
+  console.log(headline);
+  console.log("  Update with: npm install -g sdg-agents\n");
 }
 
 function printFooter() {

@@ -100,6 +100,11 @@ const SKILL_CATALOG = [
     category: "surgical",
     description: "DDD-Lite: aggregates, VOs, ubiquitous language",
   },
+  {
+    path: ".ai/skills/visual-density.md",
+    category: "surgical",
+    description: "Visual-density readability deep dive",
+  },
 ];
 
 /**

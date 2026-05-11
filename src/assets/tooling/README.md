@@ -41,6 +41,22 @@ Runs the SDG gate against staged changes, blocking commit on rule violations.
 Validates conventional-commit prefix:
 `feat|fix|docs|audit|land|chore|refactor|test|perf`.
 
+### `biome/biome.json`
+
+Opt-in Biome config (formatter + linter). Rule subset mirrors visual-density
+expectations: `lineWidth: 100`, double quotes, trailing commas, `useConst`,
+`useTemplate`, `useSingleVarDeclarator`, `noVar`, `noUselessElse`,
+`useArrowFunction`. Pairs with ESLint — does not replace it.
+
+### `hooks/writing-lint.mjs`
+
+Advisory PostToolUse hook. Scans Markdown writes (Write / Edit / MultiEdit)
+against the banlists from `writing-soul.md` (banned adverbs, openers,
+emphasis, jargon — English and pt-BR). Scope: `src/assets/skills/*.md`,
+`docs/**.md`, `README*.md`, `CHANGELOG.md`. Working-state files
+(`tasks.md`, `context.md`, `impact-map.md`, `stack.md`, `troubleshoot.md`,
+`learned.md`) are excluded. Always exits 0; reports go to stderr.
+
 ## Activation recipes
 
 ### Activate ESLint rules
@@ -158,3 +174,100 @@ capitalisation_policy = lower
 | `references.qualification`   | Requires `Table.Column` qualification       |
 
 Or ask your agent: "wire SQLFluff into my project."
+
+### Activate Biome
+
+Opt-in alternative or complement to ESLint. Faster formatter + linter pass
+with a rule set aligned to visual-density.
+
+1. Install Biome:
+
+```
+npm install --save-dev --save-exact @biomejs/biome
+```
+
+2. Copy the config to your project root:
+
+```
+cp .ai/tooling/biome/biome.json biome.json
+```
+
+3. Add an opt-in script to `package.json` (does NOT replace `lint`):
+
+```json
+{
+  "scripts": {
+    "lint:biome": "biome check .",
+    "lint:biome:fix": "biome check --write ."
+  }
+}
+```
+
+4. Optional VSCode format-on-save (`.vscode/settings.json`):
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "biomejs.biome",
+  "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[json]": { "editor.defaultFormatter": "biomejs.biome" }
+}
+```
+
+**Rules included (mapped to visual-density):**
+
+| Biome rule               | Coverage                                       |
+| :----------------------- | :--------------------------------------------- |
+| `formatter.lineWidth`    | 100 columns                                    |
+| `useConst`               | No `let` for never-reassigned bindings         |
+| `useTemplate`            | Template literals over string concatenation    |
+| `useSingleVarDeclarator` | One declaration per `const` / `let` statement  |
+| `noVar`                  | Forbid `var`                                   |
+| `noUselessElse`          | Remove `else` after a guarded `return`         |
+| `useArrowFunction`       | Prefer arrow functions for anonymous callbacks |
+| `useShorthandArrayType`  | `T[]` over `Array<T>` (TS)                     |
+
+Or ask your agent: "wire Biome into my project."
+
+### Activate writing-lint hook
+
+Advisory hook that scans Markdown writes against the writing-soul banlists.
+Reports to stderr; never blocks the tool call.
+
+1. Copy the hook script into the project:
+
+```
+mkdir -p .claude/hooks
+cp .ai/tooling/hooks/writing-lint.mjs .claude/hooks/writing-lint.mjs
+chmod +x .claude/hooks/writing-lint.mjs
+```
+
+2. Register it as a PostToolUse hook in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/writing-lint.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+3. Test by editing a scoped file (e.g. `docs/test.md`) with a banned term.
+   Stderr should show `<file>:<line> — banned <category>: "<term>"`.
+
+**Scope** (positive match): `src/assets/skills/*.md`, `docs/**.md`,
+`README*.md`, `CHANGELOG.md`.
+**Excluded** (working state): `tasks.md`, `context.md`, `impact-map.md`,
+`stack.md`, `troubleshoot.md`, `learned.md`.
+
+Or ask your agent: "wire the writing-lint hook."

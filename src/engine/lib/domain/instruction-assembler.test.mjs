@@ -223,18 +223,20 @@ describe("InstructionAssembler", () => {
       assert.ok(hasPhaseCodeHeader);
     });
 
-    it("should classify testing/security/observability as surgical skills", () => {
+    it("should classify testing/security/observability/visual-density as surgical skills", () => {
       const actual = buildMasterInstructions(baseSelections);
 
       const hasSurgicalHeader = actual.includes("**Surgical**");
       const hasTestingSkill = actual.includes("testing.md");
       const hasSecuritySkill = actual.includes("security.md");
       const hasObservabilitySkill = actual.includes("observability.md");
+      const hasVisualDensitySkill = actual.includes("visual-density.md");
 
       assert.ok(hasSurgicalHeader);
       assert.ok(hasTestingSkill);
       assert.ok(hasSecuritySkill);
       assert.ok(hasObservabilitySkill);
+      assert.ok(hasVisualDensitySkill);
     });
 
     it("should unconditionally include Agent Roles block", () => {
@@ -260,7 +262,7 @@ describe("InstructionAssembler", () => {
 
   describe("Token Budget Guard", () => {
     const WORST_CASE_INPUT = { flavor: "vertical-slice" };
-    const TOKEN_BUDGET_BYTES = 2600;
+    const TOKEN_BUDGET_BYTES = 2700;
 
     it(`should stay under ${TOKEN_BUDGET_BYTES} bytes`, () => {
       const actual = buildMasterInstructions(WORST_CASE_INPUT);
