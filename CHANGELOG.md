@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.6.5] - 2026-05-11
+
+### Added
+
+### Fixed
+
+- **`writing-soul.md` — pedagogical rewrite + COPY-language principle.** Reorganized into seven sections (`Who reads what we write`, `Tone by context`, `Default voice`, `Default structure for perennial artifacts`, `How to write`, `Anti-patterns`, `Quick checks before delivering`). Tone-by-context table now distinguishes UI copy (product-facing) from perennial artifacts and codifies the language rule: project artifacts ship in English; UI copy follows the developer-declared product language with principles invariant. Anti-patterns expanded with Portuguese banned-opener/emphasis variants. Self-violations corrected (`just`, `genuinely` removed from prose).
+- **`visual-density.md` — new dedicated skill** extracted from upstream `thiagocajadev/code-style` and translated to English. Twelve fundamental concepts (`blank line`, `tight pair`, `atomic trio`, `chained semantic pair`, `explanatory return`, `multi-line block`, `fragments → assembly`, `orphan line`, `declaration + guard`, `wall of code`, `method phase`, `column alignment`) plus thirteen-row quick reference. Twenty `details`-folded examples across JS and C# covering all rules. Cross-linked from `code-style.md` (`Visual density` row + Load directive) as the deep-dive companion to the one-line summary already in the Readability table. Registration in `SKILL_CATALOG` (Surgical) deferred to next cycle.
+
 ## [5.6.4] - 2026-05-07
 
 ### Fixed
