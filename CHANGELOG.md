@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.7.1] - 2026-05-11
+
+### Added
+
+### Fixed
+
+- **`src/assets/tooling/README.md` — writing-lint banlist scope wording.** The inventory entry described the hook's banlists as "English and pt-BR", but the implementation has been English-only since v5.7.0 ([writing-lint.mjs:14](src/assets/tooling/hooks/writing-lint.mjs#L14)). Replaced the trailing clause with "Banlists are English-only — project artifacts ship in English." Doc-only correction; no behavior change.
+
 ## [5.7.0] - 2026-05-11
 
 ### Added

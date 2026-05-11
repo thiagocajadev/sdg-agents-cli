@@ -52,7 +52,8 @@ expectations: `lineWidth: 100`, double quotes, trailing commas, `useConst`,
 
 Advisory PostToolUse hook. Scans Markdown writes (Write / Edit / MultiEdit)
 against the banlists from `writing-soul.md` (banned adverbs, openers,
-emphasis, jargon — English and pt-BR). Scope: `src/assets/skills/*.md`,
+emphasis, jargon). Banlists are English-only — project artifacts ship in
+English. Scope: `src/assets/skills/*.md`,
 `docs/**.md`, `README*.md`, `CHANGELOG.md`. Working-state files
 (`tasks.md`, `context.md`, `impact-map.md`, `stack.md`, `troubleshoot.md`,
 `learned.md`) are excluded. Always exits 0; reports go to stderr.
