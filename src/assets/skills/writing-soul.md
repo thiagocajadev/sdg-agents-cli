@@ -47,7 +47,9 @@ Skip the concepts table only when the doc has fewer than three technical terms, 
 ## How to write
 
 - **Active, direct sentences**. Break long ideas into short clauses. Avoid chains of "-ing" or "-ndo" forms.
+- **Say it once**. State the point, then stop. Cut words that do not change the meaning. Do not restate the same idea in a second phrasing, and do not extend past what the reader needs.
 - **No em dash (—)**. Use a comma, a colon, parentheses, or split into two sentences. This rule applies to the soul itself, not only to its consumers.
+- **Break large blocks**. A paragraph past four or five lines becomes a list, a table, or two shorter paragraphs. A bullet that runs three lines splits into sub-bullets. Walls of text bury the point.
 - **Visual calm**. Sentence case headings. Bold only for technical emphasis. Emojis only when they carry semantic meaning.
 - **Peer tone**. No promotional adjectives. State facts directly. When a topic is hard, name the difficulty instead of hiding it.
 - **Rhythm**. Mix short observations with longer explanations. Three same-length sentences in a row read like a machine.
@@ -74,4 +76,4 @@ Strip these before delivering any artifact.
 
 ## Quick checks before delivering
 
-Adverb? Cut. Passive voice? Find the actor. Inanimate doing a human verb? Name the person. Throat-clearing opener? Cut. Binary contrast? State Y. Three same-length sentences? Break one. Em dash (—)? Replace with comma, colon, parentheses, or split. Vague declarative? Name the thing. Promotional adjective? Replace with a fact.
+Adverb? Cut. Passive voice? Find the actor. Inanimate doing a human verb? Name the person. Throat-clearing opener? Cut. Binary contrast? State Y. Three same-length sentences? Break one. Em dash (—)? Replace with comma, colon, parentheses, or split. Vague declarative? Name the thing. Promotional adjective? Replace with a fact. Restated point? Keep one phrasing. Paragraph past five lines? Split it or make it a list. Bullet running three lines? Break into sub-bullets.

@@ -30,6 +30,7 @@ function runScript(projectDir, args = []) {
   const stdout = execFileSync("node", [SCRIPT_PATH, ...args], {
     cwd: projectDir,
     encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
   });
 
   return stdout;

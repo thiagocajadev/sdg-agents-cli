@@ -62,12 +62,14 @@ Ask exactly two questions: (1) Primary Hue, (2) Secondary Hue (Enter = Split-Com
 
 Dark mode surfaces get **lighter** as they approach the user (physical elevation). Inverting light values = "Floating Darkness" failure.
 
-| Layer | Role     | Light (Zinc)        | Dark (Zinc) |
-| :---- | :------- | :------------------ | :---------- |
-| S0    | Page bg  | 50/White            | 950/Black   |
-| S1    | Sidebars | 100                 | 900         |
-| S2    | Cards    | White + Shadow      | 800         |
-| S3    | Modals   | White + Deep Shadow | 700         |
+| Layer | Role     | Light (Zinc)     | Dark (Zinc) |
+| :---- | :------- | :--------------- | :---------- |
+| S0    | Page bg  | 50 (L≈98%)       | 950 (L≈15%) |
+| S1    | Sidebars | 100 (L≈96%)      | 900 (L≈20%) |
+| S2    | Cards    | 50 + shadow      | 800 (L≈25%) |
+| S3    | Modals   | 50 + deep shadow | 700 (L≈30%) |
+
+Both themes carry the hierarchy. No pure white (`#FFFFFF`) in light, no pure black (`#000000`) in dark. The lightest surface is Zinc 50 (L≈98%), the darkest is Zinc 950 (L≈15%). Light-mode elevation reads through shadow and subtle tint steps, never by reaching pure white.
 
 **Hover Law:** Light mode goes darker (L-5%). Dark mode goes lighter (L+10%).
 
@@ -178,6 +180,33 @@ Avoid opacity below 40% — text disappears against dark zinc surfaces.
 | Looks faded    | Increase foreground contrast (L-delta) |
 
 Perception beats math. Validate visually after applying tokens — adjust manually if WCAG passes but readability fails.
+
+</rule>
+
+### Phase 0.8 — Light Theme Calibration
+
+<rule name="LightThemeCalibration">
+
+Light theme is not "default with no dark class". It gets the same surface discipline as dark: a graded Zinc scale, never pure white.
+
+**Surfaces — use the Zinc scale, never pure white:**
+
+| Token           | Zinc step | OKLCH approx | Role           |
+| :-------------- | :-------- | :----------- | :------------- |
+| `bg-background` | 50        | L≈98%        | Page base (S0) |
+| `bg-muted`      | 100       | L≈96%        | Sidebars (S1)  |
+| `bg-card`       | 50        | L≈98%        | Cards (S2)     |
+| `bg-popover`    | 50        | L≈98%        | Modals (S3)    |
+
+Zinc 50 (`oklch(98% 0.002 285)`) is the ceiling; never override with `#FFFFFF`. Cards and modals separate from the page through shadow and border, not a brighter fill.
+
+**Elevation via shadow:** surfaces cannot go lighter than the Zinc 50 ceiling, so depth reads through soft shadows (S2 `shadow-sm`, S3 `shadow-md`).
+
+**Text — never pure black:** primary text is Zinc 900 (L≈20%), not `#000000`. Secondary Zinc 600, disabled Zinc 400. Pure black on near-white reads harsh and raises glare.
+
+**Borders:** `border-border` (Zinc 200) for structure; `border-border/60` for subtle grouping. Hold the WCAG contrast floor (Part 4).
+
+> Peer of Phase 0.7. Same FigureGround law, opposite luminance direction.
 
 </rule>
 

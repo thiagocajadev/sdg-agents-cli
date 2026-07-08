@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.8.0] - 2026-07-08
+
+### Added
+
+- **`ui-ux.md` Phase 0.8, Light Theme Calibration.** New rule symmetric to Phase 0.7 (dark). Light theme now gets the same surface discipline: a graded Zinc scale with Zinc 50 (L≈98%) as the ceiling, never `#FFFFFF`; depth conveyed by soft shadows since surfaces cannot go lighter; primary text Zinc 900 (L≈20%), never `#000000`. The Elevation Stack (Phase 0.2) light column moved from `White` to `Zinc 50`, with a both-themes note banning pure white in light and pure black in dark.
+- **`writing-soul.md` concision + anti-density rules.** Added `Say it once` (state the point, cut restatements, do not over-extend the subject) and `Break large blocks` (paragraphs past five lines become lists or split; three-line bullets split into sub-bullets) to `How to write`, plus three matching entries in `Quick checks before delivering`.
+
+### Fixed
+
+- **`delivery.md` §1 Response Envelope migrated to the `ok`-discriminated union.** The discriminator is now `ok` (literal `true` / `false`) instead of `success`, with a fixed key order `ok → meta → payload` and the irrelevant branch omitted (never `error: null` nor `data: null`). Errors follow RFC 9457 Problem Details (`type`, `title`, `status`, `detail`, `instance`, `code`, `errors`) with `error.status` equal to the real HTTP status. `meta.timestamp` (UTC, RFC 3339 `Z`) is present on errors only, keeping success bodies deterministic for ETag / idempotency. `Result<T>` / `IsSuccess` stays an internal domain pattern that the adapter converts at the controller edge. Reference norms cited: RFC 9457, JSON:API, Stripe and GitHub error objects.
+- **Surface hierarchy enforced in both themes.** `delivery.md` §2 Frontend gained a both-themes surface-hierarchy bullet that holds the S0→S3 tonal steps and the Zinc 50 / Zinc 950 ceilings, pointing at `ui-ux.md` Phase 0.2 / 0.7 / 0.8.
+- **README (en + pt-BR) revised for the updated writing soul.** Broke the dense multi-line bullets in the feature list into a lead sentence plus sub-bullets, removed prose em dashes (comma, colon, or sentence split), and converted the reference-list separators to colons. Links, badges, code blocks, and technical content preserved; the English and Portuguese versions kept in parity.
+- **`js-yaml` moderate vulnerability resolved (GHSA-h67p-54hq-rp68).** Added a `package.json` `overrides` pinning `js-yaml` to `^4.2.0` (resolves to 4.3.0), clearing the quadratic-complexity DoS that reached the tree transitively through `eslint → @eslint/eslintrc`. This unblocks `npm audit --audit-level=moderate`, the CI step that was failing the push.
+- **Tooling test stderr noise silenced.** `bump-version.test.mjs` and `prune-backlog.test.mjs` now pass `stdio: ["ignore", "pipe", "pipe"]` to `execFileSync`, so the deliberate error-path cases no longer leak `❌ Usage` / `❌ Not found` lines into `npm test` output. Production scripts are unchanged; real CLI users still see the messages.
+
 ## [5.7.2] - 2026-05-11
 
 ### Added

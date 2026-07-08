@@ -8,14 +8,22 @@
 
 ### 1. Response Envelope (SSOT)
 
-> Canonical definition. Referenced by `code-style.md` and `api-design.md` — do not redefine elsewhere.
+> Canonical definition. Referenced by `code-style.md` and `api-design.md`; do not redefine elsewhere.
 
-- **Structure**: `{ success: bool, error: { code, message } | null, meta: { action, nextCursor, hasMore, traceId }, data: T }`.
-- **Discriminator**: Consumer branches on `success`.
+- **Discriminator**: `ok` literal (`true` / `false`). TypeScript narrows on it. Never `success` / `isSuccess`.
+- **Key order (fixed)**: `ok → meta → payload`. The irrelevant branch is omitted. Never `error: null` nor `data: null`.
+- **Success (2xx)**: `{ ok: true, meta: { action, traceId }, data: T }`.
+- **Error (4xx/5xx)** (RFC 9457 Problem Details): `{ ok: false, meta: { action, traceId, timestamp }, error: { type, title, status, detail, instance, code, errors } }`.
+- **HTTP status is the authority**: 2xx ⇔ `ok: true`. Never echo the status code in a success body.
+- **`error.status` equals the real HTTP status** (invariant). RFC 9457 keeps status in the body so it survives proxy, log, and replay.
+- **Error fields**: `code` = stable machine id (extension member); `type` = `/problems/<code-kebab>`; `errors` = validation issues (400 only).
+- **`meta.timestamp`** (UTC, RFC 3339 `Z`) on errors only. Omitting it on success keeps the body deterministic for ETag / idempotency; the `Date` header covers success. Never a local offset. Business time the user reads is domain data, so it goes in `data`.
 - **Meta**: `action`, `traceId`, `requestId`, pagination fields only. No business data.
-- **Pagination**: Default Cursor (`nextCursor`, `hasMore`). Offset exception (`page`, `total`).
-- **Errors**: 400 INVALID_INPUT · 401 UNAUTHORIZED · 403 FORBIDDEN · 404 NOT_FOUND · 409 CONFLICT · 409 BUSINESS_RULE_VIOLATION · 500 INTERNAL.
-- **Boundary**: Adapter converts `Result<T>` → Envelope at controller edge.
+- **Pagination**: default Cursor (`nextCursor`, `hasMore`). Offset exception (`page`, `total`).
+- **Error codes**: 400 INVALID_INPUT · 401 UNAUTHORIZED · 403 FORBIDDEN · 404 NOT_FOUND · 409 CONFLICT · 409 BUSINESS_RULE_VIOLATION · 500 INTERNAL.
+- **Boundary**: `Result<T>` / `IsSuccess` is an internal domain pattern, never the wire format. The Adapter converts it to the envelope at the controller edge.
+
+**Reference norms**: RFC 9457 (Problem Details, supersedes 7807); JSON:API (`data` / `errors` mutually exclusive); aligned with Stripe and GitHub error objects.
 
 ### 2. Execution Flow
 
@@ -49,6 +57,7 @@
 ### 2. Visual Layers & Scale
 
 - **Base**: `bg-background` (root) · **Surface**: `bg-muted` / `bg-muted/40` (sections) · **Elevated**: `bg-card` (cards) · **Overlay**: `bg-popover` (modals).
+- **Surface hierarchy, both themes**: keep the S0→S3 tonal steps in light and dark. Never pure white (`#FFFFFF`) or pure black (`#000000`); the Zinc 50 and Zinc 950 ceilings hold. See `ui-ux.md` Phase 0.2 / 0.7 / 0.8.
 - **Brand**: `--color-primary-*` (OKLCH) for actions/accents.
 - **Spacing**: `gap-1`–`gap-8`. No arbitrary values. No margin for layout.
 - **Radius**: `rounded-sm (6px)` · `rounded-md (10px)` · `rounded-lg (16px)`.

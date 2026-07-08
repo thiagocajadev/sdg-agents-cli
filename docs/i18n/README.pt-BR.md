@@ -20,16 +20,22 @@
 
 O conjunto de instruções cobre:
 
-- **Protocolo de trabalho**: um ciclo de 5 fases (SPEC → PLAN → CODE → TEST → END) que estrutura como o agente conduz qualquer tarefa. Inclui um **Work Checklist** unificado (Intent recitado na entrada da CODE; Form recitado na entrada da CODE **e** verificado no TEST) e um **Circuit Breaker** de 3 tentativas (STOP) para evitar loops de regressão.
-- **Estilo de código e quality gates**: consolidados em `code-style.md` — uma única regra `WorkChecklist` com duas seções binárias: **Intent** (Mental Reset, Target Files, Naming, Narrative, Comments, Tests planned, Security, Blockers) e **Form** (Pure entry point, Narrative Siblings, Explaining Returns, Revealing Module Pattern, Vertical Density, Boolean prefix, No framework abbreviations, No section banners) conectada a heurísticas de narrativa em `governance.mjs`.
-- **Skills sob demanda**: code style, testing, security, API design, data access, observability, CI/CD, cloud, SQL style, UI/UX, code review, performance, domain modeling — cada uma é uma unidade auto-contida carregada somente quando o ciclo atual precisa.
-- **Contexto de stack dinâmico**: o ciclo `land:` elicita as linguagens e versões do projeto do desenvolvedor, opcionalmente as enriquece via uma lista de fontes de documentação canônicas, e persiste o resultado em `.ai/backlog/stack.md`. A fase CODE carrega esse arquivo como fonte única de verdade — sem catálogo estático de idiomas, sem flag `--idiom` para manter.
-- **Contrato de entrega**: envelope de resposta BFF (server-side) e execução de contrato UI (client-side) fundidos em um único `competencies/delivery.md` auto-gateado, carregado quando a tarefa toca lógica de entrega.
+- **Protocolo de trabalho**: um ciclo de 5 fases (SPEC → PLAN → CODE → TEST → END) que estrutura como o agente conduz qualquer tarefa. Carrega um **Work Checklist** unificado e um **Circuit Breaker** de 3 tentativas que interrompe loops de regressão.
+  - Os itens de Intent são recitados na entrada da CODE. Os itens de Form são recitados na entrada da CODE e verificados no TEST.
+- **Estilo de código e quality gates**: uma única regra `WorkChecklist` em `code-style.md`, dividida em duas seções binárias conectadas às heurísticas de narrativa em `governance.mjs`.
+  - **Intent**: Mental Reset, Target Files, Naming, Narrative, Comments, Tests planned, Security, Blockers.
+  - **Form**: Pure entry point, Narrative Siblings, Explaining Returns, Revealing Module Pattern, Vertical Density, Boolean prefix, No framework abbreviations, No section banners.
+- **Skills sob demanda**: unidades auto-contidas carregadas somente quando o ciclo atual precisa. Cobrem code style, testing, security, API design, data access, observability, CI/CD, cloud, SQL style, UI/UX, code review, performance e domain modeling.
+- **Contexto de stack dinâmico**: o ciclo `land:` pede ao desenvolvedor as linguagens e versões do projeto, opcionalmente as enriquece via uma lista de fontes de documentação canônicas, e escreve `.ai/backlog/stack.md`. A fase CODE lê esse arquivo como fonte única de verdade. Sem catálogo estático de idiomas, sem flag `--idiom` para manter.
+- **Contrato de entrega**: o envelope de resposta BFF (server-side) e a execução de contrato UI (client-side), fundidos em um único `competencies/delivery.md` auto-gateado e carregado quando a tarefa toca lógica de entrega.
 - **Flavors arquiteturais**: regras para o padrão estrutural do projeto (vertical slice, MVC, lite, legacy).
-- **Compatível com qualquer agente**: uma única fonte canônica em `.ai/skills/AGENTS.md` que qualquer agente de IA (Claude Code, Cursor, Windsurf, Copilot, Codex, Gemini, Cline/Roo) pode referenciar. O `CLAUDE.md` é gerado automaticamente na raiz para o Claude Code; outras ferramentas são conectadas com um ponteiro de uma linha (veja "Usando com outras IDEs" abaixo).
+- **Compatível com qualquer agente**: uma única fonte canônica em `.ai/skills/AGENTS.md` que qualquer agente de IA (Claude Code, Cursor, Windsurf, Copilot, Codex, Gemini, Cline/Roo) pode referenciar. O `CLAUDE.md` é gerado automaticamente na raiz para o Claude Code; outras ferramentas se conectam com um ponteiro de uma linha (veja "Usando com outras IDEs" abaixo).
 - **Harness Engineering (Memory)**: uma pasta `.ai/backlog/` que persiste contexto e estado de tarefas entre sessões.
-- **Impact Map**: um arquivo volátil de blast-radius (`.ai/backlog/impact-map.md`) criado no Phase PLAN e limpo no Phase END — diz ao agente exatamente quais arquivos carregar no ciclo atual, mantendo o contexto enxuto e focado.
-- **Catálogo de tooling inerte**: `sdg-agents init` copia um bundle pré-pronto em `.ai/tooling/` — `prune-backlog.mjs` (enxuga entradas Done do backlog), `bump-version.mjs` (bump só de versão, sem side-effects), e templates de hooks husky (gate pré-commit + validação de prefixo commit-msg). Nada é ativado por padrão: nenhum `package.json` editado, nenhum `.husky/` criado, nenhuma devDep instalada. Ative sob demanda com o agente ou manualmente.
+- **Impact Map**: um arquivo volátil de blast-radius (`.ai/backlog/impact-map.md`) criado no Phase PLAN e limpo no Phase END. Diz ao agente quais arquivos carregar no ciclo atual, mantendo o contexto enxuto.
+- **Catálogo de tooling inerte**: `sdg-agents init` copia um bundle pré-pronto em `.ai/tooling/`. Nada é ativado por padrão: nenhum `package.json` editado, nenhum `.husky/` criado, nenhuma devDep instalada. Ative sob demanda, com o agente ou à mão.
+  - `prune-backlog.mjs` enxuga entradas Done do backlog.
+  - `bump-version.mjs` faz um bump só de versão, sem side-effects.
+  - Templates de hooks husky: um gate pré-commit e uma validação de prefixo commit-msg.
 
 ---
 
@@ -43,7 +49,7 @@ npx sdg-agents
   <kbd><img src="https://raw.githubusercontent.com/thiagocajadev/sgd-agents-cli/main/docs/img/sdg-agents-menu-v2.png" alt="Spec Driven Guide CLI em ação" /></kbd>
 </p>
 
-O assistente interativo guia você na escolha do flavor arquitetural. A descoberta de stack (linguagens + versões) acontece depois via o ciclo `land:` — mantida fora da instalação para que o desenvolvedor a declare deliberadamente, quando o brief do projeto estiver claro. Para uso não-interativo:
+O assistente interativo guia você na escolha do flavor arquitetural. A descoberta de stack (linguagens + versões) acontece depois via o ciclo `land:`. Ela fica fora da instalação para que o desenvolvedor a declare de forma consciente, quando o brief do projeto estiver claro. Para uso não-interativo:
 
 ```bash
 # Instalação sem prompts (flavor lite + stack.md placeholder)
@@ -56,7 +62,7 @@ npx sdg-agents init --flavor vertical-slice
 npx sdg-agents init --flavor mvc
 ```
 
-Após a instalação, abra o chat do agente e execute `land: <visão>` — o agente elicita o stack, escreve `.ai/backlog/stack.md` e semeia o backlog.
+Após a instalação, abra o chat do agente e execute `land: <visão>`. O agente elicita o stack, escreve `.ai/backlog/stack.md` e semeia o backlog.
 
 ---
 
@@ -80,9 +86,9 @@ seu-projeto/
 │       └── ...                  ← (Veja docs/reference/PROJECT-STRUCTURE.md para detalhes)
 ```
 
-`.ai/skills/AGENTS.md` é um roteador mínimo: lista todas as skills disponíveis e as carrega sob demanda. Apenas `workflow.md` (o protocolo de 5 fases) fica sempre em contexto — tudo mais só é ativado quando o ciclo atual precisa.
+`.ai/skills/AGENTS.md` é um roteador mínimo: lista todas as skills disponíveis e as carrega sob demanda. Apenas `workflow.md` (o protocolo de 5 fases) fica sempre em contexto. Tudo mais só é ativado quando o ciclo atual precisa.
 
-O `CLAUDE.md` na raiz é um ponteiro fino que usa `@`-import para carregar `.ai/skills/AGENTS.md`, então o Claude Code carrega a governança automaticamente em toda sessão. Outras IDEs são conectadas apontando o arquivo de configuração nativo delas para a mesma fonte canônica — veja "Usando com outras IDEs" abaixo.
+O `CLAUDE.md` na raiz é um ponteiro fino que usa `@`-import para carregar `.ai/skills/AGENTS.md`, então o Claude Code carrega a governança automaticamente em toda sessão. Outras IDEs são conectadas apontando o arquivo de configuração nativo delas para a mesma fonte canônica (veja "Usando com outras IDEs" abaixo).
 
 > Para um detalhamento do papel de cada arquivo, veja [Estrutura do Projeto](../reference/PROJECT-STRUCTURE.md).
 
@@ -92,15 +98,15 @@ O `CLAUDE.md` na raiz é um ponteiro fino que usa `@`-import para carregar `.ai/
 
 Ao prefixar uma mensagem ao agente, ele entra no ciclo correspondente:
 
-| Trigger             | Ciclo   | O que acontece                                                                                                                                                   |
-| :------------------ | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `land: <descrição>` | Land    | Agente transforma uma visão bruta em um backlog de tarefas `feat:` sequenciadas — roda antes de qualquer código ser escrito                                      |
-| `feat: <descrição>` | Feature | Agente executa SPEC → PLAN → CODE → TEST → END                                                                                                                   |
-| `fix: <descrição>`  | Fix     | Agente executa SPEC → PLAN → CODE → TEST → END com foco em RCA                                                                                                   |
-| `docs: <descrição>` | Docs    | Agente atualiza changelogs, ADRs ou specs                                                                                                                        |
-| `audit: <escopo>`   | Audit   | Agente verifica alinhamento do projeto contra as regras (detecção de drift)                                                                                      |
-| `end:`              | —       | Encerra o ciclo ativo — executa o checklist do Phase: END (changelog, backlog, commit). Também recupera um ciclo se o agente perder o fio numa conversa paralela |
-| Sem prefixo         | —       | Agente pergunta: "land, feat, fix, docs ou audit?" — e então prossegue                                                                                           |
+| Trigger             | Ciclo   | O que acontece                                                                                                                                                  |
+| :------------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `land: <descrição>` | Land    | Agente transforma uma visão bruta em um backlog de tarefas `feat:` sequenciadas. Roda antes de qualquer código ser escrito                                      |
+| `feat: <descrição>` | Feature | Agente executa SPEC → PLAN → CODE → TEST → END                                                                                                                  |
+| `fix: <descrição>`  | Fix     | Agente executa SPEC → PLAN → CODE → TEST → END com foco em RCA                                                                                                  |
+| `docs: <descrição>` | Docs    | Agente atualiza changelogs, ADRs ou specs                                                                                                                       |
+| `audit: <escopo>`   | Audit   | Agente verifica alinhamento do projeto contra as regras (detecção de drift)                                                                                     |
+| `end:`              | —       | Encerra o ciclo ativo. Executa o checklist do Phase: END (changelog, backlog, commit). Também recupera um ciclo se o agente perder o fio numa conversa paralela |
+| Sem prefixo         | —       | Agente pergunta: "land, feat, fix, docs ou audit?", e então prossegue                                                                                           |
 
 O agente **para e aguarda sua aprovação** em SPEC e PLAN antes de escrever qualquer código.
 
@@ -110,7 +116,7 @@ SPEC  →  PLAN  →  CODE  →  TEST  →  END
   Wait        Wait                 "end:"
 ```
 
-> Digite `end:` para encerrar o ciclo ativo. O agente executa o checklist completo do END — changelog, sincronização do backlog, proposta de commit. Se o agente perder o fio numa conversa paralela, `end:` também recupera o ciclo.
+> Digite `end:` para encerrar o ciclo ativo. O agente executa o checklist completo do END: changelog, sincronização do backlog, proposta de commit. Se o agente perder o fio numa conversa paralela, `end:` também recupera o ciclo.
 
 Para um guia detalhado de cada fase, veja [Guia Spec-Driven Development](../concepts/SPEC-DRIVEN-DEV-GUIDE.md).
 Para um diagrama visual dos gates de decisão e loops internos, veja [Agent Deep-Flow](../concepts/AGENT-DEEP-FLOW.md).
@@ -145,7 +151,7 @@ O agente:
 1. Pede que você liste cada linguagem e versão (formato livre).
 2. Classifica cada entrada por papel (Backend / Frontend / Data / Scripts).
 3. Oferece enriquecimento **opcional** via uma lista de fontes de documentação canônicas (`nodejs.org/api`, `react.dev`, `typescriptlang.org`, `tc39.es`, `docs.astro.build`, `docs.python.org`, `go.dev/doc`, `doc.rust-lang.org`, `kotlinlang.org/docs`, `dart.dev`, `learn.microsoft.com/dotnet`, `developer.apple.com/documentation/swift`).
-4. Escreve `.ai/backlog/stack.md` — a fonte única de verdade para idiomas específicos do stack. Edite diretamente quando as versões mudarem; sem necessidade de regen.
+4. Escreve `.ai/backlog/stack.md`, a fonte única de verdade para idiomas específicos do stack. Edite diretamente quando as versões mudarem; sem necessidade de regen.
 
 A fase CODE carrega `stack.md` em todo ciclo. Sem catálogo estático de idiomas, sem flag `--idiom`.
 
@@ -165,7 +171,7 @@ O `sdg-agents` gera uma única fonte canônica em `.ai/skills/AGENTS.md` e um po
 | Gemini CLI       | `GEMINI.md`                       | Mesma linha de ponteiro.                                                                 |
 | Cline / Roo Code | `.clinerules`                     | Mesma linha de ponteiro.                                                                 |
 
-> **Quer um preset, voz ou skill customizado?** Cole o conteúdo do skill no seu agente como um prompt — do mesmo jeito que `docs/reference/REFERENCES.md` documenta influências externas. Skills customizados não exigem subcomando CLI.
+> **Quer um preset, voz ou skill customizado?** Cole o conteúdo do skill no seu agente como um prompt, do mesmo jeito que `docs/reference/REFERENCES.md` documenta influências externas. Skills customizados não exigem subcomando CLI.
 
 ---
 
@@ -182,16 +188,16 @@ npx sdg-agents clear     # Remover a pasta .ai/
 
 ## Referência
 
-- [Referência Rápida (CHEATSHEET)](../reference/CHEATSHEET.md) — todos os flags do CLI e triggers do agente
-- [Estrutura do Projeto](../reference/PROJECT-STRUCTURE.md) — detalhamento de cada arquivo gerado
-- [Pipelines Arquiteturais](../reference/PIPELINES.md) — diagramas de fluxo por flavor
-- [Constituição de Engenharia (CONSTITUTION)](../concepts/CONSTITUTION.md) — os princípios filosóficos por trás das regras (referência apenas; regras em runtime ficam em `code-style.md`)
-- [Sistema UI/UX](../guides/UI-UX.md) — filosofia de design, hierarquia, escala tonal de superfície, presets e referências externas de pesquisa
-- [Roadmap](../ROADMAP.md) — trabalho planejado
-- [Otimização de Tokens](../guides/TOKEN-OPTIMIZATION.md) — modelo de custo, processo de compactação e eficiência do roteador
-- [Migração v2 → v3](../guides/MIGRATION-v3.md) — breaking changes e guia de migração passo a passo
-- [Changelog](../../CHANGELOG.md) — histórico de versões
-- [Créditos e Filosofias](../reference/REFERENCES.md) — influências do projeto e créditos de pesquisa
+- [Referência Rápida (CHEATSHEET)](../reference/CHEATSHEET.md): todos os flags do CLI e triggers do agente
+- [Estrutura do Projeto](../reference/PROJECT-STRUCTURE.md): detalhamento de cada arquivo gerado
+- [Pipelines Arquiteturais](../reference/PIPELINES.md): diagramas de fluxo por flavor
+- [Constituição de Engenharia (CONSTITUTION)](../concepts/CONSTITUTION.md): os princípios filosóficos por trás das regras (referência apenas; regras em runtime ficam em `code-style.md`)
+- [Sistema UI/UX](../guides/UI-UX.md): filosofia de design, hierarquia, escala tonal de superfície, presets e referências externas de pesquisa
+- [Roadmap](../ROADMAP.md): trabalho planejado
+- [Otimização de Tokens](../guides/TOKEN-OPTIMIZATION.md): modelo de custo, processo de compactação e eficiência do roteador
+- [Migração v2 → v3](../guides/MIGRATION-v3.md): breaking changes e guia de migração passo a passo
+- [Changelog](../../CHANGELOG.md): histórico de versões
+- [Créditos e Filosofias](../reference/REFERENCES.md): influências do projeto e créditos de pesquisa
 
 ---
 
@@ -199,4 +205,4 @@ npx sdg-agents clear     # Remover a pasta .ai/
 
 _O equilíbrio é a chave._
 
-O SDG está em constante evolução — não existe solução perfeita, apenas melhoria contínua. Sinta-se à vontade para contribuir, fazer fork e compartilhar.
+O SDG está em constante evolução. Não existe solução perfeita, apenas melhoria contínua. Sinta-se à vontade para contribuir, fazer fork e compartilhar.

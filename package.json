@@ -1,6 +1,6 @@
 {
   "name": "sdg-agents",
-  "version": "5.7.2",
+  "version": "5.8.0",
   "description": "AI-Native Governance Framework: router-model instruction set with on-demand skills, 8 Engineering Laws, and multi-agent support for Claude, Cursor, Copilot, Gemini, Codex, Windsurf, and Roo Code.",
   "type": "module",
   "main": "./src/engine/bin/index.mjs",
@@ -68,6 +68,9 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.1"
+  },
+  "overrides": {
+    "js-yaml": "^4.2.0"
   },
   "lint-staged": {
     "**/*.mjs": "eslint --fix",
