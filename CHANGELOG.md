@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [5.9.0] - 2026-07-11
+
+### Added
+
+- **`checklist-soul.md`, operational companion to `writing-soul.md`.** New skill holding the writing ritual: a mental reset recited before the first write of each file (naming the training default being suspended), three rule passes that point at soul sections instead of restating them, the procedural checks the soul has no home for (gloss coverage judged by reader comprehension, explicit ASCII link anchors, fenced blocks byte-identical during a prose pass, Good examples dogfooding `code-style.md`), and a pre-checkpoint validation gate built on the `writing-lint` hook plus manual passes for the defects no banlist catches (fresh metaphor, restated point, effect closer). Loaded alongside `writing-soul.md` by `sdg-docs`, `sdg-land`, and `sdg-end`; cross-linked from `ui-ux.md`. Division of labor is strict: the soul owns the rules, the checklist owns the ritual, and no rule is stated twice.
+- **`writing-soul.md` anti-patterns: three model vices.** `Metaphor for mechanics` ("the handler swallows the error") → say what the code does. `Effect closer` (aphorism or verdict ending a section) → end on the last piece of information. `Filler paragraph` → cut it. They land in the soul rather than the checklist because `writing-lint.mjs` derives its banlists from the soul.
+
+### Fixed
+
+- **`writing-soul.md` acronym gloss separator.** The optional functional gloss now follows an interpoint (`·`) instead of a comma: a comma reads as part of the expansion, while the interpoint marks where the expansion ends and the gloss begins. Example: `**CI/CD** (Continuous Integration/Continuous Delivery · pipeline that automates build, test, and deploy)`.
+
 ## [5.8.0] - 2026-07-08
 
 ### Added

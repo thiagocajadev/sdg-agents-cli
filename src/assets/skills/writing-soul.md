@@ -2,6 +2,7 @@
 
 > Load for: UI copy, READMEs, guides, changelogs, commit messages, technical documentation.
 > Triggered by: `docs:` command, or any Phase CODE task involving written content.
+> Load `checklist-soul.md` alongside this file. It holds the ritual that makes these rules fire: a mental reset before each file, and a validation pass before each checkpoint.
 
 ---
 
@@ -28,7 +29,7 @@ Pedagogical, calm, inviting. Treat the reader as a peer, even when they are new 
 
 Technical terms stay in English (that is how the community speaks). On first occurrence in a document, the format depends on the kind of term:
 
-- **Acronyms**: bold with full English expansion in parentheses, plus an optional functional gloss separated by comma. Example: `**API** (Application Programming Interface)`, or `**CI/CD** (Continuous Integration/Continuous Delivery, pipeline that automates build, test, and deploy)`.
+- **Acronyms**: bold with full English expansion in parentheses, plus an optional functional gloss separated by an interpoint (`·`), never a comma. The comma reads as part of the expansion; the interpoint marks where the expansion ends and the gloss begins. Example: `**API** (Application Programming Interface)`, or `**CI/CD** (Continuous Integration/Continuous Delivery · pipeline that automates build, test, and deploy)`.
 - **Non-acronym terms**: bold with a short contextual explanation. Example: `**callback** (function passed as argument, invoked later)`.
 - **Headings**: short form only, no expansion. Use `## API design`, not `## API (Application Programming Interface) design`.
 
@@ -73,6 +74,9 @@ Strip these before delivering any artifact.
 - Passive voice → find the subject, make them act.
 - Vague declarative ("The implications are significant") → name the specific implication.
 - Dramatic fragmentation ("[Noun]. That's it.") → finish the sentence.
+- Metaphor for mechanics ("the handler swallows the error", "the query hides an N+1") → say what the code does.
+- Effect closer (an aphorism or verdict that ends a section) → end on the last piece of information.
+- Filler paragraph (adds no information the reader lacks) → cut it.
 
 ## Quick checks before delivering
 

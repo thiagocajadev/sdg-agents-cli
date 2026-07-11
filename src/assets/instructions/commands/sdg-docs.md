@@ -2,7 +2,7 @@
 
 Executing documentation for: $ARGUMENTS.
 
-> **Load now**: `.ai/instructions/templates/workflow.md`, `.ai/skills/writing-soul.md`
+> **Load now**: `.ai/instructions/templates/workflow.md`, `.ai/skills/writing-soul.md`, `.ai/skills/checklist-soul.md`
 
 ## Phase: SPEC — MODE: PLANNING
 
