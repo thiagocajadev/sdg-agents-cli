@@ -88,11 +88,11 @@
 2. **Changelog**: ONE entry per completed task. Every artifact-producing cycle gets recorded.
    - `feat:` → `### Added` | `fix:` → `### Fixed` | `docs:` → `### Fixed` | `land:` → `### Added`
 3. **Backlog Sync**: Finished tasks → `## Done` in `tasks.md`. Then run `npm run prune` — keeps last 3 entries in `## Done` (SSOT for history = CHANGELOG + git log).
-4. **Context Update**: Update `## Now` in `context.md` with next objective or clear it.
+4. **Objective Update**: Update `## Now` in `tasks.md` with next objective or clear it.
 5. **Map Reset**: Overwrite `impact-map.md` with idle state. Missing → skip.
 6. **Lint**: Run linter, block commit if errors remain.
 7. **Commit [LOCKED]**: If `bump` script exists, run `npm run bump <type>`. Then `git add .` + propose commit (`<intent>: release v<version> - <description>`). **STOP — await explicit approval before `git commit`.**
-8. **Session Gate [HARD STOP]**: Write next objective to `context.md`. Stop: _"Cycle complete. Context exhausted — **open a new session**. Next: [objective]."_
+8. **Session Gate [HARD STOP]**: Write next objective to `tasks.md`. Stop: _"Cycle complete. Context exhausted — **open a new session**. Next: [objective]."_
 
 > **SOVEREIGN GATE**: Never bypass human verification for commits.
 

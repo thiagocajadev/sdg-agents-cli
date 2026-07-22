@@ -399,6 +399,29 @@ describe("InstructionAssembler", () => {
       }
     });
 
+    it("should keep the Now objective in tasks.md and out of context.md", () => {
+      const tmpDir = makeTempDir();
+      const contextPath = path.join(tmpDir, ".ai", "backlog", "context.md");
+      const tasksPath = path.join(tmpDir, ".ai", "backlog", "tasks.md");
+
+      try {
+        writeBacklogFiles(tmpDir, { flavor: "lite" });
+
+        const contextContent = fileSystem.readFileSync(contextPath, "utf8");
+        const tasksContent = fileSystem.readFileSync(tasksPath, "utf8");
+
+        const actualContextHasNow = contextContent.includes("## Now");
+        const expectedContextHasNow = false;
+        const actualTasksHasNow = tasksContent.includes("## Now");
+        const expectedTasksHasNow = true;
+
+        assert.equal(actualContextHasNow, expectedContextHasNow);
+        assert.equal(actualTasksHasNow, expectedTasksHasNow);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
     it("should write .ai/backlog/stack.md placeholder when missing", () => {
       const tmpDir = makeTempDir();
       const stackPath = path.join(tmpDir, ".ai", "backlog", "stack.md");

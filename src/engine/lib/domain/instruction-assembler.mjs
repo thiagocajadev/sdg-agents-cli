@@ -145,7 +145,7 @@ function buildMasterInstructions(selections) {
 
       1. Read \`.ai/backlog/context.md\` — project brief. If missing, generate from \`package.json\` + \`README.md\`.
       2. Read \`.ai/backlog/stack.md\` — developer-curated stack declarations.
-      3. Read \`.ai/backlog/tasks.md\` — check for \`[IN_PROGRESS]\`. If found: load workflow.md and resume.`;
+      3. Read \`.ai/backlog/tasks.md\` — \`## Now\` holds the objective; check for \`[IN_PROGRESS]\`. If found: load workflow.md and resume.`;
 
     return sessionStartString;
   }

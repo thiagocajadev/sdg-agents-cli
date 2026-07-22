@@ -8,10 +8,6 @@ entry: [main entry point file]
 
 - [decision]: [rationale]
 
-## Now
-
-[what is actively being worked on]
-
 ## Tooling (optional)
 
 Pre-made scripts live in `.ai/tooling/`. Not wired by default.
