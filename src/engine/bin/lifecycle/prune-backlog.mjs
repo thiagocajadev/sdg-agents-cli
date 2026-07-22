@@ -50,6 +50,19 @@ export function pruneBacklog(content, keepCount = DEFAULT_KEEP_COUNT) {
     }
   }
 
+  const totalEntries = keptEntries.length + droppedCount;
+  const unrecognizedLines = collectUnrecognizedLines(doneLines);
+  const hasDrift = totalEntries === 0 && unrecognizedLines.length > 0;
+  if (hasDrift) {
+    const driftResult = {
+      pruned: content,
+      removed: 0,
+      drift: unrecognizedLines[0],
+    };
+
+    return driftResult;
+  }
+
   if (droppedCount === 0) {
     const withinThresholdResult = { pruned: content, removed: 0 };
     return withinThresholdResult;
@@ -61,6 +74,23 @@ export function pruneBacklog(content, keepCount = DEFAULT_KEEP_COUNT) {
 
   const prunedResult = { pruned, removed: droppedCount };
   return prunedResult;
+}
+
+/**
+ * `_(placeholder)_` is the backlog's explicit "deliberately empty" marker —
+ * it is an answer, not drift.
+ */
+function collectUnrecognizedLines(doneLines) {
+  const unrecognized = doneLines.filter((line) => {
+    const trimmed = line.trim();
+    const isBlank = trimmed.length === 0;
+    const isPlaceholder = trimmed.startsWith("_(");
+
+    const isMeaningful = !isBlank && !isPlaceholder;
+    return isMeaningful;
+  });
+
+  return unrecognized;
 }
 
 async function dispatchPrune() {
@@ -76,7 +106,11 @@ async function orchestratePrune() {
   }
 
   const originalContent = fileSystem.readFileSync(TASKS_PATH, "utf8");
-  const { pruned, removed } = pruneBacklog(originalContent);
+  const { pruned, removed, drift } = pruneBacklog(originalContent);
+
+  if (drift) {
+    reportDrift(drift);
+  }
 
   if (removed === 0) {
     console.log("  prune-backlog: no-op (Done already within threshold)");
@@ -91,6 +125,21 @@ async function orchestratePrune() {
 
   const finalResult = success({ removed, skipped: false });
   return finalResult;
+}
+
+/**
+ * "Nothing to prune" and "I cannot read this section" must never sound alike —
+ * a silent no-op here is what lets a format change go unnoticed for cycles.
+ */
+function reportDrift(unrecognizedSample) {
+  const driftLines = [
+    "  prune-backlog: ❌ format drift in `## Done` — content present, no `- [DONE]` entry recognized.",
+    `  First unrecognized line: ${unrecognizedSample}`,
+    "  Nothing was pruned. Fix the section format or the entry pattern.",
+  ].join("\n");
+
+  console.error(driftLines);
+  process.exit(1);
 }
 
 export const PruneBacklog = {

@@ -3,26 +3,77 @@ function checkResult(jsonInput) {
 
   const isParseFailure = !parsed.isSuccess;
   if (isParseFailure) {
-    const parseError = {
-      canCommit: true,
-      violations: [],
-      parseError: parsed.error,
-    };
-
+    const parseError = buildUnverifiable(parsed.error);
     return parseError;
   }
 
-  const report = parsed.value;
+  const report = unwrapEnvelope(parsed.value);
+  const isUnreadableShape = !Array.isArray(report?.violations);
+  if (isUnreadableShape) {
+    const shapeError = buildUnverifiable(describeShape(report));
+    return shapeError;
+  }
+
   const blockViolations = filterBlockViolations(report.violations);
   const hasBlockViolations = blockViolations.length > 0;
 
   const checkedResult = {
     canCommit: !hasBlockViolations,
-    violations: report.violations ?? [],
+    violations: report.violations,
     blockViolations,
   };
 
   return checkedResult;
+}
+
+/**
+ * A gate that cannot read the verdict has not approved anything. It reports
+ * `canCommit: true` so an automatic hook never blocks on infrastructure, and
+ * carries `unverifiedReason` so the caller can shout — or exit 1 under --strict.
+ */
+function buildUnverifiable(reason) {
+  const unverifiable = {
+    canCommit: true,
+    violations: [],
+    blockViolations: [],
+    unverifiedReason: reason,
+  };
+
+  return unverifiable;
+}
+
+/**
+ * Agent CLIs wrap the model output in their own envelope — `claude
+ * --output-format json` emits `{"type":"result","result":"<json string>"}`.
+ * Unwrap one level so the report inside is what gets checked.
+ */
+function unwrapEnvelope(value) {
+  const hasEnvelope =
+    !Array.isArray(value?.violations) && typeof value?.result === "string";
+
+  if (!hasEnvelope) {
+    return value;
+  }
+
+  const inner = parseJson(value.result);
+  if (!inner.isSuccess) {
+    return value;
+  }
+
+  const unwrapped = inner.value;
+  return unwrapped;
+}
+
+function describeShape(report) {
+  const isObject = report !== null && typeof report === "object";
+  if (!isObject) {
+    const primitiveReason = `Expected a review object, got ${typeof report}`;
+    return primitiveReason;
+  }
+
+  const keyList = Object.keys(report).join(", ") || "no keys";
+  const missingReason = `Review JSON has no \`violations\` array (keys: ${keyList})`;
+  return missingReason;
 }
 
 function parseJson(rawInput) {
@@ -56,12 +107,6 @@ function stripFences(text) {
 }
 
 function filterBlockViolations(violations) {
-  const isValidArray = Array.isArray(violations);
-  if (!isValidArray) {
-    const emptyResult = [];
-    return emptyResult;
-  }
-
   const blockOnly = violations.filter(
     (violation) => violation.tier === "BLOCK",
   );

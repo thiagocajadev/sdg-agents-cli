@@ -114,4 +114,57 @@ describe("PruneBacklog.pruneBacklog()", () => {
       "Must not leave double blank line after Done header",
     );
   });
+
+  it("should report drift when Done holds content but no recognizable entry", () => {
+    const input = [
+      "# Tasks",
+      "",
+      "## Done",
+      "",
+      "* 2026-07-22 shipped the release",
+      "* 2026-07-21 fixed the gate",
+      "",
+    ].join("\n");
+
+    const expectedDrift = "* 2026-07-22 shipped the release";
+    const expectedRemoved = 0;
+
+    const actual = pruneBacklog(input, 3);
+    const actualDrift = actual.drift;
+    const actualRemoved = actual.removed;
+    const actualPruned = actual.pruned;
+
+    assert.equal(actualDrift, expectedDrift);
+    assert.equal(actualRemoved, expectedRemoved);
+    assert.equal(actualPruned, input);
+  });
+
+  it("should not report drift when Done is explicitly empty", () => {
+    const input = [
+      "# Tasks",
+      "",
+      "## Done",
+      "",
+      "_(empty — nothing shipped yet)_",
+      "",
+    ].join("\n");
+
+    const expected = undefined;
+
+    const actual = pruneBacklog(input, 3);
+    const actualDrift = actual.drift;
+
+    assert.equal(actualDrift, expected);
+  });
+
+  it("should not report drift when every entry is dropped by keepCount zero", () => {
+    const input = buildBacklog(["cycle-a", "cycle-b"]);
+
+    const expected = undefined;
+
+    const actual = pruneBacklog(input, 0);
+    const actualDrift = actual.drift;
+
+    assert.equal(actualDrift, expected);
+  });
 });

@@ -7,6 +7,10 @@ import fileSystem from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
 
+import { FsUtils } from "../src/engine/lib/core/fs-utils.mjs";
+
+const { bootstrapIfDirect } = FsUtils;
+
 const ROOT_DIR = process.cwd();
 const PACKAGE_JSON_PATH = path.join(ROOT_DIR, "package.json");
 const CHANGELOG_PATH = path.join(ROOT_DIR, "CHANGELOG.md");
@@ -124,20 +128,69 @@ function updateChangelog(newVersion) {
   }
 
   const newHeader = `## [${newVersion}] - ${today}`;
+  const promoted = promoteUnreleased(content, unreleasedRegex, newHeader);
 
-  // 1. Promote Unreleased to New Version
-  let updatedContent = content.replace(unreleasedRegex, newHeader);
-
-  // 2. Inject new [Unreleased] block at the top
-  const insertIndex = updatedContent.indexOf(newHeader);
-  const nextBlock = `## [Unreleased]\n\n### Added\n\n### Fixed\n\n`;
-
-  updatedContent =
-    updatedContent.slice(0, insertIndex) +
-    nextBlock +
-    updatedContent.slice(insertIndex);
-
-  fileSystem.writeFileSync(CHANGELOG_PATH, updatedContent);
+  fileSystem.writeFileSync(CHANGELOG_PATH, promoted);
 }
 
-run();
+export function promoteUnreleased(content, unreleasedRegex, newHeader) {
+  const renamed = content.replace(unreleasedRegex, newHeader);
+  const compacted = dropEmptySubsections(renamed, newHeader);
+
+  const insertIndex = compacted.indexOf(newHeader);
+  const nextBlock = `## [Unreleased]\n\n### Added\n\n### Fixed\n\n`;
+
+  const promoted =
+    compacted.slice(0, insertIndex) + nextBlock + compacted.slice(insertIndex);
+
+  return promoted;
+}
+
+/**
+ * `### Added` and `### Fixed` are scaffolding the next cycle writes into. A
+ * cycle that only fixed things must not ship a released block advertising an
+ * empty `### Added` — the scaffold belongs to `[Unreleased]`, not to history.
+ */
+function dropEmptySubsections(content, newHeader) {
+  const blockStart = content.indexOf(newHeader) + newHeader.length;
+  const remainder = content.slice(blockStart);
+  const nextReleaseOffset = remainder.search(/\n## \[/);
+
+  const blockEnd =
+    nextReleaseOffset >= 0 ? blockStart + nextReleaseOffset : content.length;
+
+  const releasedBlock = content.slice(blockStart, blockEnd);
+  const sections = releasedBlock.split(/\n(?=### )/);
+  const populated = sections.filter(isPopulatedSection);
+
+  const subsectionCount = sections.length - 1;
+  const populatedCount = populated.length - 1;
+
+  // Every subsection empty means there is no narrative to promote at all —
+  // leave the block alone and let the audit report it rather than reshape it.
+  const isNarrativeMissing = subsectionCount > 0 && populatedCount === 0;
+  if (isNarrativeMissing) {
+    return content;
+  }
+
+  const compacted =
+    content.slice(0, blockStart) +
+    populated.join("\n") +
+    content.slice(blockEnd);
+
+  return compacted;
+}
+
+function isPopulatedSection(section) {
+  const isSubsection = section.startsWith("### ");
+  if (!isSubsection) {
+    return true;
+  }
+
+  const [, ...bodyLines] = section.split("\n");
+
+  const hasBody = bodyLines.some((line) => line.trim().length > 0);
+  return hasBody;
+}
+
+bootstrapIfDirect(import.meta.url, run);

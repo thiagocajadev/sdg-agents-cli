@@ -69,6 +69,82 @@ describe("GateChecker", () => {
       assert.equal(actualBlockCount, expectedBlockCount);
     });
 
+    it("should read the verdict wrapped in an agent CLI envelope", () => {
+      const input = readFileSync(
+        path.join(resultsDir, "envelope-result.json"),
+        "utf8",
+      );
+
+      const expectedCanCommit = false;
+      const expectedBlockCount = 1;
+
+      const actual = GateChecker.checkResult(input);
+      const actualCanCommit = actual.canCommit;
+      const actualBlockCount = actual.blockViolations.length;
+
+      assert.equal(actualCanCommit, expectedCanCommit);
+      assert.equal(actualBlockCount, expectedBlockCount);
+    });
+
+    it("should mark valid JSON without a violations array as unverified", () => {
+      const input = readFileSync(
+        path.join(resultsDir, "unreadable-result.json"),
+        "utf8",
+      );
+
+      const actual = GateChecker.checkResult(input);
+      const actualReason = actual.unverifiedReason;
+      const actualMentionsViolations = actualReason.includes("violations");
+      const actualNamesKeys = actualReason.includes("status, findings");
+
+      assert.ok(actualReason);
+      assert.ok(actualMentionsViolations);
+      assert.ok(actualNamesKeys);
+    });
+
+    it("should mark an envelope with unreadable inner content as unverified", () => {
+      const input = '{"type":"result","result":"I could not review this diff"}';
+
+      const actual = GateChecker.checkResult(input);
+      const actualReason = actual.unverifiedReason;
+
+      assert.ok(actualReason);
+    });
+
+    it("should mark a JSON primitive as unverified", () => {
+      const input = "42";
+
+      const actual = GateChecker.checkResult(input);
+      const actualReason = actual.unverifiedReason;
+      const actualNamesType = actualReason.includes("number");
+
+      assert.ok(actualReason);
+      assert.ok(actualNamesType);
+    });
+
+    it("should carry an unverified reason when JSON is invalid", () => {
+      const input = "not valid json {{";
+
+      const actual = GateChecker.checkResult(input);
+      const actualReason = actual.unverifiedReason;
+
+      assert.ok(actualReason);
+    });
+
+    it("should leave a clean report without an unverified reason", () => {
+      const input = readFileSync(
+        path.join(resultsDir, "pass-result.json"),
+        "utf8",
+      );
+
+      const expected = undefined;
+
+      const actual = GateChecker.checkResult(input);
+      const actualReason = actual.unverifiedReason;
+
+      assert.equal(actualReason, expected);
+    });
+
     it("should fail open when JSON is invalid", () => {
       const input = "not valid json {{";
 

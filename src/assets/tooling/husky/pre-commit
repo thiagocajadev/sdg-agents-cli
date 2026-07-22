@@ -1,4 +1,32 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+# SDG Gate — pre-commit code review.
+#
+# Four stages: staged diff -> review prompt -> LLM CLI -> verdict.
+# The default LLM is `claude`. Swap it for openai, gemini, ollama — the gate
+# only cares that stdout carries the JSON the prompt asked for.
+#
+# Skip a single commit with: git commit --no-verify
 
-git diff --cached --diff-filter=AM | npx sdg-agents gate --check
+DIFF=$(git diff --staged --diff-filter=AM)
+
+if [ -z "$DIFF" ]; then
+  exit 0
+fi
+
+PROMPT=$(printf '%s' "$DIFF" | npx --no-install sdg-agents gate --prompt)
+
+if [ -z "$PROMPT" ]; then
+  echo "  ⚠️  SDG Gate: could not build the review prompt. Skipping review." >&2
+  exit 0
+fi
+
+REVIEW=$(printf '%s' "$PROMPT" | claude --output-format json)
+LLM_EXIT=$?
+
+# LLM unavailable is not a verdict — never block a commit on infrastructure.
+if [ $LLM_EXIT -ne 0 ] || [ -z "$REVIEW" ]; then
+  echo "  ⚠️  SDG Gate: LLM unavailable (exit $LLM_EXIT). Skipping review." >&2
+  exit 0
+fi
+
+printf '%s' "$REVIEW" | npx --no-install sdg-agents gate --check

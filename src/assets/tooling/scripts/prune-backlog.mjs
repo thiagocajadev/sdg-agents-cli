@@ -19,6 +19,10 @@ function run() {
   const originalContent = fileSystem.readFileSync(tasksPath, "utf8");
   const pruneOutcome = pruneDoneSection(originalContent, keepCount);
 
+  if (pruneOutcome.hasDrift) {
+    reportDrift(pruneOutcome.unrecognizedSample);
+  }
+
   if (pruneOutcome.unchanged) {
     const nothingMessage = `ℹ️  Nothing to prune (${pruneOutcome.totalEntries} ≤ ${keepCount}).`;
     console.log(nothingMessage);
@@ -28,6 +32,21 @@ function run() {
   fileSystem.writeFileSync(tasksPath, pruneOutcome.nextContent);
   const successMessage = `✅ Pruned: kept ${keepCount} / ${pruneOutcome.totalEntries} total.`;
   console.log(successMessage);
+}
+
+/**
+ * "Nothing to prune" and "I cannot read this section" must never sound alike —
+ * a silent exit 0 here is what lets a format change go unnoticed for cycles.
+ */
+function reportDrift(unrecognizedSample) {
+  const driftLines = [
+    `❌ Format drift in "${DONE_HEADING}": content present, no \`${DONE_ENTRY_PREFIX}\` entry recognized.`,
+    `   First unrecognized line: ${unrecognizedSample}`,
+    `   Nothing was pruned. Fix the section format or the entry prefix.`,
+  ].join("\n");
+
+  console.error(driftLines);
+  process.exit(1);
 }
 
 function parseKeepArg(args) {
@@ -88,6 +107,13 @@ function pruneDoneSection(content, keepCount) {
   const entryIndices = collectEntryIndices(doneBlock);
   const totalEntries = entryIndices.length;
 
+  const unrecognizedLines = collectUnrecognizedLines(doneBlock);
+  const hasDrift = totalEntries === 0 && unrecognizedLines.length > 0;
+  if (hasDrift) {
+    const driftOutcome = { hasDrift, unrecognizedSample: unrecognizedLines[0] };
+    return driftOutcome;
+  }
+
   const hasEnoughEntries = totalEntries > keepCount;
   if (!hasEnoughEntries) {
     const idempotentOutcome = { unchanged: true, totalEntries };
@@ -117,6 +143,23 @@ function collectEntryIndices(doneBlock) {
   }
 
   return indices;
+}
+
+/**
+ * `_(placeholder)_` is the backlog's explicit "deliberately empty" marker —
+ * it is an answer, not drift.
+ */
+function collectUnrecognizedLines(doneBlock) {
+  const unrecognized = doneBlock.filter((line) => {
+    const trimmed = line.trim();
+    const isBlank = trimmed.length === 0;
+    const isPlaceholder = trimmed.startsWith("_(");
+
+    const isMeaningful = !isBlank && !isPlaceholder;
+    return isMeaningful;
+  });
+
+  return unrecognized;
 }
 
 function keepFirstEntries(doneBlock, entryIndices, keepCount) {

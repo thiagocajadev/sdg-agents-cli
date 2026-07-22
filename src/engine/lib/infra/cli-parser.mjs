@@ -16,6 +16,7 @@ function parseCliArgs(argv) {
     bump: !argv.includes("--no-bump"),
     prompt: argv.includes("--prompt"),
     check: argv.includes("--check"),
+    isStrict: argv.includes("--strict"),
   };
 
   const finalArgs = parsedArgs;

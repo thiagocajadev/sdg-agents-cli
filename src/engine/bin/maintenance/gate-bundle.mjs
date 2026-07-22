@@ -14,7 +14,7 @@ async function dispatchGate(args) {
   }
 
   if (isCheckMode) {
-    const checkResult = await processCheckMode();
+    const checkResult = await processCheckMode(args?.isStrict);
     return checkResult;
   }
 
@@ -37,16 +37,14 @@ async function processPromptMode() {
   return promptResult;
 }
 
-async function processCheckMode() {
+async function processCheckMode(isStrictMode) {
   const jsonInput = await readStdin();
 
   const result = GateChecker.checkResult(jsonInput);
 
-  const hasParseError = !!result.parseError;
-  if (hasParseError) {
-    const parseErrorLine = `  ⚠️  SDG Gate: ${result.parseError}. Skipping review.`;
-    console.error(parseErrorLine);
-    process.exit(0);
+  const isUnverified = !!result.unverifiedReason;
+  if (isUnverified) {
+    reportUnverified(result.unverifiedReason, isStrictMode);
   }
 
   const hasBlockViolations = !result.canCommit;
@@ -75,6 +73,18 @@ async function processCheckMode() {
   return passResult;
 }
 
+function reportUnverified(reason, isStrictMode) {
+  if (isStrictMode) {
+    const strictLine = `\n  ❌ SDG Gate — could not verify: ${reason}\n     Ran with --strict, so this is a failure.\n`;
+    console.error(strictLine);
+    process.exit(1);
+  }
+
+  const lenientLine = `\n  ⚠️  SDG Gate — could not verify: ${reason}\n     Review skipped, commit allowed. Use --strict to fail instead.\n`;
+  console.error(lenientLine);
+  process.exit(0);
+}
+
 async function readStdin() {
   const chunks = [];
 
@@ -97,6 +107,7 @@ function printUsage() {
     "  Flags:",
     "    --prompt   Read diff from stdin, print review prompt to stdout",
     "    --check    Read LLM JSON result from stdin, exit 0 (pass) or 1 (block)",
+    "    --strict   With --check: exit 1 when the verdict cannot be read at all",
     "",
   ].join("\n");
 

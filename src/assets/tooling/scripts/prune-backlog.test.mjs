@@ -151,6 +151,56 @@ describe("prune-backlog.mjs", () => {
     }
   });
 
+  it("should exit 1 when the Done section holds no recognizable entry", () => {
+    const { projectDir, backlogDir } = makeTempProject();
+
+    const inputContent = [
+      "# Tasks",
+      "",
+      "## Done",
+      "",
+      "* 2026-07-22 shipped the release",
+      "* 2026-07-21 fixed the gate",
+      "",
+    ].join("\n");
+
+    writeTasks(backlogDir, inputContent);
+
+    try {
+      assert.throws(() => runScript(projectDir, ["--keep", "3"]));
+    } finally {
+      cleanup(projectDir);
+    }
+  });
+
+  it("should stay quiet when the Done section is explicitly empty", () => {
+    const { projectDir, backlogDir } = makeTempProject();
+
+    const inputContent = [
+      "# Tasks",
+      "",
+      "## Done",
+      "",
+      "_(empty — nothing shipped yet)_",
+      "",
+    ].join("\n");
+
+    const tasksPath = writeTasks(backlogDir, inputContent);
+
+    const expectedContent = inputContent;
+
+    try {
+      const stdout = runScript(projectDir, ["--keep", "3"]);
+      const actualContent = fileSystem.readFileSync(tasksPath, "utf8");
+      const actualIncludesNothingToPrune = stdout.includes("Nothing to prune");
+
+      assert.ok(actualIncludesNothingToPrune);
+      assert.equal(actualContent, expectedContent);
+    } finally {
+      cleanup(projectDir);
+    }
+  });
+
   it("should exit 1 when tasks.md is missing", () => {
     const { projectDir } = makeTempProject();
 

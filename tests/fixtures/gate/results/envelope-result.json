@@ -1,0 +1,6 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "result": "{\"canCommit\": false, \"violations\": [{\"file\": \"src/orders/order.service.cs\", \"line\": 42, \"rule\": \"explaining-returns\", \"tier\": \"BLOCK\", \"snippet\": \"return _repository.Find(id);\", \"fix\": \"var order = _repository.Find(id); return order;\"}]}"
+}

@@ -34,7 +34,23 @@ node .ai/tooling/scripts/bump-version.mjs <patch|minor|major>
 
 ### `husky/pre-commit`
 
-Runs the SDG gate against staged changes, blocking commit on rule violations.
+Runs the SDG gate against staged changes, blocking commit on BLOCK violations.
+Four stages, each feeding the next:
+
+```
+git diff --staged  →  sdg-agents gate --prompt  →  <llm-cli>  →  sdg-agents gate --check
+```
+
+The hook ships with `claude --output-format json` as the LLM stage. Swap in
+`openai`, `gemini`, `ollama` — the gate only requires that the CLI writes the
+review JSON to stdout. An agent CLI that wraps its output in an envelope
+(`{"type":"result","result":"…"}`) is unwrapped automatically.
+
+Failure modes are deliberately split. An unavailable LLM is infrastructure, not
+a verdict: the hook warns and lets the commit through. A verdict the gate cannot
+read is reported loudly and still exits 0 by default; add `--strict` to the
+`--check` stage to turn that into a hard failure — recommended in CI, where a
+silent pass is worse than a false alarm.
 
 ### `husky/commit-msg`
 
