@@ -11,7 +11,7 @@
   <a href="https://www.npmjs.com/package/sdg-agents"><img src="https://img.shields.io/npm/v/sdg-agents?style=flat-square&logo=npm&color=cb3837" alt="versão npm" /></a>
   <a href="https://www.npmjs.com/package/sdg-agents"><img src="https://img.shields.io/npm/dm/sdg-agents?style=flat-square&logo=npm&color=cb3837" alt="downloads npm" /></a>
   <a href="https://github.com/thiagocajadev/sgd-agents-cli/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/thiagocajadev/sgd-agents-cli/ci.yml?style=flat-square&logo=githubactions&logoColor=white&label=CI" alt="status do CI" /></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D24-brightgreen?style=flat-square&logo=nodedotjs" alt="Node >= 24" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-24%20LTS-brightgreen?style=flat-square&logo=nodedotjs" alt="Node 24 LTS" /></a>
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-ISC-blue?style=flat-square" alt="License: ISC" /></a>
   <a href="https://agents.md"><img src="https://img.shields.io/badge/AGENTS.md-compat%C3%ADvel-6e56cf?style=flat-square" alt="compatível com AGENTS.md" /></a>
   <a href="../../CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-keep%20a%20changelog-f5a623?style=flat-square" alt="Changelog" /></a>
@@ -42,6 +42,8 @@ O conjunto de instruções cobre:
 ---
 
 ## Início Rápido
+
+Requer **Node.js 24 LTS** ou mais novo, a linha em que o CLI é construído e testado.
 
 ```bash
 npx sdg-agents

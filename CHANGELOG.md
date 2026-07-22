@@ -11,9 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [6.0.1] - 2026-07-22
+
+> First published v6, and the upgrade path from `5.9.0`: everything under `6.0.0` below arrives with it, breaking changes included. `5.10.0` and `6.0.0` were tagged in the repository but never reached npm.
+> On its own this release adds nothing. It repairs a CI that had been red since `3d978b8` and a tarball that carried repo-internal tests.
+
+### Fixed
+
+- **The mirror test read a directory that no clone has.** `SyncCheckerMirror` called `readdirSync` on `.ai/tooling`, which is gitignored generated output, so it threw `ENOENT` on every CI run since `3d978b8` while passing on any machine that had run `init`. It now generates the tree into a temp directory through `writeToolingAssets` and compares it recursively against `src/assets/tooling`. That is strictly stronger: the old assertion compared two trees that both lived on the developer's disk, so a generator that stopped copying a directory would still pass against a mirror left over from an earlier `init`. Verified by sabotage, filtering `hooks/` out of the copy makes the new test fail and name the three missing files. Local mirror drift stays covered where it belongs, in `sdg-agents audit`, which `npm run gate` already runs.
+
+- **Engine tests shipped to every consumer.** The tarball carried 27 test files, 18 of them repo-internal engine tests with no value outside this repository. A `.npmignore` had tried to stop this with `src/engine/lib/*.test.mjs`, which failed twice over: a single `*` does not cross directory boundaries, so everything under `lib/domain/`, `lib/core/` and `lib/infra/` slipped through, and a root `.npmignore` is superseded entirely once `package.json` declares `files`. The exclusion now lives where npm reads it, as `!src/engine/**/*.test.mjs` in `files`, and the dead `.npmignore` is gone. Package drops from 111 files and 504 kB to 93 files and 396 kB. The nine tests under `src/assets/tooling/` deliberately stay: `writeToolingAssets` copies that tree into the consumer's `.ai/tooling/`, and the ESLint rules ship with their tests so a consumer can verify and extend them. Verified by installing the tarball into a scratch project and running `init`: 24 tooling files land, and no engine test follows.
+
+- **CI ran Node 22 while the package required Node 24.** `engines.node` has declared `>=24.0.0` since v5, so the pipeline was validating on a line the package says it does not support. The matrix now pins 24, the active LTS. Both READMEs state the requirement in prose beside the badge rather than in the badge alone.
+
 ## [6.0.0] - 2026-07-22
 
-> Closes epic Harness Alignment 2026-07 with task E5. The epic's breaking change for consumers shipped in `5.10.0`; this release is where it is named as one.
+> Closes epic Harness Alignment 2026-07 with task E5, and names as breaking the change the epic introduced. Tagged in the repository but never published to npm: `6.0.1` is the release that carries it.
 
 ### Added
 
@@ -37,5 +50,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### BREAKING CHANGES
 
-- **Governance lives at the repo root.** Shipped in `5.10.0` and stated here as breaking: the canonical `AGENTS.md` left `.ai/skills/` for the project root, and `CLAUDE.md` `@`-imports the root path. An install made before `5.10.0` keeps a stale `.ai/skills/AGENTS.md`, and any tooling that reads governance from the old path reads a copy that no longer receives updates. **Migration:** re-run `npx sdg-agents init`. The legacy file is deleted under the same ownership sentinel that guards the writes, so an `AGENTS.md` you wrote yourself survives untouched.
-- **The generated `.gitignore` no longer blankets `.ai/backlog/`.** Shipped in `5.10.0`. `writeGitignore` only appends, so a project installed before that release keeps its legacy `.ai/backlog/` line and continues discarding `stack.md`, `learned.md` and `troubleshoot.md`. **Migration:** delete the `.ai/backlog/` line by hand, re-run `init`, then commit the three files.
+- **Governance lives at the repo root.** The canonical `AGENTS.md` left `.ai/skills/` for the project root, and `CLAUDE.md` `@`-imports the root path. An install made from any v5 release keeps a stale `.ai/skills/AGENTS.md`, and any tooling that reads governance from the old path reads a copy that no longer receives updates. **Migration:** re-run `npx sdg-agents init`. The legacy file is deleted under the same ownership sentinel that guards the writes, so an `AGENTS.md` you wrote yourself survives untouched.
+- **The generated `.gitignore` no longer blankets `.ai/backlog/`.** `writeGitignore` only appends, so a project installed from a v5 release keeps its legacy `.ai/backlog/` line and continues discarding `stack.md`, `learned.md` and `troubleshoot.md`. **Migration:** delete the `.ai/backlog/` line by hand, re-run `init`, then commit the three files.

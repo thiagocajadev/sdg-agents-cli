@@ -1,11 +1,25 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import fileSystem from "node:fs";
+import operatingSystem from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { InstructionAssembler } from "../../lib/domain/instruction-assembler.mjs";
+
+const { writeToolingAssets } = InstructionAssembler;
+
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const checkerPath = path.join(currentDirectory, "check-sync.mjs");
+
+const SOURCE_TOOLING_DIRECTORY = path.join(
+  currentDirectory,
+  "..",
+  "..",
+  "..",
+  "assets",
+  "tooling",
+);
 
 function loadCheckerSource() {
   const checkerSource = fileSystem.readFileSync(checkerPath, "utf8");
@@ -77,14 +91,61 @@ describe("SyncChecker", () => {
 });
 
 describe("SyncCheckerMirror", () => {
-  it("should report the tooling tree as in sync with its source", () => {
-    const projectRoot = path.join(currentDirectory, "..", "..", "..", "..");
-    const liveDirectory = path.join(projectRoot, ".ai", "tooling");
-    const sourceDirectory = path.join(projectRoot, "src", "assets", "tooling");
+  // Generate the tree instead of reading `.ai/`: that mirror is gitignored
+  // output, absent from any fresh clone, and reading it would only prove the
+  // developer ran init at some point. Generating proves the writer still works.
+  it("should reproduce the whole tooling tree when generating into a clean directory", () => {
+    const temporaryRoot = fileSystem.mkdtempSync(
+      path.join(operatingSystem.tmpdir(), "sdg-mirror-"),
+    );
 
-    const liveNames = fileSystem.readdirSync(liveDirectory).sort();
-    const sourceNames = fileSystem.readdirSync(sourceDirectory).sort();
+    try {
+      writeToolingAssets(temporaryRoot);
 
-    assert.deepEqual(liveNames, sourceNames);
+      const actualEntries = listRelativeEntries(
+        path.join(temporaryRoot, ".ai", "tooling"),
+      );
+
+      const expectedEntries = listRelativeEntries(SOURCE_TOOLING_DIRECTORY);
+
+      assert.deepEqual(actualEntries, expectedEntries);
+    } finally {
+      fileSystem.rmSync(temporaryRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("should carry a source tree worth comparing", () => {
+    const sourceEntries = listRelativeEntries(SOURCE_TOOLING_DIRECTORY);
+
+    const actualEntryCount = sourceEntries.length;
+    const expectedMinimumCount = 1;
+    const hasEntriesToCompare = actualEntryCount >= expectedMinimumCount;
+
+    assert.ok(hasEntriesToCompare);
   });
 });
+
+function listRelativeEntries(rootDirectory, relativePrefix = "") {
+  const entries = fileSystem.readdirSync(rootDirectory, {
+    withFileTypes: true,
+  });
+
+  const collected = [];
+
+  for (const entry of entries) {
+    const relativePath = path.join(relativePrefix, entry.name);
+    collected.push(relativePath);
+
+    if (entry.isDirectory()) {
+      const nested = listRelativeEntries(
+        path.join(rootDirectory, entry.name),
+        relativePath,
+      );
+
+      collected.push(...nested);
+    }
+  }
+
+  const sortedEntries = collected.sort();
+  return sortedEntries;
+}
