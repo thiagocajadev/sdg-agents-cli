@@ -82,7 +82,7 @@ your-project/
 │   ├── instructions/            ← Flavors, fused delivery competency, templates
 │   ├── commands/                ← Cycle commands (feat/fix/docs/audit/land/end)
 │   ├── tooling/                 ← Inert tooling bundle (scripts + husky hooks — activate on demand)
-│   └── backlog/                 ← Harness Engineering (Memory) — gitignored, local working state
+│   └── backlog/                 ← Harness Engineering (Memory) — versioned knowledge, volatile state gitignored
 │       └── ...                  ← (See docs/reference/PROJECT-STRUCTURE.md for details)
 ```
 

@@ -50,7 +50,7 @@ function printSuccessAgents(targetDir) {
   );
 
   console.log(
-    "  .ai/backlog/             (gitignored — local working state + stack.md)",
+    "  .ai/backlog/             (team knowledge, versioned — session state gitignored)",
   );
 
   console.log(
@@ -69,7 +69,7 @@ function printQuickSuccess(targetDir) {
   );
 
   console.log(
-    "  .ai/backlog/             (gitignored — local working state + stack.md)",
+    "  .ai/backlog/             (team knowledge, versioned — session state gitignored)",
   );
 
   console.log(

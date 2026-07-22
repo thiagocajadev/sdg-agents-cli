@@ -484,6 +484,8 @@ function writeAgentConfig(targetDirectory, content) {
 /**
  * Writes or updates .gitignore with SDG-managed entries.
  * Idempotent — each block only appends entries not already present.
+ * Backlog is classified by volatility: session state is ignored, while
+ * context, stack, learned and troubleshoot stay versioned as team knowledge.
  */
 function writeGitignore(targetDirectory) {
   const gitignorePath = path.join(targetDirectory, ".gitignore");
@@ -495,7 +497,13 @@ function writeGitignore(targetDirectory) {
     },
     {
       header: "# AI artifacts — session state, not project logic",
-      entries: [".ai/backlog/", "tmp/", "temp/"],
+      entries: [
+        ".ai/backlog/tasks.md",
+        ".ai/backlog/impact-map.md",
+        ".ai/last-prompt.md",
+        "tmp/",
+        "temp/",
+      ],
     },
   ];
 

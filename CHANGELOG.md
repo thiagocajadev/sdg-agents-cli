@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> Epic Harness Alignment 2026-07. Ships as one release once E4 lands.
+
 ### Added
 
+- **`## Now` objective moved from `context.md` to `tasks.md`.** The objective sat in the project brief, one file away from the task list it describes, and drifted into a history log. It now lives beside `## Active` in `tasks.md`, and the template carries a comment saying it holds one objective, not a log. Readers updated: `workflow.md` Phase END step 4 (renamed to Objective Update), `commands/sdg-end.md`, `skills/AGENTS.md` Session Start.
+- **`writeGitignore()` test suite.** The generator had no coverage at all. Six cases now hold the contract: volatile entries present, no blanket `.ai/backlog/`, knowledge files never listed, pre-existing `.gitignore` without a trailing newline preserved, header not duplicated when already present, and byte-identical output across repeated `init` runs. A seventh test scans `ui-utils.mjs` and `clear-bundle.mjs` for any line that calls a knowledge file gitignored.
+
 ### Fixed
+
+- **Generated `.gitignore` reclassified by volatility.** The blanket `.ai/backlog/` entry discarded team knowledge along with session state. `writeGitignore` now ignores three files by name (`.ai/backlog/tasks.md`, `.ai/backlog/impact-map.md`, `.ai/last-prompt.md`), leaving `context.md`, `stack.md`, `learned.md` and `troubleshoot.md` versioned. Stale summaries corrected in `ui-utils.mjs` (two post-init lines), `clear-bundle.mjs` (deletion warning box), `README.md`, `README.pt-BR.md` and `PROJECT-STRUCTURE.md`. **Migration:** `writeGitignore` only appends, so a project installed before this release keeps its legacy `.ai/backlog/` line. Remove it by hand and re-run `init`.
+- **Biome config repositioned as a baseline, not a visual-density equivalent.** Three claims in `src/assets/tooling/README.md` coupled Biome to visual density, which it does not enforce. Beyond the wording, the shipped config was invalid on Biome 2.5.5 (`$schema` pinned at 2.0.0, deprecated `suspicious.noConsoleLog`) and collided with its own template copy at the project root. Repaired alongside it: `check-sync` declared four mirrored trees but compared two, the manifest missed `tooling/` and extensionless files, and `build` / `review` / `clear` pointed at paths that no longer existed. Added `gate` and `dogfood` scripts.
 
 ## [5.9.0] - 2026-07-11
 

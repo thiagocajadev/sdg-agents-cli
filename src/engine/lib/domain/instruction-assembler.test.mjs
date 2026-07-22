@@ -3,17 +3,34 @@ import assert from "node:assert/strict";
 import fileSystem from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { InstructionAssembler } from "./instruction-assembler.mjs";
+
+const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 const {
   buildMasterInstructions,
   writeAgentConfig,
+  writeGitignore,
   writeManifest,
   writeToolingAssets,
   writeBacklogFiles,
   removeGeneratedInstructions,
 } = InstructionAssembler;
+
+const VOLATILE_ENTRIES = [
+  ".ai/backlog/tasks.md",
+  ".ai/backlog/impact-map.md",
+  ".ai/last-prompt.md",
+];
+
+const VERSIONED_BACKLOG_FILES = [
+  "context.md",
+  "stack.md",
+  "learned.md",
+  "troubleshoot.md",
+];
 
 function makeTempDir() {
   return fileSystem.mkdtempSync(path.join(os.tmpdir(), "sdg-test-"));
@@ -22,6 +39,48 @@ function makeTempDir() {
 function cleanup(dir) {
   fileSystem.rmSync(dir, { recursive: true, force: true });
 }
+
+function gitignorePathOf(targetDirectory) {
+  return path.join(targetDirectory, ".gitignore");
+}
+
+function readGitignore(targetDirectory) {
+  return fileSystem.readFileSync(gitignorePathOf(targetDirectory), "utf8");
+}
+
+function countOccurrences(content, needle) {
+  return content.split(needle).length - 1;
+}
+
+describe("BacklogVolatilityMessaging", () => {
+  const engineDirectory = path.resolve(currentDirectory, "..", "..");
+
+  const SUMMARY_SOURCES = [
+    path.join(engineDirectory, "lib", "core", "ui-utils.mjs"),
+    path.join(engineDirectory, "bin", "maintenance", "clear-bundle.mjs"),
+  ];
+
+  const IGNORE_CLAIM = /gitignored|NOT in git/;
+  const KNOWLEDGE_FILE = /(context|stack|learned|troubleshoot)\.md/;
+
+  it("should never call a knowledge file gitignored", () => {
+    const actualOffenders = SUMMARY_SOURCES.flatMap((sourcePath) => {
+      const sourceLines = fileSystem
+        .readFileSync(sourcePath, "utf8")
+        .split("\n");
+
+      const offendingLines = sourceLines.filter(
+        (line) => IGNORE_CLAIM.test(line) && KNOWLEDGE_FILE.test(line),
+      );
+
+      return offendingLines;
+    });
+
+    const expectedOffenders = [];
+
+    assert.deepEqual(actualOffenders, expectedOffenders);
+  });
+});
 
 describe("InstructionAssembler", () => {
   describe("writeAgentConfig()", () => {
@@ -461,6 +520,133 @@ describe("InstructionAssembler", () => {
         const actualContent = fileSystem.readFileSync(stackPath, "utf8");
 
         assert.equal(actualContent, preexistingContent);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+  });
+
+  describe("writeGitignore()", () => {
+    it("should ignore volatile session state only", () => {
+      const tmpDir = makeTempDir();
+
+      try {
+        writeGitignore(tmpDir);
+
+        const actualContent = readGitignore(tmpDir);
+        const actualMissing = VOLATILE_ENTRIES.filter(
+          (entry) => !actualContent.includes(entry),
+        );
+
+        const expectedMissing = [];
+
+        assert.deepEqual(actualMissing, expectedMissing);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should never ignore the backlog as a whole", () => {
+      const tmpDir = makeTempDir();
+
+      try {
+        writeGitignore(tmpDir);
+
+        const actualLines = readGitignore(tmpDir).split("\n");
+        const actualHasBlanketEntry = actualLines.includes(".ai/backlog/");
+
+        const expectedHasBlanketEntry = false;
+
+        assert.equal(
+          actualHasBlanketEntry,
+          expectedHasBlanketEntry,
+          "a blanket .ai/backlog/ entry discards versioned team knowledge",
+        );
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should leave every knowledge file versioned", () => {
+      const tmpDir = makeTempDir();
+
+      try {
+        writeGitignore(tmpDir);
+
+        const actualContent = readGitignore(tmpDir);
+        const actualIgnored = VERSIONED_BACKLOG_FILES.filter((fileName) =>
+          actualContent.includes(fileName),
+        );
+
+        const expectedIgnored = [];
+
+        assert.deepEqual(actualIgnored, expectedIgnored);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should preserve a pre-existing .gitignore that lacks a trailing newline", () => {
+      const tmpDir = makeTempDir();
+      const preexistingContent = ["node_modules/", "dist/"].join("\n");
+
+      try {
+        fileSystem.writeFileSync(gitignorePathOf(tmpDir), preexistingContent);
+
+        writeGitignore(tmpDir);
+
+        const actualContent = readGitignore(tmpDir);
+        const actualStartsWithOriginal =
+          actualContent.startsWith(preexistingContent);
+
+        const expectedStartsWithOriginal = true;
+
+        assert.equal(actualStartsWithOriginal, expectedStartsWithOriginal);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should append missing entries without repeating a present header", () => {
+      const tmpDir = makeTempDir();
+      const preexistingContent = [
+        "# AI artifacts — session state, not project logic",
+        "tmp/",
+        "",
+      ].join("\n");
+
+      try {
+        fileSystem.writeFileSync(gitignorePathOf(tmpDir), preexistingContent);
+
+        writeGitignore(tmpDir);
+
+        const actualHeaderCount = countOccurrences(
+          readGitignore(tmpDir),
+          "# AI artifacts — session state, not project logic",
+        );
+
+        const expectedHeaderCount = 1;
+
+        assert.equal(actualHeaderCount, expectedHeaderCount);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should be idempotent across repeated init runs", () => {
+      const tmpDir = makeTempDir();
+
+      try {
+        writeGitignore(tmpDir);
+
+        const contentAfterFirstRun = readGitignore(tmpDir);
+
+        writeGitignore(tmpDir);
+
+        const actualContent = readGitignore(tmpDir);
+        const expectedContent = contentAfterFirstRun;
+
+        assert.equal(actualContent, expectedContent);
       } finally {
         cleanup(tmpDir);
       }

@@ -124,7 +124,7 @@ async function confirmBacklogDeletion(items) {
 
   console.log("\n  ┌──────────────────────────────────────────────────────┐ ");
   console.log("  │  ⚠️  LOCAL BACKLOG CONTAINS WORKING STATE             │ ");
-  console.log("  │  tasks.md, learned.md, troubleshoot.md are NOT in git │ ");
+  console.log("  │  tasks.md and impact-map.md are NOT in git            │ ");
   console.log("  │  Deletion is permanent. No recovery from remote.      │ ");
   console.log("  └──────────────────────────────────────────────────────┘ ");
   for (const backlogPath of backlogsWithContent) {
