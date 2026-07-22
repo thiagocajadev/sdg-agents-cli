@@ -9,6 +9,7 @@ const __dirname = getDirname(import.meta.url);
 const ASSETS_DIR = path.join(__dirname, "../../..", "assets");
 const INSTRUCTIONS_DIR = path.join(ASSETS_DIR, "instructions");
 const SKILLS_DIR = path.join(ASSETS_DIR, "skills");
+const TOOLING_DIR = path.join(ASSETS_DIR, "tooling");
 
 function hashFile(filePath) {
   if (!fileSystem.existsSync(filePath)) {
@@ -25,34 +26,30 @@ function computeHashes(
   selections,
   instructionsDir = INSTRUCTIONS_DIR,
   skillsDir = SKILLS_DIR,
+  toolingDir = TOOLING_DIR,
 ) {
   const { flavor } = selections;
-  const hashes = {};
 
-  if (fileSystem.existsSync(skillsDir)) {
-    scanDir(skillsDir, "skills", hashes);
-  }
+  const scanTargets = [
+    { directory: skillsDir, prefix: "skills" },
+    { directory: toolingDir, prefix: "tooling" },
+    { directory: path.join(instructionsDir, "templates"), prefix: "templates" },
+    {
+      directory: path.join(instructionsDir, "competencies"),
+      prefix: "competencies",
+    },
+    { directory: path.join(instructionsDir, "commands"), prefix: "commands" },
+  ];
 
   if (flavor) {
-    const flavorDir = path.join(instructionsDir, "flavors", flavor);
-    if (fileSystem.existsSync(flavorDir)) {
-      scanDir(flavorDir, "flavor", hashes);
-    }
+    const flavorDirectory = path.join(instructionsDir, "flavors", flavor);
+    scanTargets.push({ directory: flavorDirectory, prefix: "flavor" });
   }
 
-  const templatesDir = path.join(instructionsDir, "templates");
-  if (fileSystem.existsSync(templatesDir)) {
-    scanDir(templatesDir, "templates", hashes);
-  }
+  const hashes = {};
 
-  const competenciesDir = path.join(instructionsDir, "competencies");
-  if (fileSystem.existsSync(competenciesDir)) {
-    scanDir(competenciesDir, "competencies", hashes);
-  }
-
-  const commandsDir = path.join(instructionsDir, "commands");
-  if (fileSystem.existsSync(commandsDir)) {
-    scanDir(commandsDir, "commands", hashes);
+  for (const target of scanTargets) {
+    scanDir(target.directory, target.prefix, hashes);
   }
 
   const resultHashes = hashes;
@@ -71,10 +68,7 @@ function scanDir(directory, relativePrefix, hashes) {
 
     if (entry.isDirectory()) {
       scanDir(fullPath, relativeFilePath, hashes);
-    } else if (
-      entry.isFile() &&
-      (entry.name.endsWith(".md") || entry.name.endsWith(".mjs"))
-    ) {
+    } else if (entry.isFile()) {
       hashes[relativeFilePath] = hashFile(fullPath);
     }
   }

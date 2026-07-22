@@ -3,16 +3,29 @@ import path from "node:path";
 import crypto from "node:crypto";
 
 import { FsUtils } from "../../lib/core/fs-utils.mjs";
+import { ManifestUtils } from "../../lib/domain/manifest-utils.mjs";
 import { ResultUtils } from "../../lib/core/result-utils.mjs";
 
 const { bootstrapIfDirect, isMaintainerMode } = FsUtils;
+const { loadManifest } = ManifestUtils;
 const { success, fail } = ResultUtils;
 
 const PROJECT_ROOT = process.cwd();
-const ASSETS_DIR = path.join(PROJECT_ROOT, "src", "assets", "instructions");
-const AI_DIR = path.join(PROJECT_ROOT, ".ai", "instructions");
+const ASSETS_ROOT = path.join(PROJECT_ROOT, "src", "assets");
+const AI_ROOT = path.join(PROJECT_ROOT, ".ai");
 
-const MIRRORED_DIRS = ["templates", "competencies", "commands", "flavors"];
+// Live and source layouts diverge: init flattens commands to .ai/ and copies
+// only the selected flavor. Pairing them by name silently skipped both.
+const MIRRORED_TREES = [
+  { live: "instructions/templates", source: "instructions/templates" },
+  { live: "instructions/competencies", source: "instructions/competencies" },
+  { live: "commands", source: "instructions/commands" },
+  { live: "skills", source: "skills" },
+  { live: "tooling", source: "tooling" },
+];
+
+// Assembled at init from the skill catalog, so it has no source counterpart.
+const UNMIRRORED_FILES = ["skills/AGENTS.md"];
 
 function checkDrift() {
   const syncCheckOutcome = orchestrateSyncCheck();
@@ -25,23 +38,48 @@ function orchestrateSyncCheck() {
     return skipResult;
   }
 
+  const mirroredTrees = [...MIRRORED_TREES, resolveFlavorTree()].filter(
+    Boolean,
+  );
+
   const driftedFiles = [];
 
-  for (const mirroredDirectory of MIRRORED_DIRS) {
-    const liveDirectory = path.join(AI_DIR, mirroredDirectory);
-    const sourceDirectory = path.join(ASSETS_DIR, mirroredDirectory);
+  for (const tree of mirroredTrees) {
+    const liveDirectory = path.join(AI_ROOT, tree.live);
+    const sourceDirectory = path.join(ASSETS_ROOT, tree.source);
 
-    const directoryDrifts = collectDriftedFiles(
+    const treeDrifts = collectDriftedFiles(
       liveDirectory,
       sourceDirectory,
-      mirroredDirectory,
+      tree.live,
     );
 
-    driftedFiles.push(...directoryDrifts);
+    driftedFiles.push(...treeDrifts);
   }
 
   const driftReport = reportResult(driftedFiles);
   return driftReport;
+}
+
+/**
+ * Only the flavor chosen at init lands in .ai/, under a singular directory
+ * name. The manifest is the only record of which one it was.
+ */
+function resolveFlavorTree() {
+  const manifest = loadManifest(PROJECT_ROOT);
+  const selectedFlavor = manifest?.selections?.flavor;
+
+  if (!selectedFlavor) {
+    const unresolvedTree = null;
+    return unresolvedTree;
+  }
+
+  const flavorTree = {
+    live: "instructions/flavor",
+    source: path.join("instructions", "flavors", selectedFlavor),
+  };
+
+  return flavorTree;
 }
 
 function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
@@ -69,7 +107,7 @@ function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
       );
 
       localDrifts.push(...nestedDrifts);
-    } else if (entry.isFile() && entry.name.endsWith(".md")) {
+    } else if (entry.isFile() && !isUnmirrored(relativePath)) {
       const fileDrift = checkFileDrift(livePath, sourcePath, relativePath);
       if (fileDrift !== null) {
         localDrifts.push(fileDrift);
@@ -79,6 +117,12 @@ function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
 
   const foundDrifts = localDrifts;
   return foundDrifts;
+}
+
+function isUnmirrored(relativePath) {
+  const normalizedPath = relativePath.split(path.sep).join("/");
+  const hasNoSource = UNMIRRORED_FILES.includes(normalizedPath);
+  return hasNoSource;
 }
 
 function checkFileDrift(livePath, sourcePath, relativePath) {
@@ -106,9 +150,7 @@ function hashFile(filePath) {
 
 function reportResult(drifts) {
   if (drifts.length === 0) {
-    console.log(
-      "\n  ✅ .ai/instructions/ is in sync with src/assets/instructions/\n",
-    );
+    console.log("\n  ✅ .ai/ is in sync with src/assets/\n");
 
     const syncOk = success();
     return syncOk;

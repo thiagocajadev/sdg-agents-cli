@@ -1,12 +1,13 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "includes": ["**", "!**/.ai"]
   },
   "formatter": {
     "enabled": true,
@@ -34,21 +35,26 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "style": {
         "useConst": "error",
         "useTemplate": "error",
         "useSingleVarDeclarator": "error",
-        "noVar": "error",
         "noUselessElse": "error",
-        "useShorthandArrayType": "error",
-        "useArrowFunction": "error"
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        }
       },
       "complexity": {
-        "noForEach": "off"
+        "noForEach": "off",
+        "useArrowFunction": "error"
       },
       "suspicious": {
-        "noConsoleLog": "off"
+        "noVar": "error",
+        "noConsole": "off"
       }
     }
   }

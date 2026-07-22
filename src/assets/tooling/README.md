@@ -43,10 +43,15 @@ Validates conventional-commit prefix:
 
 ### `biome/biome.json`
 
-Opt-in Biome config (formatter + linter). Rule subset mirrors visual-density
-expectations: `lineWidth: 100`, double quotes, trailing commas, `useConst`,
-`useTemplate`, `useSingleVarDeclarator`, `noVar`, `noUselessElse`,
-`useArrowFunction`. Pairs with ESLint — does not replace it.
+Opt-in Biome config: fast baseline formatter plus a small set of ES style rules
+(`useConst`, `useTemplate`, `useSingleVarDeclarator`, `noVar`, `noUselessElse`,
+`useArrowFunction`).
+
+Biome does not cover visual density. Blank-line rhythm, named const before call,
+explaining returns and assertion spacing have no equivalent rule in Biome, and
+its formatter preserves an existing blank line but never requires one. Those
+stay with the ESLint rules in `eslint-rules/`. Run Biome alongside ESLint, not
+instead of it.
 
 ### `hooks/writing-lint.mjs`
 
@@ -178,8 +183,13 @@ Or ask your agent: "wire SQLFluff into my project."
 
 ### Activate Biome
 
-Opt-in alternative or complement to ESLint. Faster formatter + linter pass
-with a rule set aligned to visual-density.
+A fast formatter and baseline linter that runs beside ESLint. It covers
+formatting and common ES style; the visual-density rules stay in ESLint.
+
+Two things the config already handles, both of which abort Biome otherwise:
+it excludes `.ai/`, because Biome 2.x reads the template copy still sitting in
+`.ai/tooling/biome/` as a second root config; and it sets `vcs.useIgnoreFile`,
+which needs a git repository with a `.gitignore` present.
 
 1. Install Biome:
 
@@ -215,7 +225,7 @@ cp .ai/tooling/biome/biome.json biome.json
 }
 ```
 
-**Rules included (mapped to visual-density):**
+**Rules included:**
 
 | Biome rule               | Coverage                                       |
 | :----------------------- | :--------------------------------------------- |
@@ -226,7 +236,17 @@ cp .ai/tooling/biome/biome.json biome.json
 | `noVar`                  | Forbid `var`                                   |
 | `noUselessElse`          | Remove `else` after a guarded `return`         |
 | `useArrowFunction`       | Prefer arrow functions for anonymous callbacks |
-| `useShorthandArrayType`  | `T[]` over `Array<T>` (TS)                     |
+| `useConsistentArrayType` | `T[]` over `Array<T>` (TS)                     |
+
+**Not covered — keep ESLint for these.** Checked against Biome 2.5.5 with
+`preset: "all"`, the full catalog: none of the four produce a diagnostic.
+
+| SDG rule                       | Gap in Biome                                                                                |
+| :----------------------------- | :------------------------------------------------------------------------------------------ |
+| `local/semantic-spacing`       | No blank-line rhythm rule; the formatter keeps an existing blank line but never demands one |
+| `local/blank-before-assertion` | Same gap, applied to test bodies                                                            |
+| `local/no-inline-assert`       | No rule for naming both sides of an assertion                                               |
+| `local/no-boolean-comparison`  | `value === true` goes unreported                                                            |
 
 Or ask your agent: "wire Biome into my project."
 

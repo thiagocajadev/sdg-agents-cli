@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { ManifestUtils } from "./manifest-utils.mjs";
 
-const { compareHashes, daysAgo } = ManifestUtils;
+const { compareHashes, computeHashes, daysAgo } = ManifestUtils;
 
 describe("ManifestUtils", () => {
   describe("compareHashes()", () => {
@@ -163,6 +163,37 @@ describe("ManifestUtils", () => {
       const actual = daysAgo(input);
 
       assert.equal(actual, expected);
+    });
+  });
+
+  describe("computeHashes()", () => {
+    it("should hash the tooling tree so review reports drift there", () => {
+      const hashes = computeHashes({ flavor: "lite" });
+
+      const actualToolingEntries = Object.keys(hashes).filter((entry) =>
+        entry.startsWith("tooling/"),
+      );
+
+      const expectedMinimumEntries = 1;
+      const actualHasToolingCoverage =
+        actualToolingEntries.length >= expectedMinimumEntries;
+
+      assert.ok(actualHasToolingCoverage);
+    });
+
+    it("should hash files of any extension, including extensionless ones", () => {
+      const hashes = computeHashes({ flavor: "lite" });
+
+      const sampledPaths = [
+        "tooling/biome/biome.json",
+        "tooling/husky/pre-commit",
+        "tooling/eslint-config/.prettierrc",
+      ];
+
+      const actualMissing = sampledPaths.filter((entry) => !hashes[entry]);
+      const expectedMissing = [];
+
+      assert.deepEqual(actualMissing, expectedMissing);
     });
   });
 });

@@ -12,15 +12,17 @@
   },
   "scripts": {
     "dev": "node src/engine/bin/index.mjs",
-    "build": "node src/engine/bin/build-bundle.mjs",
-    "review": "node src/engine/bin/review-bundle.mjs",
+    "build": "node src/engine/bin/init/build-bundle.mjs",
+    "review": "node src/engine/bin/maintenance/review-bundle.mjs",
     "bump": "node scripts/bump.mjs",
-    "clear": "node src/engine/bin/clear-bundle.mjs",
+    "clear": "node src/engine/bin/maintenance/clear-bundle.mjs",
     "prune": "node src/engine/bin/lifecycle/prune-backlog.mjs",
     "test": "node --test \"src/engine/**/*.test.mjs\" \"src/assets/tooling/**/*.test.mjs\"",
     "test:watch": "node --test --watch \"src/engine/**/*.test.mjs\" \"src/assets/tooling/**/*.test.mjs\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "gate": "npm audit --audit-level=moderate && npm run lint && npm test && npm run dev -- audit",
+    "dogfood": "npm run dev -- init --quick && npm run gate",
     "format": "prettier --write .",
     "prepare": "husky"
   },
@@ -70,7 +72,8 @@
     "prettier": "^3.8.1"
   },
   "overrides": {
-    "js-yaml": "^4.2.0"
+    "js-yaml": "^4.2.0",
+    "brace-expansion": "^1.1.16"
   },
   "lint-staged": {
     "**/*.mjs": "eslint --fix",
