@@ -37,6 +37,7 @@ const {
   printQuickDryRun,
   printDryRunPreview,
   printBuildSummary,
+  printAgentConfigWarnings,
 } = BundleUI;
 
 const require = createRequire(import.meta.url);
@@ -193,9 +194,13 @@ async function buildQuickMode(state, targetDirectory, { isDryRun }) {
   }
 
   printQuickSetupStart();
-  applyQuickPipeline(targetDirectory, state.userSelections);
+  const configOutcome = applyQuickPipeline(
+    targetDirectory,
+    state.userSelections,
+  );
 
   printQuickSuccess(targetDirectory);
+  printAgentConfigWarnings(configOutcome);
   state.step = "done";
 
   const quickSuccessResult = success();
@@ -215,9 +220,10 @@ async function buildAgentsMode(
   }
 
   printProjectRoot(targetDirectory);
-  applyAgentsPipeline(targetDirectory, selections);
+  const configOutcome = applyAgentsPipeline(targetDirectory, selections);
 
   printSuccessAgents(targetDirectory);
+  printAgentConfigWarnings(configOutcome);
   state.step = "done";
 
   const buildResult = success();
@@ -252,7 +258,7 @@ function applyQuickPipeline(targetDirectory, selections) {
   const content = buildMasterInstructions(selections);
 
   printStep(4, 5, "Writing agent config and backlog...");
-  writeAgentConfig(targetDirectory, content);
+  const configOutcome = writeAgentConfig(targetDirectory, content);
   writeBacklogFiles(targetDirectory, selections);
   writeGitignore(targetDirectory);
 
@@ -260,6 +266,8 @@ function applyQuickPipeline(targetDirectory, selections) {
   writeAutomationScripts(targetDirectory, selections);
   writeToolingAssets(targetDirectory);
   writeManifest(targetDirectory, selections, packageJson.version);
+
+  return configOutcome;
 }
 
 function applyAgentsPipeline(targetDirectory, selections) {
@@ -274,7 +282,7 @@ function applyAgentsPipeline(targetDirectory, selections) {
   const content = buildMasterInstructions(selections);
 
   printStep(4, 5, "Writing agent config and backlog...");
-  writeAgentConfig(targetDirectory, content);
+  const configOutcome = writeAgentConfig(targetDirectory, content);
   writeBacklogFiles(targetDirectory, selections);
   writeGitignore(targetDirectory);
 
@@ -282,6 +290,8 @@ function applyAgentsPipeline(targetDirectory, selections) {
   writeAutomationScripts(targetDirectory, selections);
   writeToolingAssets(targetDirectory);
   writeManifest(targetDirectory, selections, packageJson.version);
+
+  return configOutcome;
 }
 
 export const SDG = {

@@ -16,7 +16,7 @@
 
 `sdg-agents` installs a set of markdown instruction files into your project. AI agents (Claude Code, Cursor, Windsurf, Copilot, Codex, and others) read these files and follow the defined protocol for every task.
 
-> **Note:** If your agent does not pick up the rules automatically, reference `.ai/skills/AGENTS.md` at the start of the session.
+> **Note:** If your agent does not pick up the rules automatically, reference `AGENTS.md` at the start of the session.
 
 The instruction set covers:
 
@@ -29,7 +29,8 @@ The instruction set covers:
 - **Dynamic stack context**: the `land:` cycle asks the developer for the project's languages and versions, optionally enriches them through an allow-listed doc fetch, and writes `.ai/backlog/stack.md`. Phase CODE reads that file as the single source of truth. No static idiom catalog, no version registry to maintain.
 - **Delivery contract**: the BFF response envelope (server-side) and UI contract execution (client-side), fused into one self-gated `competencies/delivery.md` and loaded when the task touches delivery logic.
 - **Architectural flavors**: rules for your project's structural pattern (vertical slice, MVC, lite, legacy).
-- **Any-agent compatible**: a single canonical `.ai/skills/AGENTS.md` that any AI agent (Claude Code, Cursor, Windsurf, Copilot, Codex, Gemini, Cline/Roo) can reference. `CLAUDE.md` is auto-generated at the repo root for Claude Code; other tools wire up with a one-line pointer (see "Using with other IDEs" below).
+- **Any-agent compatible**: a single canonical `AGENTS.md` at the repo root, where Codex, Cursor and the rest already look for it. `CLAUDE.md` is generated beside it for Claude Code; other tools wire up with a one-line pointer (see "Using with other IDEs" below).
+  - An `AGENTS.md` you wrote yourself is never overwritten: the governance lands as `AGENTS.sdg.md` and `init` tells you to merge it.
 - **Harness Engineering (Memory)**: a `.ai/backlog/` folder that persists context and task state across sessions.
 - **Impact Map**: a volatile blast-radius file (`.ai/backlog/impact-map.md`) created at Phase PLAN and cleared at Phase END. It tells the agent which files to load for the current cycle, keeping context lean.
 - **Inert tooling catalog**: `sdg-agents init` copies a pre-made bundle into `.ai/tooling/`. Nothing is wired by default: no `package.json` edit, no `.husky/` created, no devDep installed. Activate on demand, with agent help or by hand.
@@ -72,9 +73,10 @@ After running `init`, your project receives:
 
 ```
 your-project/
+├── AGENTS.md                    ← Main entry point + skill registry (canonical)
+├── CLAUDE.md                    ← Thin pointer, auto-loaded by Claude Code
 ├── .ai/                         ← Instruction set (committed)
 │   ├── skills/                  ← Engineering skills (loaded on-demand per cycle phase)
-│   │   ├── AGENTS.md            ← Main entry point + skill registry
 │   │   ├── code-style.md        ← Code style + Work Checklist (Intent + Form) — Phase CODE core
 │   │   ├── testing.md
 │   │   ├── security.md
@@ -86,9 +88,9 @@ your-project/
 │       └── ...                  ← (See docs/reference/PROJECT-STRUCTURE.md for details)
 ```
 
-`.ai/skills/AGENTS.md` is a minimal router: it lists all available skills and loads them on demand. Only `workflow.md` (the 5-phase protocol) is always in context. Everything else activates only when the current cycle needs it.
+`AGENTS.md` is a minimal router: it lists all available skills and loads them on demand. Only `workflow.md` (the 5-phase protocol) is always in context. Everything else activates only when the current cycle needs it.
 
-`CLAUDE.md` at the repo root is a thin pointer that `@`-imports `.ai/skills/AGENTS.md`, so Claude Code auto-loads the governance on every session. Other IDEs are wired up by pointing their native config file at the same canonical file (see "Using with other IDEs" below).
+`CLAUDE.md` sits beside it as a thin pointer that `@`-imports `AGENTS.md`, so Claude Code auto-loads the governance on every session. Other IDEs are wired up by pointing their native config file at the same canonical file (see "Using with other IDEs" below).
 
 > For a detailed breakdown of each file's role, see [Project Structure](docs/reference/PROJECT-STRUCTURE.md).
 
@@ -159,17 +161,17 @@ Phase CODE loads `stack.md` on every cycle. No static idiom catalog, no `--idiom
 
 ## Using with other IDEs
 
-`sdg-agents` generates a single canonical governance file at `.ai/skills/AGENTS.md` and a `CLAUDE.md` pointer at the repo root. Claude Code auto-loads it with no extra step. For other tools, add a one-line pointer in your IDE's native rules file:
+`sdg-agents` generates a single canonical governance file at `AGENTS.md` in the repo root, plus a `CLAUDE.md` pointer beside it. Codex and Claude Code pick theirs up with no extra step. For other tools, add a one-line pointer in your IDE's native rules file:
 
-| Agent            | Native config file                 | How to wire it                                                                   |
-| :--------------- | :--------------------------------- | :------------------------------------------------------------------------------- |
-| Claude Code      | `CLAUDE.md` (root, auto-generated) | Auto-loaded. No action required.                                                 |
-| Cursor           | `.cursor/rules/sdg-agents.mdc`     | Create the file with a single line: `Read .ai/skills/AGENTS.md before any task.` |
-| Windsurf         | `.windsurfrules`                   | Same pointer line.                                                               |
-| GitHub Copilot   | `.github/copilot-instructions.md`  | Same pointer line.                                                               |
-| Codex CLI        | `AGENTS.md` (root)                 | Already at repo root via `.ai/skills/AGENTS.md`; or create a thin pointer file.  |
-| Gemini CLI       | `GEMINI.md`                        | Same pointer line.                                                               |
-| Cline / Roo Code | `.clinerules`                      | Same pointer line.                                                               |
+| Agent            | Native config file                 | How to wire it                                                        |
+| :--------------- | :--------------------------------- | :-------------------------------------------------------------------- |
+| Claude Code      | `CLAUDE.md` (root, auto-generated) | Auto-loaded. No action required.                                      |
+| Cursor           | `.cursor/rules/sdg-agents.mdc`     | Create the file with a single line: `Read AGENTS.md before any task.` |
+| Windsurf         | `.windsurfrules`                   | Same pointer line.                                                    |
+| GitHub Copilot   | `.github/copilot-instructions.md`  | Same pointer line.                                                    |
+| Codex CLI        | `AGENTS.md` (root)                 | Auto-loaded. No action required.                                      |
+| Gemini CLI       | `GEMINI.md`                        | Same pointer line.                                                    |
+| Cline / Roo Code | `.clinerules`                      | Same pointer line.                                                    |
 
 > **Prefer a custom preset, voice, or skill?** Paste the skill content into your agent as a prompt, the same way `docs/reference/REFERENCES.md` documents external influences. Custom skills do not require a CLI subcommand.
 

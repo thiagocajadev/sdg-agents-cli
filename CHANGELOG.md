@@ -7,10 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-> Epic Harness Alignment 2026-07. Ships as one release once E4 lands.
+### Added
+
+### Fixed
+
+## [5.10.0] - 2026-07-22
+
+> Epic Harness Alignment 2026-07, tasks E1 through E4. E5 is repo-internal dogfooding and ships nothing.
 
 ### Added
 
+- **`AGENTS.md` now lands at the repo root, where harnesses already look for it.** The canonical governance moved out of `.ai/skills/`, so Codex and any other tool that reads a root `AGENTS.md` pick it up with no wiring, and `CLAUDE.md` beside it `@`-imports `AGENTS.md` instead of a nested path. `.ai/skills/` holds skills only. A copy left under `.ai/skills/` by an earlier install is deleted on the next `init`, since two copies is the drift this move exists to prevent. `writeAgentConfig` returns the outcome per file (`written`, `unchanged`, `foreign`).
+- **Ownership guard on both root files.** Neither is overwritten blindly: ownership is recognised by the canonical title line the CLI always emits, so a file without it belongs to the developer. A hand-written `AGENTS.md` is left untouched and the governance is written to `AGENTS.sdg.md`; a hand-written `CLAUDE.md` is left untouched with no sidecar, since Claude Code reads that exact filename or nothing. Either case prints a warning at the end of `init` naming the file and the action to take, and the run still exits `0`. The same sentinel guards the legacy cleanup, so a `.ai/skills/AGENTS.md` you wrote yourself survives.
 - **`## Now` objective moved from `context.md` to `tasks.md`.** The objective sat in the project brief, one file away from the task list it describes, and drifted into a history log. It now lives beside `## Active` in `tasks.md`, and the template carries a comment saying it holds one objective, not a log. Readers updated: `workflow.md` Phase END step 4 (renamed to Objective Update), `commands/sdg-end.md`, `skills/AGENTS.md` Session Start.
 - **`writeGitignore()` test suite.** The generator had no coverage at all. Six cases now hold the contract: volatile entries present, no blanket `.ai/backlog/`, knowledge files never listed, pre-existing `.gitignore` without a trailing newline preserved, header not duplicated when already present, and byte-identical output across repeated `init` runs. A seventh test scans `ui-utils.mjs` and `clear-bundle.mjs` for any line that calls a knowledge file gitignored.
 

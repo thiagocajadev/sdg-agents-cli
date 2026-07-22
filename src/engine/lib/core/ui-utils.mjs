@@ -35,7 +35,7 @@ function printProjectRoot(targetDir) {
 function printActivationGuide() {
   console.log("\n  Your agent is ready. Start with a task.");
   console.log("  If it does not auto-load the rules, paste this once:");
-  console.log("\n    Read .ai/skills/AGENTS.md\n");
+  console.log("\n    Read AGENTS.md\n");
   console.log(
     "  First task is `land:` — discover the project stack and seed backlog.\n",
   );
@@ -46,9 +46,10 @@ function printSuccessAgents(targetDir) {
   console.log(`  ${"─".repeat(55)}`);
   console.log(`  Project: ${targetDir}\n`);
   console.log(
-    "  .ai/                     (governance — canonical AGENTS.md lives here)",
+    "  AGENTS.md                (canonical governance at the repo root)",
   );
 
+  console.log("  .ai/                     (skills, commands and templates)");
   console.log(
     "  .ai/backlog/             (team knowledge, versioned — session state gitignored)",
   );
@@ -65,9 +66,10 @@ function printQuickSuccess(targetDir) {
   console.log(`  ${"─".repeat(55)}`);
   console.log(`  Project: ${targetDir}\n`);
   console.log(
-    "  .ai/                     (governance — canonical AGENTS.md lives here)",
+    "  AGENTS.md                (canonical governance at the repo root)",
   );
 
+  console.log("  .ai/                     (skills, commands and templates)");
   console.log(
     "  .ai/backlog/             (team knowledge, versioned — session state gitignored)",
   );
@@ -77,6 +79,35 @@ function printQuickSuccess(targetDir) {
   );
 
   printActivationGuide();
+}
+
+/**
+ * Warns when a pre-existing file blocked a write. Silence means both root files
+ * are SDG-owned and current.
+ */
+function printAgentConfigWarnings(configOutcome) {
+  if (configOutcome?.agents === "foreign") {
+    printForeignAgentsWarning();
+  }
+
+  if (configOutcome?.claude === "foreign") {
+    printForeignClaudeWarning();
+  }
+}
+
+function printForeignAgentsWarning() {
+  console.log("  ⚠️  Existing AGENTS.md preserved — it is not SDG-generated.");
+  console.log("      Governance was written to AGENTS.sdg.md instead.");
+  console.log(
+    "      Merge it into your AGENTS.md, or point your agent at the sidecar.\n",
+  );
+}
+
+function printForeignClaudeWarning() {
+  console.log("  ⚠️  Existing CLAUDE.md preserved — it is not SDG-generated.");
+  console.log("      Claude Code reads that exact filename, so no sidecar was");
+  console.log("      written. Add this line to it yourself:\n");
+  console.log("        @AGENTS.md\n");
 }
 
 function printQuickDryRun(targetDir) {
@@ -118,7 +149,7 @@ function renderPreviewDirectories(directories) {
 }
 
 function renderPreviewInstructionSet() {
-  console.log(`    📄 .ai/skills/AGENTS.md`);
+  console.log(`    📄 AGENTS.md                (canonical governance, root)`);
   console.log(
     `    📄 .ai/backlog/stack.md     (placeholder — populated by \`land:\`)`,
   );
@@ -226,6 +257,7 @@ export const BundleUI = {
   printActivationGuide,
   printSuccessAgents,
   printQuickSuccess,
+  printAgentConfigWarnings,
   printQuickDryRun,
   printDryRunPreview,
   printBuildSummary,

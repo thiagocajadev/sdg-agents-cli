@@ -66,13 +66,13 @@ describe("SyncChecker", () => {
     assert.equal(actualReadsSelection, expectedReadsSelection);
   });
 
-  it("should exempt the assembled AGENTS.md from drift comparison", () => {
+  it("should carry no drift exemption now that AGENTS.md left .ai/", () => {
     const checkerSource = loadCheckerSource();
 
-    const actualExemptsAgents = checkerSource.includes('"skills/AGENTS.md"');
-    const expectedExemptsAgents = true;
+    const actualExemptsAnything = checkerSource.includes("UNMIRRORED");
+    const expectedExemptsAnything = false;
 
-    assert.equal(actualExemptsAgents, expectedExemptsAgents);
+    assert.equal(actualExemptsAnything, expectedExemptsAnything);
   });
 });
 

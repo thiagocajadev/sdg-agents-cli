@@ -23,6 +23,12 @@ const SOURCE_INSTRUCTIONS = path.join(
   "instructions",
 );
 
+// Ownership markers: the canonical title line each generated file always
+// carries. Their absence means the developer wrote the file, so we leave it.
+const AGENTS_SENTINEL = "# Staff Engineer — Governance Command Center";
+const CLAUDE_SENTINEL = "# SDG Agents — Claude Code Governance";
+const AGENTS_SIDECAR_NAME = "AGENTS.sdg.md";
+
 /**
  * Canonical skill catalog — single source of truth for AGENTS.md rendering.
  * All skills are always listed; the agent self-filters per task domain via the
@@ -449,7 +455,7 @@ function buildClaudeContent() {
 
     ## Auto-Load: Governance Context
 
-    @.ai/skills/AGENTS.md
+    @AGENTS.md
   `;
 
   const instructionSet = claudeContent;
@@ -457,28 +463,92 @@ function buildClaudeContent() {
 }
 
 /**
- * Writes the universal agent config:
- *   - \`.ai/skills/AGENTS.md\` — canonical governance (consumed by any AI agent).
- *   - \`CLAUDE.md\` at repo root — thin pointer auto-loaded by Claude Code.
+ * Writes the universal agent config, both at the repo root where harnesses
+ * discover them natively:
+ *   - \`AGENTS.md\` — canonical governance (consumed by any AI agent).
+ *   - \`CLAUDE.md\` — thin pointer auto-loaded by Claude Code.
  *
- * Other IDEs (Cursor, Windsurf, Copilot, Gemini, Codex, Cline/Roo) should be
- * configured by the developer to read \`.ai/skills/AGENTS.md\` directly. See
- * README "Using with other IDEs" for native pointers per tool.
+ * Returns the outcome per file so the caller can warn the developer about a
+ * sidecar. Other IDEs (Cursor, Windsurf, Copilot, Gemini, Cline/Roo) should be
+ * configured to read the root \`AGENTS.md\` directly. See README "Using with
+ * other IDEs" for native pointers per tool.
  */
 function writeAgentConfig(targetDirectory, content) {
-  const skillDir = path.join(targetDirectory, ".ai", "skills");
-  fileSystem.mkdirSync(skillDir, { recursive: true });
-  fileSystem.writeFileSync(path.join(skillDir, "AGENTS.md"), content);
+  const agentsOutcome = writeManagedFile(
+    path.join(targetDirectory, "AGENTS.md"),
+    content,
+    AGENTS_SENTINEL,
+  );
 
-  const claudePath = path.join(targetDirectory, "CLAUDE.md");
-  const claudeContent = buildClaudeContent();
-  const existingClaude = fileSystem.existsSync(claudePath)
-    ? fileSystem.readFileSync(claudePath, "utf8")
-    : null;
+  const claudeOutcome = writeManagedFile(
+    path.join(targetDirectory, "CLAUDE.md"),
+    buildClaudeContent(),
+    CLAUDE_SENTINEL,
+  );
 
-  if (existingClaude !== claudeContent) {
-    fileSystem.writeFileSync(claudePath, claudeContent);
+  // A foreign AGENTS.md still gets the governance, just under another name.
+  // CLAUDE.md gets no sidecar: Claude Code reads that exact filename or nothing.
+  if (agentsOutcome === "foreign") {
+    const sidecarPath = path.join(targetDirectory, AGENTS_SIDECAR_NAME);
+    fileSystem.writeFileSync(sidecarPath, content);
   }
+
+  removeLegacyAgentsFile(targetDirectory);
+
+  const configOutcome = { agents: agentsOutcome, claude: claudeOutcome };
+  return configOutcome;
+}
+
+/**
+ * Deletes the pre-root copy at `.ai/skills/AGENTS.md`, left behind when a
+ * project upgrades. Two copies is the drift this move exists to prevent.
+ * Only a copy carrying our sentinel is removed.
+ */
+function removeLegacyAgentsFile(targetDirectory) {
+  const legacyPath = path.join(targetDirectory, ".ai", "skills", "AGENTS.md");
+  if (!fileSystem.existsSync(legacyPath)) {
+    return;
+  }
+
+  const legacyContent = fileSystem.readFileSync(legacyPath, "utf8");
+  if (!legacyContent.includes(AGENTS_SENTINEL)) {
+    return;
+  }
+
+  fileSystem.rmSync(legacyPath);
+}
+
+/**
+ * Writes a file the CLI owns, recognising ownership by the canonical title line
+ * it always emits. A file without that sentinel belongs to the developer and is
+ * never touched.
+ *
+ * Returns \`written\`, \`unchanged\`, or \`foreign\`.
+ */
+function writeManagedFile(filePath, content, sentinel) {
+  if (!fileSystem.existsSync(filePath)) {
+    fileSystem.writeFileSync(filePath, content);
+
+    const createdOutcome = "written";
+    return createdOutcome;
+  }
+
+  const existingContent = fileSystem.readFileSync(filePath, "utf8");
+
+  if (!existingContent.includes(sentinel)) {
+    const foreignOutcome = "foreign";
+    return foreignOutcome;
+  }
+
+  if (existingContent === content) {
+    const idempotentOutcome = "unchanged";
+    return idempotentOutcome;
+  }
+
+  fileSystem.writeFileSync(filePath, content);
+
+  const rewrittenOutcome = "written";
+  return rewrittenOutcome;
 }
 
 /**

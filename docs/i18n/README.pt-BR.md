@@ -16,7 +16,7 @@
 
 `sdg-agents` instala um conjunto de arquivos de instrução em markdown no seu projeto. Agentes de IA (Claude Code, Cursor, Windsurf, Copilot, Codex e outros) leem esses arquivos e seguem o protocolo definido em cada tarefa.
 
-> **Nota:** Se o seu agente não carregar as regras automaticamente, referencie `.ai/skills/AGENTS.md` no início da sessão.
+> **Nota:** Se o seu agente não carregar as regras automaticamente, referencie `AGENTS.md` no início da sessão.
 
 O conjunto de instruções cobre:
 
@@ -29,7 +29,8 @@ O conjunto de instruções cobre:
 - **Contexto de stack dinâmico**: o ciclo `land:` pede ao desenvolvedor as linguagens e versões do projeto, opcionalmente as enriquece via uma lista de fontes de documentação canônicas, e escreve `.ai/backlog/stack.md`. A fase CODE lê esse arquivo como fonte única de verdade. Sem catálogo estático de idiomas, sem flag `--idiom` para manter.
 - **Contrato de entrega**: o envelope de resposta BFF (server-side) e a execução de contrato UI (client-side), fundidos em um único `competencies/delivery.md` auto-gateado e carregado quando a tarefa toca lógica de entrega.
 - **Flavors arquiteturais**: regras para o padrão estrutural do projeto (vertical slice, MVC, lite, legacy).
-- **Compatível com qualquer agente**: uma única fonte canônica em `.ai/skills/AGENTS.md` que qualquer agente de IA (Claude Code, Cursor, Windsurf, Copilot, Codex, Gemini, Cline/Roo) pode referenciar. O `CLAUDE.md` é gerado automaticamente na raiz para o Claude Code; outras ferramentas se conectam com um ponteiro de uma linha (veja "Usando com outras IDEs" abaixo).
+- **Compatível com qualquer agente**: uma única fonte canônica em `AGENTS.md` na raiz do repositório, onde Codex, Cursor e os demais já procuram. O `CLAUDE.md` é gerado ao lado dele para o Claude Code; outras ferramentas se conectam com um ponteiro de uma linha (veja "Usando com outras IDEs" abaixo).
+  - Um `AGENTS.md` escrito por você nunca é sobrescrito: a governança chega como `AGENTS.sdg.md` e o `init` avisa para você fazer o merge.
 - **Harness Engineering (Memory)**: uma pasta `.ai/backlog/` que persiste contexto e estado de tarefas entre sessões.
 - **Impact Map**: um arquivo volátil de blast-radius (`.ai/backlog/impact-map.md`) criado no Phase PLAN e limpo no Phase END. Diz ao agente quais arquivos carregar no ciclo atual, mantendo o contexto enxuto.
 - **Catálogo de tooling inerte**: `sdg-agents init` copia um bundle pré-pronto em `.ai/tooling/`. Nada é ativado por padrão: nenhum `package.json` editado, nenhum `.husky/` criado, nenhuma devDep instalada. Ative sob demanda, com o agente ou à mão.
@@ -72,9 +73,10 @@ Após rodar `init`, seu projeto recebe:
 
 ```
 seu-projeto/
+├── AGENTS.md                    ← Ponto de entrada + registro de skills (canônico)
+├── CLAUDE.md                    ← Ponteiro fino, carregado pelo Claude Code
 ├── .ai/                         ← Conjuntos de instruções (commitado)
 │   ├── skills/                  ← Skills de engenharia (carregadas sob demanda por fase do ciclo)
-│   │   ├── AGENTS.md            ← Ponto de entrada + registro de skills
 │   │   ├── code-style.md        ← Code style + Work Checklist (Intent + Form) — núcleo da Phase CODE
 │   │   ├── testing.md
 │   │   ├── security.md
@@ -86,9 +88,9 @@ seu-projeto/
 │       └── ...                  ← (Veja docs/reference/PROJECT-STRUCTURE.md para detalhes)
 ```
 
-`.ai/skills/AGENTS.md` é um roteador mínimo: lista todas as skills disponíveis e as carrega sob demanda. Apenas `workflow.md` (o protocolo de 5 fases) fica sempre em contexto. Tudo mais só é ativado quando o ciclo atual precisa.
+`AGENTS.md` é um roteador mínimo: lista todas as skills disponíveis e as carrega sob demanda. Apenas `workflow.md` (o protocolo de 5 fases) fica sempre em contexto. Tudo mais só é ativado quando o ciclo atual precisa.
 
-O `CLAUDE.md` na raiz é um ponteiro fino que usa `@`-import para carregar `.ai/skills/AGENTS.md`, então o Claude Code carrega a governança automaticamente em toda sessão. Outras IDEs são conectadas apontando o arquivo de configuração nativo delas para a mesma fonte canônica (veja "Usando com outras IDEs" abaixo).
+O `CLAUDE.md` fica ao lado dele como ponteiro fino que usa `@`-import para carregar `AGENTS.md`, então o Claude Code carrega a governança automaticamente em toda sessão. Outras IDEs são conectadas apontando o arquivo de configuração nativo delas para a mesma fonte canônica (veja "Usando com outras IDEs" abaixo).
 
 > Para um detalhamento do papel de cada arquivo, veja [Estrutura do Projeto](../reference/PROJECT-STRUCTURE.md).
 
@@ -159,17 +161,17 @@ A fase CODE carrega `stack.md` em todo ciclo. Sem catálogo estático de idiomas
 
 ## Usando com outras IDEs
 
-O `sdg-agents` gera uma única fonte canônica em `.ai/skills/AGENTS.md` e um ponteiro `CLAUDE.md` na raiz do repositório. O Claude Code carrega automaticamente, sem nenhum passo extra. Para outras ferramentas, adicione um ponteiro de uma linha no arquivo de regras nativo da sua IDE:
+O `sdg-agents` gera uma única fonte canônica em `AGENTS.md` na raiz do repositório, com um ponteiro `CLAUDE.md` ao lado. Codex e Claude Code carregam o seu automaticamente, sem nenhum passo extra. Para outras ferramentas, adicione um ponteiro de uma linha no arquivo de regras nativo da sua IDE:
 
-| Agente           | Arquivo de config nativo          | Como conectar                                                                            |
-| :--------------- | :-------------------------------- | :--------------------------------------------------------------------------------------- |
-| Claude Code      | `CLAUDE.md` (raiz, auto-gerado)   | Carregado automaticamente. Nenhuma ação necessária.                                      |
-| Cursor           | `.cursor/rules/sdg-agents.mdc`    | Crie o arquivo com uma única linha: `Read .ai/skills/AGENTS.md before any task.`         |
-| Windsurf         | `.windsurfrules`                  | Mesma linha de ponteiro.                                                                 |
-| GitHub Copilot   | `.github/copilot-instructions.md` | Mesma linha de ponteiro.                                                                 |
-| Codex CLI        | `AGENTS.md` (raiz)                | Já está disponível via `.ai/skills/AGENTS.md`; ou crie um arquivo-ponteiro fino na raiz. |
-| Gemini CLI       | `GEMINI.md`                       | Mesma linha de ponteiro.                                                                 |
-| Cline / Roo Code | `.clinerules`                     | Mesma linha de ponteiro.                                                                 |
+| Agente           | Arquivo de config nativo          | Como conectar                                                         |
+| :--------------- | :-------------------------------- | :-------------------------------------------------------------------- |
+| Claude Code      | `CLAUDE.md` (raiz, auto-gerado)   | Carregado automaticamente. Nenhuma ação necessária.                   |
+| Cursor           | `.cursor/rules/sdg-agents.mdc`    | Crie o arquivo com uma única linha: `Read AGENTS.md before any task.` |
+| Windsurf         | `.windsurfrules`                  | Mesma linha de ponteiro.                                              |
+| GitHub Copilot   | `.github/copilot-instructions.md` | Mesma linha de ponteiro.                                              |
+| Codex CLI        | `AGENTS.md` (raiz)                | Carregado automaticamente. Nenhuma ação necessária.                   |
+| Gemini CLI       | `GEMINI.md`                       | Mesma linha de ponteiro.                                              |
+| Cline / Roo Code | `.clinerules`                     | Mesma linha de ponteiro.                                              |
 
 > **Quer um preset, voz ou skill customizado?** Cole o conteúdo do skill no seu agente como um prompt, do mesmo jeito que `docs/reference/REFERENCES.md` documenta influências externas. Skills customizados não exigem subcomando CLI.
 

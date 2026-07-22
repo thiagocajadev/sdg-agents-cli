@@ -24,9 +24,6 @@ const MIRRORED_TREES = [
   { live: "tooling", source: "tooling" },
 ];
 
-// Assembled at init from the skill catalog, so it has no source counterpart.
-const UNMIRRORED_FILES = ["skills/AGENTS.md"];
-
 function checkDrift() {
   const syncCheckOutcome = orchestrateSyncCheck();
   return syncCheckOutcome;
@@ -107,7 +104,7 @@ function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
       );
 
       localDrifts.push(...nestedDrifts);
-    } else if (entry.isFile() && !isUnmirrored(relativePath)) {
+    } else if (entry.isFile()) {
       const fileDrift = checkFileDrift(livePath, sourcePath, relativePath);
       if (fileDrift !== null) {
         localDrifts.push(fileDrift);
@@ -117,12 +114,6 @@ function collectDriftedFiles(liveDirectory, sourceDirectory, relativePrefix) {
 
   const foundDrifts = localDrifts;
   return foundDrifts;
-}
-
-function isUnmirrored(relativePath) {
-  const normalizedPath = relativePath.split(path.sep).join("/");
-  const hasNoSource = UNMIRRORED_FILES.includes(normalizedPath);
-  return hasNoSource;
 }
 
 function checkFileDrift(livePath, sourcePath, relativePath) {

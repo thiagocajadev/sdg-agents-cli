@@ -6,9 +6,10 @@ This document describes every directory and file installed by `sdg-agents init`.
 
 ```text
 your-project/
+├── AGENTS.md                    ← Main entry point + skill registry (canonical)
+├── CLAUDE.md                    ← Thin pointer, auto-loaded by Claude Code
 ├── .ai/                         ← Instruction set (committed)
 │   ├── skills/                  ← Engineering skills (loaded on-demand per cycle phase)
-│   │   ├── AGENTS.md            ← Main entry point + skill registry
 │   │   ├── code-style.md        ← Code style + Work Checklist (Intent + Form) — Phase CODE core
 │   │   ├── testing.md           ← Test principles (loaded in Phase CODE/TEST)
 │   │   ├── security.md          ← Security boundaries + pipeline rules
@@ -34,20 +35,23 @@ your-project/
 │       ├── troubleshoot.md      ← Troubleshooting: RCA logs and critical failure records — versioned
 │       ├── tasks.md             ← Task list (TODO / IN_PROGRESS / DONE) — gitignored
 │       └── impact-map.md        ← Blast-radius map: created at PLAN, cleared at END — gitignored
-└── (agent-specific root files — see below)
 ```
 
-Agent-specific root files are also written based on which agents are selected during init: `CLAUDE.md` (Claude Code), `.cursor/rules/` (Cursor), `.windsurfrules` (Windsurf), `.github/copilot-instructions.md` (GitHub Copilot), `AGENTS.md` (Codex), `GEMINI.md` (Gemini), `.roo/rules/` (Roo Code).
+Only those two root files are written. Harnesses that read `AGENTS.md` natively (Codex among them) need nothing further; the rest are wired with a one-line pointer in their own config file, documented in the README.
+
+Neither root file is overwritten blindly. Ownership is recognised by the canonical title line the CLI always emits: without it, the file is yours. A foreign `AGENTS.md` is left alone and the governance is written to `AGENTS.sdg.md` for you to merge; a foreign `CLAUDE.md` is left alone with no sidecar, since Claude Code reads that exact filename or nothing. Either case prints a warning at the end of `init`.
+
+---
+
+## AGENTS.md — the entry point
+
+The main entry point, at the repo root. Assembled at `init` from the skill catalog, so it has no counterpart under `src/assets/`. It is a **minimal router**: header + session start checklist + semantic router + skill registry. It carries no knowledge — it tells the agent which skill to load for the current task.
 
 ---
 
 ## .ai/skills/ — Engineering Skills (on-demand)
 
 The skill directory is the **canonical Single Source of Truth** for engineering rules. Each file is a self-contained skill unit with a defined load convention (most load in Phase CODE; `testing.md` also loads in Phase TEST).
-
-### skills/AGENTS.md
-
-The main entry point. Referenced by `CLAUDE.md` (and equivalent files for other agents) so it loads automatically at session start. It is a **minimal router**: header + session start checklist + semantic router + skill registry. It does not contain knowledge — it tells the agent which skill to load for the current task.
 
 ### skills/code-style.md
 

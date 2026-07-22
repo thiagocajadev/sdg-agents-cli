@@ -32,6 +32,24 @@ const VERSIONED_BACKLOG_FILES = [
   "troubleshoot.md",
 ];
 
+const GENERATED_AGENTS = [
+  "# Staff Engineer — Governance Command Center",
+  "",
+  "> Cycle phases live in workflow.md.",
+  "",
+].join("\n");
+
+const FOREIGN_AGENTS = [
+  "# House Rules",
+  "",
+  "Written by the team, not by this CLI.",
+  "",
+].join("\n");
+
+const FOREIGN_CLAUDE = ["# Team Claude Notes", "", "Hand-maintained.", ""].join(
+  "\n",
+);
+
 function makeTempDir() {
   return fileSystem.mkdtempSync(path.join(os.tmpdir(), "sdg-test-"));
 }
@@ -84,34 +102,148 @@ describe("BacklogVolatilityMessaging", () => {
 
 describe("InstructionAssembler", () => {
   describe("writeAgentConfig()", () => {
-    it("should write .ai/skills/AGENTS.md", () => {
+    it("should write AGENTS.md at the repo root", () => {
       const tmpDir = makeTempDir();
-      const inputContent = "content";
-      const expectedPath = path.join(tmpDir, ".ai", "skills", "AGENTS.md");
+      const expectedPath = path.join(tmpDir, "AGENTS.md");
 
       try {
-        writeAgentConfig(tmpDir, inputContent);
+        writeAgentConfig(tmpDir, GENERATED_AGENTS);
 
-        const actualExists = fileSystem.existsSync(expectedPath);
         const actualContent = fileSystem.readFileSync(expectedPath, "utf8");
+        const expectedContent = GENERATED_AGENTS;
 
-        assert.ok(actualExists);
-        assert.equal(actualContent, inputContent);
+        assert.equal(actualContent, expectedContent);
       } finally {
         cleanup(tmpDir);
       }
     });
 
-    it("should create .ai/skills/ directory if it does not exist", () => {
+    it("should leave no AGENTS.md under .ai/skills/", () => {
       const tmpDir = makeTempDir();
-      const expectedDir = path.join(tmpDir, ".ai", "skills");
+      const legacyPath = path.join(tmpDir, ".ai", "skills", "AGENTS.md");
 
       try {
-        writeAgentConfig(tmpDir, "content");
+        writeAgentConfig(tmpDir, GENERATED_AGENTS);
 
-        const actualExists = fileSystem.existsSync(expectedDir);
+        const actualLegacyExists = fileSystem.existsSync(legacyPath);
+        const expectedLegacyExists = false;
 
-        assert.ok(actualExists);
+        assert.equal(actualLegacyExists, expectedLegacyExists);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should delete a legacy .ai/skills/AGENTS.md on upgrade", () => {
+      const tmpDir = makeTempDir();
+      const legacyDir = path.join(tmpDir, ".ai", "skills");
+      const legacyPath = path.join(legacyDir, "AGENTS.md");
+      fileSystem.mkdirSync(legacyDir, { recursive: true });
+      fileSystem.writeFileSync(legacyPath, GENERATED_AGENTS);
+
+      try {
+        writeAgentConfig(tmpDir, GENERATED_AGENTS);
+
+        const actualLegacyExists = fileSystem.existsSync(legacyPath);
+        const expectedLegacyExists = false;
+
+        assert.equal(actualLegacyExists, expectedLegacyExists);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should keep a hand-written .ai/skills/AGENTS.md", () => {
+      const tmpDir = makeTempDir();
+      const legacyDir = path.join(tmpDir, ".ai", "skills");
+      const legacyPath = path.join(legacyDir, "AGENTS.md");
+      fileSystem.mkdirSync(legacyDir, { recursive: true });
+      fileSystem.writeFileSync(legacyPath, FOREIGN_AGENTS);
+
+      try {
+        writeAgentConfig(tmpDir, GENERATED_AGENTS);
+
+        const actualContent = fileSystem.readFileSync(legacyPath, "utf8");
+        const expectedContent = FOREIGN_AGENTS;
+
+        assert.equal(actualContent, expectedContent);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should point CLAUDE.md at the root AGENTS.md", () => {
+      const tmpDir = makeTempDir();
+      const claudePath = path.join(tmpDir, "CLAUDE.md");
+
+      try {
+        writeAgentConfig(tmpDir, GENERATED_AGENTS);
+
+        const claudeContent = fileSystem.readFileSync(claudePath, "utf8");
+        const actualImportsRoot = claudeContent.includes("@AGENTS.md");
+        const expectedImportsRoot = true;
+
+        assert.equal(actualImportsRoot, expectedImportsRoot);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should report unchanged when re-run over its own output", () => {
+      const tmpDir = makeTempDir();
+
+      try {
+        writeAgentConfig(tmpDir, GENERATED_AGENTS);
+
+        const actualOutcome = writeAgentConfig(tmpDir, GENERATED_AGENTS);
+        const expectedOutcome = { agents: "unchanged", claude: "unchanged" };
+
+        assert.deepEqual(actualOutcome, expectedOutcome);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should preserve a foreign AGENTS.md and write a sidecar", () => {
+      const tmpDir = makeTempDir();
+      const agentsPath = path.join(tmpDir, "AGENTS.md");
+      const sidecarPath = path.join(tmpDir, "AGENTS.sdg.md");
+      fileSystem.writeFileSync(agentsPath, FOREIGN_AGENTS);
+
+      try {
+        const configOutcome = writeAgentConfig(tmpDir, GENERATED_AGENTS);
+
+        const actualPreserved = fileSystem.readFileSync(agentsPath, "utf8");
+        const actualSidecar = fileSystem.readFileSync(sidecarPath, "utf8");
+        const actualOutcome = configOutcome.agents;
+        const expectedOutcome = "foreign";
+
+        assert.equal(actualPreserved, FOREIGN_AGENTS);
+        assert.equal(actualSidecar, GENERATED_AGENTS);
+        assert.equal(actualOutcome, expectedOutcome);
+      } finally {
+        cleanup(tmpDir);
+      }
+    });
+
+    it("should preserve a foreign CLAUDE.md without a sidecar", () => {
+      const tmpDir = makeTempDir();
+      const claudePath = path.join(tmpDir, "CLAUDE.md");
+      const sidecarPath = path.join(tmpDir, "CLAUDE.sdg.md");
+      fileSystem.writeFileSync(claudePath, FOREIGN_CLAUDE);
+
+      try {
+        const configOutcome = writeAgentConfig(tmpDir, GENERATED_AGENTS);
+
+        const actualPreserved = fileSystem.readFileSync(claudePath, "utf8");
+        const actualSidecarExists = fileSystem.existsSync(sidecarPath);
+        const actualOutcome = configOutcome.claude;
+        const expectedSidecarExists = false;
+        const expectedOutcome = "foreign";
+
+        assert.equal(actualPreserved, FOREIGN_CLAUDE);
+        assert.equal(actualSidecarExists, expectedSidecarExists);
+        assert.equal(actualOutcome, expectedOutcome);
       } finally {
         cleanup(tmpDir);
       }
