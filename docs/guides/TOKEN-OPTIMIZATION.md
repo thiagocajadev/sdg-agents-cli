@@ -1,10 +1,12 @@
-# Token Optimization — Cost Model, Compaction & Routing
+# Token optimization: cost model, compaction, and routing
+
+How the instruction set stays cheap to load, and what it cost to get there. Sections 1 through 3 describe the model as it works today. Section 4 onward is the measured record of the v3 compaction, kept as written: it names files that later releases removed, including the idiom catalog and `staff-dna.md`.
 
 ## 1. Token Cost Model
 
 - **Ratio**: ~4 bytes/token (English), ~3 bytes/token (code).
-- **Auto-loaded per session**: `CLAUDE.md` (pointer, ~200B) + `AGENTS.md` (router, <2.8KB).
-- **On-demand**: Skills, idioms, competencies loaded only when triggered by phase/domain.
+- **Auto-loaded per session**: `CLAUDE.md` (pointer, ~200B) + `AGENTS.md` (router at the repo root, <2.8KB).
+- **On-demand**: skills and competencies loaded only when triggered by phase or domain.
 - **Per-session formula**: `base (CLAUDE.md + AGENTS.md) + Σ(loaded skills per phase)`.
 - **Typical session**: 2–4 skills loaded. Worst-case (fullstack feat): ~8 skills.
 
@@ -12,7 +14,7 @@
 
 - `AGENTS.md` is a minimal registry (<2.8KB worst-case, 44% reduction from v2).
 - **Phase-gated**: Skills only loaded in Phase CODE, not at session start.
-- **Domain matching**: Backend, Frontend, Surgical, Stack idioms — loaded by task domain.
+- **Domain matching**: Backend, Frontend, and Surgical groups loaded by task domain. Stack specifics come from `.ai/backlog/stack.md`, already in context.
 - **Token gate**: "load ONLY what's triggered — never preload."
 
 ## 3. Compaction Process

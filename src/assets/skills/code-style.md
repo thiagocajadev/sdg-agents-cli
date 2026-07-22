@@ -126,15 +126,16 @@
 
 > These rules run before the agent sees the code. No gate check needed.
 
-| Rule                              | Coverage                                                                                                                                                 |
-| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `curly: all`                      | Every `if`/`else`/`for`/`while` body wrapped in `{ }`                                                                                                    |
-| `local/semantic-spacing`          | Blank line after multiline statement; 2+2 split in 4-statement non-test bodies; no spurious blanks between consecutive VDs before a side-effect terminal |
-| `local/no-boolean-comparison`     | `value === true/false` → `value` / `!value`                                                                                                              |
-| `local/no-inline-assert`          | Named `actual*` / `expected*` identifiers on both sides of every assertion (test files)                                                                  |
-| `local/blank-before-assertion`    | Blank line before first `assert.*` / `expect()` in a block; no blank between consecutive assertions (test files)                                         |
-| `padding-line-between-statements` | Blank line before/after top-level function declarations                                                                                                  |
-| `prettier`                        | Formatting, indentation, quotes, semicolons, dot-chain wrapping (printWidth 80)                                                                          |
+| Rule                                    | Coverage                                                                                                                                                 |
+| :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `curly: all`                            | Every `if`/`else`/`for`/`while` body wrapped in `{ }`                                                                                                    |
+| `local/semantic-spacing`                | Blank line after multiline statement; 2+2 split in 4-statement non-test bodies; no spurious blanks between consecutive VDs before a side-effect terminal |
+| `local/no-boolean-comparison`           | `value === true/false` → `value` / `!value`                                                                                                              |
+| `local/no-inline-assert`                | Named `actual*` / `expected*` identifiers on both sides of every assertion (test files)                                                                  |
+| `local/blank-before-assertion`          | Blank line before first `assert.*` / `expect()` in a block; no blank between consecutive assertions (test files)                                         |
+| `local/duplicate-consecutive-statement` | Two adjacent statements with identical source text; deliberate repetition carries an `eslint-disable-next-line` plus a WHY comment                       |
+| `padding-line-between-statements`       | Blank line before/after top-level function declarations                                                                                                  |
+| `prettier`                              | Formatting, indentation, quotes, semicolons, dot-chain wrapping (printWidth 80)                                                                          |
 
 Activation recipe: `.ai/tooling/eslint-config/snippet.mjs` + `.ai/tooling/README.md`.
 

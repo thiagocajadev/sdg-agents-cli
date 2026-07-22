@@ -95,7 +95,7 @@ A single file, `delivery.md`, covering both sides of the delivery contract with 
 
 Loaded on demand by the SPEC phase of a `feat:` cycle when the cycle command requests it. The agent picks whichever half matches the task.
 
-> **Stack specificity.** Static language idiom catalogs were retired in v5.0. Stack lives in `.ai/backlog/stack.md`, written by the `land:` cycle — the agent reads it on every session to know which languages/versions the project actually uses.
+> **Stack specificity.** Static language idiom catalogs were retired in v5.0. Stack lives in `.ai/backlog/stack.md`, written by the `land:` cycle — the agent reads it on every session to know which languages and versions the project uses.
 
 ---
 
@@ -155,7 +155,7 @@ The agent reads this at session start before accepting new work.
 
 The map contains three sections: `## Changed` (files directly modified), `## Blast Radius` (files that import or call a changed file), and `## Tests at Risk` (test files covering blast-radius files). A `## Safe` section optionally marks directories that can be skipped entirely.
 
-This design is inspired by the structural philosophy of [code-review-graph](https://github.com/tirth8205/code-review-graph) — a knowledge graph tool that uses Tree-sitter ASTs and MCP to give AI agents precise context. Instead of parsing ASTs or running a Python server, the Impact Map achieves the same goal through a lightweight protocol: the agent uses `git diff` and import scanning to build a minimal read-list at the start of every cycle. No external tools, no extra dependencies — just a markdown file and a disciplined workflow.
+This design is inspired by the structural philosophy of [code-review-graph](https://github.com/tirth8205/code-review-graph) — a knowledge graph tool that uses Tree-sitter ASTs and MCP to give AI agents precise context. Instead of parsing ASTs or running a Python server, the Impact Map achieves the same goal through a lightweight protocol: the agent uses `git diff` and import scanning to build a minimal read-list at the start of every cycle. No external tools and no extra dependencies: a markdown file and a disciplined workflow.
 
 ---
 

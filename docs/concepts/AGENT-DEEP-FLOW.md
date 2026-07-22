@@ -128,8 +128,8 @@ Verification against the original Spec's checklist.
 
 Closing the loop and ensuring project observability.
 
-- **Artifact Sync**: Automated updates to `tasks.md` (status DONE) and `context.md` (next objective).
-- **Engineering Insights**: The agent logs research findings, rework patterns, and lessons learned into `context.md ## Engineering Insights`. Stale or irrelevant entries are curated out, keeping the file lean across sessions.
+- **Artifact Sync**: Finished tasks move to `## Done` in `tasks.md`, and the `## Now` objective in the same file is rewritten or cleared. The objective lived in `context.md` until v5.10.0, one file away from the task list it describes.
+- **Knowledge Capture**: Patterns worth reusing go to `.ai/backlog/learned.md`; failures and their resolutions go to `.ai/backlog/troubleshoot.md`. Both are versioned, so the knowledge survives the session that produced it.
 - **Changelog**: Consistent history following the [Keep a Changelog](https://keepachangelog.com/) standard.
 - **Semantic Commit**: Proposing a commit message that reflects the actual intent and scope.
 

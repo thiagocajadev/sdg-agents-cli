@@ -1,4 +1,6 @@
-# Quick Reference: Commands & Triggers
+# Quick reference: commands and triggers
+
+Every CLI command and agent trigger on one page, for the reader who already knows what the tool does and needs the exact syntax. If you are meeting the project for the first time, start at the [README](../../README.md).
 
 ---
 
@@ -78,10 +80,11 @@ The agent may only fetch enrichment from these canonical sources:
 ## Maintenance Commands
 
 ```bash
-npx sdg-agents gate      # Run SDG gate review against staged diff (language-agnostic pre-commit)
-npx sdg-agents review    # Detect drift between local rules and source engine
-npx sdg-agents audit     # Run governance audit (law violations, drift)
-npx sdg-agents clear     # Remove the entire .ai/ governance layer
+npx sdg-agents gate       # Review the staged diff against the gate (language-agnostic pre-commit)
+npx sdg-agents review     # Detect drift between local rules and source engine
+npx sdg-agents audit      # Run the governance audit (drift, narrative, code style, hygiene)
+npx sdg-agents narrative  # Check the changelog narrative on its own
+npx sdg-agents clear      # Remove the entire .ai/ governance layer
 ```
 
 ---
@@ -100,7 +103,7 @@ Prefix your message to the AI Agent to activate the corresponding governance cyc
 | `end:`                | —       | Close the active cycle — runs the END Phase checklist (changelog, backlog, commit). Also recovers a cycle if the agent loses track mid-conversation. |
 | No prefix             | —       | Agent asks: "land, feat, fix, docs, or audit?" — then proceeds.                                                                                      |
 
-> `end:` takes no argument. Type it to close the active cycle — the agent runs the full END checklist (changelog, backlog sync, commit proposal). If the agent loses track mid-conversation, `end:` also recovers the cycle.
+> `end:` takes no argument.
 
 ---
 

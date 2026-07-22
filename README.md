@@ -8,8 +8,13 @@
   <p align="center">
       Read the manifesto and visual guide at <a href="https://specdrivenguide.org">specdrivenguide.org</a>
   </p>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D24-brightgreen?style=flat-square&logo=nodedotjs" alt="Node" /></a>
+  <a href="https://www.npmjs.com/package/sdg-agents"><img src="https://img.shields.io/npm/v/sdg-agents?style=flat-square&logo=npm&color=cb3837" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/sdg-agents"><img src="https://img.shields.io/npm/dm/sdg-agents?style=flat-square&logo=npm&color=cb3837" alt="npm downloads" /></a>
+  <a href="https://github.com/thiagocajadev/sgd-agents-cli/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/thiagocajadev/sgd-agents-cli/ci.yml?style=flat-square&logo=githubactions&logoColor=white&label=CI" alt="CI status" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D24-brightgreen?style=flat-square&logo=nodedotjs" alt="Node >= 24" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-ISC-blue?style=flat-square" alt="License: ISC" /></a>
+  <a href="https://agents.md"><img src="https://img.shields.io/badge/AGENTS.md-compatible-6e56cf?style=flat-square" alt="AGENTS.md compatible" /></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-keep%20a%20changelog-f5a623?style=flat-square" alt="Changelog" /></a>
 </div>
 
 <br>
@@ -20,23 +25,19 @@
 
 The instruction set covers:
 
-- **Working protocol**: a 5-phase cycle (SPEC → PLAN → CODE → TEST → END) that structures how the agent handles any task. It carries a unified **Work Checklist** and a 3-strike **Circuit Breaker** that stops regression loops.
-  - Intent items are recited at CODE entry. Form items are recited at CODE entry and verified at TEST.
-- **Code style & quality gates**: one `WorkChecklist` rule in `code-style.md`, split into two binary sections wired to the narrative heuristics in `governance.mjs`.
-  - **Intent**: Mental Reset, Target Files, Naming, Narrative, Comments, Tests planned, Security, Blockers.
-  - **Form**: Pure entry point, Narrative Siblings, Explaining Returns, Revealing Module Pattern, Vertical Density, Boolean prefix, No framework abbreviations, No section banners.
-- **Skills, on-demand**: self-contained skill units loaded only when the current cycle needs them. They cover code style, testing, security, API design, data access, observability, CI/CD, cloud, SQL style, UI/UX, code review, performance, and domain modeling.
-- **Dynamic stack context**: the `land:` cycle asks the developer for the project's languages and versions, optionally enriches them through an allow-listed doc fetch, and writes `.ai/backlog/stack.md`. Phase CODE reads that file as the single source of truth. No static idiom catalog, no version registry to maintain.
-- **Delivery contract**: the BFF response envelope (server-side) and UI contract execution (client-side), fused into one self-gated `competencies/delivery.md` and loaded when the task touches delivery logic.
-- **Architectural flavors**: rules for your project's structural pattern (vertical slice, MVC, lite, legacy).
-- **Any-agent compatible**: a single canonical `AGENTS.md` at the repo root, where Codex, Cursor and the rest already look for it. `CLAUDE.md` is generated beside it for Claude Code; other tools wire up with a one-line pointer (see "Using with other IDEs" below).
-  - An `AGENTS.md` you wrote yourself is never overwritten: the governance lands as `AGENTS.sdg.md` and `init` tells you to merge it.
-- **Harness Engineering (Memory)**: a `.ai/backlog/` folder that persists context and task state across sessions.
-- **Impact Map**: a volatile blast-radius file (`.ai/backlog/impact-map.md`) created at Phase PLAN and cleared at Phase END. It tells the agent which files to load for the current cycle, keeping context lean.
-- **Inert tooling catalog**: `sdg-agents init` copies a pre-made bundle into `.ai/tooling/`. Nothing is wired by default: no `package.json` edit, no `.husky/` created, no devDep installed. Activate on demand, with agent help or by hand.
-  - `prune-backlog.mjs` trims backlog Done entries.
-  - `bump-version.mjs` runs a semver-only bump.
-  - Husky hook templates: a pre-commit gate and a commit-msg prefix check.
+- **Working protocol**: a 5-phase cycle (SPEC → PLAN → CODE → TEST → END) with a unified Work Checklist and a 3-strike Circuit Breaker that stops regression loops. The agent waits for your approval at SPEC and PLAN.
+
+- **Code style and quality gates**: one `WorkChecklist` in `code-style.md`, split into Intent items (recited at CODE entry) and Form items (verified at TEST), wired to the narrative heuristics in `governance.mjs`.
+
+- **Skills, on-demand**: self-contained skill units loaded only when the cycle needs them, covering code style, testing, security, API design, data access, observability, CI/CD, cloud, SQL style, UI/UX, review, performance, and domain modeling.
+
+- **Dynamic stack context**: the `land:` cycle elicits your languages and versions and writes `.ai/backlog/stack.md`, which Phase CODE reads as the single source of truth. No static idiom catalog to maintain.
+
+- **Any-agent compatible**: one canonical `AGENTS.md` at the repo root, where Codex, Cursor and the rest already look. A file you wrote yourself is never overwritten.
+
+- **Memory across sessions**: `.ai/backlog/` persists the project brief, stack, task state, and accumulated team knowledge. An Impact Map scoped to the active cycle tells the agent which files to load.
+
+- **Inert tooling catalog**: a bundle copied into `.ai/tooling/` with nothing wired by default. No `package.json` edit, no `.husky/` created, no devDep installed. Activate on demand.
 
 ---
 
@@ -118,8 +119,6 @@ SPEC  →  PLAN  →  CODE  →  TEST  →  END
   Wait        Wait                 "end:"
 ```
 
-> Type `end:` to close the active cycle. The agent runs the full END checklist: changelog, backlog sync, commit proposal. If the agent loses track mid-conversation, `end:` also recovers the cycle.
-
 For a detailed walkthrough of each phase and its rules, see [Spec-Driven Development Guide](docs/concepts/SPEC-DRIVEN-DEV-GUIDE.md).
 For a visual breakdown of the internal decision gates and loops, see [Agent Deep-Flow](docs/concepts/AGENT-DEEP-FLOW.md).
 
@@ -180,10 +179,11 @@ Phase CODE loads `stack.md` on every cycle. No static idiom catalog, no `--idiom
 ## Maintenance
 
 ```bash
-npx sdg-agents gate      # Run SDG gate review against staged diff (language-agnostic pre-commit)
-npx sdg-agents review    # Detect drift between local rules and source
-npx sdg-agents audit     # Run governance audit (law violations, drift)
-npx sdg-agents clear     # Remove the .ai/ folder
+npx sdg-agents gate       # Review the staged diff against the gate (language-agnostic pre-commit)
+npx sdg-agents review     # Detect drift between local rules and source
+npx sdg-agents audit      # Run the governance audit (drift, narrative, code style, hygiene)
+npx sdg-agents narrative  # Check the changelog narrative on its own
+npx sdg-agents clear      # Remove the .ai/ folder
 ```
 
 ---
@@ -191,14 +191,23 @@ npx sdg-agents clear     # Remove the .ai/ folder
 ## Reference
 
 - [Quick Reference (CHEATSHEET)](docs/reference/CHEATSHEET.md): all CLI flags and agent triggers
+
 - [Project Structure](docs/reference/PROJECT-STRUCTURE.md): detailed breakdown of every generated file
+
 - [Architectural Pipelines](docs/reference/PIPELINES.md): data flow diagrams for each flavor
+
 - [Engineering Constitution](docs/concepts/CONSTITUTION.md): the philosophical principles behind the rules (reference only; runtime rules live in `code-style.md`)
+
 - [UI/UX System](docs/guides/UI-UX.md): design philosophy, hierarchy, surface tonal scale, presets, and external research references
-- [Roadmap](docs/ROADMAP.md): planned work
-- [Changelog](CHANGELOG.md): release history
+
+- [Roadmap](docs/ROADMAP.md): shipped milestones and planned extensions
+
+- [Changelog](CHANGELOG.md): current release, with [the archive](docs/CHANGELOG-archive.md) holding every version back to v0.x
+
 - [Token Optimization](docs/guides/TOKEN-OPTIMIZATION.md): cost model, compaction process, and routing efficiency
-- [Migration v2 → v3](docs/guides/MIGRATION-v3.md): breaking changes and step-by-step migration guide
+
+- [Migration guide](docs/guides/MIGRATION-v3.md): breaking changes and step-by-step migration, v2 through v6
+
 - [Credits and Philosophies](docs/reference/REFERENCES.md): project influences and research credits
 
 ---

@@ -5,7 +5,7 @@ The **Spec-Driven Guide (SDG)** enforces a standardized lifecycle for every task
 The cycle follows five mandatory phases: **SPEC → PLAN → CODE → TEST → END**.
 
 > [!TIP]
-> **Deep Dive**: Want to see what happens "Under the Hood"? Read the [**Agent Deep-Flow Guide**](AGENT-DEEP-FLOW.md) for a visual breakdown of internal sub-steps and decision gates.
+> For the internal sub-steps and decision gates behind each phase, read the [Agent Deep-Flow Guide](AGENT-DEEP-FLOW.md).
 
 ---
 
@@ -13,15 +13,14 @@ The cycle follows five mandatory phases: **SPEC → PLAN → CODE → TEST → E
 
 **Goal:** Define the implementation contract and verification criteria.
 
-- **Process**: The agent analyzes the request (e.g., via `/sdg-feat` or `/sdg-fix`) and produces a formal specification.
+- **Process**: The agent analyzes the request, routed by its prefix (`feat:`, `fix:`, `docs:`, `audit:`, `land:`), and produces a formal specification. The triggers are message prefixes, not slash commands: the instruction set stays vendor-neutral and installs no harness-specific command files.
 - **Standards**:
   - Identify the domain (Backend, Frontend, Fullstack).
   - **Feature Cycle**: Focus on domain modeling and business logic.
   - **Fix Cycle**: Execute **Root Cause Analysis (RCA)** to identify the specific layer or contract violation.
   - Define inputs, outputs, and hardware/software constraints.
   - Create a **Verification Checklist** (binary pass/fail items).
-- **Mandate**: The agent must halt for explicit Developer approval of the Spec before moving to the Plan.
-- **Reasoning Exception**: Modern reasoning models may proceed after emitting an internal `<thought>` block validating the criteria.
+- **Mandate**: The agent must halt for explicit Developer approval of the Spec before moving to the Plan. The gate has no exception for reasoning models.
 
 ---
 
@@ -34,8 +33,7 @@ The cycle follows five mandatory phases: **SPEC → PLAN → CODE → TEST → E
   - Produce a numbered task list.
   - Use the Action Verb + Object pattern (e.g., "1. Create User domain type").
   - **Task Decomposition**: Split complex tasks into sub-tasks to maintain vertical density and prevent context exhaustion.
-- **Mandate**: The agent must halt for explicit Developer approval of the Plan.
-- **Reasoning Exception**: Autonomous models with built-in reasoning may proceed to Code after validating that the plan reflects the project's engineering rules.
+- **Mandate**: The agent must halt for explicit Developer approval of the Plan. As at SPEC, the gate holds for every model.
 
 ---
 

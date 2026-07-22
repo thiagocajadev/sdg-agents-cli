@@ -100,12 +100,13 @@ export default [js.configs.recommended, prettierRecommended, sdgEslintConfig];
 
 **Rules included:**
 
-| Rule                              | Coverage                                                               |
-| :-------------------------------- | :--------------------------------------------------------------------- |
-| `curly: all`                      | Every `if`/`else`/`for`/`while` body must use `{ }`                    |
-| `local/semantic-spacing`          | Blank line required after multiline statement in non-trivial functions |
-| `local/no-boolean-comparison`     | `value === true/false` → `value` / `!value`                            |
-| `padding-line-between-statements` | Blank line required before/after top-level function declarations       |
+| Rule                                    | Coverage                                                               |
+| :-------------------------------------- | :--------------------------------------------------------------------- |
+| `curly: all`                            | Every `if`/`else`/`for`/`while` body must use `{ }`                    |
+| `local/semantic-spacing`                | Blank line required after multiline statement in non-trivial functions |
+| `local/no-boolean-comparison`           | `value === true/false` → `value` / `!value`                            |
+| `local/duplicate-consecutive-statement` | Two adjacent statements with identical source text                     |
+| `padding-line-between-statements`       | Blank line required before/after top-level function declarations       |
 
 Or ask your agent: "wire the SDG ESLint rules into my eslint.config.mjs."
 
@@ -239,14 +240,15 @@ cp .ai/tooling/biome/biome.json biome.json
 | `useConsistentArrayType` | `T[]` over `Array<T>` (TS)                     |
 
 **Not covered — keep ESLint for these.** Checked against Biome 2.5.5 with
-`preset: "all"`, the full catalog: none of the four produce a diagnostic.
+`preset: "all"`, the full catalog: none of the five produce a diagnostic.
 
-| SDG rule                       | Gap in Biome                                                                                |
-| :----------------------------- | :------------------------------------------------------------------------------------------ |
-| `local/semantic-spacing`       | No blank-line rhythm rule; the formatter keeps an existing blank line but never demands one |
-| `local/blank-before-assertion` | Same gap, applied to test bodies                                                            |
-| `local/no-inline-assert`       | No rule for naming both sides of an assertion                                               |
-| `local/no-boolean-comparison`  | `value === true` goes unreported                                                            |
+| SDG rule                                | Gap in Biome                                                                                |
+| :-------------------------------------- | :------------------------------------------------------------------------------------------ |
+| `local/semantic-spacing`                | No blank-line rhythm rule; the formatter keeps an existing blank line but never demands one |
+| `local/blank-before-assertion`          | Same gap, applied to test bodies                                                            |
+| `local/no-inline-assert`                | No rule for naming both sides of an assertion                                               |
+| `local/no-boolean-comparison`           | `value === true` goes unreported                                                            |
+| `local/duplicate-consecutive-statement` | A statement repeated verbatim on the next line goes unreported                              |
 
 Or ask your agent: "wire Biome into my project."
 

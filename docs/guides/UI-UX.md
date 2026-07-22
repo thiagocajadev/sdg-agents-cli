@@ -126,4 +126,4 @@ The UI/UX skill is built on public research and open-source work. The items belo
 
 - [Engineering Constitution](../concepts/CONSTITUTION.md) — the philosophical principle of Visual Excellence is what `ui-ux.md` operationalizes.
 - [Spec-Driven Development Guide](../concepts/SPEC-DRIVEN-DEV-GUIDE.md) — how the UI/UX skill plugs into the 5-phase cycle.
-- [Credits and Philosophies](../reference/REFERENCES.md) — the broader influences behind the whole project, not just UI/UX.
+- [Credits and Philosophies](../reference/REFERENCES.md) — the broader influences behind the whole project, beyond UI/UX.

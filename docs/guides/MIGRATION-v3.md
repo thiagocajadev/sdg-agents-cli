@@ -1,7 +1,10 @@
-# Migrating sdg-agents (v2 → v3, v4.1 → v5.0)
+# Migrating sdg-agents
 
-> For the **v4.1 → v5.0** breaks — static idioms removed, stack now declared via `land:`, competencies fused — jump to [v5.0 Migration Notes](#v42-migration-notes-dynamic-stack-context).
-> For the historic **v2 → v3** reformulation, continue below.
+Every breaking upgrade the CLI has shipped, newest first, with the steps each one needs. The filename still says v3 because external links point at it; the content covers v2 through v6.
+
+> **v5.x → v6.0**: governance moved to a root `AGENTS.md` and the backlog is classified by volatility. See [v6.0 Migration Notes](#v6-migration-notes) below.
+> **v4.1 → v5.0**: static idioms removed, stack declared via `land:`, competencies fused. See [v5.0 Migration Notes](#v42-migration-notes-dynamic-stack-context).
+> **v2 → v3**: the historic reformulation, continue below.
 
 ---
 
@@ -44,7 +47,7 @@ If you have local edits in `.ai/instructions/core/`, save them elsewhere first �
 
 v2 was a knowledge dump. Every session loaded the full ruleset into context, regardless of what the current task needed. The 7 Laws, code style, UI rules, SQL rules, and security pipeline were all read on every turn — even when the task was a typo fix in a single file.
 
-v3 is a **router**. `AGENTS.md` is a minimal registry of skills, not the rules themselves. Skills load on demand per cycle phase: `staff-dna.md` activates in Phase CODE; `testing.md` activates in Phase TEST; `api-design.md` activates only when the task touches an endpoint. The auto-loaded context is now ~4–6K tokens instead of ~25K, and the skill machinery is the same SSOT — just lazy.
+v3 is a **router**. `AGENTS.md` is a minimal registry of skills, not the rules themselves. Skills load on demand per cycle phase: `staff-dna.md` activates in Phase CODE; `testing.md` activates in Phase TEST; `api-design.md` activates only when the task touches an endpoint. The auto-loaded context is now ~4–6K tokens instead of ~25K, and the skill machinery is the same SSOT, loaded lazily.
 
 The Engineering Laws renumber (0–7 → 1–8) is cosmetic: Law 0 was always the meta-Law that precedes code. In v3 it joins the peer set as Law 1, keeping the natural 1–N reading order.
 
@@ -84,7 +87,7 @@ npm i -g sdg-agents@3
 npx sdg-agents init
 ```
 
-The wizard now multi-selects IDE agents and idioms. Pick every agent you actually use — the cost of enabling all is zero (each agent entry file is 3–5 lines pointing to `.ai/skills/AGENTS.md`).
+The wizard now multi-selects IDE agents and idioms. Pick every agent your team uses, since the cost of enabling all is zero (each agent entry file is 3–5 lines pointing to `.ai/skills/AGENTS.md`).
 
 For non-interactive projects:
 
@@ -173,7 +176,7 @@ v5.0 removes the static idiom catalog. Stack specificity moves from the installe
 
 ### Step-by-Step (v4.1 → v5.0)
 
-1. Upgrade: `npm i -g sdg-agents@4.2` (or use `npx sdg-agents@4.2`).
+1. Upgrade: `npm i -g sdg-agents@5` (or use `npx sdg-agents@5`).
 2. Re-run `npx sdg-agents init` — the installer silently wipes `.ai/instructions/` and rewrites it. `.ai/backlog/` is preserved.
 3. A new `.ai/backlog/stack.md` placeholder appears. Open the agent chat and run `land: <one-line vision>`. The agent will elicit languages/versions, optionally fetch canonical docs, and populate the file.
 4. Check your generated `AGENTS.md` — the Phase CODE block should list `delivery.md` and skills by category, with no `idioms/` references.
@@ -186,6 +189,46 @@ If you had hand-authored edits in `.ai/instructions/idioms/**/patterns.md`, copy
 ### Why
 
 Static idiom catalogs were a knowledge dump — every install copied fifteen language subdirectories, most unused, and the version registry (`stack-versions.mjs`) rotted the moment any upstream released. v5.0 replaces that with developer authority: the `land:` cycle treats stack declaration as part of project inception, the same way `## Vision` and the epic list are. The agent reads the live declaration on every Phase CODE entry; the maintainer never has to ship a new catalog version.
+
+---
+
+<a id="v6-migration-notes"></a>
+
+## v6.0 Migration Notes: Harness Alignment
+
+v6.0 moves the canonical governance to the repo root and stops discarding team knowledge. Both breaks shipped in `5.10.0` and are named as breaking here.
+
+### Breaking Changes
+
+| Area                   | v5.x (before)                                | v6.0 (now)                                                                                    |
+| :--------------------- | :------------------------------------------- | :-------------------------------------------------------------------------------------------- |
+| Canonical governance   | `.ai/skills/AGENTS.md`                       | **`AGENTS.md` at the repo root**, where Codex and other harnesses already look                |
+| `CLAUDE.md` import     | Pointed at the nested `.ai/skills/AGENTS.md` | Imports the root `AGENTS.md`                                                                  |
+| Legacy copy            | Stayed in place after an upgrade             | **Deleted on the next `init`**, guarded by the ownership sentinel                             |
+| Generated `.gitignore` | Blanket `.ai/backlog/` entry                 | Three volatile files by name; `stack.md`, `learned.md` and `troubleshoot.md` become versioned |
+| Foreign root files     | Not applicable                               | An `AGENTS.md` or `CLAUDE.md` you wrote is preserved; governance lands as `AGENTS.sdg.md`     |
+
+### Step-by-Step (v5.x → v6.0)
+
+1. Upgrade: `npm i -g sdg-agents@6` (or use `npx sdg-agents@6`).
+
+2. Re-run `npx sdg-agents init`. The root `AGENTS.md` and `CLAUDE.md` are written, and a stale `.ai/skills/AGENTS.md` from an earlier install is removed.
+
+3. Open your `.gitignore` and delete the legacy `.ai/backlog/` line by hand. `writeGitignore` only appends, so it cannot remove that entry for you, and while it stays your team knowledge keeps being ignored.
+
+4. Commit `.ai/backlog/stack.md`, `learned.md` and `troubleshoot.md`. They were being discarded before this release.
+
+5. Run `npx sdg-agents audit` and expect 100%.
+
+### If you hand-wrote a root AGENTS.md
+
+It is never overwritten. The CLI recognises its own files by the canonical title line it always emits, so a file without that line belongs to you. The governance is written to `AGENTS.sdg.md` instead, and `init` prints a warning naming the file. Merge what you want and delete the sidecar.
+
+A hand-written `CLAUDE.md` gets no sidecar, because Claude Code reads that exact filename or nothing. Add the `@AGENTS.md` import to your own file to wire the governance in.
+
+### Why
+
+Governance was living where the CLI put it rather than where tools look for it, which meant every harness needed manual wiring for a file the ecosystem had already standardised. The backlog change fixes the opposite defect: a single gitignore line was throwing away the stack declaration, the accumulated patterns, and the troubleshooting log, all of which cost real work to produce and none of which are session state.
 
 ---
 

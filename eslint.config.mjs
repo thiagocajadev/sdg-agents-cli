@@ -6,6 +6,7 @@ import { semanticSpacing } from "./src/assets/tooling/eslint-rules/semantic-spac
 import { noBooleanComparison } from "./src/assets/tooling/eslint-rules/no-boolean-comparison.mjs";
 import { noInlineAssert } from "./src/assets/tooling/eslint-rules/no-inline-assert.mjs";
 import { blankBeforeAssertion } from "./src/assets/tooling/eslint-rules/blank-before-assertion.mjs";
+import { duplicateConsecutiveStatement } from "./src/assets/tooling/eslint-rules/duplicate-consecutive-statement.mjs";
 
 export default [
   js.configs.recommended,
@@ -19,6 +20,7 @@ export default [
           "no-boolean-comparison": noBooleanComparison,
           "no-inline-assert": noInlineAssert,
           "blank-before-assertion": blankBeforeAssertion,
+          "duplicate-consecutive-statement": duplicateConsecutiveStatement,
         },
       },
     },
@@ -45,6 +47,7 @@ export default [
       "local/semantic-spacing": ["error", { minBodySize: 2 }],
       "local/no-boolean-comparison": "error",
       "local/no-inline-assert": "error",
+      "local/duplicate-consecutive-statement": "error",
       "padding-line-between-statements": [
         "error",
         { blankLine: "always", prev: "function", next: "*" },
